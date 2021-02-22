@@ -8,7 +8,7 @@ The objective of this project is to build an online Student Information System t
 ## Project Scope
 The scope project is to build the online Student Information System to be accessed by Students, Professors and Administrators only via their PCs.
 
-The major features of the system include :\
+The major features of the system include\
 FE-1: Allow access to the system for specific users via a PC.\
 FE-2: Create, view, modify, request and delete classes and class schedules.\
 FE-3: Manage student’s access to adding classes including availability per section and prerequisites standings.\
@@ -21,7 +21,7 @@ FE-9: Grant access to different features on the system depending on the type of 
 FE-10: Ability to add course descriptions and group courses by major.\
 FE-11: Ability to run a report that provides a student's status for degree completion.\
 
-## Scope of Releases:
+## Scope of Releases
 The first releasable version is the minimum viable product and will include the features listed above. All additional features will be added in subsequent releases.The scope of each iteration will be defined by the selected user stories from the backlog based on their priority and the team’s capacity.
 
 ## Limitations:
