@@ -24,7 +24,7 @@ FE-11: Ability to run a report that provides a student's status for degree compl
 ## Scope of Releases
 The first releasable version is the minimum viable product and will include the features listed above. All additional features will be added in subsequent releases.The scope of each iteration will be defined by the selected user stories from the backlog based on their priority and the team’s capacity.
 
-## Limitations:
+## Limitations
 LI-1: The StudentInformation System is only available for Students, Professors and Administration at California State University Fullerton.\
 LI-2: The features of Student Information System are available depending on the type of user that is in the system. All features will not be available to all users.\
 
