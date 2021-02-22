@@ -1,2 +1,9 @@
 [tool.black]
-skip-string-normalization = true
+exclude = '''
+(
+  /(
+      student-info-system
+  )/
+)
+'''
+
