@@ -9,7 +9,7 @@ https://docs.djangoproject.com/en/3.1/topics/settings/
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/3.1/ref/settings/
 """
-import os
+# import os
 from pathlib import Path
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -74,24 +74,24 @@ WSGI_APPLICATION = "config.wsgi.application"
 # https://docs.djangoproject.com/en/3.1/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+    "default": {
+        "ENGINE": "django.db.backends.sqlite3",
+        "NAME": BASE_DIR / "db.sqlite3",
     }
- }
+}
 
 # TODO REMOVE THIS BLOCK OF EXPLANATION AND ABOVE TEXT
-"""
-from : https://medium.com/intelligentmachines/github-actions-end-to-end-ci-cd-pipeline-for-django-5d48d6f00abf
-Why this block? 
-GITHUB_WORKFLOW env variable is only available in GitHub Actions. So in actions
-we want a simple postgres docker image to be booted as a service and does all the testing there.
 
-When we deploy to cloud the else block will work as we won't be having GITHUB_WORKFLOW env var in our deployment.
-That time the db config we use DB_USER, DB_NAME, DB_PASSWORD, DB_HOST and DB_PASSWORD
-which we will set in repository secret to be used in our deployment.
-"""
-#if os.getenv("GITHUB_WORKFLOW"):
+# from : https://medium.com/intelligentmachines/github-actions-end-to-end-ci-cd-pipeline-for-django-5d48d6f00abf
+# Why this block?
+# GITHUB_WORKFLOW env variable is only available in GitHub Actions. So in actions
+# we want a simple postgres docker image to be booted as a service and does all the testing there.
+#
+# When we deploy to cloud the else block will work as we won't be having GITHUB_WORKFLOW env var in our deployment.
+# That time the db config we use DB_USER, DB_NAME, DB_PASSWORD, DB_HOST and DB_PASSWORD
+# which we will set in repository secret to be used in our deployment.
+
+# if os.getenv("GITHUB_WORKFLOW"):
 #    DATABASES = {
 #        "default": {
 #            "ENGINE": "django.db.backends.postgresql",
@@ -102,7 +102,7 @@ which we will set in repository secret to be used in our deployment.
 #            "PORT": "5432",
 #        }
 #    }
-#else:
+# else:
 #    DATABASES = {
 #        "default": {
 #            "ENGINE": "django.db.backends.postgresql",
