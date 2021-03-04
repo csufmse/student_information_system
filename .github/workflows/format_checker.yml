@@ -1,0 +1,23 @@
+name: Check Formats
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    continue-on-error: true
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up Python 3.8
+      uses: actions/setup-python@v1
+      with:
+        python-version: 3.8
+    - name: Install pycodestyle
+      run: |
+        python -m pip install --upgrade pip
+        pip install pycodestyle
+    - name: Analysing the code with pycodestyle
+      run: |
+        pycodestyle --max-line-len=99 `find . -name \*.py -not -path "*/migrations/*"`

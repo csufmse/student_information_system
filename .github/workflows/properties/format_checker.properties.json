@@ -1,0 +1,5 @@
+{
+    "name": "Format Checker",
+    "description": "Check against python files against pycodestyle.",
+    "categories": null
+}
