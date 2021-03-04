@@ -89,8 +89,8 @@ DATABASES = {
 # Why this block?
 # GITHUB_WORKFLOW env variable is only available in GitHub Actions. So in actions
 # we want a simple postgres docker image to be booted as a service and does all the testing there.
-#
-# When we deploy to cloud the else block will work as we won't be having GITHUB_WORKFLOW env var 
+
+# When we deploy to cloud the else block will work as we won't be having GITHUB_WORKFLOW env var
 # in our deployment. That time the db config we use DB_USER, DB_NAME, DB_PASSWORD, DB_HOST and
 # DB_PASSWORD which we will set in repository secret to be used in our deployment.
 
