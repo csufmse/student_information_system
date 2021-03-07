@@ -19,9 +19,9 @@ jobs:
         pip install -r requirements.txt
     - name: Run migrations
       run: |
-        cd student-info-system
+        cd GITHUB_WORKSPACE/student-info-system
         python manage.py migrate
     - name: Run tests
       run: |
-        cd student-info-system
+        cd GITHUB_WORKSPACE/student-info-system
         python manage.py test
