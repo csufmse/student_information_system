@@ -110,7 +110,7 @@ class Section(models.Model):
     capacity = models.IntegerField('Capacity',
                                    default=0,
                                    validators=[MinValueValidator(1)])
-    waitlist_capacity = models.IntegerField('Capacity',
+    waitlist_capacity = models.IntegerField('Waitlist Capacity',
                                             default=0,
                                             validators=[MinValueValidator(0)])
 
