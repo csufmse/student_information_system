@@ -12,8 +12,8 @@ class SemesterAdmin(admin.ModelAdmin):
 
 admin.site.register(Semester, SemesterAdmin)
 
-### This chunk "appends" the fields of Person to those of User in the admin page
-### https://docs.djangoproject.com/en/3.0/topics/auth/customizing/#custom-permissions
+# This chunk "appends" the fields of Person to those of User in the admin page
+# https://docs.djangoproject.com/en/3.0/topics/auth/customizing/#custom-permissions
 
 
 # Define an inline admin descriptor for Person model

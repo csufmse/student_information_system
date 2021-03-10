@@ -1,14 +1,14 @@
 from django.db import models
-from phone_field import PhoneField
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
-""" 
-a subclass that returns the upper-cased version of its text. Effect is user cannot
-enter lower-case text
-"""
+from phone_field import PhoneField
 
 
 class UpperField(models.CharField):
+    """
+    a subclass that returns the upper-cased version of its text. Effect is user cannot
+    enter lower-case text
+    """
     def __init__(self, *args, **kwargs):
         super(UpperField, self).__init__(*args, **kwargs)
 
