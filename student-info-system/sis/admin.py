@@ -1,5 +1,5 @@
 from django.contrib import admin
-from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
+from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
 from .models import Person, Semester, Major, Course, Section
@@ -21,17 +21,23 @@ admin.site.register(Semester, SemesterAdmin)
 class PersonInline(admin.StackedInline):
     model = Person
     can_delete = False
-    verbose_name_plural = 'person'
+    verbose_name_plural = 'people'
+    fk_name = 'user'
 
 
 # Define a new User admin
-class UserAdmin(BaseUserAdmin):
+class CustomUserAdmin(UserAdmin):
     inlines = (PersonInline, )
+
+    def get_inline_instances(self, request, obj=None):
+        if not obj:
+            return list()
+        return super(CustomUserAdmin, self).get_inline_instances(request, obj)
 
 
 # Re-register UserAdmin
 admin.site.unregister(User)
-admin.site.register(User, UserAdmin)
+admin.site.register(User, CustomUserAdmin)
 
 
 class MajorAdmin(admin.ModelAdmin):
