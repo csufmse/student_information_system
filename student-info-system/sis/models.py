@@ -17,6 +17,7 @@ class UpperField(models.CharField):
     def get_prep_value(self, value):
         return str(value).upper()
 
+
 class Semester(models.Model):
     name = models.CharField('Name', max_length=20, default='xxx')
     date_registration_opens = models.DateField('Registration Opens')
@@ -47,6 +48,7 @@ class Person(models.Model):
 
     def __str__(self):
         return self.sort_name
+
 
 # https://simpleisbetterthancomplex.com/tutorial/2016/11/23/how-to-add-user-profile-to-django-admin.html
 @receiver(post_save, sender=User)
