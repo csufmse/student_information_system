@@ -29,16 +29,18 @@ class Semester(models.Model):
         return self.name
 
 
-
 class Major(models.Model):
     abbreviation = UpperField('Abbreviation', max_length=6, primary_key=True)
     name = models.CharField('Name', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
     professors = models.ManyToManyField(User, blank=True, related_name="prof")
-    administrators = models.ManyToManyField(User, blank=True, related_name="admins")
+    administrators = models.ManyToManyField(User,
+                                            blank=True,
+                                            related_name="admins")
 
     def __str__(self):
         return self.abbreviation
+
 
 # This is an extension class for the default User class
 class Person(models.Model):
@@ -48,7 +50,10 @@ class Person(models.Model):
                                help_text='Your Mailing Address',
                                blank=True)
     phone = PhoneField(help_text='Your Primary Contact Phone', blank=True)
-    major = models.ForeignKey(Major, on_delete=models.DO_NOTHING, blank=True, null=True)
+    major = models.ForeignKey(Major,
+                              on_delete=models.DO_NOTHING,
+                              blank=True,
+                              null=True)
 
     @property
     def name(self):
