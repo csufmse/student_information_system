@@ -2,6 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.core.validators import MinValueValidator
 from phone_field import PhoneField
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 
 
 class UpperField(models.CharField):
@@ -14,7 +16,6 @@ class UpperField(models.CharField):
 
     def get_prep_value(self, value):
         return str(value).upper()
-
 
 class Semester(models.Model):
     name = models.CharField('Name', max_length=20, default='xxx')
@@ -36,14 +37,23 @@ class Person(models.Model):
                                blank=True)
     phone = PhoneField(help_text='Your Primary Contact Phone', blank=True)
 
+    @property
     def name(self):
-        return self.fname + ' ' + self.lname
+        return self.user.first_name + ' ' + self.user.last_name
 
+    @property
     def sort_name(self):
-        return self.lname + ', ' + self.fname
+        return self.user.last_name + ', ' + self.user.first_name
 
     def __str__(self):
-        return self.sort_name()
+        return self.sort_name
+
+# https://simpleisbetterthancomplex.com/tutorial/2016/11/23/how-to-add-user-profile-to-django-admin.html
+@receiver(post_save, sender=User)
+def create_or_update_user_person(sender, instance, created, **kwargs):
+    if created:
+        Person.objects.create(user=instance)
+    instance.person.save()
 
 
 class Department(models.Model):
