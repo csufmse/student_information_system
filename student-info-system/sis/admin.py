@@ -2,7 +2,7 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from .models import Person, Semester, Department, Major, Course, Section
+from .models import Person, Semester, Major, Course, Section
 
 
 class SemesterAdmin(admin.ModelAdmin):
@@ -40,15 +40,8 @@ admin.site.unregister(User)
 admin.site.register(User, CustomUserAdmin)
 
 
-class DepartmentAdmin(admin.ModelAdmin):
-    list_display = ('abbreviation', 'name', 'description')
-
-
-admin.site.register(Department, DepartmentAdmin)
-
-
 class MajorAdmin(admin.ModelAdmin):
-    list_display = ('abbreviation', 'name', 'department_name')
+    list_display = ('abbreviation', 'name')
 
 
 admin.site.register(Major, MajorAdmin)

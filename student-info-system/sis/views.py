@@ -38,8 +38,8 @@ def current_courses(request):
         username)
 
 
-def departments(request):
-    return HttpResponse("Don't need to be logged in, showing departments.")
+def majors(request):
+    return HttpResponse("Don't need to be logged in, showing majors.")
 
 
 @login_required

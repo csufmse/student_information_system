@@ -29,6 +29,19 @@ class Semester(models.Model):
         return self.name
 
 
+class Major(models.Model):
+    abbreviation = UpperField('Abbreviation', max_length=6, primary_key=True)
+    name = models.CharField('Name', max_length=256)
+    description = models.CharField('Description', max_length=256, blank=True)
+    professors = models.ManyToManyField(User, blank=True, related_name="prof")
+    administrators = models.ManyToManyField(User,
+                                            blank=True,
+                                            related_name="admins")
+
+    def __str__(self):
+        return self.abbreviation
+
+
 # This is an extension class for the default User class
 class Person(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
@@ -37,6 +50,10 @@ class Person(models.Model):
                                help_text='Your Mailing Address',
                                blank=True)
     phone = PhoneField(help_text='Your Primary Contact Phone', blank=True)
+    major = models.ForeignKey(Major,
+                              on_delete=models.DO_NOTHING,
+                              blank=True,
+                              null=True)
 
     @property
     def name(self):
@@ -58,33 +75,8 @@ def create_or_update_user_person(sender, instance, created, **kwargs):
     instance.person.save()
 
 
-class Department(models.Model):
-    abbreviation = UpperField('Abbreviation', max_length=6, primary_key=True)
-    name = models.CharField('Name', max_length=256)
-    description = models.CharField('Description', max_length=256, blank=True)
-    professors = models.ManyToManyField(User, blank=True)
-
-    def __str__(self):
-        return self.abbreviation
-
-
-class Major(models.Model):
-    abbreviation = UpperField('Abbreviation', max_length=6, primary_key=True)
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
-    name = models.CharField('Name', max_length=256)
-    description = models.CharField('Description', max_length=256, blank=True)
-
-    def department_name(self):
-        return self.department.name
-
-    department_name.short_description = 'Department Name'
-
-    def __str__(self):
-        return self.abbreviation
-
-
 class Course(models.Model):
-    department = models.ForeignKey(Department, on_delete=models.CASCADE)
+    major = models.ForeignKey(Major, on_delete=models.CASCADE)
     catalogNumber = models.CharField('Number', max_length=20)
     title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
@@ -97,13 +89,13 @@ class Course(models.Model):
                                     choices=GRADING_METHOD_CHOICES,
                                     default='GR')
 
-    def department_name(self):
-        return self.department.name
+    def major_name(self):
+        return self.major.name
 
-    department_name.short_description = 'Department Name'
+    major_name.short_description = 'Major Name'
 
     def slug(self):
-        return self.department.abbreviation + '-' + self.catalogNumber
+        return self.major.abbreviation + '-' + self.catalogNumber
 
     slug.short_description = 'Course Number'
 
