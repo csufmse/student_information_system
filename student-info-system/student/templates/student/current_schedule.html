@@ -1,10 +1,22 @@
-<!DOCTYPE html>
-<html>
-<head>
-<title>Student Portal: Current Schedule</title>
-</head>
-<body>
-<h1>Current Schedule</h1>
-<p>Nothing much going on here just yet. Come back soon!</p>
-</body>
-</html>
+{% extends "base.html" %}
+
+{% block title %}Student Portal: Current Schedule{% endblock %}
+
+{% block content %}
+<table>
+  <tr>
+    <th>Course Name</th>
+    <th>Section Number</th>
+    <th>Professor</th>
+    <th>Schedule</th>
+  </tr>
+  <tr>
+  {% for section in student.sections %}
+    <td>section.course_name</td>
+    <td>section.number</td>
+    <td>section.professor</td>
+    <td>section.schedule</td>
+  {% endfor %}
+  </tr>
+</table>
+{% endblock %}

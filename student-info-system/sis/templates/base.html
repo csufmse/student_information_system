@@ -3,13 +3,17 @@
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta charset="utf-8">
-<title>Student Info System</title>
+<title>{% block title %}Student Info System{% endblock %}</title>
 </head>
 <body>
 <div class="header">
-<span class="name">Student Info System</span>
-   {% block content %}
-   {% endblock %}
+<span class="name">
+<h1>{% block header_name %}Student Info System{% endblock %}</h1>
+</span>
+  {% block header_content %}
+  {% endblock %}
 </div>
+  {% block content %}
+  {% endblock %}
 </body>
 </html>
