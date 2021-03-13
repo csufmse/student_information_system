@@ -1,0 +1,7 @@
+{% extends 'base.html' %}
+
+{% block title %}Admin Home Page{% endblock %}
+
+{% block content %}
+<span>Logged in as ADMIN {{ user.username }} <a href="{% url 'logout' %}">Log Out</a></span>
+{% endblock %}

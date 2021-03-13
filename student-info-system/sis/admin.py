@@ -2,7 +2,42 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from .models import Person, Semester, Major, Course, Section
+from .models import Student, Professor, Major, TranscriptRequest, Course, Semester, Section, SectionStudent, CoursePrerequisite
+
+
+class StudentAdmin(admin.ModelAdmin):
+    list_display = ('user', 'name', 'major', 'gpa', 'class_level')
+
+
+admin.site.register(Student, StudentAdmin)
+
+
+class ProfessorAdmin(admin.ModelAdmin):
+    list_display = ('user', 'name', 'major')
+
+
+admin.site.register(Professor, ProfessorAdmin)
+
+
+class MajorAdmin(admin.ModelAdmin):
+    list_display = ('abbreviation', 'name', 'description')
+
+
+admin.site.register(Major, MajorAdmin)
+
+
+class TranscriptRequestAdmin(admin.ModelAdmin):
+    list_display = ('student', 'date_requested', 'date_fulfilled')
+
+
+admin.site.register(TranscriptRequest, TranscriptRequestAdmin)
+
+
+class CourseAdmin(admin.ModelAdmin):
+    list_display = ('major', 'name', 'title', 'description', 'credits_earned')
+
+
+admin.site.register(Course, CourseAdmin)
 
 
 class SemesterAdmin(admin.ModelAdmin):
@@ -12,51 +47,23 @@ class SemesterAdmin(admin.ModelAdmin):
 
 admin.site.register(Semester, SemesterAdmin)
 
-# This chunk "appends" the fields of Person to those of User in the admin page
-# https://docs.djangoproject.com/en/3.0/topics/auth/customizing/#custom-permissions
-
-
-# Define an inline admin descriptor for Person model
-# which acts a bit like a singleton
-class PersonInline(admin.StackedInline):
-    model = Person
-    can_delete = False
-    verbose_name_plural = 'people'
-    fk_name = 'user'
-
-
-# Define a new User admin
-class CustomUserAdmin(UserAdmin):
-    inlines = (PersonInline, )
-
-    def get_inline_instances(self, request, obj=None):
-        if not obj:
-            return list()
-        return super(CustomUserAdmin, self).get_inline_instances(request, obj)
-
-
-# Re-register UserAdmin
-admin.site.unregister(User)
-admin.site.register(User, CustomUserAdmin)
-
-
-class MajorAdmin(admin.ModelAdmin):
-    list_display = ('abbreviation', 'name')
-
-
-admin.site.register(Major, MajorAdmin)
-
-
-class CourseAdmin(admin.ModelAdmin):
-    list_display = ('slug', 'title', 'credits_earned', 'grading_type')
-
-
-admin.site.register(Course, CourseAdmin)
-
 
 class SectionAdmin(admin.ModelAdmin):
-    list_display = ('slug', 'semester_name', 'professor_name', 'registered',
-                    'waitlisted')
+    list_display = ('semester', 'name', 'professor', 'registered', 'capacity')
 
 
 admin.site.register(Section, SectionAdmin)
+
+
+class SectionStudentAdmin(admin.ModelAdmin):
+    list_display = ('section', 'student', 'status', 'grade', 'professor')
+
+
+admin.site.register(SectionStudent, SectionStudentAdmin)
+
+
+class CoursePrerequisiteAdmin(admin.ModelAdmin):
+    list_display = ('course', 'prerequisite')
+
+
+admin.site.register(CoursePrerequisite, CoursePrerequisiteAdmin)
