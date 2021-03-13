@@ -1,22 +1,25 @@
 {% extends "base.html" %}
 
 {% block title %}Student Portal: Current Schedule{% endblock %}
-
+{% block header_name %}Current Schedule{% endblock %}
 {% block content %}
-<table>
-  <tr>
-    <th>Course Name</th>
-    <th>Section Number</th>
-    <th>Professor</th>
-    <th>Schedule</th>
-  </tr>
-  <tr>
-  {% for section in student.sections %}
-    <td>section.course_name</td>
-    <td>section.number</td>
-    <td>section.professor</td>
-    <td>section.schedule</td>
-  {% endfor %}
+  {% if not sections %}
+     <p>No registered sections</p>
+  {% else %}
+    <table>
+    <tr>
+      <th>Course Name</th>
+      <th>Section Number</th>
+      <th>Professor</th>
+      <th>Schedule</th>
+    </tr>
+    <tr>
+    {% for section in sections %}
+      <td>{{section.course.name}}</td>
+      <td>{{section.number}}</td>
+      <td>{{section.professor.name}}</td>
+    {% endfor %}
+  {% endif %}
   </tr>
 </table>
 {% endblock %}

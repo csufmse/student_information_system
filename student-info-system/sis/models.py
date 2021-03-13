@@ -202,7 +202,7 @@ class Section(models.Model):
     course_name.short_description = 'Course Name'
 
     def professor_name(self):
-        return self.professor.person.name
+        return self.professor.name
 
     professor_name.short_description = 'Professor Name'
 
