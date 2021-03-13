@@ -195,6 +195,7 @@ class Section(models.Model):
     capacity = models.IntegerField('Capacity',
                                    default=0,
                                    validators=[MinValueValidator(1)])
+    hours = models.CharField('Hours', max_length=256)
 
     def course_name(self):
         return self.course.name
