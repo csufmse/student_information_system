@@ -50,7 +50,7 @@ admin.site.register(Semester, SemesterAdmin)
 
 
 class SectionAdmin(admin.ModelAdmin):
-    list_display = ('semester', 'name', 'professor', 'registered', 'capacity')
+    list_display = ('semester', 'name', 'professor', 'hours', 'registered', 'capacity')
 
 
 admin.site.register(Section, SectionAdmin)
