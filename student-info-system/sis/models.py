@@ -11,6 +11,7 @@ class UpperField(models.CharField):
     a subclass that returns the upper-cased version of its text. Effect is user cannot
     enter lower-case text
     """
+
     def __init__(self, *args, **kwargs):
         super(UpperField, self).__init__(*args, **kwargs)
 
@@ -18,61 +19,68 @@ class UpperField(models.CharField):
         return str(value).upper()
 
 
-class Semester(models.Model):
-    name = models.CharField('Name', max_length=20, default='xxx')
-    date_registration_opens = models.DateField('Registration Opens')
-    date_started = models.DateField('Classes Start')
-    date_last_drop = models.DateField('Last Drop')
-    date_ended = models.DateField('Classes End')
+class Student(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    """ Student major """
+    major = models.ForeignKey('Major',
+                              on_delete=models.DO_NOTHING,
+                              blank=True,
+                              null=True)
+    sections = models.ManyToManyField('Section',
+                                      through='SectionStudent',
+                                      related_name='students')
+
+    # will be adding aggregate things here to replace dummy methods
+    def class_level(self):
+        return 'Freshman'
+
+    def gpa(self):
+        return 0.0
+
+    def name(self):
+        return self.user.first_name + ' ' + self.user.last_name
 
     def __str__(self):
-        return self.name
+        return self.name()
+
+
+class Professor(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    """ Professor's department """
+    major = models.ForeignKey('Major',
+                              on_delete=models.DO_NOTHING,
+                              blank=True,
+                              null=True)
+
+    def name(self):
+        return self.user.first_name + ' ' + self.user.last_name
+
+    def __str__(self):
+        return self.name()
 
 
 class Major(models.Model):
     abbreviation = UpperField('Abbreviation', max_length=6, primary_key=True)
     name = models.CharField('Name', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
-    professors = models.ManyToManyField(User, blank=True, related_name="prof")
-    administrators = models.ManyToManyField(User,
-                                            blank=True,
-                                            related_name="admins")
+    professors = models.ManyToManyField(Professor,
+                                        blank=True,
+                                        related_name="prof")
+    courses_required = models.ManyToManyField('Course',
+                                              blank=True,
+                                              related_name="required_by")
 
     def __str__(self):
         return self.abbreviation
 
 
-# This is an extension class for the default User class
-class Person(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
-    address = models.CharField('Address',
-                               max_length=256,
-                               help_text='Your Mailing Address',
-                               blank=True)
-    phone = PhoneField(help_text='Your Primary Contact Phone', blank=True)
-    major = models.ForeignKey(Major,
-                              on_delete=models.DO_NOTHING,
-                              blank=True,
-                              null=True)
-
-    @property
-    def name(self):
-        return self.user.first_name + ' ' + self.user.last_name
-
-    @property
-    def sort_name(self):
-        return self.user.last_name + ', ' + self.user.first_name
+class TranscriptRequest(models.Model):
+    student = models.ForeignKey(Student, on_delete=models.CASCADE)
+    date_requested = models.DateField('Date Requested')
+    date_fulfilled = models.DateField('Date Fulfilled', null=True, blank=True)
 
     def __str__(self):
-        return self.sort_name
-
-
-# https://simpleisbetterthancomplex.com/tutorial/2016/11/23/how-to-add-user-profile-to-django-admin.html
-@receiver(post_save, sender=User)
-def create_or_update_user_person(sender, instance, created, **kwargs):
-    if created:
-        Person.objects.create(user=instance)
-    instance.person.save()
+        return self.student.name() + '@' + str(self.date_requested)
 
 
 class Course(models.Model):
@@ -83,40 +91,110 @@ class Course(models.Model):
     credits_earned = models.DecimalField('Credits',
                                          max_digits=2,
                                          decimal_places=1)
-
-    GRADING_METHOD_CHOICES = [('GR', 'Graded'), ('CR', 'Credit/No Credit')]
-    grading_type = models.CharField(max_length=2,
-                                    choices=GRADING_METHOD_CHOICES,
-                                    default='GR')
+    prereqs = models.ManyToManyField('self', through='CoursePrerequisite')
 
     def major_name(self):
         return self.major.name
 
     major_name.short_description = 'Major Name'
 
-    def slug(self):
+    def name(self):
         return self.major.abbreviation + '-' + self.catalogNumber
 
-    slug.short_description = 'Course Number'
+    name.short_description = 'Course Name'
 
     def __str__(self):
-        return self.slug()
+        return self.name()
+
+
+class CoursePrerequisite(models.Model):
+    course = models.ForeignKey(Course,
+                               related_name='a_course',
+                               on_delete=models.CASCADE)
+    prerequisite = models.ForeignKey(Course,
+                                     related_name='a_prerequisite',
+                                     on_delete=models.CASCADE)
+
+    def __str__(self):
+        return self.course.name() + ' requires ' + self.prerequisite.name()
+
+
+class Semester(models.Model):
+    name = models.CharField('Name', max_length=20)
+    date_registration_opens = models.DateField('Registration Opens')
+    date_started = models.DateField('Classes Start')
+    date_last_drop = models.DateField('Last Drop')
+    date_ended = models.DateField('Classes End')
+
+    def __str__(self):
+        return self.name
+
+
+class SectionStudent(models.Model):
+    section = models.ForeignKey('Section', on_delete=models.SET_NULL, null=True)
+    student = models.ForeignKey(Student,
+                                on_delete=models.SET_NULL,
+                                null=True,
+                                blank=True)
+
+    GRADE_A = 4
+    GRADE_B = 3
+    GRADE_C = 2
+    GRADE_D = 1
+    GRADE_F = 0
+    GRADE = (
+        (GRADE_A, 'A'),
+        (GRADE_B, 'B'),
+        (GRADE_C, 'C'),
+        (GRADE_D, 'D'),
+        (GRADE_F, 'F'),
+    )
+    grade = models.SmallIntegerField(
+        choices=GRADE,
+        default=GRADE_F,
+        blank=True,
+        null=True,
+    )
+
+    REGISTERED = 'Registered'
+    AWAITING_GRADE = 'Done'
+    GRADED = 'Graded'
+    DROP_REQUESTED = 'DropReq'
+    DROPPED = 'Dropped'
+    STATUS = (
+        (REGISTERED, 'Registered'),
+        (AWAITING_GRADE, 'Awaiting Grade'),
+        (GRADED, 'Graded'),
+        (DROP_REQUESTED, 'Drop Requested'),
+        (DROPPED, 'Dropped'),
+    )
+    status = models.CharField(
+        'Course Status',
+        choices=STATUS,
+        default=REGISTERED,
+        max_length=20,
+    )
+
+    def professor(self):
+        return self.section.professor
+
+    def name(self):
+        return self.student.name() + '@' + self.section.name()
+
+    def __str__(self):
+        return self.name()
 
 
 class Section(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
-    professor = models.ForeignKey(User, on_delete=models.DO_NOTHING)
+    professor = models.ForeignKey(Professor, on_delete=models.DO_NOTHING)
     semester = models.ForeignKey(Semester, on_delete=models.DO_NOTHING)
     number = models.IntegerField('Section Number',
                                  default=1,
                                  validators=[MinValueValidator(1)])
-    textbooks = models.CharField('Textbooks', max_length=256, blank=True)
     capacity = models.IntegerField('Capacity',
                                    default=0,
                                    validators=[MinValueValidator(1)])
-    waitlist_capacity = models.IntegerField('Waitlist Capacity',
-                                            default=0,
-                                            validators=[MinValueValidator(0)])
 
     def course_name(self):
         return self.course.name
@@ -133,16 +211,13 @@ class Section(models.Model):
 
     semester_name.short_description = 'Semester'
 
-    def slug(self):
-        return self.course.slug() + '-' + str(self.number)
-
-    slug.short_description = 'Section'
-
+    #  this will implemented as a custom manager -- BJM
     def registered(self):
-        return 0
+        return self.sectionstudent_set.exclude(
+            status=SectionStudent.DROPPED).count()
 
-    def waitlisted(self):
-        return 0
+    def name(self):
+        return self.course.name() + '-' + str(self.number)
 
     def __str__(self):
-        return self.slug()
+        return self.name()
