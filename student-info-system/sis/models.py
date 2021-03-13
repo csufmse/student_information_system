@@ -11,6 +11,7 @@ class UpperField(models.CharField):
     a subclass that returns the upper-cased version of its text. Effect is user cannot
     enter lower-case text
     """
+
     def __init__(self, *args, **kwargs):
         super(UpperField, self).__init__(*args, **kwargs)
 
@@ -130,9 +131,7 @@ class Semester(models.Model):
 
 
 class SectionStudent(models.Model):
-    section = models.ForeignKey('Section',
-                                on_delete=models.SET_NULL,
-                                null=True)
+    section = models.ForeignKey('Section', on_delete=models.SET_NULL, null=True)
     student = models.ForeignKey(Student,
                                 on_delete=models.SET_NULL,
                                 null=True,
