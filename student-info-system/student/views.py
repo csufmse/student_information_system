@@ -4,12 +4,13 @@ from django.contrib.auth.decorators import login_required
 
 @login_required
 def current_schedule_view(request):
-    if request.user.is_authenticated and not request.user.is_superuser and not request.user.is_staff:
-        context = {
-            'sections': request.user.student.sections.all,
-            'student_name': request.user.student.name,
-            'logged_in': True,
-        }
+    user = request.user
+    if user.is_authenticated and not user.is_superuser and not user.is_staff:
+            context = {
+                'sections': user.student.sections.all,
+                'student_name': user.student.name,
+                'logged_in': True,
+            }
     else:
         return redirect('/sis/access_denied')
     return render(request, 'student/current_schedule.html', context)
