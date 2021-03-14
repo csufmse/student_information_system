@@ -3,5 +3,8 @@
 {% block title %}Student Home Page{% endblock %}
 
 {% block content %}
+<nav>
+  <a href="{% url 'student:current_schedule' %}">Current Schedule</a>
+<nav>
 <span>Logged in as STUDENT {{ user.username }} <a href="{% url 'logout' %}">Log Out</a></span>
 {% endblock %}
