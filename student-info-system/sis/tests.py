@@ -18,7 +18,7 @@ from .models import (
 class StudentTestCase(TestCase):
     @classmethod
     def setUpTestData(self):
-        cls.user = User.objects.create(username="testUser", first_name="First", last_name="Last")
+        self.user = User.objects.create(username="testUser", first_name="First", last_name="Last")
         user_p = User.objects.create(username="prof", first_name="First", last_name="Last")
         major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
         course = Course.objects.create(
