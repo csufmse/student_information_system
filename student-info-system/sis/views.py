@@ -19,5 +19,6 @@ def index(request):
             context = {'is_student': 'yes'}
             return render(request, 'home_student.html', context)
 
+
 def access_denied(request):
     return render(request, 'access_denied.html', None)
