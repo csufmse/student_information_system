@@ -1,5 +1,8 @@
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
     "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% load static %}
+<link rel="stylesheet" type="text/css" href="{% static 'sis/style.css' %}">
+
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
 <meta charset="utf-8">
@@ -12,7 +15,8 @@
 </span>
   {% block header_content %}
     {% if logged_in %}
-       <a href="{% url 'logout' %}">Log Out</a>
+       {% block user %}Currently logged in as {% endblock user %}
+       <br><a href="{% url 'logout' %}">Log Out</a>
     {% endif %}
   {% endblock %}
 </div>
