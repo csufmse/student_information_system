@@ -198,12 +198,12 @@ class Section(models.Model):
     hours = models.CharField('Hours', max_length=256)
 
     def course_name(self):
-        return self.course.name
+        return self.course.name()
 
     course_name.short_description = 'Course Name'
 
     def professor_name(self):
-        return self.professor.name
+        return self.professor.name()
 
     professor_name.short_description = 'Professor Name'
 
