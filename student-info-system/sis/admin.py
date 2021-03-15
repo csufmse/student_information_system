@@ -2,8 +2,28 @@ from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
-from .models import Student, Professor, Major, TranscriptRequest, Course, \
+admin.site.site_title = "CSUF Student Information System Site Admin"
+admin.site.site_header = "Administrative Access to ALL Data"
+admin.site.index_title = "Database Access"
+
+from .models import Admin, Student, Professor, Major, TranscriptRequest, Course, \
     Semester, Section, SectionStudent, CoursePrerequisite
+
+
+class CustomUserAdmin(UserAdmin):
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff',
+                    'access_role')
+
+
+admin.site.unregister(User)
+admin.site.register(User, CustomUserAdmin)
+
+
+class AdminAdmin(admin.ModelAdmin):
+    list_display = ('user', 'name')
+
+
+admin.site.register(Admin, AdminAdmin)
 
 
 class StudentAdmin(admin.ModelAdmin):
@@ -50,7 +70,8 @@ admin.site.register(Semester, SemesterAdmin)
 
 
 class SectionAdmin(admin.ModelAdmin):
-    list_display = ('semester', 'name', 'professor', 'hours', 'registered', 'capacity')
+    list_display = ('semester', 'name', 'professor', 'hours', 'registered',
+                    'capacity')
 
 
 admin.site.register(Section, SectionAdmin)

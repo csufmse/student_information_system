@@ -19,6 +19,28 @@ class UpperField(models.CharField):
         return str(value).upper()
 
 
+class Admin(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+
+    def is_admin(self):
+        return True
+
+    def is_student(self):
+        return False
+
+    def is_professor(self):
+        return False
+
+    def username(self):
+        return self.user.username
+
+    def name(self):
+        return self.user.first_name + ' ' + self.user.last_name
+
+    def __str__(self):
+        return self.name()
+
+
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     """ Student major """
@@ -31,6 +53,15 @@ class Student(models.Model):
                                       related_name='students')
 
     # will be adding aggregate things here to replace dummy methods
+    def is_admin(self):
+        return False
+
+    def is_student(self):
+        return True
+
+    def is_professor(self):
+        return False
+
     def class_level(self):
         return 'Freshman'
 
@@ -51,6 +82,15 @@ class Professor(models.Model):
                               on_delete=models.DO_NOTHING,
                               blank=True,
                               null=True)
+
+    def is_admin(self):
+        return False
+
+    def is_student(self):
+        return False
+
+    def is_professor(self):
+        return True
 
     def name(self):
         return self.user.first_name + ' ' + self.user.last_name
@@ -222,3 +262,24 @@ class Section(models.Model):
 
     def __str__(self):
         return self.name()
+
+
+""" making it so users know about roles, but without overhead of subclassing """
+
+
+def access_role(self):
+    is_admin = Admin.objects.filter(user_id=self.id).count() > 0
+    is_student = Student.objects.filter(user_id=self.id).count() > 0
+    is_professor = Professor.objects.filter(user_id=self.id).count() > 0
+    if is_admin:
+        return 'Admin'
+    elif is_professor:
+        return 'Professor'
+    elif is_student:
+        return 'Student'
+    else:
+        return 'Unknown'
+
+
+User.add_to_class('access_role', access_role)
+""" end """
