@@ -1,7 +1,52 @@
 {% extends 'base.html' %}
+{% load static %}
+
+{% block css %}<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+{% endblock css %}
 
 {% block title %}Admin Home Page{% endblock %}
 
 {% block content %}
+<div>
 <span>Logged in as ADMIN {{ user.username }} <a href="{% url 'logout' %}">Log Out</a></span>
+</div>
+
+<div class="tab">
+  <button class="tablinks" onclick="openChunk(event, 'Users')" id="defaultOpen">Users</button>
+  <button class="tablinks" onclick="openChunk(event, 'New User')">New User</button>
+</div>
+
+<div id="Users" class="tabcontent">
+  <h3>Table of Users</h3>
+  <p>etc.</p>
+</div>
+
+<div id="New User" class="tabcontent">
+  <h3>New User</h3>
+  <p>form.</p>
+</div>
+
+<script>
+function openChunk(evt, chunkName) {
+  // Declare all variables
+  var i, tabcontent, tablinks;
+
+  // Get all elements with class="tabcontent" and hide them
+  tabcontent = document.getElementsByClassName("tabcontent");
+  for (i = 0; i < tabcontent.length; i++) {
+    tabcontent[i].style.display = "none";
+  }
+
+  // Get all elements with class="tablinks" and remove the class "active"
+  tablinks = document.getElementsByClassName("tablinks");
+  for (i = 0; i < tablinks.length; i++) {
+    tablinks[i].className = tablinks[i].className.replace(" active", "");
+  }
+
+  // Show the current tab, and add an "active" class to the link that opened the tab
+  document.getElementById(chunkName).style.display = "block";
+  evt.currentTarget.className += " active";
+}
+document.getElementById("defaultOpen").click();
+</script>
 {% endblock %}

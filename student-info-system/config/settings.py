@@ -77,6 +77,10 @@ TEMPLATES = [
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/sis'
 
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
