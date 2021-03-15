@@ -4,8 +4,8 @@ from django.contrib.auth import views as auth_views
 
 from . import views
 
-app_name = 'sis'
+app_name = 'schooladmin'
+
 urlpatterns = [
     path('', views.index, name='index'),
-    path('access_denied', views.access_denied, name='access_denied'),
 ]

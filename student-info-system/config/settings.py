@@ -42,6 +42,8 @@ INSTALLED_APPS = [
     "phone_field",
     "sis",
     "student",
+    "professor",
+    "schooladmin",
 ]
 
 MIDDLEWARE = [
