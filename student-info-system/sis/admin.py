@@ -1,9 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from .models import Admin, Student, Professor, Major, TranscriptRequest, Course, \
-    Semester, Section, SectionStudent, CoursePrerequisite
-
+from .models import (Admin, Student, Professor, Major, TranscriptRequest,
+                     Course, Semester, Section, SectionStudent,
+                     CoursePrerequisite)
 
 admin.site.site_title = "CSUF Student Information System Site Admin"
 admin.site.site_header = "Administrative Access to ALL Data"

@@ -43,7 +43,6 @@ class Admin(models.Model):
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    """ Student major """
     major = models.ForeignKey('Major',
                               on_delete=models.DO_NOTHING,
                               blank=True,
@@ -77,7 +76,7 @@ class Student(models.Model):
 
 class Professor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    """ Professor's department """
+    # Professor's department
     major = models.ForeignKey('Major',
                               on_delete=models.DO_NOTHING,
                               blank=True,
@@ -264,7 +263,7 @@ class Section(models.Model):
         return self.name()
 
 
-""" making it so users know about roles, but without overhead of subclassing """
+# making it so users know about roles, but without overhead of subclassing
 
 
 def access_role(self):
@@ -282,4 +281,4 @@ def access_role(self):
 
 
 User.add_to_class('access_role', access_role)
-""" end """
+# end
