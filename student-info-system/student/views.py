@@ -8,6 +8,7 @@ def index(request):
         return redirect('sis:access_denied')
     return redirect('student:current_schedule')
 
+
 @login_required
 def current_schedule_view(request):
     if request.user.access_role() != 'Student':
