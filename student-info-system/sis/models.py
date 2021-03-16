@@ -280,5 +280,10 @@ def access_role(self):
         return 'Unknown'
 
 
+def name(self):
+    return self.first_name + ' ' + self.last_name
+
+
 User.add_to_class('access_role', access_role)
+User.add_to_class('name', name)
 # end

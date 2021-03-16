@@ -1,11 +1,10 @@
-from django.contrib import admin
 from django.urls import path, include
-from django.contrib.auth import views as auth_views
 
 from . import views
 
 app_name = 'schooladmin'
-
 urlpatterns = [
     path('', views.index, name='index'),
+    path('users', views.users, name='users'),
+    path('new_user', views.new_user, name='new_user'),
 ]
