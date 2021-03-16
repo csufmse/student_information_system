@@ -1,15 +1,35 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
+from django.contrib.auth.models import User
+from sis.models import Major
+
+ROLE_CHOICES = (
+    ('Student', 'Student'),
+    ('Professor', 'Professor'),
+    ('Admin', 'Admin'),
+)
 
 
-class SignUpForm(UserCreationForm):
-        GENDER_CHOICES = (...)
-        email = forms.EmailField(label='Email address', max_length=75)
-        first_name = forms.CharField(label='First Name')
-        last_name = forms.CharField(label='Last Name')
-        gender = forms.ChoiceField(widget=RadioSelect, choices=GENDER_CHOICES)
-        date_of_birth = forms.DateField(initial=datetime.date.today)
+class CustomUserCreationForm(UserCreationForm):
+    first_name = forms.CharField(max_length=30,
+                                 required=False,
+                                 help_text='Optional.')
+    last_name = forms.CharField(max_length=30,
+                                required=False,
+                                help_text='Optional.')
+    email = forms.EmailField(
+        max_length=254, help_text='Required. Inform a valid email address.')
+    role = forms.ChoiceField(choices=ROLE_CHOICES,
+                             required=True,
+                             help_text='Select type of user')
+    major = forms.ModelChoiceField(queryset=None, required=False)
 
-        class Meta:
-            model = Members
-            fields = ('username', 'email', 'first_name', 'last_name')
+    class Meta:
+        model = User
+        fields = ('role', 'username', 'first_name', 'last_name', 'email',
+                  'password1', 'password2', 'major')
+
+    def __init__(self, *args, **kwargs):
+        super(CustomUserCreationForm, self).__init__(*args, **kwargs)
+        # this may be necessary: applyClassConfig2FormControl(self)
+        self.fields['major'].queryset = Major.objects.all()

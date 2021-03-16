@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{% endblock title %}
+{% block header_name %}{% endblock header_name %}
+{% block css %}<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+<style>
+.button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+#Users {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#Users td, #Users th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#Users tr:nth-child(even){background-color: #f2f2f2;}
+
+#Users tr:hover {background-color: #ddd;}
+
+#Users th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+</style>
+
+{% endblock css %}
+
+
+{% block content %}
+<div>
+<button class="button" onclick="location.href='{% url 'schooladmin:new_user' %}';">New User</button>
+<div>
+<table id="Users">
+    <tr>
+      <th>Login</th>
+      <th>User Name</th>
+      <th>Email</th>
+      <th>Access Role</th>
+    </tr>
+    {% for user in users %}
+      <tr>
+      <td>{{user.username}}</td>
+      <td>{{user.name}}</td>
+      <td>{{user.email}}</td>
+      <td>{{user.access_role}}</td>
+      </tr>
+    {% endfor %}
+</table>
+</div>
+</div>
+{% endblock content %}

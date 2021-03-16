@@ -2,9 +2,28 @@
 {% load static %}
 
 {% block css %}<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+<style>
+.button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+.tab {
+  width: 75px;
+}
+</style>
+
 {% endblock css %}
 
-{% block title %}Admin Home Page{% endblock %}
+{% block title %}Student Info System Administration{% endblock %}
+{% block header_name %}Student Info System Administration{% endblock header_name %}
 
 {% block content %}
 <div>
@@ -12,29 +31,59 @@
 </div>
 
 <div class="tab">
-  <button class="tablinks" onclick="openChunk(event, 'Users')" id="defaultOpen">Users</button>
-  <button class="tablinks" onclick="openChunk(event, 'New User')">New User</button>
+  <button class="tablinks" id="defaultOpen">Users</button>
+  <button class="tablinks">Stuff</button>
 </div>
 
-<div id="Users" class="tabcontent">
-  <h3>Table of Users</h3>
-  <p>etc.</p>
-</div>
-
-<div id="New User" class="tabcontent">
-  <h3>New User</h3>
-  <p>form.</p>
-</div>
+<span>
+<iframe id="Users" class="tabcontent" title="Admin Users" src="{% url 'schooladmin:users' %}" ></iframe>
+<div class="tabcontent" id="Stuff">Hello.</div>
+</span>
 
 <script>
-function openChunk(evt, chunkName) {
+// resize iframe based on window size/resize
+var buffer = 20; //scroll bar buffer
+var iframe = document.getElementById('Users');
+
+function pageY(elem) {
+    return elem.offsetParent ? (elem.offsetTop + pageY(elem.offsetParent)) : elem.offsetTop;
+}
+
+function resizeIframe() {
+    var height = document.documentElement.clientHeight;
+    // get the default button; use that to find the frame.
+    var width = document.getElementById(document.getElementById('defaultOpen').innerText).offsetWidth;
+    height -= pageY(document.getElementById('Users'))+ buffer ;
+    height = (height < 0) ? 0 : height;
+    iframe.style.height = height + 'px';
+    iframe.style.width = width + 'px';
+}
+
+// .onload doesn't work with IE8 and older.
+if (iframe.attachEvent) {
+    iframe.attachEvent("onload", resizeIframe);
+} else {
+    iframe.onload=resizeIframe;
+}
+
+window.onresize = resizeIframe;
+
+
+// handle tab button clicks. Relies on the content (frame) id be the same as the button text
+// that lights it up.
+function openChunk(evt) {
   // Declare all variables
+  var chunkName = this.innerText;
   var i, tabcontent, tablinks;
 
   // Get all elements with class="tabcontent" and hide them
   tabcontent = document.getElementsByClassName("tabcontent");
   for (i = 0; i < tabcontent.length; i++) {
-    tabcontent[i].style.display = "none";
+    if (tabcontent[i].id == chunkName) {
+      tabcontent[i].style.display = "block";
+    } else {
+      tabcontent[i].style.display = "none";
+    }
   }
 
   // Get all elements with class="tablinks" and remove the class "active"
@@ -45,8 +94,18 @@ function openChunk(evt, chunkName) {
 
   // Show the current tab, and add an "active" class to the link that opened the tab
   document.getElementById(chunkName).style.display = "block";
-  evt.currentTarget.className += " active";
+  this.className += " active";
 }
-document.getElementById("defaultOpen").click();
+
+// Add onclick to each tab button so that it displays the contents
+var tablinks = document.getElementsByClassName('tablinks')
+for (var i=0, len=tablinks.length; i<len; i=i+1) {
+    tablinks[i].addEventListener("click", openChunk, false);
+}
+
+// start the page with the default tab (this id)
+var defaultButton = document.getElementById("defaultOpen")
+defaultButton.click();
+
 </script>
 {% endblock %}
