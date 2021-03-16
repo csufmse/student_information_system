@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}Student Portal: Registration{% endblock %}
+
+{% block header_name %} Registration {% endblock %}
+
+{% block content %}
+  {% if not courses %}
+    <p>No courses offered</P>
+  {% else %}
+    <table>
+    <tr>
+      <th>Number</th>
+      <th>Title</th>
+      <th>Credits</th>
+      <th>Description</th>
+    </tr>
+    {% for course in courses %}
+    <tr>
+      <td>{{course.name}}</td>
+      <td>{{course.title}}</td>
+      <td>{{course.credits_earned}}</td>
+      <td>{{course.description}}</td>
+      <td>{% for prereq in course.prereqs %}{{prereq}}{% endfor %}</td>
+    </tr>
+    {% if course.section_set.all %}
+      <tr class="child_row">
+        <th>Section Number</th>
+        <th>Professor</th>
+        <th>Schedule</th>
+        <th>Open Seats</th>
+        <th>Select</th>
+      </tr>
+      {% for section in course.section_set.all %}
+        <tr class="child_row">
+          <td>{{section.number}}</td>
+          <td>{{section.professor_name}}</td>
+          <td>{{section.hours}}</td>
+          <td>{{section.capacity - section.CourseSection_set.all.count}}</td>
+          <td><input type="radio" name="{{section.course}}" value="{{section.number}}"><td>
+        </tr>
+    </table>
+{% endblock content %}
+    

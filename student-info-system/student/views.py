@@ -1,21 +1,26 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
+from sis.authentication_helpers import role_login_required
+from sis.models import Course, Section
 
 
-@login_required
+@role_login_required('Student')
 def index(request):
-    if request.user.access_role() != 'Student':
-        return redirect('sis:access_denied')
-    return redirect('student:current_schedule')
+    return redirect('student:current_schedule.html')
 
 
-@login_required
+@role_login_required('Student')
 def current_schedule_view(request):
-    if request.user.access_role() != 'Student':
-        return redirect('sis:access_denied')
     context = {
-             'sections': request.user.student.sections.all,
-             'student_name': request.user.student.name,
-             'logged_in': True,
-        }
-    return render(request, 'student/current_schedule.html', context)
+        'sections': request.user.student.sections.all,
+        'name': request.user.student.name
+    }
+    return render(request, 'student:current_schedule', context)
+
+
+@role_login_required('Student')
+def registration_view(request):
+    #if request.method == 'POST':
+    
+    context = {'courses': Course.objects.all}
+    return render(request, 'student:registration', context)
