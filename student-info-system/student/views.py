@@ -15,12 +15,13 @@ def current_schedule_view(request):
         'sections': request.user.student.sections.all,
         'name': request.user.student.name
     }
-    return render(request, 'student:current_schedule', context)
+    return render(request, 'student/current_schedule.html', context)
 
 
 @role_login_required('Student')
 def registration_view(request):
-    #if request.method == 'POST':
+    if request.method == 'POST':
+        user.student.sections.add(request.POST[section])
     
     context = {'courses': Course.objects.all}
-    return render(request, 'student:registration', context)
+    return render(request, 'student/registration.html', context)
