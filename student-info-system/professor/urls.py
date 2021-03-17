@@ -8,4 +8,5 @@ app_name = 'professor'
 
 urlpatterns = [
     path('', views.index, name='index'),
+    path('courses', views.courses, name='courses'),
 ]
