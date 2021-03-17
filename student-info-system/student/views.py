@@ -27,7 +27,7 @@ def registration_view(request):
             }
         if request.POST['Register']:
             user.student.sections.add(request.POST[section])
-            return redurect('student:current_schedule'
+            return redurect('student:current_schedule')
     else: 
         context = {
             'courses': Course.objects.all
