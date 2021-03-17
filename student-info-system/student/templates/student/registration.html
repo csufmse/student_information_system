@@ -5,6 +5,14 @@
 {% block header_name %} Registration {% endblock %}
 
 {% block content %}
+  <select name="semester">
+  {% for semester in semesters %}
+    <option name="{{semester.name}}" value={{semester.name}}>{{semester.name}}</option>
+  {% endfor %}
+  </select>
+
+  <input type="submit" onclick="select_semester" name="Select Semester">
+
   {% if not courses %}
     <p>No courses offered</P>
   {% else %}
@@ -38,7 +46,7 @@
           <td>{{section.professor_name}}</td>
           <td>{{section.hours}}</td>
           <td>{{section.capacity}}</td>
-          <td><input type="radio" name="{{section.course}}" value="{{section.number}}"><td>
+          <td><input type="radio" name="section" value="{{section}}"><td>
         </tr>
        {% endfor %}
     {% endif %}
@@ -46,7 +54,7 @@
   {% endif %}
     </table>
 <input type="submit" onclick="confirm_input" name="Register">
-<script type="text/javascript">
+<script>
     function confirm_input() {
        if (confirm('Are you sure you want to register for ?')) {
            Register.submit();
