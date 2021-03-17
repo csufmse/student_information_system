@@ -1,0 +1,68 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+<style>
+.button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+</style>
+{% endblock css %}
+
+{% block content %}
+<h2>User {{ user.name }}:</h2>
+<h2>Userid: {{ user.id }}</h2>
+  <form method="post">
+    {% csrf_token %}
+     <input type="hidden" name="userid" value="{{ user.id }}"/>
+      {% if user.is_active %}
+    <input id="disbutton" name="disbutton"
+           action="action"
+        value="Disable User" class="button"
+    />
+    {% else %}
+    <input id="enabutton" name="enabutton"
+        action="action"
+        value="Enable User" class="button"
+   />
+    {% endif %}
+
+    <input
+        action="action"
+        onclick="window.history.go(-1); return false;"
+        value="Cancel" class="button"
+    />
+  </form>
+<script>
+function confirmit(evt) {
+    var btntitle = evt.target.value;
+    var answer = window.confirm("Are you sure you want to "+btntitle+"?");
+    if (answer) {
+        this.form.submit();
+        return true;
+    }
+    return false;
+}
+
+  // run your script in here
+// start the page with the default tab (this id)
+var btn = document.getElementById("disbutton");
+if ( btn ) {
+    btn.addEventListener("click", confirmit);
+}
+btn = document.getElementById("enabutton");
+if ( btn ) {
+    btn.addEventListener("click", confirmit);
+}
+</script>
+{% endblock %}
