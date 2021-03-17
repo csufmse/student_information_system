@@ -166,21 +166,23 @@ class Semester(models.Model):
     FALL = 'FA'
     SPRING = 'SP'
     SUMMER = 'SU'
-    SEASON = (
-        (FALL, 'Fall'),
-        (SPRING, 'Spring'),
-        (SUMMER, 'Summer')
-    )
-    semester = models.CharField('semester', choices=SEASON, default='FA', max_length=6)
-    year = models.IntegerField('year',
+    SEASON = ((FALL, 'Fall'), (SPRING, 'Spring'), (SUMMER, 'Summer'))
+    semester = models.CharField('semester',
+                                choices=SEASON,
+                                default='FA',
+                                max_length=6)
+    year = models.IntegerField(
+        'year',
         default=2000,
-        validators=[MinValueValidator(1900), MaxValueValidator(2300)])
+        validators=[MinValueValidator(1900),
+                    MaxValueValidator(2300)])
 
     def __str__(self):
         return self.name
-    
+
     def name(self):
         return str(self.semester) + "-" + str(self.year)
+
 
 class SectionStudent(models.Model):
     section = models.ForeignKey('Section', on_delete=models.SET_NULL, null=True)

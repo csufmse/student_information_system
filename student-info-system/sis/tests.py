@@ -125,4 +125,3 @@ class SectionTestCase(TestCase):
     def test_section_name(self):
         section = Section.objects.get(hours="MW 1200-1400")
         self.assertEqual(section.name(), "CPSC-101-1")
-
