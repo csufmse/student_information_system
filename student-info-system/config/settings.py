@@ -55,6 +55,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
+X_FRAME_OPTIONS = 'SAMEORIGIN'
 
 ROOT_URLCONF = "config.urls"
 
@@ -77,6 +78,10 @@ TEMPLATES = [
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/sis'
 
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    BASE_DIR / "static",
+]
 WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
