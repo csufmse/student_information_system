@@ -1,6 +1,6 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.core.validators import MinValueValidator
+from django.core.validators import MinValueValidator, MaxValueValidator
 from phone_field import PhoneField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -159,15 +159,28 @@ class CoursePrerequisite(models.Model):
 
 
 class Semester(models.Model):
-    name = models.CharField('Name', max_length=20)
     date_registration_opens = models.DateField('Registration Opens')
     date_started = models.DateField('Classes Start')
     date_last_drop = models.DateField('Last Drop')
     date_ended = models.DateField('Classes End')
+    FALL = 'FA'
+    SPRING = 'SP'
+    SUMMER = 'SU'
+    SEASON = (
+        (FALL, 'Fall'),
+        (SPRING, 'Spring'),
+        (SUMMER, 'Summer')
+    )
+    semester = models.CharField('semester', choices=SEASON, default='FA', max_length=6)
+    year = models.IntegerField('year',
+        default=2000,
+        validators=[MinValueValidator(1900), MaxValueValidator(2300)])
 
     def __str__(self):
         return self.name
-
+    
+    def name(self):
+        return str(self.semester) + "-" + str(self.year)
 
 class SectionStudent(models.Model):
     section = models.ForeignKey('Section', on_delete=models.SET_NULL, null=True)
@@ -247,7 +260,7 @@ class Section(models.Model):
     professor_name.short_description = 'Professor Name'
 
     def semester_name(self):
-        return self.semester.name
+        return self.semester.name()
 
     semester_name.short_description = 'Semester'
 

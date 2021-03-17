@@ -24,11 +24,12 @@ class StudentTestCase(TestCase):
                                        credits_earned=3.0)
         professor = Professor.objects.create(user=user_p)
         semester = Semester.objects.create(
-            name="fall",
             date_registration_opens=datetime.now(),
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
-            date_ended=datetime.now())
+            date_ended=datetime.now(),
+            semester='FA',
+            year=2000)
         section = Section.objects.create(course=course,
                                          professor=professor,
                                          semester=semester,
@@ -97,11 +98,12 @@ class SectionTestCase(TestCase):
                                        credits_earned=3.0)
         professor = Professor.objects.create(user=user)
         semester = Semester.objects.create(
-            name="fall",
             date_registration_opens=datetime.now(),
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
-            date_ended=datetime.now())
+            date_ended=datetime.now(),
+            semester='FA',
+            year=2000)
         Section.objects.create(course=course,
                                professor=professor,
                                semester=semester,
@@ -118,8 +120,9 @@ class SectionTestCase(TestCase):
 
     def test_section_semester_name(self):
         section = Section.objects.get(hours="MW 1200-1400")
-        self.assertEqual(section.semester_name(), "fall")
+        self.assertEqual(section.semester_name(), "FA-2000")
 
     def test_section_name(self):
         section = Section.objects.get(hours="MW 1200-1400")
         self.assertEqual(section.name(), "CPSC-101-1")
+
