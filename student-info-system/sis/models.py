@@ -67,11 +67,9 @@ class Student(models.Model):
     def is_professor(self):
         return False
 
-    @property
     def class_level(self):
         return 'Freshman'
 
-    @property
     def gpa(self):
         return 0.0
 
