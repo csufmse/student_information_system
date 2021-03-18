@@ -35,8 +35,9 @@
   <button class="tablinks">Stuff</button>
 </div>
 
-<span>
-<iframe id="Users" class="tabcontent" title="Admin Users" src="{% url 'schooladmin:users' %}" ></iframe>
+<span height="300" width="300">
+<iframe id="Users" class="tabcontent" title="Admin Users" src="{% url 'schooladmin:users' %}"
+    width="200" height="200"></iframe>
 <div class="tabcontent" id="Stuff">Hello.</div>
 </span>
 
@@ -61,12 +62,12 @@ function resizeIframe() {
 
 // .onload doesn't work with IE8 and older.
 if (iframe.attachEvent) {
-    iframe.attachEvent("onload", resizeIframe);
+//    iframe.attachEvent("onload", resizeIframe);
 } else {
-    iframe.onload=resizeIframe;
+//    iframe.onload=resizeIframe;
 }
 
-window.onresize = resizeIframe;
+//window.onresize = resizeIframe;
 
 
 // handle tab button clicks. Relies on the content (frame) id be the same as the button text
