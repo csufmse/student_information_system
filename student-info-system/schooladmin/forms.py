@@ -13,7 +13,7 @@ ROLE_CHOICES = (
 class CustomUserCreationForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     last_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
-    email = forms.EmailField(max_length=254, help_text='Required. Inform a valid email address.')
+    email = forms.EmailField(max_length=254, help_text='Required. Enter a valid email address.')
     role = forms.ChoiceField(choices=ROLE_CHOICES, required=True, help_text='Select type of user')
     major = forms.ModelChoiceField(queryset=None, required=False)
 
