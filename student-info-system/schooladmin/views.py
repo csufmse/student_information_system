@@ -4,8 +4,8 @@ from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django_tables2 import RequestConfig
-from django_filters import ( FilterSet, CharFilter, ChoiceFilter,
-                             ModelChoiceFilter, ModelMultipleChoiceFilter )
+from django_filters import (FilterSet, CharFilter, ChoiceFilter, ModelChoiceFilter,
+                            ModelMultipleChoiceFilter)
 
 from sis.models import Student, Admin, Professor, Major
 from .forms import CustomUserCreationForm, MajorCreationForm
@@ -18,7 +18,8 @@ def index(request):
         return redirect('sis:access_denied')
     return render(request, 'home_admin.html')
 
-#### USERS ####
+
+# USERS ####
 class UserFilter(FilterSet):
     username = CharFilter(lookup_expr='iexact')
     name = CharFilter(field_name='name', label='Name', lookup_expr='icontains')
@@ -80,7 +81,8 @@ def new_user(request):
             access_role = form.cleaned_data.get('role')
             major = form.cleaned_data.get('major')
             if access_role == 'Student':
-                student = Student(user=the_new_user, major=Major.objects.filter(abbreviation=major).get())
+                student = Student(user=the_new_user,
+                                  major=Major.objects.filter(abbreviation=major).get())
                 student.save()
             elif access_role == 'Professor':
                 professor = Professor(user=the_new_user,
@@ -94,23 +96,33 @@ def new_user(request):
         form = CustomUserCreationForm()
     return render(request, 'signup.html', {'form': form})
 
-#### MAJORS ####
+
+# MAJORS ####
 class MajorFilter(FilterSet):
-    abbreviation = CharFilter(field_name='abbreviation',lookup_expr='icontains')
+    abbreviation = CharFilter(field_name='abbreviation', lookup_expr='icontains')
     name = CharFilter(field_name='name', label='Name contains', lookup_expr='icontains')
-    description = CharFilter(field_name='description', label='Description contains',
+    description = CharFilter(field_name='description',
+                             label='Description contains',
                              lookup_expr='icontains')
-    #professors = ModelChoiceFilter(queryset=Professor.objects.filter(),
-    #                               field_name='professor__user__last_name', lookup_expr='icontains',label='Has Professor')
+    # professors = ModelChoiceFilter(queryset=Professor.objects.filter(),
+    #                               field_name='professor__user__last_name',
+    #                               lookup_expr='icontains',label='Has Professor')
     professors = CharFilter(field_name='professor__user__last_name',
-                            lookup_expr='icontains',label='Has Professor')
-    #requires = ModelChoiceFilter(field_name='requires',lookup_field='required_by',)
+                            lookup_expr='icontains',
+                            label='Has Professor')
+
+    # requires = ModelChoiceFilter(field_name='requires',lookup_field='required_by',)
 
     class Meta:
         model = Major
-        fields = ['abbreviation','name','description','professors',
-                  # 'requires'
-                  ]
+        fields = [
+            'abbreviation',
+            'name',
+            'description',
+            'professors',
+            # 'requires'
+        ]
+
 
 @login_required
 def majors(request):
@@ -144,9 +156,13 @@ def major(request, abbreviation):
     #         the_user.is_active = True
     #         the_user.save()
     #     return redirect('schooladmin:users')
-    return render(request, 'major.html', {'major': the_major,
-                                          'profs': the_major.professors.all(),
-                                          'courses': the_major.courses_required.all()})
+    return render(
+        request, 'major.html', {
+            'major': the_major,
+            'profs': the_major.professors.all(),
+            'courses': the_major.courses_required.all()
+        })
+
 
 @login_required
 def new_major(request):
@@ -160,4 +176,3 @@ def new_major(request):
     else:
         form = MajorCreationForm()
     return render(request, 'new_major.html', {'form': form})
-

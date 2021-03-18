@@ -68,16 +68,16 @@ class Majors():
     @classmethod
     def create(cls) -> None:
         Majors.cpsc = Major(abbreviation='CPSC',
-                           name="Computer Science",
-                           description="bits and byte, oh my!")
+                            name="Computer Science",
+                            description="bits and byte, oh my!")
         Majors.cpsc.save()
         Majors.engl = Major(abbreviation='ENGL',
-                           name='English',
-                           description='Composition, Literature, and Rhetoric. Not Grunting.')
+                            name='English',
+                            description='Composition, Literature, and Rhetoric. Not Grunting.')
         Majors.engl.save()
         Majors.arch = Major(abbreviation='ARCH',
-                           name='Architecture',
-                           description='Buildings and Ditches')
+                            name='Architecture',
+                            description='Buildings and Ditches')
         Majors.arch.save()
         Majors.phys = Major(abbreviation='PHYS', name='Physics', description='Why Things Break')
         Majors.phys.save()
@@ -135,14 +135,15 @@ class Courses():
         Courses.phys405 = Course.objects.filter(major=Majors.phys, catalogNumber='405').get()
         Courses.phys406 = Course.objects.filter(major=Majors.phys, catalogNumber='406').get()
 
+
 class Professors():
 
     @classmethod
     def create(cls) -> None:
-        u = User(username='bjmckenz_prof',first_name='bpfn',last_name='bpln')
+        u = User(username='bjmckenz_prof', first_name='bpfn', last_name='bpln')
         u.save()
         professor = Professor.objects.create(user=user)
-        Professors.bjm = Professor(user_id=u.id,major_id=Majors.cpsc)
+        Professors.bjm = Professor(user_id=u.id, major_id=Majors.cpsc)
         Professors.bjm.save()
 
     @classmethod
@@ -163,4 +164,3 @@ def fetchAll() -> None:
     Majors.fetch()
     Courses.fetch()
     Professors.fetch()
-
