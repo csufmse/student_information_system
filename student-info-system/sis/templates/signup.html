@@ -1,22 +1,13 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load bootstrap3 %}
+
+{% block title %}{% endblock title %}
+{% block header_name %}{% endblock header_name %}
 
 {% block css %}
 <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<style>
-.button {
-  background-color: #4CAF50;
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-}
-</style>
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 {% endblock css %}
 
 {% block content %}
@@ -39,9 +30,9 @@
         action="action"
         onclick="window.history.go(-1); return false;"
         type="submit"
-        value="Cancel" class="button"
+        value="Cancel" class="btn btn-info"
     />
-    <button type="submit" class="button">Create User</button>
+    <button type="submit" class="btn btn-primary">Create User</button>
   </form>
 
 <script>
