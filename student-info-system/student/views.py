@@ -27,9 +27,10 @@ def registration_view(request):
         if request.POST.get('semester', False):
             sections = Section.objects.filter(semester=request.POST['semester'])
             context['sections'] = sections
-        if request.POST.get('section', False):
+        if request.POST.get('course', False):
             student = request.user.student
-            reg_section = Section.objects.get(id=request.POST['section'])
+            reg_section = Section.objects.get(
+                id=request.POST[request.POST['course']])
             student.sections.add(reg_section)
             return redirect('student:current_schedule')
 

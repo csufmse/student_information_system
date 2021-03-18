@@ -48,7 +48,8 @@
               <td>{{section.professor_name}}</td>
               <td>{{section.hours}}</td>
               <td>{{section.capacity}}</td>
-              <td><input type="radio" name="section" value="{{section.id}}"><td>
+              <td><input type="radio" name="{{course.name}}" value="{{section.id}}"><td>
+              <input type="hidden" name="course" value="{{course.name}}">
             </tr>
           {% endifequal %}
         {% endfor%}
