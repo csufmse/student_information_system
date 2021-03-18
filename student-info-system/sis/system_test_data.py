@@ -67,27 +67,27 @@ class Majors():
 
     @classmethod
     def create(cls) -> None:
-        Major.cpsc = Major(abbreviation='CPSC',
+        Majors.cpsc = Major(abbreviation='CPSC',
                            name="Computer Science",
                            description="bits and byte, oh my!")
-        Major.cpsc.save()
-        Major.engl = Major(abbreviation='ENGL',
+        Majors.cpsc.save()
+        Majors.engl = Major(abbreviation='ENGL',
                            name='English',
                            description='Composition, Literature, and Rhetoric. Not Grunting.')
-        Major.engl.save()
-        Major.arch = Major(abbreviation='ARCH',
+        Majors.engl.save()
+        Majors.arch = Major(abbreviation='ARCH',
                            name='Architecture',
                            description='Buildings and Ditches')
-        Major.arch.save()
-        Major.phys = Major(abbreviation='PHYS', name='Physics', description='Why Things Break')
-        Major.phys.save()
+        Majors.arch.save()
+        Majors.phys = Major(abbreviation='PHYS', name='Physics', description='Why Things Break')
+        Majors.phys.save()
 
     @classmethod
     def fetch(cls) -> None:
-        Major.cpsc = Major.objects.filter(abbreviation='CPSC').get()
-        Major.phys = Major.objects.filter(abbreviation='PHYS').get()
-        Major.arch = Major.objects.filter(abbreviation='ARCH').get()
-        Major.engl = Major.objects.filter(abbreviation='ENGL').get()
+        Majors.cpsc = Major.objects.filter(abbreviation='CPSC').get()
+        Majors.phys = Major.objects.filter(abbreviation='PHYS').get()
+        Majors.arch = Major.objects.filter(abbreviation='ARCH').get()
+        Majors.engl = Major.objects.filter(abbreviation='ENGL').get()
 
 
 class Courses():
@@ -135,15 +135,32 @@ class Courses():
         Courses.phys405 = Course.objects.filter(major=Majors.phys, catalogNumber='405').get()
         Courses.phys406 = Course.objects.filter(major=Majors.phys, catalogNumber='406').get()
 
+class Professors():
+
+    @classmethod
+    def create(cls) -> None:
+        u = User(username='bjmckenz_prof',first_name='bpfn',last_name='bpln')
+        u.save()
+        professor = Professor.objects.create(user=user)
+        Professors.bjm = Professor(user_id=u.id,major_id=Majors.cpsc)
+        Professors.bjm.save()
+
+    @classmethod
+    def fetch(cls) -> None:
+        Professors.bjm = Professor.objects.filter(user__username='bjmckenz_prof').get()
+
 
 # Unity functions: create it all (to create db), fetch it all (for playing around)
 def createAll() -> None:
     Semesters.create()
     Majors.create()
     Courses.create()
+    Professors.create()
 
 
 def fetchAll() -> None:
     Semesters.fetch()
     Majors.fetch()
     Courses.fetch()
+    Professors.fetch()
+
