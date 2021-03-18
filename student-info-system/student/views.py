@@ -34,7 +34,7 @@ def registration_view(request):
             return redirect('student:current_schedule')
 
     if len(semester_list):
-        if not 'sections' in context:
+        if 'sections' not in context:
             sections = Section.objects.filter(semester=semester_list[0])
             context['sections'] = sections
         courses = set(section.course for section in sections)
