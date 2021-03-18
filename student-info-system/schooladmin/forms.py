@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from sis.models import Major
+from sis.models import Major, UpperField
 
 ROLE_CHOICES = (
     ('Student', 'Student'),
@@ -26,3 +26,13 @@ class CustomUserCreationForm(UserCreationForm):
         super(CustomUserCreationForm, self).__init__(*args, **kwargs)
         # this may be necessary: applyClassConfig2FormControl(self)
         self.fields['major'].queryset = Major.objects.all()
+
+
+class MajorCreationForm(forms.Form):
+    abbreviation = UpperField(max_length=6, help_text='Abbreviation')
+    title = forms.CharField(max_length=256)
+    description = forms.CharField(max_length=256, required=False)
+
+    class Meta:
+        model = Major
+        fields = ('abbrevation', 'title', 'description')

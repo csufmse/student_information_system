@@ -32,13 +32,14 @@
 
 <div class="tab">
   <button class="tablinks" id="defaultOpen">Users</button>
-  <button class="tablinks">Stuff</button>
+  <button class="tablinks">Majors</button>
 </div>
 
 <span height="300" width="300">
 <iframe id="Users" class="tabcontent" title="Admin Users" src="{% url 'schooladmin:users' %}"
     width="200" height="200"></iframe>
-<div class="tabcontent" id="Stuff">Hello.</div>
+<iframe id="Majors" class="tabcontent" title="Majors" src="{% url 'schooladmin:majors' %}"
+    width="200" height="200"></iframe>
 </span>
 
 <script>
