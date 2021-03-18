@@ -24,7 +24,7 @@ def registration_view(request):
     if request.method == 'POST':
         if request.POST.get('semester', False):
             context = {
-                'courses': Course.objects.filter(section_set=request.POST['semester'])
+                'courses': Course.objects.filter(semester=request.POST['semester'])
             }
         if request.POST.get('Register', False):
             student = request.user.student

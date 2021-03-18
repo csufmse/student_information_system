@@ -183,7 +183,7 @@ class Semester(models.Model):
                     MaxValueValidator(2300)])
 
     def __str__(self):
-        return self.name
+        return self.name()
 
     def name(self):
         return str(self.semester) + "-" + str(self.year)
