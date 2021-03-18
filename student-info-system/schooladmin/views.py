@@ -1,31 +1,32 @@
-from django import forms
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.contrib.auth.forms import UserCreationForm
+from django.db import models
 from django.http import HttpResponse
+from django import forms
 from django.shortcuts import render, redirect
 from django_tables2 import RequestConfig
 from django_filters import (FilterSet, CharFilter, ChoiceFilter, ModelChoiceFilter,
                             ModelMultipleChoiceFilter)
 
+from sis.authentication_helpers import role_login_required
 from sis.models import Student, Admin, Professor, Major
 from .forms import CustomUserCreationForm, MajorCreationForm
 from .tables import UsersTable, MajorsTable
 
 
-@login_required
+@role_login_required('Admin')
 def index(request):
-    if request.user.access_role() != 'Admin':
-        return redirect('sis:access_denied')
     return render(request, 'home_admin.html')
 
 
 # USERS ####
 class UserFilter(FilterSet):
-    username = CharFilter(lookup_expr='iexact')
+    username = CharFilter(lookup_expr='icontains')
     name = CharFilter(field_name='name', label='Name', lookup_expr='icontains')
     access_role = ChoiceFilter(field_name='access_role',
                                label='Access Role',
-                               choices=(('Admin', 'Admin'), ('Professor', 'Professor'),
+                               choices=(('Admin', 'Admin'), ('Professor',
+                                                             'Professor'),
                                         ('Student', 'Student')))
     #    is_active = BooleanFilter(field_name='is_active',label="User Enabled")
     is_active = ChoiceFilter(choices=((True, 'Enabled'), (False, 'Disabled')))
@@ -35,15 +36,16 @@ class UserFilter(FilterSet):
         fields = ['username', 'name', 'access_role', 'is_active']
 
 
-@login_required
+@role_login_required('Admin')
 def users(request):
-    if request.user.access_role() != 'Admin':
-        return redirect('sis:access_denied')
     queryset = User.annotated().all()
     f = UserFilter(request.GET, queryset=queryset)
     has_filter = any(field in request.GET for field in set(f.get_fields()))
     table = UsersTable(f.qs)
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
+    RequestConfig(request, paginate={
+        "per_page": 25,
+        "page": 1
+    }).configure(table)
     return render(request, 'users.html', {
         'table': table,
         'filter': f,
@@ -51,7 +53,7 @@ def users(request):
     })
 
 
-@login_required
+@role_login_required('Admin')
 def user(request, userid):
     if request.user.access_role() != 'Admin':
         return redirect('sis:access_denied')
@@ -70,10 +72,8 @@ def user(request, userid):
     return render(request, 'user.html', {'user': the_user})
 
 
-@login_required
+@role_login_required('Admin')
 def new_user(request):
-    if request.user.access_role() != 'Admin':
-        return redirect('sis:access_denied')
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -87,6 +87,14 @@ def new_user(request):
             elif access_role == 'Professor':
                 professor = Professor(user=the_new_user,
                                       major=Major.objects.filter(abbreviation=major).get())
+                student = Student(
+                    user=user,
+                    major=Major.objects.filter(abbreviation=major).get())
+                student.save()
+            elif access_role == 'Professor':
+                professor = Professor(
+                    user=user,
+                    major=Major.objects.filter(abbreviation=major).get())
                 professor.save()
             elif access_role == 'Admin':
                 admin = Admin(user=the_new_user)
@@ -124,7 +132,7 @@ class MajorFilter(FilterSet):
         ]
 
 
-@login_required
+@role_login_required('Admin')
 def majors(request):
     if request.user.access_role() != 'Admin':
         return redirect('sis:access_denied')
@@ -140,7 +148,7 @@ def majors(request):
     })
 
 
-@login_required
+@role_login_required('Admin')
 def major(request, abbreviation):
     if request.user.access_role() != 'Admin':
         return redirect('sis:access_denied')
@@ -164,7 +172,7 @@ def major(request, abbreviation):
         })
 
 
-@login_required
+@role_login_required('Admin')
 def new_major(request):
     if request.user.access_role() != 'Admin':
         return redirect('sis:access_denied')

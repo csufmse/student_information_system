@@ -10,7 +10,8 @@ class NameColumn(tables.Column):
         return record.name
 
     def order(self, queryset, is_descending):
-        queryset = queryset.order_by(("-" if is_descending else "") + "name_sort")
+        queryset = queryset.order_by(("-" if is_descending else "") +
+                                     "name_sort")
         return (queryset, True)
 
 

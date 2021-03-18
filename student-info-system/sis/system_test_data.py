@@ -1,7 +1,7 @@
 from datetime import date
 from django.contrib.auth.models import User
-from .models import (Student, Professor, Major, TranscriptRequest, Course, CoursePrerequisite,
-                     Semester, SectionStudent, Section)
+from .models import (Student, Professor, Major, TranscriptRequest, Course,
+                     CoursePrerequisite, Semester, SectionStudent, Section)
 
 # Creation of test data (for developing, demoing, maybe acceptance testing)
 #
@@ -67,6 +67,7 @@ class Majors():
 
     @classmethod
     def create(cls) -> None:
+<<<<<<< HEAD
         Majors.cpsc = Major(abbreviation='CPSC',
                             name="Computer Science",
                             description="bits and byte, oh my!")
@@ -128,12 +129,18 @@ class Courses():
     @classmethod
     def fetch(cls) -> None:
         Majors.fetch()
-        Courses.cpsc101 = Course.objects.filter(major=Majors.cpsc, catalogNumber='101').get()
-        Courses.cpsc345 = Course.objects.filter(major=Majors.cpsc, catalogNumber='345').get()
-        Courses.engl218 = Course.objects.filter(major=Majors.engl, catalogNumber='218').get()
-        Courses.engl255 = Course.objects.filter(major=Majors.engl, catalogNumber='405').get()
-        Courses.phys405 = Course.objects.filter(major=Majors.phys, catalogNumber='405').get()
-        Courses.phys406 = Course.objects.filter(major=Majors.phys, catalogNumber='406').get()
+        Courses.cpsc101 = Course.objects.filter(major=Majors.cpsc,
+                                                catalogNumber='101').get()
+        Courses.cpsc345 = Course.objects.filter(major=Majors.cpsc,
+                                                catalogNumber='345').get()
+        Courses.engl218 = Course.objects.filter(major=Majors.engl,
+                                                catalogNumber='218').get()
+        Courses.engl255 = Course.objects.filter(major=Majors.engl,
+                                                catalogNumber='405').get()
+        Courses.phys405 = Course.objects.filter(major=Majors.phys,
+                                                catalogNumber='405').get()
+        Courses.phys406 = Course.objects.filter(major=Majors.phys,
+                                                catalogNumber='406').get()
 
 
 class Professors():

@@ -1,8 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from .models import (Admin, Student, Professor, Major, TranscriptRequest, Course, Semester,
-                     Section, SectionStudent, CoursePrerequisite)
+from .models import (Admin, Student, Professor, Major, TranscriptRequest,
+                     Course, Semester, Section, SectionStudent,
+                     CoursePrerequisite)
 
 admin.site.site_title = "CSUF Student Information System Site Admin"
 admin.site.site_header = "Administrative Access to ALL Data"
@@ -10,7 +11,8 @@ admin.site.index_title = "Database Access"
 
 
 class CustomUserAdmin(UserAdmin):
-    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff', 'access_role')
+    list_display = ('username', 'email', 'first_name', 'last_name', 'is_staff',
+                    'access_role')
 
 
 admin.site.unregister(User)
@@ -60,15 +62,16 @@ admin.site.register(Course, CourseAdmin)
 
 
 class SemesterAdmin(admin.ModelAdmin):
-    list_display = ('name', 'date_registration_opens', 'date_started', 'date_last_drop',
-                    'date_ended')
+    list_display = ('name', 'date_registration_opens', 'date_started',
+                    'date_last_drop', 'date_ended')
 
 
 admin.site.register(Semester, SemesterAdmin)
 
 
 class SectionAdmin(admin.ModelAdmin):
-    list_display = ('semester', 'name', 'professor', 'hours', 'registered', 'capacity')
+    list_display = ('semester', 'name', 'professor', 'hours', 'registered',
+                    'capacity')
 
 
 admin.site.register(Section, SectionAdmin)

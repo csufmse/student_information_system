@@ -15,8 +15,8 @@
 <h1>{% block header_name %}Student Info System{% endblock %}</h1>
 </span>
   {% block header_content %}
-    {% if logged_in %}
-       {% block user %}Currently logged in as {% endblock user %}
+    {% if name %}
+       {% block user %}Currently logged in as {{name}}{% endblock user %}
        <br><a href="{% url 'logout' %}">Log Out</a>
     {% endif %}
   {% endblock %}
