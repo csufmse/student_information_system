@@ -1,28 +1,35 @@
 from datetime import datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
-from .models import (UpperField, Student, Professor, Major, TranscriptRequest, Course,
-                     CoursePrerequisite, Semester, SectionStudent, Section)
+from .models import (UpperField, Student, Professor, Major, TranscriptRequest,
+                     Course, CoursePrerequisite, Semester, SectionStudent,
+                     Section)
 
 
 class StudentTestCase(TestCase):
 
     @classmethod
     def setUpTestData(self):
-        self.user = User.objects.create(username="testUser", first_name="First", last_name="Last")
-        user_p = User.objects.create(username="prof", first_name="First", last_name="Last")
-        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        self.user = User.objects.create(username="testUser",
+                                        first_name="First",
+                                        last_name="Last")
+        user_p = User.objects.create(username="prof",
+                                     first_name="First",
+                                     last_name="Last")
+        major = Major.objects.create(abbreviation="CPSC",
+                                     name="Computer Science")
         course = Course.objects.create(major=major,
                                        catalogNumber='101',
                                        title="Intro To Test",
                                        credits_earned=3.0)
         professor = Professor.objects.create(user=user_p)
-        semester = Semester.objects.create(date_registration_opens=datetime.now(),
-                                           date_started=datetime.now(),
-                                           date_last_drop=datetime.now(),
-                                           date_ended=datetime.now(),
-                                           semester='FA',
-                                           year=2000)
+        semester = Semester.objects.create(
+            date_registration_opens=datetime.now(),
+            date_started=datetime.now(),
+            date_last_drop=datetime.now(),
+            date_ended=datetime.now(),
+            semester='FA',
+            year=2000)
         section = Section.objects.create(course=course,
                                          professor=professor,
                                          semester=semester,
@@ -47,7 +54,9 @@ class StudentTestCase(TestCase):
 class ProfessorTestCase(TestCase):
 
     def setUp(self):
-        User.objects.create(username="prof", first_name="First", last_name="Last")
+        User.objects.create(username="prof",
+                            first_name="First",
+                            last_name="Last")
 
     def test_professor_name(self):
         user = User.objects.get(username="prof")
@@ -58,7 +67,8 @@ class ProfessorTestCase(TestCase):
 class CourseTestCase(TestCase):
 
     def setUp(self):
-        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        major = Major.objects.create(abbreviation="CPSC",
+                                     name="Computer Science")
         Course.objects.create(major=major,
                               catalogNumber='101',
                               title="Intro To Test",
@@ -77,19 +87,23 @@ class SectionTestCase(TestCase):
 
     @classmethod
     def setUpTestData(self):
-        user = User.objects.create(username="prof", first_name="First", last_name="Last")
-        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        user = User.objects.create(username="prof",
+                                   first_name="First",
+                                   last_name="Last")
+        major = Major.objects.create(abbreviation="CPSC",
+                                     name="Computer Science")
         course = Course.objects.create(major=major,
                                        catalogNumber='101',
                                        title="Intro To Test",
                                        credits_earned=3.0)
         professor = Professor.objects.create(user=user)
-        semester = Semester.objects.create(date_registration_opens=datetime.now(),
-                                           date_started=datetime.now(),
-                                           date_last_drop=datetime.now(),
-                                           date_ended=datetime.now(),
-                                           semester='FA',
-                                           year=2000)
+        semester = Semester.objects.create(
+            date_registration_opens=datetime.now(),
+            date_started=datetime.now(),
+            date_last_drop=datetime.now(),
+            date_ended=datetime.now(),
+            semester='FA',
+            year=2000)
         Section.objects.create(course=course,
                                professor=professor,
                                semester=semester,

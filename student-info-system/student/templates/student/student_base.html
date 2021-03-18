@@ -1,0 +1,10 @@
+{% extends 'base.html' %}
+
+{% block header_content %}
+  <nav>
+  <ul>
+    <li><a href="{% url 'student:registration' %}">Registration</a></li>
+  </ul>
+  </nav>
+{{block.super}}
+{% endblock header_content %}
