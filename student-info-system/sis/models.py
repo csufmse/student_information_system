@@ -1,6 +1,6 @@
 from django.db import models
-from django.contrib.auth.models import User, AbstractUser
-from django.core.validators import MinValueValidator
+from django.contrib.auth.models import User
+from django.core.validators import MinValueValidator, MaxValueValidator
 from phone_field import PhoneField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -46,8 +46,13 @@ class Admin(models.Model):
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    major = models.ForeignKey('Major', on_delete=models.DO_NOTHING, blank=True, null=True)
-    sections = models.ManyToManyField('Section', through='SectionStudent', related_name='students')
+    major = models.ForeignKey('Major',
+                              on_delete=models.DO_NOTHING,
+                              blank=True,
+                              null=True)
+    sections = models.ManyToManyField('Section',
+                                      through='SectionStudent',
+                                      related_name='students')
 
     # will be adding aggregate things here to replace dummy methods
     def is_admin(self):
@@ -75,7 +80,10 @@ class Student(models.Model):
 class Professor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     # Professor's department
-    major = models.ForeignKey('Major', on_delete=models.DO_NOTHING, blank=True, null=True)
+    major = models.ForeignKey('Major',
+                              on_delete=models.DO_NOTHING,
+                              blank=True,
+                              null=True)
 
     def is_admin(self):
         return False
@@ -97,8 +105,12 @@ class Major(models.Model):
     abbreviation = UpperField('Abbreviation', max_length=6, primary_key=True)
     name = models.CharField('Name', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
-    professors = models.ManyToManyField(Professor, blank=True, related_name="prof")
-    courses_required = models.ManyToManyField('Course', blank=True, related_name="required_by")
+    professors = models.ManyToManyField(Professor,
+                                        blank=True,
+                                        related_name="prof")
+    courses_required = models.ManyToManyField('Course',
+                                              blank=True,
+                                              related_name="required_by")
 
     def __str__(self):
         return self.abbreviation
@@ -118,7 +130,9 @@ class Course(models.Model):
     catalogNumber = models.CharField('Number', max_length=20)
     title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
-    credits_earned = models.DecimalField('Credits', max_digits=2, decimal_places=1)
+    credits_earned = models.DecimalField('Credits',
+                                         max_digits=2,
+                                         decimal_places=1)
     prereqs = models.ManyToManyField('self', through='CoursePrerequisite')
 
     def major_name(self):
@@ -136,7 +150,9 @@ class Course(models.Model):
 
 
 class CoursePrerequisite(models.Model):
-    course = models.ForeignKey(Course, related_name='a_course', on_delete=models.CASCADE)
+    course = models.ForeignKey(Course,
+                               related_name='a_course',
+                               on_delete=models.CASCADE)
     prerequisite = models.ForeignKey(Course,
                                      related_name='a_prerequisite',
                                      on_delete=models.CASCADE)
@@ -146,19 +162,39 @@ class CoursePrerequisite(models.Model):
 
 
 class Semester(models.Model):
-    name = models.CharField('Name', max_length=20)
     date_registration_opens = models.DateField('Registration Opens')
     date_started = models.DateField('Classes Start')
     date_last_drop = models.DateField('Last Drop')
     date_ended = models.DateField('Classes End')
+    FALL = 'FA'
+    SPRING = 'SP'
+    SUMMER = 'SU'
+    WINTER = 'WI'
+    SEASON = ((FALL, 'Fall'), (SPRING, 'Spring'), (SUMMER, 'Summer'),
+              (WINTER, 'Winter'))
+    semester = models.CharField('semester',
+                                choices=SEASON,
+                                default='FA',
+                                max_length=6)
+    year = models.IntegerField(
+        'year',
+        default=2000,
+        validators=[MinValueValidator(1900),
+                    MaxValueValidator(2300)])
 
     def __str__(self):
         return self.name
 
+    def name(self):
+        return str(self.semester) + "-" + str(self.year)
+
 
 class SectionStudent(models.Model):
     section = models.ForeignKey('Section', on_delete=models.SET_NULL, null=True)
-    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True)
+    student = models.ForeignKey(Student,
+                                on_delete=models.SET_NULL,
+                                null=True,
+                                blank=True)
 
     GRADE_A = 4
     GRADE_B = 3
@@ -212,8 +248,12 @@ class Section(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     professor = models.ForeignKey(Professor, on_delete=models.DO_NOTHING)
     semester = models.ForeignKey(Semester, on_delete=models.DO_NOTHING)
-    number = models.IntegerField('Section Number', default=1, validators=[MinValueValidator(1)])
-    capacity = models.IntegerField('Capacity', default=0, validators=[MinValueValidator(1)])
+    number = models.IntegerField('Section Number',
+                                 default=1,
+                                 validators=[MinValueValidator(1)])
+    capacity = models.IntegerField('Capacity',
+                                   default=0,
+                                   validators=[MinValueValidator(1)])
     hours = models.CharField('Hours', max_length=256)
 
     def course_name(self):
@@ -227,13 +267,14 @@ class Section(models.Model):
     professor_name.short_description = 'Professor Name'
 
     def semester_name(self):
-        return self.semester.name
+        return self.semester.name()
 
     semester_name.short_description = 'Semester'
 
     #  this will implemented as a custom manager -- BJM
     def registered(self):
-        return self.sectionstudent_set.exclude(status=SectionStudent.DROPPED).count()
+        return self.sectionstudent_set.exclude(
+            status=SectionStudent.DROPPED).count()
 
     def name(self):
         return self.course.name() + '-' + str(self.number)
