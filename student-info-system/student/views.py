@@ -20,20 +20,24 @@ def current_schedule_view(request):
 
 @role_login_required('Student')
 def registration_view(request):
-    semester_list = Semester.objects.all().order_by('semester')
+    context = {}
+    semester_list = Semester.objects.all()
+
     if request.method == 'POST':
         if request.POST.get('semester', False):
-            context = {
-                'courses': Course.objects.filter(semester=request.POST['semester'])
-            }
-        if request.POST.get('Register', False):
+            sections = Section.objects.filter(semester=request.POST['semester'])
+            context['sections'] = sections
+        if request.POST.get('section', False):
             student = request.user.student
-            section = Section.objects.get(id=request.POST['section'])
-            student.sections.add(section)
+            reg_section = Section.objects.get(id=request.POST['section'])
+            student.sections.add(reg_section)
             return redirect('student:current_schedule')
-    else: 
-        context = {
-            'sections': Section.objects.all().filter(semester=semester_list[0])
-        }
-    context['semesters'] = semester_list
+
+    if len(semester_list):
+        if not 'sections' in context:
+            sections = Section.objects.filter(semester=semester_list[0])
+            context['sections'] = sections
+        courses = set(section.course for section in sections)
+        context['semesters'] = semester_list
+        context['courses'] = courses
     return render(request, 'student/registration.html', context)

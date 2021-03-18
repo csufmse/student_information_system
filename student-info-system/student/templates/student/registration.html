@@ -9,12 +9,11 @@
 {% csrf_token %}
   <select name="semester">
   {% for semester in semesters %}
-    <option name="{{semester.name}}" value={{semester.name}}>{{semester.name}}</option>
+    <option value={{semester.id}}>{{semester.name}}</option>
   {% endfor %}
   </select>
   <input type="submit" name="Select Semester">
 </form>
-
   {% if not courses %}
     <p>No courses offered</P>
   {% else %}
@@ -27,25 +26,32 @@
         <th>Credits</th>
         <th>Description</th>
         <th>Prerequisites</th>
-        <th>Section Number</th>
-        <th>Professor</th>
-        <th>Schedule</th>
-        <th>Open Seats</th>
-        <th>Select</th>
       </tr>
-      {% for section in sections %}
+      {% for course in courses %}
         <tr>
-          <td>{{section.course_name}}</td>
-          <td>{{section.course.title}}</td>
-          <td>{{section.course.credits_earned}}</td>
-          <td>{{section.course.description}}</td>
-          <td>{% for prereq in section.course.prereqs.all %}{{prereq}}{% endfor %}</td>
-          <td>{{section.number}}</td>
-          <td>{{section.professor_name}}</td>
-          <td>{{section.hours}}</td>
-          <td>{{section.capacity}}</td>
-          <td><input type="radio" name="section" value="{{section.id}}"><td>
+          <td>{{course.name}}</td>
+          <td>{{course.title}}</td>
+          <td>{{course.credits_earned}}</td>
+          <td>{{course.description}}</td>
+          <td>{% for prereq in course.prereqs.all %}{{prereq}}{% endfor %}</td>
+        <tr id="childRow">
+          <th>Section Number</th>
+          <th>Professor</th>
+          <th>Schedule</th>
+          <th>Open Seats</th>
+          <th>Select</th>
         </tr>
+        {% for section in sections %}
+          {% ifequal section.course course %}
+            <tr id="childRow">
+              <td>{{section.number}}</td>
+              <td>{{section.professor_name}}</td>
+              <td>{{section.hours}}</td>
+              <td>{{section.capacity}}</td>
+              <td><input type="radio" name="section" value="{{section.id}}"><td>
+            </tr>
+          {% endifequal %}
+        {% endfor%}
       {% endfor %}
   {% endif %}
   </table>
