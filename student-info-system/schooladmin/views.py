@@ -1,17 +1,15 @@
-from django.contrib.auth.models import User
-from django.contrib.auth.forms import UserCreationForm
-from django.db import models
 from django.http import HttpResponse
-from django import forms
 from django.shortcuts import render, redirect
 from django_tables2 import RequestConfig
-from django_filters import (FilterSet, CharFilter, ChoiceFilter, ModelChoiceFilter,
-                            ModelMultipleChoiceFilter)
+from django.contrib import messages
+from django.contrib.auth.forms import AdminPasswordChangeForm
 
 from sis.authentication_helpers import role_login_required
+from django.contrib.auth.models import User
 from sis.models import Student, Admin, Professor, Major, Course
-from .forms import CustomUserCreationForm, MajorCreationForm
+from .forms import CustomUserCreationForm, MajorCreationForm, UserEditForm
 from .tables import UsersTable, MajorsTable, BasicProfsTable, BasicCoursesTable
+from .filters import UserFilter, MajorFilter
 
 
 @role_login_required('Admin')
@@ -19,20 +17,7 @@ def index(request):
     return render(request, 'home_admin.html')
 
 
-# USERS ####
-class UserFilter(FilterSet):
-    username = CharFilter(lookup_expr='icontains')
-    name = CharFilter(field_name='name', label='Name', lookup_expr='icontains')
-    access_role = ChoiceFilter(field_name='access_role',
-                               label='Access Role',
-                               choices=(('Admin', 'Admin'), ('Professor', 'Professor'),
-                                        ('Student', 'Student')))
-    #    is_active = BooleanFilter(field_name='is_active',label="User Enabled")
-    is_active = ChoiceFilter(label='Enabled?', choices=((True, 'Enabled'), (False, 'Disabled')))
-
-    class Meta:
-        model = User
-        fields = ['username', 'name', 'access_role', 'is_active']
+# USERS
 
 
 @role_login_required('Admin')
@@ -67,6 +52,49 @@ def user(request, userid):
 
 
 @role_login_required('Admin')
+def user_change_password(request, userid):
+    qs = User.objects.filter(id=userid)
+    if qs.count() < 1:
+        return HttpResponse("No such user")
+    the_user = qs.get()
+    if request.method == 'POST':
+        form = AdminPasswordChangeForm(the_user, request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request,
+                             f'Password for {the_user.username} was successfully updated.')
+            return redirect('schooladmin:user', userid)
+        else:
+            messages.error(request, 'Please correct the error below.')
+    else:
+        form = AdminPasswordChangeForm(request.user)
+    return render(request, 'user_change_password.html', {'user': the_user, 'form': form})
+
+
+@role_login_required('Admin')
+def user_edit(request, userid):
+    qs = User.objects.filter(id=userid)
+    if qs.count() < 1:
+        return HttpResponse("No such user")
+    the_user = qs.get()
+    if request.method == 'POST':
+        form = UserEditForm(request.POST)
+        if form.is_valid():
+            the_user.first_name = form.cleaned_data['first_name']
+            the_user.last_name = form.cleaned_data['last_name']
+            the_user.email = form.cleaned_data['last_name']
+            # role
+            # major
+            the_user.save()
+            return redirect('schooladmin:user', userid)
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
+    else:
+        form = UserEditForm(instance=the_user)
+    return render(request, 'user_edit.html', {'user': the_user, 'form': form})
+
+
+@role_login_required('Admin')
 def new_user(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
@@ -96,31 +124,7 @@ def new_user(request):
     return render(request, 'signup.html', {'form': form})
 
 
-# MAJORS ####
-class MajorFilter(FilterSet):
-    abbreviation = CharFilter(field_name='abbreviation', lookup_expr='icontains')
-    name = CharFilter(field_name='name', label='Name contains', lookup_expr='icontains')
-    description = CharFilter(field_name='description',
-                             label='Description contains',
-                             lookup_expr='icontains')
-    # professors = ModelChoiceFilter(queryset=Professor.objects.filter(),
-    #                               field_name='professor__user__last_name',
-    #                               lookup_expr='icontains',label='Has Professor')
-    professors = CharFilter(field_name='professor__user__last_name',
-                            lookup_expr='icontains',
-                            label='Has Professor')
-
-    # requires = ModelChoiceFilter(field_name='requires',lookup_field='required_by',)
-
-    class Meta:
-        model = Major
-        fields = [
-            'abbreviation',
-            'name',
-            'description',
-            'professors',
-            # 'requires'
-        ]
+# MAJORS
 
 
 @role_login_required('Admin')
