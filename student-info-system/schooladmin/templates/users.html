@@ -38,7 +38,7 @@
 
 {% block content %}
 <div>
-<button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:new_user' %}';">New User</button>
+<button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
 <div>
 <div id="Users">
     {% if filter %}
@@ -57,7 +57,7 @@
 <script>
 function selectRow(evt) {
     userid = this.getAttribute('data-id');
-  open("/schooladmin/user/"+userid,'_self');
+    open("/schooladmin/user/"+userid,'_self');
 }
 
 // Add onclick to each row so that it leaps off to the detail

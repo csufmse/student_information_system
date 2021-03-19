@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load bootstrap3 %}
+{% load render_table from django_tables2 %}
 
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
@@ -9,51 +10,51 @@
 <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 <style>
-#Professors th {
+.bprof {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 400px;
+}
+
+.bprof th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: center;
   background-color: #4CAF50;
   color: white;
 }
-#Professors {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
-
-#Professors td, #Professors th {
+.bprof td, .bprof th {
   border: 1px solid #ddd;
   padding: 8px;
 }
 
-#Professors tr:nth-child(even){background-color: #f2f2f2;}
+.bprof tr:nth-child(even){background-color: #f2f2f2;}
 
-#Professors tr:hover {background-color: #ddd;}
+.bprof tr:hover {background-color: #ddd;}
 
-#Courses th {
+.bcourse {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 500px;
+}
+
+.bcourse th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: center;
   background-color: #4CAF50;
   color: white;
 }
-#Courses {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
-
-#Courses td, #Professors th {
+.bcourse td, .bprof th {
   border: 1px solid #ddd;
   padding: 8px;
 }
 
-#Courses tr:nth-child(even){background-color: #f2f2f2;}
+.bcourse tr:nth-child(even){background-color: #f2f2f2;}
 
-#Courses tr:hover {background-color: #ddd;}
+.bcourse tr:hover {background-color: #ddd;}
 
-#Courses th {
+.bcourse th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: center;
@@ -65,55 +66,52 @@
 {% endblock css %}
 
 {% block content %}
-<h2>Major {{ major.abbreviation }}:</h2>
-<h2>Name {{ major.name }}:</h2>
-<h2>Description {{ major.description }}:</h2>
+<dl class="dl-horizontal">
+  <dt>Major</dt>
+  <dd>{{ major.abbreviation }}</dd>
+  <dt>Name</dt>
+  <dd>{{ major.name }}</dd>
+  <dt>Description</dt>
+  <dd>{{ major.description }}</dd>
+</dl>
 
     <div id="Professors">
-        <h2>Professors:</h2>
-          {% if not profs %}
-             <p>No Professors in major</p>
-          {% else %}
-        <table width="400">
-            <tr>
-              <th >Professor</th>
-            </tr>
-            <tr>
-            {% for professor in profs %}
-              <td>{{professor.name}}</td>
-            {% endfor %}
-          </tr>
-        </table>
-          {% endif %}
+        <h3>Professors:</h3>
+    {% render_table profs 'django_tables2/bootstrap.html' %}
     </div>
 
     <div id="Courses">
-        <h2>Required Courses:</h2>
-          {% if not courses %}
-             <p>No Courses required by Major</p>
-          {% else %}
-        <table width="400">
-            <tr>
-              <th>Name</th>
-              <th>Title</th>
-              <th>Credits</th>
-            </tr>
-            <tr>
-            {% for course in courses %}
-            <tr>
-              <td align="center">{{course.name}}</td>
-              <td>{{course.title}}</td>
-              <td align="center">{{course.credits_earned}}</td>
-            </tr>
-            {% endfor %}
-          </tr>
-        </table>
+        <h3>Required Courses:</h3>
+        {% render_table courses 'django_tables2/bootstrap.html' %}
     </div>
-  {% endif %}
+
     <input
         action="action"
            class="btn btn-info"
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
+<script>
+function selectProf(evt) {
+    var id = this.getAttribute('data-id');
+//    var url = "{ % url 'schooladmin:user' arg1='12345' % }".replace(/12345/, id.toString());
+    var url = "/schooladmin/user/"+id;
+    open(url,'_self');
+}
+function selectCourse(evt) {
+    var id = this.getAttribute('data-id');
+    var url = "/schooladmin/course/"+id;
+    open(url,'_self');
+}
+
+// Add onclick to each row so that it leaps off to the detail
+var tablerows = document.getElementsByClassName('crow')
+for (var i=0, len=tablerows.length; i<len; i=i+1) {
+    tablerows[i].addEventListener("click", selectCourse, false);
+}
+tablerows = document.getElementsByClassName('prow')
+for (var i=0, len=tablerows.length; i<len; i=i+1) {
+    tablerows[i].addEventListener("click", selectProf, false);
+}
+</script>
 {% endblock %}

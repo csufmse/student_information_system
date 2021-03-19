@@ -6,9 +6,12 @@ app_name = 'schooladmin'
 urlpatterns = [
     path('', views.index, name='index'),
     path('users', views.users, name='users'),
+    path('user/<int:userid>/change_password', views.user_change_password, name='change_password'),
+    path('user/<int:userid>/edit', views.user_edit, name='user_edit'),
     path('user/<int:userid>', views.user, name='user'),
-    path('new_user', views.new_user, name='new_user'),
+    path('user_new', views.user_new, name='user_new'),
     path('majors', views.majors, name='majors'),
     path('major/<str:abbreviation>', views.major, name='major'),
-    path('new_major', views.new_major, name='new_major'),
+    path('major_new', views.major_new, name='major_new'),
+    path('course/<int:courseid>', views.course, name='course'),
 ]

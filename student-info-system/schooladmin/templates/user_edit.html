@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+
+{% block title %}{% endblock title %}
+{% block header_name %}{% endblock header_name %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+{% endblock css %}
+
+{% block content %}
+  <h3>Edit User {{ user.username }} / {{ user.name }}</h3>
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% if field.help_text %}
+          <small style="color: grey">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+      </p>
+    {% endfor %}
+    <input
+        action="action"
+        onclick="window.history.go(-1); return false;"
+        type="submit"
+        value="Cancel" class="btn btn-info"
+    />
+    <input
+        type="reset"
+        value="Reset" class="btn btn-info"
+    />
+    <button type="submit" class="btn btn-primary">Save Changes</button>
+  </form>
+
+<script>
+function manageMajor(evt) {
+  var role_select = document.getElementById("id_role")
+  var major_select = document.getElementById("id_major")
+  var major_label = major_select.labels[0]
+
+  if ( role_select.value == 'Admin') {
+    major_select.disabled = true;
+    major_select.required = false;
+    major_select.style.visibility = "hidden"
+    major_label.style.visibility = "hidden"
+  }
+  else {
+    major_select.disabled = false;
+    major_select.required = true;
+    major_select.style.visibility = "visible"
+    major_label.style.visibility = "visible"
+    if (role_select.value == 'Student') {
+      major_label.innerHTML = "Student Major";
+    }
+    else {
+      major_label.innerText = "Major Taught"
+    }
+  }
+}
+
+document.getElementById("id_role").addEventListener("change", manageMajor);
+manageMajor();
+</script>
+{% endblock %}

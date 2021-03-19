@@ -51,10 +51,7 @@ class Admin(models.Model):
 
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    major = models.ForeignKey('Major',
-                              on_delete=models.DO_NOTHING,
-                              blank=True,
-                              null=True)
+    major = models.ForeignKey('Major', on_delete=models.DO_NOTHING, blank=True, null=True)
     sections = models.ManyToManyField('Section',
                                       through='SectionStudent',
                                       related_name='students')
@@ -89,10 +86,7 @@ class Student(models.Model):
 class Professor(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     # Professor's department
-    major = models.ForeignKey('Major',
-                              on_delete=models.DO_NOTHING,
-                              blank=True,
-                              null=True)
+    major = models.ForeignKey('Major', on_delete=models.DO_NOTHING, blank=True, null=True)
 
     @property
     def is_admin(self):
@@ -118,12 +112,8 @@ class Major(models.Model):
     abbreviation = UpperField('Abbreviation', max_length=6, primary_key=True)
     name = models.CharField('Name', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
-    professors = models.ManyToManyField(Professor,
-                                        blank=True,
-                                        related_name="prof")
-    courses_required = models.ManyToManyField('Course',
-                                              blank=True,
-                                              related_name="required_by")
+    professors = models.ManyToManyField(Professor, blank=True, related_name="prof")
+    courses_required = models.ManyToManyField('Course', blank=True, related_name="required_by")
 
     def __str__(self):
         return self.abbreviation
@@ -143,9 +133,7 @@ class Course(models.Model):
     catalogNumber = models.CharField('Number', max_length=20)
     title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
-    credits_earned = models.DecimalField('Credits',
-                                         max_digits=2,
-                                         decimal_places=1)
+    credits_earned = models.DecimalField('Credits', max_digits=2, decimal_places=1)
     prereqs = models.ManyToManyField('self', through='CoursePrerequisite')
 
     @property
@@ -165,9 +153,7 @@ class Course(models.Model):
 
 
 class CoursePrerequisite(models.Model):
-    course = models.ForeignKey(Course,
-                               related_name='a_course',
-                               on_delete=models.CASCADE)
+    course = models.ForeignKey(Course, related_name='a_course', on_delete=models.CASCADE)
     prerequisite = models.ForeignKey(Course,
                                      related_name='a_prerequisite',
                                      on_delete=models.CASCADE)
@@ -185,17 +171,12 @@ class Semester(models.Model):
     SPRING = 'SP'
     SUMMER = 'SU'
     WINTER = 'WI'
-    SEASON = ((FALL, 'Fall'), (SPRING, 'Spring'), (SUMMER, 'Summer'),
-              (WINTER, 'Winter'))
-    semester = models.CharField('semester',
-                                choices=SEASON,
-                                default='FA',
-                                max_length=6)
-    year = models.IntegerField(
-        'year',
-        default=2000,
-        validators=[MinValueValidator(1900),
-                    MaxValueValidator(2300)])
+    SEASON = ((FALL, 'Fall'), (SPRING, 'Spring'), (SUMMER, 'Summer'), (WINTER, 'Winter'))
+    semester = models.CharField('semester', choices=SEASON, default='FA', max_length=6)
+    year = models.IntegerField('year',
+                               default=2000,
+                               validators=[MinValueValidator(1900),
+                                           MaxValueValidator(2300)])
 
     @property
     def name(self):
@@ -207,10 +188,7 @@ class Semester(models.Model):
 
 class SectionStudent(models.Model):
     section = models.ForeignKey('Section', on_delete=models.SET_NULL, null=True)
-    student = models.ForeignKey(Student,
-                                on_delete=models.SET_NULL,
-                                null=True,
-                                blank=True)
+    student = models.ForeignKey(Student, on_delete=models.SET_NULL, null=True, blank=True)
 
     GRADE_A = 4
     GRADE_B = 3
@@ -266,12 +244,8 @@ class Section(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     professor = models.ForeignKey(Professor, on_delete=models.DO_NOTHING)
     semester = models.ForeignKey(Semester, on_delete=models.DO_NOTHING)
-    number = models.IntegerField('Section Number',
-                                 default=1,
-                                 validators=[MinValueValidator(1)])
-    capacity = models.IntegerField('Capacity',
-                                   default=0,
-                                   validators=[MinValueValidator(1)])
+    number = models.IntegerField('Section Number', default=1, validators=[MinValueValidator(1)])
+    capacity = models.IntegerField('Capacity', default=0, validators=[MinValueValidator(1)])
     hours = models.CharField('Hours', max_length=256)
 
     @property
@@ -294,8 +268,7 @@ class Section(models.Model):
 
     #  this will implemented as a custom manager -- BJM
     def registered(self):
-        return self.sectionstudent_set.exclude(
-            status=SectionStudent.DROPPED).count()
+        return self.sectionstudent_set.exclude(status=SectionStudent.DROPPED).count()
 
     @property
     def name(self):

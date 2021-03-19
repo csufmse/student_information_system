@@ -11,8 +11,23 @@
 {% endblock css %}
 
 {% block content %}
-<h2>User {{ user.name }}:</h2>
-<h2>Userid: {{ user.id }}</h2>
+<dl class="dl-horizontal">
+  <dt>User</dt>
+  <dd>{{ user.name }}</dd>
+  <dt>Username</dt>
+  <dd>{{ user.username }}</dd>
+  <dt>User Type</dt>
+  <dd>{{ user.access_role }}</dd>
+{%  if user.access_role == 'Student' %}
+  <dt>Student Major</dt>
+  <dd>{{ user.student.major.abbreviation }}: {{ user.student.major.name }}</dd>
+{% elif user.access_role == 'Professor' %}
+  <dt>Teaching Department</dt>
+  <dd>{{ user.professor.major.abbreviation }}:{{ user.professor.major.name }}</dd>
+{%  endif %}
+  <dt>Enabled?</dt>
+  <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
+</dl>
   <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
@@ -21,6 +36,11 @@
            class="btn btn-info"
         onclick="window.history.go(-1); return false;"
         value="Back"
+    />
+    <input id="passchg"
+        action="action"
+           class="btn btn-info"
+        value="Change Password"
     />
       {% if user.is_active %}
     <input id="disbutton" name="disbutton"
@@ -34,10 +54,25 @@
            class="btn btn-primary"
         value="Enable User"
    />
-    {% endif %}
+   {% endif %}
+     <input id="editu"
+        action="action"
+           class="btn btn-info"
+        value="Edit User"
+    />
 
   </form>
 <script>
+function change_pass(evt) {
+    open('/schooladmin/user/{{ user.id }}/change_password','_self');
+    return false;
+}
+
+function edit_user(evt) {
+    open('/schooladmin/user/{{ user.id }}/edit','_self');
+    return false;
+}
+
 function confirmit(evt) {
     var btntitle = evt.target.value;
     var answer = window.confirm("Are you sure you want to "+btntitle+"?");
@@ -57,6 +92,14 @@ if ( btn ) {
 btn = document.getElementById("enabutton");
 if ( btn ) {
     btn.addEventListener("click", confirmit);
+}
+btn = document.getElementById("passchg");
+if ( btn ) {
+    btn.addEventListener("click", change_pass);
+}
+btn = document.getElementById("editu");
+if ( btn ) {
+    btn.addEventListener("click", edit_user);
 }
 </script>
 {% endblock %}
