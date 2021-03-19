@@ -11,10 +11,7 @@ def index(request):
 
 @role_login_required('Student')
 def current_schedule_view(request):
-    context = {
-        'sections': request.user.student.sections.all,
-        'name': request.user.student.name
-    }
+    context = {'sections': request.user.student.sections.all, 'name': request.user.student.name}
     return render(request, 'student/current_schedule.html', context)
 
 
@@ -29,8 +26,7 @@ def registration_view(request):
             context['sections'] = sections
         if request.POST.get('course', False):
             student = request.user.student
-            reg_section = Section.objects.get(
-                id=request.POST[request.POST['course']])
+            reg_section = Section.objects.get(id=request.POST[request.POST['course']])
             student.sections.add(reg_section)
             return redirect('student:current_schedule')
 

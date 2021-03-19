@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load bootstrap3 %}
 
-{% block css %}<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+{% block css %}
+    <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 <style>
 .button {
   background-color: #4CAF50;
@@ -16,7 +19,7 @@
   cursor: pointer;
 }
 .tab {
-  width: 75px;
+  width: 90px;
 }
 </style>
 
@@ -26,8 +29,18 @@
 {% block header_name %}Student Info System Administration{% endblock header_name %}
 
 {% block content %}
-<div>
-<span>Logged in as ADMIN {{ user.username }} <a href="{% url 'logout' %}">Log Out</a></span>
+    <div>
+    <span>
+<dl class="dl-horizontal">
+  <dt>Logged in as</dt>
+  <dd>{{ user.username }}</dd>
+  <dt>User Role</dt>
+  <dd>{{ user.access_role }}</dd>
+</dl>
+    <a
+            class="btn btn-primary"
+            href="{% url 'logout' %}">Log Out</a>
+</span>
 </div>
 
 <div class="tab">

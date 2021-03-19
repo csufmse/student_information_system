@@ -11,4 +11,5 @@ urlpatterns = [
     path('majors', views.majors, name='majors'),
     path('major/<str:abbreviation>', views.major, name='major'),
     path('new_major', views.new_major, name='new_major'),
+    path('course/<int:courseid>', views.course, name='course'),
 ]

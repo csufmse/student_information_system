@@ -9,9 +9,9 @@ from django_filters import (FilterSet, CharFilter, ChoiceFilter, ModelChoiceFilt
                             ModelMultipleChoiceFilter)
 
 from sis.authentication_helpers import role_login_required
-from sis.models import Student, Admin, Professor, Major
+from sis.models import Student, Admin, Professor, Major, Course
 from .forms import CustomUserCreationForm, MajorCreationForm
-from .tables import UsersTable, MajorsTable
+from .tables import UsersTable, MajorsTable, BasicProfsTable, BasicCoursesTable
 
 
 @role_login_required('Admin')
@@ -25,11 +25,10 @@ class UserFilter(FilterSet):
     name = CharFilter(field_name='name', label='Name', lookup_expr='icontains')
     access_role = ChoiceFilter(field_name='access_role',
                                label='Access Role',
-                               choices=(('Admin', 'Admin'), ('Professor',
-                                                             'Professor'),
+                               choices=(('Admin', 'Admin'), ('Professor', 'Professor'),
                                         ('Student', 'Student')))
     #    is_active = BooleanFilter(field_name='is_active',label="User Enabled")
-    is_active = ChoiceFilter(choices=((True, 'Enabled'), (False, 'Disabled')))
+    is_active = ChoiceFilter(label='Enabled?', choices=((True, 'Enabled'), (False, 'Disabled')))
 
     class Meta:
         model = User
@@ -42,10 +41,7 @@ def users(request):
     f = UserFilter(request.GET, queryset=queryset)
     has_filter = any(field in request.GET for field in set(f.get_fields()))
     table = UsersTable(f.qs)
-    RequestConfig(request, paginate={
-        "per_page": 25,
-        "page": 1
-    }).configure(table)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
     return render(request, 'users.html', {
         'table': table,
         'filter': f,
@@ -55,8 +51,6 @@ def users(request):
 
 @role_login_required('Admin')
 def user(request, userid):
-    if request.user.access_role() != 'Admin':
-        return redirect('sis:access_denied')
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:
         return HttpResponse("No such user")
@@ -87,14 +81,11 @@ def new_user(request):
             elif access_role == 'Professor':
                 professor = Professor(user=the_new_user,
                                       major=Major.objects.filter(abbreviation=major).get())
-                student = Student(
-                    user=user,
-                    major=Major.objects.filter(abbreviation=major).get())
+                student = Student(user=user, major=Major.objects.filter(abbreviation=major).get())
                 student.save()
             elif access_role == 'Professor':
-                professor = Professor(
-                    user=user,
-                    major=Major.objects.filter(abbreviation=major).get())
+                professor = Professor(user=user,
+                                      major=Major.objects.filter(abbreviation=major).get())
                 professor.save()
             elif access_role == 'Admin':
                 admin = Admin(user=the_new_user)
@@ -134,8 +125,6 @@ class MajorFilter(FilterSet):
 
 @role_login_required('Admin')
 def majors(request):
-    if request.user.access_role() != 'Admin':
-        return redirect('sis:access_denied')
     queryset = Major.objects.all()
     f = MajorFilter(request.GET, queryset=queryset)
     has_filter = any(field in request.GET for field in set(f.get_fields()))
@@ -150,12 +139,18 @@ def majors(request):
 
 @role_login_required('Admin')
 def major(request, abbreviation):
-    if request.user.access_role() != 'Admin':
-        return redirect('sis:access_denied')
     qs = Major.objects.filter(abbreviation=abbreviation)
     if qs.count() < 1:
         return HttpResponse("No such major")
     the_major = qs.get()
+
+    pqueryset = User.objects.filter(professor__major=the_major)
+    prof_table = BasicProfsTable(pqueryset)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(prof_table)
+    #    cqueryset = Course.objects.filter(a_prerequisite__course__major=the_major)
+    cqueryset = Course.objects.filter(required_by=the_major)
+    course_table = BasicCoursesTable(cqueryset)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(course_table)
     # if request.method == 'POST':
     #     if request.POST.get('disbutton'):
     #         the_user.is_active = False
@@ -164,18 +159,15 @@ def major(request, abbreviation):
     #         the_user.is_active = True
     #         the_user.save()
     #     return redirect('schooladmin:users')
-    return render(
-        request, 'major.html', {
-            'major': the_major,
-            'profs': the_major.professors.all(),
-            'courses': the_major.courses_required.all()
-        })
+    return render(request, 'major.html', {
+        'major': the_major,
+        'profs': prof_table,
+        'courses': course_table,
+    })
 
 
 @role_login_required('Admin')
 def new_major(request):
-    if request.user.access_role() != 'Admin':
-        return redirect('sis:access_denied')
     if request.method == 'POST':
         form = MajorCreationForm(request.POST)
         if form.is_valid():
@@ -184,3 +176,12 @@ def new_major(request):
     else:
         form = MajorCreationForm()
     return render(request, 'new_major.html', {'form': form})
+
+
+@role_login_required('Admin')
+def course(request, courseid):
+    qs = Course.objects.filter(id=courseid)
+    if qs.count() < 1:
+        return HttpResponse("No such course")
+    the_course = qs.get()
+    return HttpResponse("Sure, " + the_course.name + " is a real thing.")

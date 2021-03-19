@@ -1,7 +1,7 @@
 from datetime import date
 from django.contrib.auth.models import User
-from .models import (Student, Professor, Major, TranscriptRequest, Course,
-                     CoursePrerequisite, Semester, SectionStudent, Section)
+from .models import (Student, Professor, Major, TranscriptRequest, Course, CoursePrerequisite,
+                     Semester, SectionStudent, Section)
 
 # Creation of test data (for developing, demoing, maybe acceptance testing)
 #
@@ -15,7 +15,7 @@ from .models import (Student, Professor, Major, TranscriptRequest, Course,
 #   1. do the obvious..
 #   2. In fetch(), if model requires others, add a OtherModel.fetch()
 #      (too dangerous to add this into create() -- take care of it yourself!
-#   2. Add the model to createAll() and fetchAll()
+#   2. Add the model to create_all() and fetch_all()
 #      (in the order of dependence)
 #
 # How to use this to refresh database:
@@ -26,14 +26,14 @@ from .models import (Student, Professor, Major, TranscriptRequest, Course,
 #      (this is the "admin" userid. Use our standard password for it)
 #   5. manage.py shell
 #   6. from sis.system_test_data import *
-#   7. createAll()
+#   7. create_all()
 #
 # How to use this to play around in the shell:
 #   (basically a fast way to access created objects)
 #   1. manage.py shell
 #   2. from sis.system_test_data import *
-#   3. fetchAll()
-#   3.5. If you only need one Models's worth do it directly: Majors.fetchAll()
+#   3. fetch_all()
+#   3.5. If you only need one Models's worth do it directly: Majors.fetch_all()
 #   4. Access objects with things like "Majors.arch" (NOTE THE "s")
 
 
@@ -67,7 +67,6 @@ class Majors():
 
     @classmethod
     def create(cls) -> None:
-<<<<<<< HEAD
         Majors.cpsc = Major(abbreviation='CPSC',
                             name="Computer Science",
                             description="bits and byte, oh my!")
@@ -129,18 +128,12 @@ class Courses():
     @classmethod
     def fetch(cls) -> None:
         Majors.fetch()
-        Courses.cpsc101 = Course.objects.filter(major=Majors.cpsc,
-                                                catalogNumber='101').get()
-        Courses.cpsc345 = Course.objects.filter(major=Majors.cpsc,
-                                                catalogNumber='345').get()
-        Courses.engl218 = Course.objects.filter(major=Majors.engl,
-                                                catalogNumber='218').get()
-        Courses.engl255 = Course.objects.filter(major=Majors.engl,
-                                                catalogNumber='405').get()
-        Courses.phys405 = Course.objects.filter(major=Majors.phys,
-                                                catalogNumber='405').get()
-        Courses.phys406 = Course.objects.filter(major=Majors.phys,
-                                                catalogNumber='406').get()
+        Courses.cpsc101 = Course.objects.filter(major=Majors.cpsc, catalogNumber='101').get()
+        Courses.cpsc345 = Course.objects.filter(major=Majors.cpsc, catalogNumber='345').get()
+        Courses.engl218 = Course.objects.filter(major=Majors.engl, catalogNumber='218').get()
+        Courses.engl255 = Course.objects.filter(major=Majors.engl, catalogNumber='255').get()
+        Courses.phys405 = Course.objects.filter(major=Majors.phys, catalogNumber='405').get()
+        Courses.phys406 = Course.objects.filter(major=Majors.phys, catalogNumber='406').get()
 
 
 class Professors():
@@ -158,16 +151,37 @@ class Professors():
         Professors.bjm = Professor.objects.filter(user__username='bjmckenz_prof').get()
 
 
+class CoursePrerequisites():
+
+    @classmethod
+    def create(cls) -> None:
+        CoursePrerequisites.e218e255 = CoursePrerequisite(course=Courses.engl255,
+                                                          prerequisite=Courses.engl218)
+        CoursePrerequisites.e218e255.save()
+        CoursePrerequisites.c101c345 = CoursePrerequisite(course=Courses.cpsc345,
+                                                          prerequisite=Courses.cpsc101)
+        CoursePrerequisites.c101c345.save()
+
+    @classmethod
+    def fetch(cls) -> None:
+        CoursePrerequisites.e218e255 = CoursePrerequisite.objects.filter(
+            prerequisite=Courses.engl218).get()
+        CoursePrerequisites.c101c345 = CoursePrerequisite.objects.filter(
+            prerequisite=Courses.cpsc101).get()
+
+
 # Unity functions: create it all (to create db), fetch it all (for playing around)
-def createAll() -> None:
+def create_all() -> None:
     Semesters.create()
     Majors.create()
     Courses.create()
     Professors.create()
+    CoursePrerequisites.create()
 
 
-def fetchAll() -> None:
+def fetch_all() -> None:
     Semesters.fetch()
     Majors.fetch()
     Courses.fetch()
     Professors.fetch()
+    CoursePrerequisites.fetch()
