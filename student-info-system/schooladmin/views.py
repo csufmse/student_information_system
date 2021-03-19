@@ -95,7 +95,7 @@ def user_edit(request, userid):
 
 
 @role_login_required('Admin')
-def new_user(request):
+def user_new(request):
     if request.method == 'POST':
         form = CustomUserCreationForm(request.POST)
         if form.is_valid():
@@ -109,11 +109,6 @@ def new_user(request):
             elif access_role == 'Professor':
                 professor = Professor(user=the_new_user,
                                       major=Major.objects.filter(abbreviation=major).get())
-                student = Student(user=user, major=Major.objects.filter(abbreviation=major).get())
-                student.save()
-            elif access_role == 'Professor':
-                professor = Professor(user=user,
-                                      major=Major.objects.filter(abbreviation=major).get())
                 professor.save()
             elif access_role == 'Admin':
                 admin = Admin(user=the_new_user)
@@ -121,7 +116,7 @@ def new_user(request):
             return redirect('schooladmin:users')
     else:
         form = CustomUserCreationForm()
-    return render(request, 'signup.html', {'form': form})
+    return render(request, 'user_new.html', {'form': form})
 
 
 # MAJORS
@@ -171,7 +166,7 @@ def major(request, abbreviation):
 
 
 @role_login_required('Admin')
-def new_major(request):
+def major_new(request):
     if request.method == 'POST':
         form = MajorCreationForm(request.POST)
         if form.is_valid():
@@ -179,7 +174,7 @@ def new_major(request):
             return redirect('schooladmin:majors')
     else:
         form = MajorCreationForm()
-    return render(request, 'new_major.html', {'form': form})
+    return render(request, 'major_new.html', {'form': form})
 
 
 @role_login_required('Admin')

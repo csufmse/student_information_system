@@ -52,7 +52,8 @@ class Admin(models.Model):
 class Student(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     major = models.ForeignKey('Major', on_delete=models.DO_NOTHING, blank=True, null=True)
-    sections = models.ManyToManyField('Section', through='SectionStudent',
+    sections = models.ManyToManyField('Section',
+                                      through='SectionStudent',
                                       related_name='students')
 
     # will be adding aggregate things here to replace dummy methods
