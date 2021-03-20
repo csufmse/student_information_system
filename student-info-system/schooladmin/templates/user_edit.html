@@ -8,12 +8,27 @@
 {% block css %}
 <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<style>
+.rolesel {
+  font-family: Arial, Helvetica, sans-serif;
+    data-style: btn_primary;
+  width: 180px;
+  height: 30px;
+}
+.majorsel {
+  font-family: Arial, Helvetica, sans-serif;
+    data-style: btn_primary;
+  width: 180px;
+  height: 30px;
+}
+</style>
 {% endblock css %}
 
 {% block content %}
   <h3>Edit User {{ user.username }} / {{ user.name }}</h3>
   <form method="post">
     {% csrf_token %}
+    <input type="hidden" id="original_role" value="{{ user.role }}"/>
     {% for field in form %}
       <p>
         {{ field.label_tag }}<br>
@@ -33,13 +48,27 @@
         value="Cancel" class="btn btn-info"
     />
     <input
-        type="reset"
+        type="reset" id="reset_button"
         value="Reset" class="btn btn-info"
+    />
+    <input id="submitme" name="submitme"
+        action="action"
+        value="Save Changes" class="btn btn-primary submitme"
     />
     <button type="submit" class="btn btn-primary">Save Changes</button>
   </form>
 
 <script>
+function selectItem(selectElement,valToSelect) {
+    var opts = selectElement.options;
+    for (var opt, j = 0; opt = opts[j]; j++) {
+        if (opt.value == valToSelect) {
+            selectElement.selectedIndex = j;
+            break;
+        }
+    }
+}
+
 function manageMajor(evt) {
   var role_select = document.getElementById("id_role")
   var major_select = document.getElementById("id_major")
@@ -65,7 +94,26 @@ function manageMajor(evt) {
   }
 }
 
+function confirmit(evt) {
+    var btntitle = evt.target.value;
+    var orig_role = document.getElementById("submitme").value;
+    var role_select = document.getElementById("id_role")
+    if (role_select.value != orig_role) {
+        var answer = window.confirm("Role has been changed. Are you sure?");
+        if (answer) {
+            this.form.submit();
+            return true;
+        }
+    } else {
+        this.form.submit();
+        return true;
+    }
+    return false;
+}
+document.getElementById("submitme").addEventListener("click", confirmit);
+
 document.getElementById("id_role").addEventListener("change", manageMajor);
+document.getElementById("reset_button").addEventListener("change", manageMajor);
 manageMajor();
 </script>
 {% endblock %}

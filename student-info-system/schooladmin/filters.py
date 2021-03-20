@@ -1,4 +1,5 @@
-from django.db.models import Q, F
+from django.db.models import Q, Value, F
+from django.db.models.functions import Concat
 from django_filters import (FilterSet, CharFilter, ChoiceFilter, ModelChoiceFilter,
                             ModelMultipleChoiceFilter)
 from django.contrib.auth.models import User
@@ -44,20 +45,31 @@ class MajorFilter(FilterSet):
     description = CharFilter(field_name='description',
                              label='Description contains',
                              lookup_expr='icontains')
-#    professors = CharFilter(field_name='professor__user__last_name',
-#                            lookup_expr='icontains',
-#                            label='Has Professor')
+# this version lets them type part of the profs name
+    professors = CharFilter(field_name='professor__user__last_name',
+                            lookup_expr='icontains',
+                            label='Professor Name')
+# this version lets them pick professors
+#    professors = ModelChoiceFilter(queryset=Professor.objects,
+#                                  method='filter_has_prof',
+#                                  label='Has Professor')
+#    def filter_has_prof(self, queryset, name, value):
+#        return queryset.annotate(profname=Concat('professor__user__first_name',Value(' '),
+#                                                 'professor__user__last_name')).filter(profname__icontains=value)
 
-    # requires = ModelChoiceFilter(field_name='requires',lookup_field='required_by',)
+    requires = CharFilter(Course.objects,
+                                  label='Requires Course',
+                                  method='filter_requires_course',
+                                  distinct=True,
+                          )
 
-    professors = ModelChoiceFilter(queryset=Professor.objects,
-                                  # provided because it needs one. Will be ignoring this.
-                                  field_name='last_name',
-                                  method='filter_has_prof',
-                                  label='Professor')
 
-    def filter_has_prof(self, queryset, name, value):
-        return queryset.annotate(pname=F('professor__user__first_name') + ' ' + F('professor__user__last_name')).filter( pname__icontains=value )
+    def filter_requires_course(self, queryset, name, value):
+        return queryset.annotate(slug=Concat('courses_required__major__abbreviation',
+                                             Value('-'),
+                                             'courses_required__catalogNumber',
+                                             Value(' '),
+                                             'courses_required__title')).filter(slug__icontains=value).values('abbreviation').annotate(pk=F('abbreviation')).distinct()
 
     class Meta:
         model = Major
@@ -66,5 +78,10 @@ class MajorFilter(FilterSet):
             'name',
             'description',
             'professors',
-            # 'requires'
+            'requires'
         ]
+# this is useful for the ModelChoice version of professor
+#    def __init__(self, *args, **kwargs):
+#        super(MajorFilter, self).__init__(*args, **kwargs)
+#        self.filters['professors'].extra.update(
+#            {'empty_label': 'Has Professor'})

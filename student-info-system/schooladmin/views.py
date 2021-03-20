@@ -3,6 +3,7 @@ from django.shortcuts import render, redirect
 from django_tables2 import RequestConfig
 from django.contrib import messages
 from django.contrib.auth.forms import AdminPasswordChangeForm
+from django.forms.models import model_to_dict
 
 from sis.authentication_helpers import role_login_required
 from django.contrib.auth.models import User
@@ -82,7 +83,7 @@ def user_edit(request, userid):
         if form.is_valid():
             the_user.first_name = form.cleaned_data['first_name']
             the_user.last_name = form.cleaned_data['last_name']
-            the_user.email = form.cleaned_data['last_name']
+            the_user.email = form.cleaned_data['email']
             # role
             # major
             the_user.save()
@@ -90,7 +91,16 @@ def user_edit(request, userid):
         else:
             messages.error(request, 'Please correct the error(s) below.')
     else:
-        form = UserEditForm(instance=the_user)
+        dict = model_to_dict(the_user)
+        dict['role']=the_user.access_role()
+
+        profs = Professor.objects.filter(user_id=the_user.id)
+        studs = Student.objects.filter(user_id=the_user.id)
+        if profs.count() > 0:
+            dict['major'] = profs[0].major
+        elif studs.count() > 0:
+            dict['major'] = studs[0].major
+        form = UserEditForm(dict)
     return render(request, 'user_edit.html', {'user': the_user, 'form': form})
 
 
