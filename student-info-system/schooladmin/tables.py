@@ -23,28 +23,47 @@ class AbilityColumn(tables.BooleanColumn):
 class UsersTable(tables.Table):
     username = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
     name = NameColumn(attrs={'th': {'style': 'text-align: center;'}})
+    student_major = tables.Column(verbose_name='Student Major',
+                                  accessor='student__major__abbreviation',
+                                  attrs={'th': {'style': 'text-align: center;'},
+                                         'td': {
+                                             'align': 'center',
+                                             'width': '90px',
+                                             }
+                                         })
+    professor_department = tables.Column(verbose_name='Professor Dept',
+                                         accessor='professor__major__abbreviation',
+                                         attrs={'th': {'style': 'text-align: center;'},
+                                                'td': {
+                                                    'align': 'center',
+                                                    'width': '90px',
+                                                }
+                                                })
     is_active = AbilityColumn(null=False,
                               attrs={
                                   'th': {
                                       'style': 'text-align: center;'
                                   },
                                   'td': {
-                                      'align': 'center'
+                                      'align': 'center',
+                                      'width': '80px',
                                   }
                               })
-    access_role = tables.Column(attrs={
-        'th': {
-            'style': 'text-align: center;'
-        },
-        'td': {
-            'align': 'center'
-        }
-    })
+    access_role = tables.Column(verbose_name='User Role',
+                                attrs={
+                                    'th': {
+                                        'style': 'text-align: center;'
+                                    },
+                                    'td': {
+                                        'align': 'center',
+                                        'width': '90px',
+                                }
+                                })
 
     class Meta:
         model = User
         template_name = "django_tables2/bootstrap.html"
-        fields = ("username", "name", "access_role", "is_active")
+        fields = ("username", "name", 'student_major', 'professor_department', "access_role", "is_active")
         row_attrs = {'class': 'urow', 'data-id': lambda record: record.pk}
 
 
