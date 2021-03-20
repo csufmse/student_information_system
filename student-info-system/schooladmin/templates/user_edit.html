@@ -28,7 +28,7 @@
   <h3>Edit User {{ user.username }} / {{ user.name }}</h3>
   <form method="post">
     {% csrf_token %}
-    <input type="hidden" id="original_role" value="{{ user.role }}"/>
+    <input type="hidden" id="original_role" value="{{ original_role }}"/>
     {% for field in form %}
       <p>
         {{ field.label_tag }}<br>
@@ -55,7 +55,6 @@
         action="action"
         value="Save Changes" class="btn btn-primary submitme"
     />
-    <button type="submit" class="btn btn-primary">Save Changes</button>
   </form>
 
 <script>
@@ -95,8 +94,7 @@ function manageMajor(evt) {
 }
 
 function confirmit(evt) {
-    var btntitle = evt.target.value;
-    var orig_role = document.getElementById("submitme").value;
+    var orig_role = document.getElementById("original_role").value;
     var role_select = document.getElementById("id_role")
     if (role_select.value != orig_role) {
         var answer = window.confirm("Role has been changed. Are you sure?");
