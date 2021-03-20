@@ -5,7 +5,7 @@ from phone_field import PhoneField
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.db.models import Count, F, Value, When, Case
-from django.db.models.fields import CharField
+from django.db.models.fields import CharField, IntegerField, DateField
 from django.db.models.functions import Concat
 
 
