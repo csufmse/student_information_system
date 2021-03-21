@@ -87,8 +87,15 @@ class MajorsTable(tables.Table):
 
 
 class BasicProfsTable(tables.Table):
-    name = NameColumn(attrs={'th': {'style': 'text-align: center;'}})
-    username = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    name = NameColumn(attrs={'th': {'style': 'text-align: center;'},
+        'td': {
+            'width': '200px'
+        }})
+    username = tables.Column(attrs={'th': {'style': 'text-align: center;'},
+        'td': {
+            'align': 'center',
+            'width': '100px'
+        }})
 
     class Meta:
         model = User
@@ -104,7 +111,8 @@ class BasicCoursesTable(tables.Table):
             'style': 'text-align: center;'
         },
         'td': {
-            'align': 'center'
+            'align': 'center',
+            'width': '70px'
         }
     })
     catalogNumber = tables.Column(verbose_name='Number',
@@ -113,7 +121,8 @@ class BasicCoursesTable(tables.Table):
                                           'style': 'text-align: center;'
                                       },
                                       'td': {
-                                          'align': 'center'
+                                          'align': 'center',
+                                          'width': '60px'
                                       }
                                   })
     title = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
@@ -122,7 +131,8 @@ class BasicCoursesTable(tables.Table):
             'style': 'text-align: center;'
         },
         'td': {
-            'align': 'center'
+            'align': 'center',
+            'width': '75px'
         }
     })
 

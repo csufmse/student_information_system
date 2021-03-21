@@ -1,7 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from sis.models import Major, UpperField
+from sis.models import Major, UpperField, Course
 
 ROLE_CHOICES = (
     ('Student', 'Student'),
@@ -15,6 +15,11 @@ class UpperFormField(forms.CharField):
     def clean(self, value):
         supa_clean = super().clean(value)
         return str(supa_clean).upper()
+
+class CourseChoiceField(forms.ModelMultipleChoiceField):
+
+    def label_from_instance(self, obj):
+        return f'{obj.name}: {obj.title}'
 
 class CustomUserCreationForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
@@ -43,6 +48,14 @@ class MajorCreationForm(forms.ModelForm):
         model = Major
         fields = ('abbreviation', 'name', 'description')
 
+class MajorEditForm(forms.ModelForm):
+    name = forms.CharField(max_length=256)
+    description = forms.CharField(max_length=256, required=False, widget=forms.Textarea(attrs={'rows':3}))
+    courses_required = CourseChoiceField(queryset=Course.objects.all(), widget = forms.CheckboxSelectMultiple, required=False)
+
+    class Meta:
+        model = Major
+        fields = ('name', 'description','courses_required')
 
 class UserEditForm(forms.Form):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')

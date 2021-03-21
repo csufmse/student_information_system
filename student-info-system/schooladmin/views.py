@@ -8,7 +8,7 @@ from django.forms.models import model_to_dict
 from sis.authentication_helpers import role_login_required
 from django.contrib.auth.models import User
 from sis.models import Student, Admin, Professor, Major, Course
-from .forms import CustomUserCreationForm, MajorCreationForm, UserEditForm
+from .forms import CustomUserCreationForm, MajorCreationForm, UserEditForm, MajorEditForm
 from .tables import UsersTable, MajorsTable, BasicProfsTable, BasicCoursesTable
 from .filters import UserFilter, MajorFilter
 
@@ -207,6 +207,24 @@ def major(request, abbreviation):
         'courses': course_table,
     })
 
+
+@role_login_required('Admin')
+def major_edit(request, abbreviation):
+    qs = Major.objects.filter(abbreviation=abbreviation)
+    if qs.count() < 1:
+        return HttpResponse("No such major")
+    the_major = qs.get()
+
+    if request.method == 'POST':
+        form = MajorEditForm(request.POST, instance=the_major)
+        if form.is_valid():
+            form.save()
+            return redirect('schooladmin:major', abbreviation)
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
+    else:
+        form = MajorEditForm(instance=the_major)
+    return render(request, 'major_edit.html', {'form': form})
 
 @role_login_required('Admin')
 def major_new(request):
