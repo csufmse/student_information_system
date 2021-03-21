@@ -5,10 +5,11 @@ from django.contrib import messages
 from django.contrib.auth.forms import AdminPasswordChangeForm
 from django.forms.models import model_to_dict
 
-from sis.authentication_helpers import role_login_required
 from django.contrib.auth.models import User
 from sis.models import Student, Admin, Professor, Major, Course, Semester
-from .forms import CustomUserCreationForm, MajorCreationForm, MajorEditForm, UserEditForm, SemesterCreationForm
+from sis.authentication_helpers import role_login_required
+from .forms import (CustomUserCreationForm, MajorCreationForm, MajorEditForm, UserEditForm,
+                    SemesterCreationForm)
 from .tables import UsersTable, MajorsTable, BasicProfsTable, BasicCoursesTable, SemestersTable
 from .filters import UserFilter, MajorFilter, SemesterFilter
 

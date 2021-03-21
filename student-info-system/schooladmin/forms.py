@@ -1,8 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from sis.models import ( Major, Semester, Course,
-    UpperField, CharField, IntegerField, DateField)
+from sis.models import (Major, Semester, Course, UpperField, CharField, IntegerField, DateField)
 
 ROLE_CHOICES = (
     ('Student', 'Student'),
@@ -68,9 +67,8 @@ class MajorEditForm(forms.ModelForm):
         fields = ('name', 'description', 'courses_required')
 
 
-
-
 SEASON = (('FALL', 'Fall'), ('SPRING', 'Spring'), ('SUMMER', 'Summer'), ('WINTER', 'Winter'))
+
 
 class SemesterCreationForm(forms.Form):
     semester = CharField(max_length=6, choices=SEASON, default='FA')
