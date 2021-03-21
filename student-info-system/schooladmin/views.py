@@ -100,7 +100,7 @@ def user_edit(request, userid):
                     admi.delete()
 
                 if new_role == 'Student':
-                    stud = Student(user_id=the_user.id,major=form.cleaned_data['major'])
+                    stud = Student(user_id=the_user.id, major=form.cleaned_data['major'])
                     stud.save()
                 elif new_role == 'Professor':
                     prof = Professor(user_id=the_user.id, major=form.cleaned_data['major'])
@@ -134,7 +134,11 @@ def user_edit(request, userid):
         elif studs.count() > 0:
             dict['major'] = studs[0].major
         form = UserEditForm(dict)
-    return render(request, 'user_edit.html', {'user': the_user, 'original_role': the_user.access_role(), 'form': form})
+    return render(request, 'user_edit.html', {
+        'user': the_user,
+        'original_role': the_user.access_role(),
+        'form': form
+    })
 
 
 @role_login_required('Admin')
@@ -225,6 +229,7 @@ def major_edit(request, abbreviation):
     else:
         form = MajorEditForm(instance=the_major)
     return render(request, 'major_edit.html', {'form': form})
+
 
 @role_login_required('Admin')
 def major_new(request):
