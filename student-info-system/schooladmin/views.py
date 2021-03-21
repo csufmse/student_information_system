@@ -18,8 +18,6 @@ def index(request):
 
 
 # USERS
-
-
 @role_login_required('Admin')
 def users(request):
     queryset = User.annotated().all()
@@ -120,8 +118,6 @@ def user_new(request):
 
 
 # MAJORS
-
-
 @role_login_required('Admin')
 def majors(request):
     queryset = Major.objects.all()
@@ -186,7 +182,6 @@ def course(request, courseid):
     return HttpResponse("Sure, " + the_course.name + " is a real thing.")
 
 
-
 @role_login_required('Admin')
 def semesters(request):
     if request.user.access_role() != 'Admin':
@@ -219,10 +214,7 @@ def semester(request, semester_id):
     #         the_user.is_active = True
     #         the_user.save()
     #     return redirect('schooladmin:users')
-    return render(
-        request,
-        'semester.html',
-        {'semester': the_semester})
+    return render(request, 'semester.html', {'semester': the_semester})
 
 
 @role_login_required('Admin')

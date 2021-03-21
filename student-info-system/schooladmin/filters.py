@@ -43,8 +43,8 @@ class MajorFilter(FilterSet):
             'professors',
             # 'requires'
         ]
-        
-        
+
+
 class SemesterFilter(FilterSet):
     semester = CharFilter(field_name='semester', lookup_expr='icontains')
     year = CharFilter(field_name='year', lookup_expr='icontains')
