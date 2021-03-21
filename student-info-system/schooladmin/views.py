@@ -3,11 +3,13 @@ from django.shortcuts import render, redirect
 from django_tables2 import RequestConfig
 from django.contrib import messages
 from django.contrib.auth.forms import AdminPasswordChangeForm
+from django.forms.models import model_to_dict
 
-from sis.authentication_helpers import role_login_required
 from django.contrib.auth.models import User
 from sis.models import Student, Admin, Professor, Major, Course, Semester
-from .forms import CustomUserCreationForm, MajorCreationForm, UserEditForm, SemesterCreationForm
+from sis.authentication_helpers import role_login_required
+from .forms import (CustomUserCreationForm, MajorCreationForm, MajorEditForm, UserEditForm,
+                    SemesterCreationForm)
 from .tables import UsersTable, MajorsTable, BasicProfsTable, BasicCoursesTable, SemestersTable
 from .filters import UserFilter, MajorFilter, SemesterFilter
 
@@ -18,6 +20,8 @@ def index(request):
 
 
 # USERS
+
+
 @role_login_required('Admin')
 def users(request):
     queryset = User.annotated().all()
@@ -80,16 +84,62 @@ def user_edit(request, userid):
         if form.is_valid():
             the_user.first_name = form.cleaned_data['first_name']
             the_user.last_name = form.cleaned_data['last_name']
-            the_user.email = form.cleaned_data['last_name']
-            # role
-            # major
+            the_user.email = form.cleaned_data['email']
             the_user.save()
+
+            old_role = the_user.access_role()
+            new_role = form.cleaned_data['role']
+            if old_role != new_role:
+                if old_role == 'Student':
+                    stud = Student.objects.filter(user_id=the_user.id).get()
+                    stud.delete()
+                elif old_role == 'Professor':
+                    prof = Professor.objects.filter(user_id=the_user.id).get()
+                    prof.delete()
+                elif old_role == 'Admin':
+                    admi = Admin.objects.filter(user_id=the_user.id).get()
+                    admi.delete()
+
+                if new_role == 'Student':
+                    stud = Student(user_id=the_user.id, major=form.cleaned_data['major'])
+                    stud.save()
+                elif new_role == 'Professor':
+                    prof = Professor(user_id=the_user.id, major=form.cleaned_data['major'])
+                    prof.save()
+                elif new_role == 'Admin':
+                    admi = Admin(user_id=the_user.id)
+                    admi.save()
+            elif old_role == 'Student':
+                # same role, check if major has to be updated
+                stud = Student.objects.filter(user_id=the_user.id).get()
+                if stud.major != form.cleaned_data['major']:
+                    stud.major = form.cleaned_data['major']
+                    stud.save()
+            elif old_role == 'Professor':
+                # same role, check if major has to be updated
+                prof = Professor.objects.filter(user_id=the_user.id).get()
+                if prof.major != form.cleaned_data['major']:
+                    prof.major = form.cleaned_data['major']
+                    prof.save()
+
             return redirect('schooladmin:user', userid)
         else:
             messages.error(request, 'Please correct the error(s) below.')
     else:
-        form = UserEditForm(instance=the_user)
-    return render(request, 'user_edit.html', {'user': the_user, 'form': form})
+        dict = model_to_dict(the_user)
+        dict['role'] = the_user.access_role()
+        profs = Professor.objects.filter(user_id=the_user.id)
+        studs = Student.objects.filter(user_id=the_user.id)
+        if profs.count() > 0:
+            dict['major'] = profs[0].major
+        elif studs.count() > 0:
+            dict['major'] = studs[0].major
+        form = UserEditForm(dict)
+    return render(request, 'user_edit.html', {
+        'user': the_user,
+        'original_role': the_user.access_role(),
+        'form': form
+    })
 
 
 @role_login_required('Admin')
@@ -118,6 +168,8 @@ def user_new(request):
 
 
 # MAJORS
+
+
 @role_login_required('Admin')
 def majors(request):
     queryset = Major.objects.all()
@@ -159,6 +211,25 @@ def major(request, abbreviation):
         'profs': prof_table,
         'courses': course_table,
     })
+
+
+@role_login_required('Admin')
+def major_edit(request, abbreviation):
+    qs = Major.objects.filter(abbreviation=abbreviation)
+    if qs.count() < 1:
+        return HttpResponse("No such major")
+    the_major = qs.get()
+
+    if request.method == 'POST':
+        form = MajorEditForm(request.POST, instance=the_major)
+        if form.is_valid():
+            form.save()
+            return redirect('schooladmin:major', abbreviation)
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
+    else:
+        form = MajorEditForm(instance=the_major)
+    return render(request, 'major_edit.html', {'form': form})
 
 
 @role_login_required('Admin')
