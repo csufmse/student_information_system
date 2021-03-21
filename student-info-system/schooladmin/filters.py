@@ -3,7 +3,7 @@ from django.db.models.functions import Concat
 from django_filters import (FilterSet, CharFilter, ChoiceFilter, ModelChoiceFilter,
                             ModelMultipleChoiceFilter)
 from django.contrib.auth.models import User
-from sis.models import Student, Admin, Professor, Major, Course
+from sis.models import Student, Admin, Professor, Major, Course, Semester
 
 
 class UserFilter(FilterSet):
@@ -78,3 +78,12 @@ class MajorFilter(FilterSet):
 #        super(MajorFilter, self).__init__(*args, **kwargs)
 #        self.filters['professors'].extra.update(
 #            {'empty_label': 'Has Professor'})
+
+
+class SemesterFilter(FilterSet):
+    semester = CharFilter(field_name='semester', lookup_expr='icontains')
+    year = CharFilter(field_name='year', lookup_expr='icontains')
+
+    class Meta:
+        model = Semester
+        fields = ['semester', 'year']

@@ -7,10 +7,10 @@ from django.forms.models import model_to_dict
 
 from sis.authentication_helpers import role_login_required
 from django.contrib.auth.models import User
-from sis.models import Student, Admin, Professor, Major, Course
-from .forms import CustomUserCreationForm, MajorCreationForm, UserEditForm, MajorEditForm
-from .tables import UsersTable, MajorsTable, BasicProfsTable, BasicCoursesTable
-from .filters import UserFilter, MajorFilter
+from sis.models import Student, Admin, Professor, Major, Course, Semester
+from .forms import CustomUserCreationForm, MajorCreationForm, MajorEditForm, UserEditForm, SemesterCreationForm
+from .tables import UsersTable, MajorsTable, BasicProfsTable, BasicCoursesTable, SemestersTable
+from .filters import UserFilter, MajorFilter, SemesterFilter
 
 
 @role_login_required('Admin')
@@ -250,3 +250,52 @@ def course(request, courseid):
         return HttpResponse("No such course")
     the_course = qs.get()
     return HttpResponse("Sure, " + the_course.name + " is a real thing.")
+
+
+@role_login_required('Admin')
+def semesters(request):
+    if request.user.access_role() != 'Admin':
+        return redirect('sis:access_denied')
+    queryset = Semester.objects.all()
+    f = SemesterFilter(request.GET, queryset=queryset)
+    has_filter = any(field in request.GET for field in set(f.get_fields()))
+    table = SemestersTable(f.qs)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
+    return render(request, 'semesters.html', {
+        'table': table,
+        'filter': f,
+        'has_filter': has_filter,
+    })
+
+
+@role_login_required('Admin')
+def semester(request, semester_id):
+    if request.user.access_role() != 'Admin':
+        return redirect('sis:access_denied')
+    qs = Semester.objects.filter(id=semester_id)
+    if qs.count() < 1:
+        return HttpResponse("No such semester")
+    the_semester = qs.get()
+    # if request.method == 'POST':
+    #     if request.POST.get('disbutton'):
+    #         the_user.is_active = False
+    #         the_user.save()
+    #     elif request.POST.get('enabutton'):
+    #         the_user.is_active = True
+    #         the_user.save()
+    #     return redirect('schooladmin:users')
+    return render(request, 'semester.html', {'semester': the_semester})
+
+
+@role_login_required('Admin')
+def new_semester(request):
+    if request.user.access_role() != 'Admin':
+        return redirect('sis:access_denied')
+    if request.method == 'POST':
+        form = SemesterCreationForm(request.POST)
+        if form.is_valid():
+            the_new_semester = form.save()
+            return redirect('schooladmin:semesters')
+    else:
+        form = SemesterCreationForm()
+    return render(request, 'new_semester.html', {'form': form})

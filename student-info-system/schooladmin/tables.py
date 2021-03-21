@@ -150,3 +150,20 @@ class BasicCoursesTable(tables.Table):
         fields = ('major', 'catalogNumber', 'title', 'credits_earned')
         attrs = {"class": 'bcourse'}
         row_attrs = {'class': 'crow', 'data-id': lambda record: record.pk}
+
+
+class SemestersTable(tables.Table):
+    semester = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    year = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    date_started = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    date_ended = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    date_registration_opens = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    date_last_drop = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+
+    class Meta:
+        model = Semester
+        template_name = "django_tables2/bootstrap.html"
+        fields = ('semester', 'year', 'date_started', 'date_ended', 'date_registration_opens',
+                  'date_last_drop')
+
+        row_attrs = {'class': 'urow', 'data-id': lambda record: record.pk}
