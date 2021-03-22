@@ -5,14 +5,13 @@ ARG DEBIAN_FRONTEND=noninteractive
 # Get system up to date
 RUN apt-get update && apt-get -y upgrade
 
-# Install initial Python needs (python3, pip, virtualenv)
-RUN apt-get install -y python3 python3-pip && \
-    python3 -m pip install virtualenv
+# Install initial Python needs (python3, pip)
+RUN apt-get install -y python3 python3-pip
 
 # Install PostgreSQL dependencies
 RUN apt-get install -y libpq-dev
 
-RUN apt-get install -y postgresql postgresql-contrib
+RUN apt-get install -y postgresql-12 postgresql-contrib
 
 # Install python packages
 COPY requirements.txt .

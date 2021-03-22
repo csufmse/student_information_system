@@ -91,11 +91,11 @@ if os.getenv("GITHUB_WORKFLOW"):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
-            "NAME": "github-actions",
-            "USER": "postgres",
-            "PASSWORD": "postgres",
-            "HOST": "localhost",
-            "PORT": "5432",
+            "NAME": os.getenv('$DB_NAME'),
+            "USER": os.getenv('$DB_USER'),
+            "PASSWORD": os.getenv('$DB_PASSWORD'),
+            "HOST":  os.getenv('$DB_HOST'),
+            "PORT":  os.getenv('DB_PORT'),
         }
     }
 elif os.getenv('PRODUCTION'):
@@ -147,4 +147,3 @@ USE_I18N = True
 USE_L10N = True
 
 USE_TZ = True
-
