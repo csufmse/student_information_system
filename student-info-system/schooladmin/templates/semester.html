@@ -1,0 +1,83 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+
+{% block title %}{% endblock title %}
+{% block header_name %}{% endblock header_name %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<style>
+#Professors th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #4CAF50;
+  color: white;
+}
+#Professors {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#Professors td, #Professors th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#Professors tr:nth-child(even){background-color: #f2f2f2;}
+
+#Professors tr:hover {background-color: #ddd;}
+
+#Courses th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #4CAF50;
+  color: white;
+}
+#Courses {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#Courses td, #Professors th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#Courses tr:nth-child(even){background-color: #f2f2f2;}
+
+#Courses tr:hover {background-color: #ddd;}
+
+#Courses th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #4CAF50;
+  color: white;
+}
+</style>
+
+{% endblock css %}
+
+{% block content %}
+<h2>Semester {{ semester.semester }}:</h2>
+<h2>Year {{ semester.year }}:</h2>
+<h2>Start Date {{ semester.date_started }}:</h2>
+<h2>End Date {{ semester.date_ended }}:</h2>
+<h2>Registration Open {{ semester.date_registration_opens }}:</h2>
+<h2>Last Drop Date {{ semester.date_last_drop }}:</h2>
+
+
+
+    <input
+        action="action"
+           class="btn btn-info"
+        onclick="window.history.go(-1); return false;"
+        value="Back"
+    />
+{% endblock %}

@@ -91,6 +91,11 @@
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
+     <input id="editm"
+        action="action"
+           class="btn btn-info"
+        value="Edit Major"
+    />
 <script>
 function selectProf(evt) {
     var id = this.getAttribute('data-id');
@@ -104,6 +109,11 @@ function selectCourse(evt) {
     open(url,'_self');
 }
 
+function edit_major(evt) {
+    open('/schooladmin/major/{{ major.abbreviation }}/edit','_self');
+    return false;
+}
+
 // Add onclick to each row so that it leaps off to the detail
 var tablerows = document.getElementsByClassName('crow')
 for (var i=0, len=tablerows.length; i<len; i=i+1) {
@@ -112,6 +122,10 @@ for (var i=0, len=tablerows.length; i<len; i=i+1) {
 tablerows = document.getElementsByClassName('prow')
 for (var i=0, len=tablerows.length; i<len; i=i+1) {
     tablerows[i].addEventListener("click", selectProf, false);
+}
+btn = document.getElementById("editm");
+if ( btn ) {
+    btn.addEventListener("click", edit_major);
 }
 </script>
 {% endblock %}

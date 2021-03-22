@@ -19,7 +19,7 @@
   cursor: pointer;
 }
 .tab {
-  width: 90px;
+  width: 100px;
 }
 </style>
 
@@ -46,12 +46,15 @@
 <div class="tab">
   <button class="tablinks" id="defaultOpen">Users</button>
   <button class="tablinks">Majors</button>
+  <button class="tablinks">Semesters</button>
 </div>
 
 <span height="300" width="300">
 <iframe id="Users" class="tabcontent" title="Admin Users" src="{% url 'schooladmin:users' %}"
     width="200" height="200"></iframe>
 <iframe id="Majors" class="tabcontent" title="Majors" src="{% url 'schooladmin:majors' %}"
+    width="200" height="200"></iframe>
+<iframe id="Semesters" class="tabcontent" title="Semesters" src="{% url 'schooladmin:semesters' %}"
     width="200" height="200"></iframe>
 </span>
 

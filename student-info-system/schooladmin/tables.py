@@ -23,28 +23,54 @@ class AbilityColumn(tables.BooleanColumn):
 class UsersTable(tables.Table):
     username = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
     name = NameColumn(attrs={'th': {'style': 'text-align: center;'}})
+    student_major = tables.Column(verbose_name='Student Major',
+                                  accessor='student__major__abbreviation',
+                                  attrs={
+                                      'th': {
+                                          'style': 'text-align: center;'
+                                      },
+                                      'td': {
+                                          'align': 'center',
+                                          'width': '90px',
+                                      }
+                                  })
+    professor_department = tables.Column(verbose_name='Professor Dept',
+                                         accessor='professor__major__abbreviation',
+                                         attrs={
+                                             'th': {
+                                                 'style': 'text-align: center;'
+                                             },
+                                             'td': {
+                                                 'align': 'center',
+                                                 'width': '90px',
+                                             }
+                                         })
     is_active = AbilityColumn(null=False,
                               attrs={
                                   'th': {
                                       'style': 'text-align: center;'
                                   },
                                   'td': {
-                                      'align': 'center'
+                                      'align': 'center',
+                                      'width': '80px',
                                   }
                               })
-    access_role = tables.Column(attrs={
-        'th': {
-            'style': 'text-align: center;'
-        },
-        'td': {
-            'align': 'center'
-        }
-    })
+    access_role = tables.Column(verbose_name='User Role',
+                                attrs={
+                                    'th': {
+                                        'style': 'text-align: center;'
+                                    },
+                                    'td': {
+                                        'align': 'center',
+                                        'width': '90px',
+                                    }
+                                })
 
     class Meta:
         model = User
         template_name = "django_tables2/bootstrap.html"
-        fields = ("username", "name", "access_role", "is_active")
+        fields = ("username", "name", 'student_major', 'professor_department', "access_role",
+                  "is_active")
         row_attrs = {'class': 'urow', 'data-id': lambda record: record.pk}
 
 
@@ -68,8 +94,16 @@ class MajorsTable(tables.Table):
 
 
 class BasicProfsTable(tables.Table):
-    name = NameColumn(attrs={'th': {'style': 'text-align: center;'}})
-    username = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    name = NameColumn(attrs={'th': {'style': 'text-align: center;'}, 'td': {'width': '200px'}})
+    username = tables.Column(attrs={
+        'th': {
+            'style': 'text-align: center;'
+        },
+        'td': {
+            'align': 'center',
+            'width': '100px'
+        }
+    })
 
     class Meta:
         model = User
@@ -85,7 +119,8 @@ class BasicCoursesTable(tables.Table):
             'style': 'text-align: center;'
         },
         'td': {
-            'align': 'center'
+            'align': 'center',
+            'width': '70px'
         }
     })
     catalogNumber = tables.Column(verbose_name='Number',
@@ -94,7 +129,8 @@ class BasicCoursesTable(tables.Table):
                                           'style': 'text-align: center;'
                                       },
                                       'td': {
-                                          'align': 'center'
+                                          'align': 'center',
+                                          'width': '60px'
                                       }
                                   })
     title = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
@@ -103,7 +139,8 @@ class BasicCoursesTable(tables.Table):
             'style': 'text-align: center;'
         },
         'td': {
-            'align': 'center'
+            'align': 'center',
+            'width': '75px'
         }
     })
 
@@ -113,3 +150,20 @@ class BasicCoursesTable(tables.Table):
         fields = ('major', 'catalogNumber', 'title', 'credits_earned')
         attrs = {"class": 'bcourse'}
         row_attrs = {'class': 'crow', 'data-id': lambda record: record.pk}
+
+
+class SemestersTable(tables.Table):
+    semester = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    year = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    date_started = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    date_ended = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    date_registration_opens = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    date_last_drop = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+
+    class Meta:
+        model = Semester
+        template_name = "django_tables2/bootstrap.html"
+        fields = ('semester', 'year', 'date_started', 'date_ended', 'date_registration_opens',
+                  'date_last_drop')
+
+        row_attrs = {'class': 'urow', 'data-id': lambda record: record.pk}
