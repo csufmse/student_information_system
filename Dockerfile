@@ -14,14 +14,14 @@ RUN apt-get install -y libpq-dev
 RUN apt-get install -y postgresql-12 postgresql-contrib
 
 # Install python packages
-COPY requirements.txt .
+COPY ./production/requirements.txt .
 RUN python3 -m pip install -r requirements.txt
 
 # Make sure this matches the django project root folder
-COPY ./student-info-system /student-info-system
+COPY /student-info-system /student-info-system
 
 WORKDIR /student-info-system
 
-COPY ./postgres_cmd.sh ./entrypoint.sh /
+COPY ./production/postgres_cmd.sh ./production/entrypoint.sh /
 ENTRYPOINT ["sh", "/entrypoint.sh"]
 
