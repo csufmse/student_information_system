@@ -16,5 +16,5 @@ then
             ;;
     esac
 else
-    echo "No environment file found. Make sure your environment file is in the base directory. For more information see https://github.com/csufmse/student_information_system/blob/develop/dev_info.md"
+    echo "No environment file found. Make sure your environment file is in the same directory as this executable and variable name is set correct."
 fi
