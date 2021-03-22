@@ -11,4 +11,15 @@ jobs:
     - uses: actions/checkout@v2
     - name: Run Docker-compose 
       run: |
+        touch .env
+        echo PRODUCTION=True >> .env
+        echo DEBUG=False >> .env
+        echo SECRET_KEY="(abaz)3wml_wsqh^02#*=47psn=r1!dfx=q9g*cspm(j)5@*$a" >> .env
+        echo DB_NAME=production >> .env
+        echo DB_USER=prod_user >> .env
+        echo DB_PASSWORD=apassword >> .env
+        echo DB_HOST=localhost >> .env
+        echo DB_PORT=5432 >> .env
+      run: |
+        cd /home/runner/work/student_information_system
         docker-compose up --build
