@@ -9,7 +9,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v2
-    - name: Run Docker-compose 
+    - name: Run create generic env file
       run: |
         touch .env
         echo PRODUCTION=True >> .env
@@ -20,6 +20,7 @@ jobs:
         echo DB_PASSWORD=apassword >> .env
         echo DB_HOST=localhost >> .env
         echo DB_PORT=5432 >> .env
+    - name: Run docker-compose
       run: |
         cd /home/runner/work/student_information_system
         docker-compose up --build
