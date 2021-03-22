@@ -4,7 +4,7 @@ from pathlib import Path
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-if os.getenv('PRODUCTION') and !os.getenv('GITHUB_WORKFLOW'):
+if os.getenv('PRODUCTION') and not os.getenv('GITHUB_WORKFLOW'):
     SECRET_KEY = os.getenv('SECRET_KEY')
     DEBUG = os.getenv('DEBUG')
 else:
