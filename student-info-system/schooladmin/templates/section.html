@@ -1,0 +1,141 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% load render_table from django_tables2 %}
+
+{% block title %}{% endblock title %}
+{% block header_name %}{% endblock header_name %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<style>
+.bcourse {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 500px;
+}
+
+.bcourse th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #4CAF50;
+  color: white;
+}
+.bcourse td, .bprof th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.bcourse tr:nth-child(even){background-color: #f2f2f2;}
+
+.bcourse tr:hover {background-color: #ddd;}
+
+.bcourse th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #4CAF50;
+  color: white;
+}
+</style>
+
+{% endblock css %}
+
+{% block content %}
+<dl class="dl-horizontal">
+  <dt>Course</dt>
+  <dd>{{ section.name }}</dd>
+  <dt>Section Number</dt>
+  <dd>{{ section.number }}</dd>
+  <dt>Semester</dt>
+  <dd>{{ section.semester }}</dd>
+  <dt>Professor</dt>
+  <dd>{{ section.professor }}</dd>
+  <dt>Hours</dt>
+  <dd>{{ section.hours }}</dd>
+  <dt>Capacity</dt>
+  <dd>{{ section.capacity }}</dd>
+</dl>
+
+    <div id="Students">
+        <h3>Students:</h3>
+    {% render_table students 'django_tables2/bootstrap.html' %}
+    </div>
+  <form method="post">
+    {% csrf_token %}
+     <input type="hidden" name="userid" value="{{ user.id }}"/>
+
+    <input
+        action="action"
+           class="btn btn-info"
+        onclick="window.history.go(-1); return false;"
+        value="Back"
+    />
+     <input id="edit_section"
+        action="action"
+           class="btn btn-info"
+        value="Edit Section"
+    />
+     <input id="delete_section"
+        action="action"
+           class="btn btn-info"
+        value="Delete Section"
+    />
+     <input id="manage_students"
+        action="action"
+           class="btn btn-info"
+        value="Manage Students in Section"
+    />
+</form>
+
+<script>
+function selectStudent(evt) {
+    var id = this.getAttribute('data-id');
+    var url = "/schooladmin/student/"+id;
+    open(url,'_self');
+}
+
+function edit_section(evt) {
+    open('/schooladmin/section/{{ section.id }}/edit','_self');
+    return false;
+}
+
+function manage_student_sections(evt) {
+    open('/schooladmin/section/{{ section.id }}/students_manage','_self');
+    return false;
+}
+
+function confirmit(evt) {
+    var btntitle = evt.target.value;
+    var answer = window.confirm("Are you sure you want to delete this section?");
+    if (answer) {
+        this.form.submit();
+        return true;
+    }
+    return false;
+}
+
+var btn = document.getElementById("delete_section");
+if ( btn ) {
+    btn.addEventListener("click", confirmit);
+}
+
+var btn = document.getElementById("manage_students");
+if ( btn ) {
+    btn.addEventListener("click", manage_student_sections);
+}
+
+// Add onclick to each row so that it leaps off to the detail
+var tablerows = document.getElementsByClassName('srow')
+for (var i=0, len=tablerows.length; i<len; i=i+1) {
+    tablerows[i].addEventListener("click", selectStudent, false);
+}
+
+btn = document.getElementById("edit_section");
+if ( btn ) {
+    btn.addEventListener("click", edit_section);
+}
+</script>
+{% endblock %}

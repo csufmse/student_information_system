@@ -1,3 +1,4 @@
+from datetime import date
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
 from django_tables2 import RequestConfig
@@ -6,13 +7,15 @@ from django.contrib.auth.forms import AdminPasswordChangeForm
 from django.forms.models import model_to_dict
 
 from django.contrib.auth.models import User
-from sis.models import Student, Admin, Professor, Major, Course, CoursePrerequisite, Semester
 from sis.authentication_helpers import role_login_required
-from .forms import (CustomUserCreationForm, MajorCreationForm, MajorEditForm, UserEditForm,
-                    SemesterCreationForm, CourseEditForm, CourseCreationForm)
+from sis.models import (Student, Admin, Professor, Major, Course, CoursePrerequisite, Semester,
+                        Section)
+from .forms import (CustomUserCreationForm, UserEditForm, MajorCreationForm, MajorEditForm,
+                    SectionCreationForm, SectionEditForm, SemesterCreationForm, CourseEditForm,
+                    CourseCreationForm)
 from .tables import (UsersTable, MajorsTable, BasicProfsTable, BasicCoursesTable, SemestersTable,
-                     CoursesTable)
-from .filters import UserFilter, MajorFilter, SemesterFilter, CourseFilter
+                     CoursesTable, SectionsTable, SectionStudentsTable)
+from .filters import UserFilter, MajorFilter, SemesterFilter, SectionFilter, CourseFilter
 
 
 @role_login_required('Admin')
@@ -313,6 +316,22 @@ def course_new(request):
 
 
 @role_login_required('Admin')
+def course_section_new(request, courseid):
+    qs = Course.objects.filter(id=courseid)
+    if qs.count() < 1:
+        return HttpResponse("No such course")
+    the_course = qs.get()
+    form_values = {'course': the_course}
+    semesters = Semester.objects.order_by('-date_registration_opens').filter(
+        date_registration_opens__lte=date.today(), date_last_drop__gte=date.today())
+    if semesters.count() > 0:
+        form_values['semester'] = semesters[0]
+
+    form = SectionCreationForm(form_values)
+    return render(request, 'section_new.html', {'form': form})
+
+
+@role_login_required('Admin')
 def semesters(request):
     if request.user.access_role() != 'Admin':
         return redirect('sis:access_denied')
@@ -336,15 +355,26 @@ def semester(request, semester_id):
     if qs.count() < 1:
         return HttpResponse("No such semester")
     the_semester = qs.get()
-    # if request.method == 'POST':
-    #     if request.POST.get('disbutton'):
-    #         the_user.is_active = False
-    #         the_user.save()
-    #     elif request.POST.get('enabutton'):
-    #         the_user.is_active = True
-    #         the_user.save()
-    #     return redirect('schooladmin:users')
-    return render(request, 'semester.html', {'semester': the_semester})
+
+    sections_qs = Section.objects.filter(semester=the_semester)
+    sections_table = SectionsTable(sections_qs)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
+
+    return render(request, 'semester.html', {
+        'semester': the_semester,
+        'sections': sections_table
+    })
+
+
+@role_login_required('Admin')
+def semester_section_new(request, semester_id):
+    qs = Semester.objects.filter(id=semester_id)
+    if qs.count() < 1:
+        return HttpResponse("No such semester")
+    the_semester = qs.get()
+    form_values = {'semester': the_semester}
+    form = SectionCreationForm(form_values)
+    return render(request, 'section_new.html', {'form': form})
 
 
 @role_login_required('Admin')
@@ -359,3 +389,64 @@ def new_semester(request):
     else:
         form = SemesterCreationForm()
     return render(request, 'new_semester.html', {'form': form})
+
+
+@role_login_required('Admin')
+def sections(request):
+    queryset = Section.objects.all()
+    f = SectionFilter(request.GET, queryset=queryset)
+    has_filter = any(field in request.GET for field in set(f.get_fields()))
+    table = SectionsTable(f.qs)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
+    return render(request, 'sections.html', {
+        'table': table,
+        'filter': f,
+        'has_filter': has_filter,
+    })
+
+
+@role_login_required('Admin')
+def section(request, sectionid):
+    qs = Section.objects.filter(id=sectionid)
+    if qs.count() < 1:
+        return HttpResponse("No such section")
+    the_section = qs.get()
+
+    student_qs = Student.objects.filter(sectionstudent__section=the_section)
+    student_table = SectionStudentsTable(student_qs)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(student_table)
+
+    return render(request, 'section.html', {'section': the_section, 'students': student_table})
+
+
+@role_login_required('Admin')
+def section_edit(request, sectionid):
+    qs = Section.objects.filter(id=sectionid)
+    if qs.count() < 1:
+        return HttpResponse("No such section")
+    the_section = qs.get()
+
+    if request.method == 'POST':
+        form = SectionEditForm(request.POST, instance=the_section)
+        if form.is_valid():
+            obj = form.save(commit=False)
+            obj.save()
+            form.save_m2m()
+            return redirect('schooladmin:section', sectionid)
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
+    else:
+        form = SectionEditForm(instance=the_section)
+    return render(request, 'section_edit.html', {'form': form, 'section': the_section})
+
+
+@role_login_required('Admin')
+def section_new(request):
+    if request.method == 'POST':
+        form = SectionCreationForm(request.POST)
+        if form.is_valid():
+            the_new_section = form.save()
+            return redirect('schooladmin:sections')
+    else:
+        form = SectionCreationForm(request.GET)
+    return render(request, 'section_new.html', {'form': form})

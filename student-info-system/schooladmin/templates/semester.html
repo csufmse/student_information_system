@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load bootstrap3 %}
+{% load render_table from django_tables2 %}
 
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
@@ -72,7 +73,16 @@
 <h2>Registration Open {{ semester.date_registration_opens }}:</h2>
 <h2>Last Drop Date {{ semester.date_last_drop }}:</h2>
 
+    <div id="Sections">
+        <h3>Sections:</h3>
+    {% render_table sections 'django_tables2/bootstrap.html' %}
+    </div>
 
+     <input id="new_section"
+        action="action"
+           class="btn btn-info"
+        value="New Section"
+    />
 
     <input
         action="action"
@@ -80,4 +90,14 @@
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
+<script>
+function new_section(evt) {
+    open('/schooladmin/semester/{{ semester.id }}/section_new','_self');
+    return false;
+}
+btn = document.getElementById("new_section");
+if ( btn ) {
+    btn.addEventListener("click", new_section);
+}
+</script>
 {% endblock %}

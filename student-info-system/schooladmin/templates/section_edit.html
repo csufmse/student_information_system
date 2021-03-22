@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+
+{% block title %}{% endblock title %}
+{% block header_name %}{% endblock header_name %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<style>
+.rolesel {
+  font-family: Arial, Helvetica, sans-serif;
+    data-style: btn_primary;
+  width: 180px;
+  height: 30px;
+}
+.coursesel {
+  font-family: Arial, Helvetica, sans-serif;
+    data-style: btn_primary;
+  width: 180px;
+  height: 30px;
+}
+</style>
+{% endblock css %}
+
+{% block content %}
+  <h3>Edit Section {{ section.course_name }}-{{ section.number }}</h3>
+<dl class="dl-horizontal">
+  <dt>Course</dt>
+  <dd>{{ section.course_name }}</dd>
+  <dt>Section Number</dt>
+  <dd>{{ section.number }}</dd>
+  <dt>Semester</dt>
+  <dd>{{ section.semester }}</dd>
+</dl>
+
+  <form method="post">
+    {% csrf_token %}
+    {% for field in form %}
+      <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% if field.help_text %}
+          <small style="color: grey">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+      </p>
+    {% endfor %}
+    <input
+        action="action"
+        onclick="window.history.go(-1); return false;"
+        type="submit"
+        value="Cancel" class="btn btn-info"
+    />
+    <input
+        type="reset" id="reset_button"
+        value="Reset" class="btn btn-info"
+    />
+    <input id="submitme" name="submitme"
+        action="action"
+        value="Save Changes" class="btn btn-primary submitme"
+    />
+  </form>
+
+<script>
+
+function confirmit(evt) {
+    this.form.submit();
+    return true;
+}
+document.getElementById("submitme").addEventListener("click", confirmit);
+</script>
+{% endblock %}

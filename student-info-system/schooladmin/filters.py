@@ -1,8 +1,9 @@
-from django.db.models import Q, Value, F
+from django.db.models import Q, Value, F, CharField
 from django.db.models.functions import Concat
 from django_filters import (FilterSet, CharFilter, ChoiceFilter, ModelChoiceFilter, RangeFilter)
 from django.contrib.auth.models import User
-from sis.models import (Student, Admin, Professor, Major, Course, CoursePrerequisite, Semester)
+from sis.models import (Student, Admin, Professor, Major, Course, Section, CoursePrerequisite,
+                        Semester)
 
 
 class UserFilter(FilterSet):
@@ -143,3 +144,31 @@ class SemesterFilter(FilterSet):
     class Meta:
         model = Semester
         fields = ['semester', 'year']
+
+
+class SectionFilter(FilterSet):
+    semester = CharFilter(Semester.objects, label='Semester', method='filter_semester')
+
+    professor = CharFilter(field_name='professor__user__last_name',
+                           lookup_expr='icontains',
+                           label='Professor Name')
+
+    course_descr = CharFilter(Course.objects, label='Course', method='filter_course')
+
+    def filter_semester(self, queryset, name, value):
+        return queryset.annotate(slug=Concat(
+            'semester__semester', Value('-'), 'semester__year', output_field=CharField())).filter(
+                slug__icontains=value)
+
+    def filter_course(self, queryset, name, value):
+        return queryset.annotate(slug=Concat(
+            'course__major__abbreviation',
+            Value('-'),
+            'course__catalogNumber',
+            Value(' '),
+            'course__title',
+        )).filter(slug__icontains=value)
+
+    class Meta:
+        model = Section
+        fields = ['semester', 'course_descr', 'professor']
