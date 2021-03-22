@@ -22,5 +22,4 @@ jobs:
         echo DB_PORT=5432 >> .env
     - name: Run docker-compose
       run: |
-        cd /home/runner/work/student_information_system
         docker-compose up --build
