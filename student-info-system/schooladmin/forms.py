@@ -1,8 +1,7 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from sis.models import (Major, Semester, Course, UpperField,
-                        CoursePrerequisite)
+from sis.models import (Major, Semester, Course, UpperField, CoursePrerequisite)
 
 ROLE_CHOICES = (
     ('Student', 'Student'),
@@ -98,8 +97,8 @@ class CourseEditForm(forms.ModelForm):
     credits_earned = forms.DecimalField(label='Credits', max_digits=2, decimal_places=1)
 
     prereqs = CourseChoiceField(queryset=Course.objects.all(),
-                                         widget=forms.CheckboxSelectMultiple,
-                                         required=False)
+                                widget=forms.CheckboxSelectMultiple,
+                                required=False)
 
     # courses_required = CourseChoiceField(queryset=Course.objects.all(),
     #                                      widget=forms.CheckboxSelectMultiple,
