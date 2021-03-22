@@ -167,3 +167,24 @@ class SemestersTable(tables.Table):
                   'date_last_drop')
 
         row_attrs = {'class': 'urow', 'data-id': lambda record: record.pk}
+
+
+class CoursesTable(tables.Table):
+    major = tables.Column(attrs={
+        'th': {
+            'class': 'mcol',
+            'style': 'text-align: center;'
+        },
+        'td': {
+            'class': 'mcell'
+        }
+    })
+    catalogNumber = tables.Column(attrs={'th': {'class': 'cncol'}, 'td': {'class': 'cncell'}})
+    title = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    credits_earned = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+
+    class Meta:
+        model = Course
+        template_name = "django_tables2/bootstrap.html"
+        fields = ('major', 'catalogNumber', 'title', 'credits_earned')
+        row_attrs = {'class': 'crow', 'data-id': lambda record: record.pk}

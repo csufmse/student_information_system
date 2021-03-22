@@ -1,7 +1,8 @@
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from sis.models import (Major, Semester, Course, UpperField, CharField, IntegerField, DateField)
+from sis.models import (Major, Semester, Course, UpperField,
+                        CoursePrerequisite)
 
 ROLE_CHOICES = (
     ('Student', 'Student'),
@@ -60,23 +61,65 @@ class MajorEditForm(forms.ModelForm):
                                   widget=forms.Textarea(attrs={'rows': 3}))
     courses_required = CourseChoiceField(queryset=Course.objects.all(),
                                          widget=forms.CheckboxSelectMultiple,
-                                         required=False)
+                                         required=False,
+                                         to_field_name='a_prerequisite')
 
     class Meta:
         model = Major
         fields = ('name', 'description', 'courses_required')
 
 
+class CourseCreationForm(forms.ModelForm):
+    major = forms.ModelChoiceField(queryset=Major.objects.all())
+    catalogNumber = forms.IntegerField(label='Number')
+    title = forms.CharField(label='Title', max_length=256)
+    description = forms.CharField(label_suffix='Description',
+                                  max_length=256,
+                                  required=False,
+                                  widget=forms.Textarea(attrs={'rows': 3}))
+    credits_earned = forms.DecimalField(label='Credits', max_digits=2, decimal_places=1)
+
+    # prereqs = models.ManyToManyField('self', through='CoursePrerequisite')
+
+    class Meta:
+        model = Course
+        fields = ('major', 'catalogNumber', 'title', 'description', 'credits_earned')
+
+
+class CourseEditForm(forms.ModelForm):
+    major = forms.ModelChoiceField(queryset=Major.objects.all())
+
+    catalogNumber = forms.IntegerField(label='Number')
+    title = forms.CharField(label='Title', max_length=256)
+    description = forms.CharField(label='Description',
+                                  max_length=256,
+                                  required=False,
+                                  widget=forms.Textarea(attrs={'rows': 3}))
+    credits_earned = forms.DecimalField(label='Credits', max_digits=2, decimal_places=1)
+
+    prereqs = CourseChoiceField(queryset=Course.objects.all(),
+                                         widget=forms.CheckboxSelectMultiple,
+                                         required=False)
+
+    # courses_required = CourseChoiceField(queryset=Course.objects.all(),
+    #                                      widget=forms.CheckboxSelectMultiple,
+    #                                      required=False)
+
+    class Meta:
+        model = Course
+        fields = ('major', 'catalogNumber', 'title', 'description', 'credits_earned', 'prereqs')
+
+
 SEASON = (('FALL', 'Fall'), ('SPRING', 'Spring'), ('SUMMER', 'Summer'), ('WINTER', 'Winter'))
 
 
 class SemesterCreationForm(forms.Form):
-    semester = CharField(max_length=6, choices=SEASON, default='FA')
-    year = IntegerField(default=2000)
-    date_started = DateField(auto_now=False)
-    date_ended = DateField(auto_now=False)
-    date_registration_opens = DateField(auto_now=False)
-    date_last_drop = DateField(auto_now=False)
+    semester = forms.ChoiceField(choices=SEASON)
+    year = forms.IntegerField()
+    date_started = forms.DateField()
+    date_ended = forms.DateField()
+    date_registration_opens = forms.DateField()
+    date_last_drop = forms.DateField()
 
     class Meta:
         model = Semester
