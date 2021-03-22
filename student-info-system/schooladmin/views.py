@@ -6,12 +6,13 @@ from django.contrib.auth.forms import AdminPasswordChangeForm
 from django.forms.models import model_to_dict
 
 from django.contrib.auth.models import User
-from sis.models import Student, Admin, Professor, Major, Course, Semester
+from sis.models import Student, Admin, Professor, Major, Course, CoursePrerequisite, Semester
 from sis.authentication_helpers import role_login_required
 from .forms import (CustomUserCreationForm, MajorCreationForm, MajorEditForm, UserEditForm,
-                    SemesterCreationForm)
-from .tables import UsersTable, MajorsTable, BasicProfsTable, BasicCoursesTable, SemestersTable
-from .filters import UserFilter, MajorFilter, SemesterFilter
+                    SemesterCreationForm, CourseEditForm, CourseCreationForm)
+from .tables import (UsersTable, MajorsTable, BasicProfsTable, BasicCoursesTable, SemestersTable,
+                     CoursesTable)
+from .filters import UserFilter, MajorFilter, SemesterFilter, CourseFilter
 
 
 @role_login_required('Admin')
@@ -194,21 +195,19 @@ def major(request, abbreviation):
     pqueryset = User.objects.filter(professor__major=the_major)
     prof_table = BasicProfsTable(pqueryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(prof_table)
-    #    cqueryset = Course.objects.filter(a_prerequisite__course__major=the_major)
-    cqueryset = Course.objects.filter(required_by=the_major)
+
+    rqueryset = Course.objects.filter(required_by=the_major)
+    required_table = BasicCoursesTable(rqueryset)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(required_table)
+
+    cqueryset = Course.objects.filter(major=the_major)
     course_table = BasicCoursesTable(cqueryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(course_table)
-    # if request.method == 'POST':
-    #     if request.POST.get('disbutton'):
-    #         the_user.is_active = False
-    #         the_user.save()
-    #     elif request.POST.get('enabutton'):
-    #         the_user.is_active = True
-    #         the_user.save()
-    #     return redirect('schooladmin:users')
+
     return render(request, 'major.html', {
         'major': the_major,
         'profs': prof_table,
+        'required': required_table,
         'courses': course_table,
     })
 
@@ -223,7 +222,9 @@ def major_edit(request, abbreviation):
     if request.method == 'POST':
         form = MajorEditForm(request.POST, instance=the_major)
         if form.is_valid():
-            form.save()
+            obj = form.save(commit=False)
+            obj.save()
+            form.save_m2m()
             return redirect('schooladmin:major', abbreviation)
         else:
             messages.error(request, 'Please correct the error(s) below.')
@@ -245,12 +246,70 @@ def major_new(request):
 
 
 @role_login_required('Admin')
+def courses(request):
+    queryset = Course.objects.all()
+    f = CourseFilter(request.GET, queryset=queryset)
+    has_filter = any(field in request.GET for field in set(f.get_fields()))
+    table = CoursesTable(f.qs)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
+    return render(request, 'courses.html', {
+        'table': table,
+        'filter': f,
+        'has_filter': has_filter,
+    })
+
+
+@role_login_required('Admin')
 def course(request, courseid):
     qs = Course.objects.filter(id=courseid)
     if qs.count() < 1:
         return HttpResponse("No such course")
     the_course = qs.get()
-    return HttpResponse("Sure, " + the_course.name + " is a real thing.")
+
+    pqueryset = Course.objects.filter(a_prerequisite__course=the_course)
+    ptable = BasicCoursesTable(pqueryset)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(ptable)
+
+    nqueryset = Course.objects.filter(a_course__prerequisite=the_course)
+    ntable = BasicCoursesTable(nqueryset)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(ntable)
+
+    return render(request, 'course.html', {
+        'course': the_course,
+        'prereqs': ptable,
+        'needed_by': ntable,
+    })
+
+
+@role_login_required('Admin')
+def course_edit(request, courseid):
+    qs = Course.objects.filter(id=courseid)
+    if qs.count() < 1:
+        return HttpResponse("No such course")
+    the_course = qs.get()
+
+    if request.method == 'POST':
+        form = CourseEditForm(request.POST, instance=the_course)
+        if form.is_valid():
+            form.save()
+            return redirect('schooladmin:course', courseid)
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
+    else:
+        form = CourseEditForm(instance=the_course)
+    return render(request, 'course_edit.html', {'form': form})
+
+
+@role_login_required('Admin')
+def course_new(request):
+    if request.method == 'POST':
+        form = CourseCreationForm(request.POST)
+        if form.is_valid():
+            the_new_course = form.save()
+            return redirect('schooladmin:courses')
+    else:
+        form = CourseCreationForm()
+    return render(request, 'course_new.html', {'form': form})
 
 
 @role_login_required('Admin')

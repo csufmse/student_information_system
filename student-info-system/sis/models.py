@@ -134,7 +134,7 @@ class Course(models.Model):
     title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
     credits_earned = models.DecimalField('Credits', max_digits=2, decimal_places=1)
-    prereqs = models.ManyToManyField('self', through='CoursePrerequisite')
+    prereqs = models.ManyToManyField('self', symmetrical=False, through='CoursePrerequisite')
 
     @property
     def major_name(self):
@@ -313,7 +313,7 @@ def annotated(cls):
             When(admin__id__isnull=False, then=Value('Admin')),
             When(professor__id__isnull=False, then=Value('Professor')),
             default=Value('Unknown'),
-            output_field=CharField(),
+            output_field=forms.CharField(),
         ),
         name=Concat(F("first_name"), Value(' '), F("last_name")),
         name_sort=Concat(F("last_name"), Value(', '), F("first_name")),
