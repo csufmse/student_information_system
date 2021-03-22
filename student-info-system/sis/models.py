@@ -134,7 +134,7 @@ class Course(models.Model):
     title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
     credits_earned = models.DecimalField('Credits', max_digits=2, decimal_places=1)
-    prereqs = models.ManyToManyField('self', asymmetricthrough='CoursePrerequisite')
+    prereqs = models.ManyToManyField('self', symmetrical=False, through='CoursePrerequisite')
 
     @property
     def major_name(self):
