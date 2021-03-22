@@ -22,4 +22,5 @@ jobs:
         echo DB_PORT=5432 >> .env
     - name: Run docker-compose
       run: |
+        sed -i -e '/GITHUB_TEST/s/false/true/' ./production/entrypoint.sh
         docker-compose up --build

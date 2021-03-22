@@ -1,5 +1,7 @@
 #!/bin/sh
 
+GITHUB_TEST=false
+
 # Make postgres user not need a password
 sed -i -e '/postgres/s/peer/trust/' '/etc/postgresql/12/main/pg_hba.conf'
 
@@ -16,7 +18,7 @@ python3 manage.py collectstatic --no-input &&
 python3 manage.py test &&
 
 # If we're in a workflow we dont run gunicorn
-if ! [ -v $GITHUB_WORKFLOW ] ; then
+if $GITHUB_TEST == "True" ; then
     echo "All is well if you've made it this far";
 else gunicorn config.wsgi:application --bind 0.0.0.0:8000;
 fi
