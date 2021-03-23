@@ -48,9 +48,10 @@
   <button class="tablinks">Majors</button>
   <button class="tablinks">Semesters</button>
   <button class="tablinks">Courses</button>
+  <button class="tablinks">Sections</button>
 </div>
 
-<span height="300" width="300">
+<span height="400" width="300">
 <iframe id="Users" class="tabcontent" title="Admin Users" src="{% url 'schooladmin:users' %}"
     width="200" height="200"></iframe>
 <iframe id="Majors" class="tabcontent" title="Majors" src="{% url 'schooladmin:majors' %}"
@@ -58,6 +59,8 @@
 <iframe id="Semesters" class="tabcontent" title="Semesters" src="{% url 'schooladmin:semesters' %}"
     width="200" height="200"></iframe>
 <iframe id="Courses" class="tabcontent" title="Courses" src="{% url 'schooladmin:courses' %}"
+    width="200" height="200"></iframe>
+<iframe id="Sections" class="tabcontent" title="Sections" src="{% url 'schooladmin:sections' %}"
     width="200" height="200"></iframe>
 </span>
 

@@ -73,7 +73,12 @@
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
-     <input id="editc"
+     <input id="new_section"
+        action="action"
+           class="btn btn-info"
+        value="New Section"
+    />
+     <input id="course_edit"
         action="action"
            class="btn btn-info"
         value="Edit Course"
@@ -90,15 +95,24 @@ function edit_course(evt) {
     return false;
 }
 
+function new_section(evt) {
+    open('/schooladmin/course/{{ course.id }}/section_new','_self');
+    return false;
+}
+
 // Add onclick to each row so that it leaps off to the detail
 var tablerows = document.getElementsByClassName('crow')
 for (var i=0, len=tablerows.length; i<len; i=i+1) {
     tablerows[i].addEventListener("click", selectCourse, false);
 }
 
-btn = document.getElementById("editc");
+btn = document.getElementById("course_edit");
 if ( btn ) {
     btn.addEventListener("click", edit_course);
+}
+btn = document.getElementById("new_section");
+if ( btn ) {
+    btn.addEventListener("click", new_section);
 }
 </script>
 {% endblock %}

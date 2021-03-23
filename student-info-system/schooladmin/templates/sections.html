@@ -9,30 +9,37 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
 <style>
-#Courses {
+#Sections {
   font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
   width: 100%;
 }
 
-#Courses td, #Courses th {
+#Sections td, #Sections th {
   border: 1px solid #ddd;
   padding: 8px;
 }
 
-#Courses tr:nth-child(even){background-color: #f2f2f2;}
+#Sections tr:nth-child(even){background-color: #f2f2f2;}
 
-#Courses tr:hover {background-color: #ddd;}
+#Sections tr:hover {background-color: #ddd;}
 
-#Courses th {
+#Sections th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: center;
   background-color: #4CAF50;
   color: white;
 }
-.mcell, .cncell {
+
+.cnnsell, .cccell, .cnncell, .cscell, .cssell {
     text-align: center;
+}
+#id_catalogNumber_0, #id_catalogNumber_1 {
+    width: 100px;
+}
+#id_credits_earned_0, #id_credits_earned_1 {
+    width: 100px;
 }
 </style>
 
@@ -41,15 +48,15 @@
 
 {% block content %}
 <div>
-<button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:course_new' %}';">New Course</button>
+<button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:section_new' %}';">Add Section to Class</button>
 <div>
-<div id="Courses">
+<div id="Sections">
     {% if filter %}
     <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
     {% bootstrap_form filter.form layout='inline' %}
     <button class="btn btn-primary">Filter</button>
 {% if has_filter %}
-  <a  class="btn btn-success" href="{%  url 'schooladmin:courses' %}">Clear</a>
+  <a  class="btn btn-success" href="{%  url 'schooladmin:sections' %}">Clear</a>
 {% endif %}
     </form>
     {% endif %}
@@ -60,11 +67,11 @@
 <script>
 function selectRow(evt) {
     id = this.getAttribute('data-id');
-    open("/schooladmin/course/"+id,'_self');
+    open("/schooladmin/section/"+id,'_self');
 }
 
 // Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('crow')
+var tablerows = document.getElementsByClassName('srow')
 for (var i=0, len=tablerows.length; i<len; i=i+1) {
     tablerows[i].addEventListener("click", selectRow, false);
 }
