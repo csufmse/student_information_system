@@ -26,17 +26,20 @@
 
 {% block content %}
 <div>
-<span>Logged in as PROFESSOR {{ user.username }} <a href="{% url 'logout' %}">Log Out</a></span>
+<span>Logged in as PROFESSOR {{ user.username }} {{user.id}} <a href="{% url 'logout' %}">Log Out</a></span>
 </div>
 
 <div class="tab">
   <button class="tablinks" id="defaultOpen">Courses</button>
-  <button class="tablinks">Stuff</button>
+  <button class="tablinks">Students</button>
+  <button class="tablinks">Grades</button>
 </div>
 
 <span>
 <iframe id="Courses" class="tabcontent" title="Courses" src="{% url 'professor:courses' %}" ></iframe>
-<div class="tabcontent" id="Stuff">Hello.</div>
+<div class="tabcontent" id="Students">Hello.</div>
+<div class="tabcontent" id="Grades">Hello.</div>
+
 </span>
 
 <script>
