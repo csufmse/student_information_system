@@ -188,3 +188,58 @@ class CoursesTable(tables.Table):
         template_name = "django_tables2/bootstrap.html"
         fields = ('major', 'catalogNumber', 'title', 'credits_earned')
         row_attrs = {'class': 'crow', 'data-id': lambda record: record.pk}
+
+
+class SectionsTable(tables.Table):
+    semester = tables.Column(attrs={'th': {'class': 'cscol'}, 'td': {'class': 'cscell'}})
+    course_descr = tables.Column(attrs={'th': {'class': 'cncol'}, 'td': {'class': 'cncell'}})
+    number = tables.Column(attrs={'th': {'class': 'cnncol'}, 'td': {'class': 'cnncell'}})
+    professor = tables.Column(attrs={'th': {'class': 'cpcol'}, 'td': {'class': 'cpcell'}})
+    hours = tables.Column(attrs={'th': {'class': 'chcol'}, 'td': {'class': 'chcell'}})
+    capacity = tables.Column(attrs={'th': {'class': 'cccol'}, 'td': {'class': 'cccell'}})
+
+    class Meta:
+        model = Section
+        template_name = "django_tables2/bootstrap.html"
+        fields = ('semester', 'course_descr', 'number', 'hours', 'professor', 'capacity')
+        row_attrs = {'class': 'srow', 'data-id': lambda record: record.pk}
+
+
+class SectionStudentsTable(tables.Table):
+    username = tables.Column(accessor='user__username',
+                             attrs={
+                                 'th': {
+                                     'class': 'sucol'
+                                 },
+                                 'td': {
+                                     'class': 'sucell'
+                                 }
+                             })
+    name = tables.Column(attrs={'th': {'class': 'sncol'}, 'td': {'class': 'sncell'}})
+    major = tables.Column(attrs={'th': {'class': 'smcol'}, 'td': {'class': 'smcell'}})
+    status = tables.Column(verbose_name="Status",
+                           accessor='sectionstudent__status',
+                           attrs={
+                               'th': {
+                                   'class': 'smcol'
+                               },
+                               'td': {
+                                   'class': 'smcell'
+                               }
+                           })
+    letter_grade = tables.Column(verbose_name="Grade",
+                                 accessor='sectionstudent__letter_grade',
+                                 attrs={
+                                     'th': {
+                                         'class': 'smcol'
+                                     },
+                                     'td': {
+                                         'class': 'smcell'
+                                     }
+                                 })
+
+    class Meta:
+        model = Student
+        template_name = "django_tables2/bootstrap.html"
+        fields = ("username", "name", 'major', 'status', 'letter_grade')
+        row_attrs = {'class': 'srow', 'data-id': lambda record: record.pk}

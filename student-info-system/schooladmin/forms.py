@@ -1,7 +1,9 @@
+from datetime import date
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from sis.models import (Major, Semester, Course, UpperField, CoursePrerequisite)
+from sis.models import (Major, Semester, Professor, Student, Course, Section, SectionStudent,
+                        UpperField, CoursePrerequisite)
 
 ROLE_CHOICES = (
     ('Student', 'Student'),
@@ -139,3 +141,27 @@ class UserEditForm(forms.Form):
     class Meta:
         model = User
         fields = ('role', 'first_name', 'last_name', 'email', 'major')
+
+
+class SectionCreationForm(forms.ModelForm):
+    semester = forms.ModelChoiceField(queryset=Semester.objects.filter(
+        date_ended__gt=date.today()))
+    course = forms.ModelChoiceField(queryset=Course.objects.all())
+    number = forms.IntegerField()
+    hours = forms.CharField(max_length=100)
+    professor = forms.ModelChoiceField(queryset=Professor.objects.filter(user__is_active=True))
+    capacity = forms.IntegerField()
+
+    class Meta:
+        model = Section
+        fields = ('semester', 'course', 'number', 'hours', 'professor', 'capacity')
+
+
+class SectionEditForm(forms.ModelForm):
+    hours = forms.CharField(max_length=100)
+    professor = forms.ModelChoiceField(queryset=Professor.objects.filter(user__is_active=True))
+    capacity = forms.IntegerField()
+
+    class Meta:
+        model = Section
+        fields = ('hours', 'professor', 'capacity')

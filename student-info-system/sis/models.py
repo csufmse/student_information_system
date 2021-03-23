@@ -54,6 +54,7 @@ class Student(models.Model):
     major = models.ForeignKey('Major', on_delete=models.DO_NOTHING, blank=True, null=True)
     sections = models.ManyToManyField('Section',
                                       through='SectionStudent',
+                                      symmetrical=False,
                                       related_name='students')
 
     # will be adding aggregate things here to replace dummy methods
@@ -148,6 +149,12 @@ class Course(models.Model):
 
     name.fget.short_description = 'Course Name'
 
+    @property
+    def descr(self):
+        return self.name + ':' + self.title
+
+    descr.fget.short_description = 'Course'
+
     def __str__(self):
         return self.name
 
@@ -233,6 +240,12 @@ class SectionStudent(models.Model):
         return self.section.professor
 
     @property
+    def letter_grade(self):
+        return dict(GRADE).get(self.grade)
+
+    letter_grade.fget.short_description = 'Grade Assigned'
+
+    @property
     def name(self):
         return self.student.name + '@' + self.section.name
 
@@ -271,8 +284,18 @@ class Section(models.Model):
         return self.sectionstudent_set.exclude(status=SectionStudent.DROPPED).count()
 
     @property
+    def course_name(self):
+        return self.course.name
+
+    @property
     def name(self):
         return self.course.name + '-' + str(self.number)
+
+    @property
+    def course_descr(self):
+        return self.course.descr
+
+    course_descr.fget.short_description = 'Course'
 
     def __str__(self):
         return self.name
@@ -306,18 +329,27 @@ User.add_to_class('name', name)
 
 
 # Extend User to return annotated User objects
-def annotated(cls):
+def uannotated(cls):
     return User.objects.annotate(
         access_role=Case(
             When(student__id__isnull=False, then=Value('Student')),
             When(admin__id__isnull=False, then=Value('Admin')),
             When(professor__id__isnull=False, then=Value('Professor')),
             default=Value('Unknown'),
-            output_field=forms.CharField(),
+            output_field=models.CharField(),
         ),
         name=Concat(F("first_name"), Value(' '), F("last_name")),
         name_sort=Concat(F("last_name"), Value(', '), F("first_name")),
     ).exclude(access_role='Unknown')
 
 
-User.annotated = classmethod(annotated)
+User.annotated = classmethod(uannotated)
+
+
+def sannotated(cls):
+    return Section.objects.annotate(course_descr=Concat(F('course__major'), Value('-'),
+                                                        F('course__catalogNumber'), Value(': '),
+                                                        F('course__title')),)
+
+
+Section.annotated = classmethod(sannotated)
