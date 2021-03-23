@@ -1,7 +1,10 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load bootstrap3 %}
 
-{% block css %}<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+{% block css %}
+    <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 <style>
 .button {
   background-color: #4CAF50;
@@ -16,7 +19,7 @@
   cursor: pointer;
 }
 .tab {
-  width: 75px;
+  width: 100px;
 }
 </style>
 
@@ -26,18 +29,39 @@
 {% block header_name %}Student Info System Administration{% endblock header_name %}
 
 {% block content %}
-<div>
-<span>Logged in as ADMIN {{ user.username }} <a href="{% url 'logout' %}">Log Out</a></span>
+    <div>
+    <span>
+<dl class="dl-horizontal">
+  <dt>Logged in as</dt>
+  <dd>{{ user.username }}</dd>
+  <dt>User Role</dt>
+  <dd>{{ user.access_role }}</dd>
+</dl>
+    <a
+            class="btn btn-primary"
+            href="{% url 'logout' %}">Log Out</a>
+</span>
 </div>
 
 <div class="tab">
   <button class="tablinks" id="defaultOpen">Users</button>
-  <button class="tablinks">Stuff</button>
+  <button class="tablinks">Majors</button>
+  <button class="tablinks">Semesters</button>
+  <button class="tablinks">Courses</button>
+  <button class="tablinks">Sections</button>
 </div>
 
-<span>
-<iframe id="Users" class="tabcontent" title="Admin Users" src="{% url 'schooladmin:users' %}" ></iframe>
-<div class="tabcontent" id="Stuff">Hello.</div>
+<span height="400" width="300">
+<iframe id="Users" class="tabcontent" title="Admin Users" src="{% url 'schooladmin:users' %}"
+    width="200" height="200"></iframe>
+<iframe id="Majors" class="tabcontent" title="Majors" src="{% url 'schooladmin:majors' %}"
+    width="200" height="200"></iframe>
+<iframe id="Semesters" class="tabcontent" title="Semesters" src="{% url 'schooladmin:semesters' %}"
+    width="200" height="200"></iframe>
+<iframe id="Courses" class="tabcontent" title="Courses" src="{% url 'schooladmin:courses' %}"
+    width="200" height="200"></iframe>
+<iframe id="Sections" class="tabcontent" title="Sections" src="{% url 'schooladmin:sections' %}"
+    width="200" height="200"></iframe>
 </span>
 
 <script>
@@ -61,12 +85,12 @@ function resizeIframe() {
 
 // .onload doesn't work with IE8 and older.
 if (iframe.attachEvent) {
-    iframe.attachEvent("onload", resizeIframe);
+//    iframe.attachEvent("onload", resizeIframe);
 } else {
-    iframe.onload=resizeIframe;
+//    iframe.onload=resizeIframe;
 }
 
-window.onresize = resizeIframe;
+//window.onresize = resizeIframe;
 
 
 // handle tab button clicks. Relies on the content (frame) id be the same as the button text

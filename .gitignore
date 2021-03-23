@@ -3,5 +3,7 @@
 *.pyc
 *.pyo
 
+format.sh
+
 /hdesk
 /venv

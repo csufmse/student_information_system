@@ -9,22 +9,22 @@
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
 <style>
-#Users {
+#Majors {
   font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
   width: 100%;
 }
 
-#Users td, #Users th {
+#Majors td, #Majors th {
   border: 1px solid #ddd;
   padding: 8px;
 }
 
-#Users tr:nth-child(even){background-color: #f2f2f2;}
+#Majors tr:nth-child(even){background-color: #f2f2f2;}
 
-#Users tr:hover {background-color: #ddd;}
+#Majors tr:hover {background-color: #ddd;}
 
-#Users th {
+#Majors th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: left;
@@ -38,15 +38,15 @@
 
 {% block content %}
 <div>
-<button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
+<button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:major_new' %}';">New Major</button>
 <div>
-<div id="Users">
+<div id="Majors">
     {% if filter %}
     <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
     {% bootstrap_form filter.form layout='inline' %}
     <button class="btn btn-primary">Filter</button>
 {% if has_filter %}
-  <a  class="btn btn-success" href="{%  url 'schooladmin:users' %}">Clear</a>
+  <a  class="btn btn-success" href="{%  url 'schooladmin:majors' %}">Clear</a>
 {% endif %}
     </form>
     {% endif %}
@@ -56,12 +56,12 @@
 </div>
 <script>
 function selectRow(evt) {
-    userid = this.getAttribute('data-id');
-    open("/schooladmin/user/"+userid,'_self');
+    id = this.getAttribute('data-id');
+    open("/schooladmin/major/"+id,'_self');
 }
 
 // Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('urow')
+var tablerows = document.getElementsByClassName('mrow')
 for (var i=0, len=tablerows.length; i<len; i=i+1) {
     tablerows[i].addEventListener("click", selectRow, false);
 }

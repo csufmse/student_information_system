@@ -1,8 +1,7 @@
-{% extends "base.html" %}
+{% extends "student/student_base.html" %}
 
 {% block title %}Student Portal: Current Schedule{% endblock %}
 {% block header_name %}Current Schedule{% endblock %}
-{% block user %}{{block.super}}{{student_name}}{% endblock user %}
 {% block content %}
   {% if not sections %}
      <p>No registered sections</p>
@@ -20,8 +19,8 @@
       <td>{{section.number}}</td>
       <td>{{section.professor.name}}</td>
       <td>{{section.hours}}</td>
+    </tr>
     {% endfor %}
+    </table>
   {% endif %}
-  </tr>
-</table>
 {% endblock %}

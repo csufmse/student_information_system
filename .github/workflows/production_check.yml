@@ -1,0 +1,26 @@
+name: Prod Django Student Information System Check
+
+on: [push]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Run create generic env file
+      run: |
+        touch .env
+        echo PRODUCTION=True >> .env
+        echo DEBUG=False >> .env
+        echo SECRET_KEY="(abaz)3wml_wsqh^02#*=47psn=r1!dfx=q9g*cspm(j)5@*$a" >> .env
+        echo DB_NAME=production >> .env
+        echo DB_USER=prod_user >> .env
+        echo DB_PASSWORD=apassword >> .env
+        echo DB_HOST=localhost >> .env
+        echo DB_PORT=5432 >> .env
+    - name: Run docker-compose
+      run: |
+        sed -i -e '/GITHUB_TEST/s/false/true/' ./production/entrypoint.sh
+        docker-compose up --build

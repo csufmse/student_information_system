@@ -1,0 +1,136 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% load render_table from django_tables2 %}
+
+{% block title %}{% endblock title %}
+{% block header_name %}{% endblock header_name %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<style>
+.bprof {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 400px;
+}
+
+.bprof th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #4CAF50;
+  color: white;
+}
+.bprof td, .bprof th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.bprof tr:nth-child(even){background-color: #f2f2f2;}
+
+.bprof tr:hover {background-color: #ddd;}
+
+.bcourse {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 500px;
+}
+
+.bcourse th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #4CAF50;
+  color: white;
+}
+.bcourse td, .bprof th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+.bcourse tr:nth-child(even){background-color: #f2f2f2;}
+
+.bcourse tr:hover {background-color: #ddd;}
+
+.bcourse th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #4CAF50;
+  color: white;
+}
+</style>
+
+{% endblock css %}
+
+{% block content %}
+<dl class="dl-horizontal">
+  <dt>Major</dt>
+  <dd>{{ major.abbreviation }}</dd>
+  <dt>Name</dt>
+  <dd>{{ major.name }}</dd>
+  <dt>Description</dt>
+  <dd>{{ major.description }}</dd>
+</dl>
+
+    <div id="Professors">
+        <h3>Professors:</h3>
+    {% render_table profs 'django_tables2/bootstrap.html' %}
+    </div>
+
+    <div id="Required">
+        <h3>Required Courses:</h3>
+        {% render_table required 'django_tables2/bootstrap.html' %}
+    </div>
+
+    <div id="Courses">
+        <h3>Courses offered by Major:</h3>
+        {% render_table courses 'django_tables2/bootstrap.html' %}
+    </div>
+
+    <input
+        action="action"
+           class="btn btn-info"
+        onclick="window.history.go(-1); return false;"
+        value="Back"
+    />
+     <input id="editm"
+        action="action"
+           class="btn btn-info"
+        value="Edit Major"
+    />
+<script>
+function selectProf(evt) {
+    var id = this.getAttribute('data-id');
+//    var url = "{ % url 'schooladmin:user' arg1='12345' % }".replace(/12345/, id.toString());
+    var url = "/schooladmin/user/"+id;
+    open(url,'_self');
+}
+function selectCourse(evt) {
+    var id = this.getAttribute('data-id');
+    var url = "/schooladmin/course/"+id;
+    open(url,'_self');
+}
+
+function edit_major(evt) {
+    open('/schooladmin/major/{{ major.abbreviation }}/edit','_self');
+    return false;
+}
+
+// Add onclick to each row so that it leaps off to the detail
+var tablerows = document.getElementsByClassName('crow')
+for (var i=0, len=tablerows.length; i<len; i=i+1) {
+    tablerows[i].addEventListener("click", selectCourse, false);
+}
+tablerows = document.getElementsByClassName('prow')
+for (var i=0, len=tablerows.length; i<len; i=i+1) {
+    tablerows[i].addEventListener("click", selectProf, false);
+}
+btn = document.getElementById("editm");
+if ( btn ) {
+    btn.addEventListener("click", edit_major);
+}
+</script>
+{% endblock %}

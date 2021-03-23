@@ -1,0 +1,117 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+
+{% block title %}{% endblock title %}
+{% block header_name %}{% endblock header_name %}
+
+{% block css %}
+<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<style>
+.rolesel {
+  font-family: Arial, Helvetica, sans-serif;
+    data-style: btn_primary;
+  width: 180px;
+  height: 30px;
+}
+.majorsel {
+  font-family: Arial, Helvetica, sans-serif;
+    data-style: btn_primary;
+  width: 180px;
+  height: 30px;
+}
+</style>
+{% endblock css %}
+
+{% block content %}
+  <h3>Edit User {{ user.username }} / {{ user.name }}</h3>
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" id="original_role" value="{{ original_role }}"/>
+    {% for field in form %}
+      <p>
+        {{ field.label_tag }}<br>
+        {{ field }}
+        {% if field.help_text %}
+          <small style="color: grey">{{ field.help_text }}</small>
+        {% endif %}
+        {% for error in field.errors %}
+          <p style="color: red">{{ error }}</p>
+        {% endfor %}
+      </p>
+    {% endfor %}
+    <input
+        action="action"
+        onclick="window.history.go(-1); return false;"
+        type="submit"
+        value="Cancel" class="btn btn-info"
+    />
+    <input
+        type="reset" id="reset_button"
+        value="Reset" class="btn btn-info"
+    />
+    <input id="submitme" name="submitme"
+        action="action"
+        value="Save Changes" class="btn btn-primary submitme"
+    />
+  </form>
+
+<script>
+function selectItem(selectElement,valToSelect) {
+    var opts = selectElement.options;
+    for (var opt, j = 0; opt = opts[j]; j++) {
+        if (opt.value == valToSelect) {
+            selectElement.selectedIndex = j;
+            break;
+        }
+    }
+}
+
+function manageMajor(evt) {
+  var role_select = document.getElementById("id_role")
+  var major_select = document.getElementById("id_major")
+  var major_label = major_select.labels[0]
+
+  if ( role_select.value == 'Admin') {
+    major_select.disabled = true;
+    major_select.required = false;
+    major_select.style.visibility = "hidden"
+    major_label.style.visibility = "hidden"
+  }
+  else {
+    major_select.disabled = false;
+    major_select.required = true;
+    major_select.style.visibility = "visible"
+    major_label.style.visibility = "visible"
+    if (role_select.value == 'Student') {
+      major_label.innerHTML = "Student Major";
+    }
+    else {
+      major_label.innerText = "Major Taught"
+    }
+  }
+}
+
+function confirmit(evt) {
+    var orig_role = document.getElementById("original_role").value;
+    var role_select = document.getElementById("id_role")
+    if (role_select.value != orig_role) {
+        var answer = window.confirm("Role has been changed. Are you sure?");
+        if (answer) {
+            this.form.submit();
+            return true;
+        }
+    } else {
+        this.form.submit();
+        return true;
+    }
+    return false;
+}
+document.getElementById("submitme").addEventListener("click", confirmit);
+
+document.getElementById("id_role").addEventListener("change", manageMajor);
+document.getElementById("reset_button").addEventListener("change", manageMajor);
+manageMajor();
+</script>
+{% endblock %}
