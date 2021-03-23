@@ -1,12 +1,9 @@
-from django.contrib.auth import login, authenticate
-from django.shortcuts import render, redirect
+from django.shortcuts import render
 from django.http import HttpResponse
 from django_tables2 import RequestConfig
 from sis.authentication_helpers import role_login_required
-from .tables import (UsersTable, MajorsTable, BasicProfsTable, BasicCoursesTable, SemestersTable,
-                     CoursesTable, SectionsTable, SectionStudentsTable)
-from sis.models import (Student, Admin, Professor, Major, Course, CoursePrerequisite, Semester,
-                        Section)
+from .tables import SectionsTable
+from sis.models import (Professor, Section)
 
 
 @role_login_required('Professor')
@@ -15,7 +12,7 @@ def index(request):
 
 
 @role_login_required('Professor')
-def courses(request):
+def sections(request):
     u = request.user
 
     qs = Professor.objects.filter(user__id=3)

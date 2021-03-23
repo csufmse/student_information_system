@@ -1,7 +1,9 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load bootstrap3 %}
 
 {% block css %}<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 <style>
 .button {
   background-color: #4CAF50;
@@ -26,26 +28,33 @@
 
 {% block content %}
 <div>
-<span>Logged in as PROFESSOR {{ user.username }} {{user.id}} <a href="{% url 'logout' %}">Log Out</a></span>
+  <span>
+    <dl class="dl-horizontal">
+      <dt>Logged in as</dt>
+      <dd>{{ user.username }}</dd>
+      <dt>User Role</dt>
+      <dd>{{ user.access_role }}</dd>
+    </dl>
+  <a class="btn btn-primary" href="{% url 'logout' %}">Log Out</a>
+  </span>
 </div>
 
 <div class="tab">
-  <button class="tablinks" id="defaultOpen">Courses</button>
+  <button class="tablinks" id="defaultOpen">Sections</button>
   <button class="tablinks">Students</button>
   <button class="tablinks">Grades</button>
 </div>
 
-<span>
-<iframe id="Courses" class="tabcontent" title="Courses" src="{% url 'professor:courses' %}" ></iframe>
-<div class="tabcontent" id="Students">Hello.</div>
-<div class="tabcontent" id="Grades">Hello.</div>
-
+<span height="400" width="300">
+  <iframe id="Sections" class="tabcontent" title="Sections" src="{% url 'professor:sections' %}" width="200" height="200"></iframe>
+  <div id="Students" class="tabcontent" title="Students" >Student Search.</div>
+  <div id="Grades" class="tabcontent" title="Grades" >Edit Grades.</div>
 </span>
 
 <script>
 // resize iframe based on window size/resize
 var buffer = 20; //scroll bar buffer
-var iframe = document.getElementById('Courses');
+var iframe = document.getElementById('Sections');
 
 function pageY(elem) {
     return elem.offsetParent ? (elem.offsetTop + pageY(elem.offsetParent)) : elem.offsetTop;
