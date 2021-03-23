@@ -87,18 +87,7 @@ WSGI_APPLICATION = "config.wsgi.application"
 # in our deployment. That time the db config we use DB_USER, DB_NAME, DB_PASSWORD, DB_HOST and
 # DB_PASSWORD which we will set in repository secret to be used in our deployment.
 
-if os.getenv("GITHUB_WORKFLOW"):
-    DATABASES = {
-        "default": {
-            "ENGINE": "django.db.backends.postgresql",
-            "NAME": os.getenv('$DB_NAME'),
-            "USER": os.getenv('$DB_USER'),
-            "PASSWORD": os.getenv('$DB_PASSWORD'),
-            "HOST":  os.getenv('$DB_HOST'),
-            "PORT":  os.getenv('DB_PORT'),
-        }
-    }
-elif os.getenv('PRODUCTION'):
+if os.getenv('PRODUCTION'):
     DATABASES = {
         "default": {
             "ENGINE": "django.db.backends.postgresql",
