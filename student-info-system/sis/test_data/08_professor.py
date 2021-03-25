@@ -3,9 +3,9 @@ import sys
 
 import django
 
-sys.path.append(".") #noqa
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings") #noqa
-django.setup() #noqa
+sys.path.append(".") # noqa
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings") # noqa
+django.setup() # noqa
 
 from random import randint, random
 
