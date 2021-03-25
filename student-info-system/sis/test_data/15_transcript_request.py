@@ -3,9 +3,9 @@ import sys
 
 import django
 
-sys.path.append(".")
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-django.setup()
+sys.path.append(".") #noqa
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings") #noqa
+django.setup() #noqa
 
 from datetime import timedelta
 from random import randint, random

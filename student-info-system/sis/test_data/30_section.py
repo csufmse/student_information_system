@@ -3,11 +3,12 @@ import sys
 from random import randint
 
 import django
-from sis.models import Course, Major, Professor, Section, Semester
 
-sys.path.append(".")
-os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
-django.setup()
+sys.path.append(".") #noqa
+os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings") #noqa
+django.setup() #noqa
+
+from sis.models import Course, Major, Professor, Section, Semester
 
 # set low to generate multiple sections per semester, count() to spread
 # them across all courses
