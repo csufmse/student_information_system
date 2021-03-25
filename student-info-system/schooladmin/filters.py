@@ -1,9 +1,10 @@
-from django.db.models import Q, Value, F, CharField
-from django.db.models.functions import Concat
-from django_filters import (FilterSet, CharFilter, ChoiceFilter, ModelChoiceFilter, RangeFilter)
 from django.contrib.auth.models import User
-from sis.models import (Student, Admin, Professor, Major, Course, Section, CoursePrerequisite,
-                        Semester)
+from django.db.models import CharField, F, Q, Value
+from django.db.models.functions import Concat
+from django_filters import (CharFilter, ChoiceFilter, FilterSet, ModelChoiceFilter, RangeFilter)
+
+from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
+                        Student)
 
 
 class UserFilter(FilterSet):
@@ -14,7 +15,7 @@ class UserFilter(FilterSet):
                                choices=(('Admin', 'Admin'), ('Professor', 'Professor'),
                                         ('Student', 'Student')))
     major = ModelChoiceFilter(
-        queryset=Major.objects,
+        queryset=Major.objects.order_by('abbreviation'),
         # provided because it needs one. Will be ignoring this.
         field_name='name',
         method='filter_has_major',
@@ -26,9 +27,26 @@ class UserFilter(FilterSet):
 
     is_active = ChoiceFilter(label='Enabled?', choices=((True, 'Enabled'), (False, 'Disabled')))
 
+    # class_level = ChoiceFilter(field_name='student__class_level',
+    #                            label='Class Level',
+    #                            choices=(('Freshman','Freshman'),('Sophomore','Sophomore'),('Junior','Junior'),('Senior','Senior'),
+    #                                     ),method='filter_class_level')
+    # gpa = RangeFilter(field_name='student__gpa')
+    #
+    # def filter_class_level(self, queryset, name, value):
+    #     return queryset.filter(
+    #         Q(professor__major__abbreviation=value) | Q(student__major__abbreviation=value))
+
     class Meta:
         model = User
-        fields = ['username', 'name', 'access_role', 'is_active']
+        fields = [
+            'username',
+            'name',
+            'major',
+            # 'gpa', 'class_level',
+            'access_role',
+            'is_active'
+        ]
 
     def __init__(self, *args, **kwargs):
         super(UserFilter, self).__init__(*args, **kwargs)
@@ -53,7 +71,7 @@ class MajorFilter(FilterSet):
     # this version lets them type part of the profs name
     professors = CharFilter(field_name='professor__user__last_name',
                             lookup_expr='icontains',
-                            label='Professor Name')
+                            label='Has Professor Name')
     # this version lets them pick professors
     #    professors = ModelChoiceFilter(queryset=Professor.objects,
     #                                  method='filter_has_prof',
@@ -71,9 +89,8 @@ class MajorFilter(FilterSet):
 
     def filter_requires_course(self, queryset, name, value):
         return queryset.annotate(slug=Concat('courses_required__major__abbreviation', Value(
-            '-'), 'courses_required__catalogNumber', Value(' '), 'courses_required__title')
-                                ).filter(slug__icontains=value).values('abbreviation').annotate(
-                                    pk=F('abbreviation')).distinct()
+            '-'), 'courses_required__catalog_number', Value(
+                ' '), 'courses_required__title')).filter(slug__icontains=value).distinct()
 
     class Meta:
         model = Major
@@ -85,7 +102,7 @@ class CourseFilter(FilterSet):
                               field_name='major__abbreviation',
                               label='Major')
 
-    catalogNumber = RangeFilter(field_name='catalogNumber')
+    catalog_number = RangeFilter(field_name='catalog_number')
     title = CharFilter(field_name='title', label='Title contains', lookup_expr='icontains')
     description = CharFilter(field_name='description',
                              label='Description contains',
@@ -107,7 +124,7 @@ class CourseFilter(FilterSet):
 
     # return queryset.annotate(slug=Concat('prereqs__prerequisite__major__abbreviation',
     #                                      Value('-'),
-    #                                      'prereqs__prerequisite__catalogNumber',
+    #                                      'prereqs__prerequisite__catalog_number',
     #                                      Value(' '),
     #                                      'prereqs__prerequisite__title')
 
@@ -115,7 +132,7 @@ class CourseFilter(FilterSet):
         return queryset.annotate(slug=Concat(
             'prereqs__major__abbreviation',
             Value('-'),
-            'prereqs__catalogNumber',
+            'prereqs__catalog_number',
             Value(' '),
             'prereqs__title',
         )).filter(slug__icontains=value)
@@ -124,7 +141,7 @@ class CourseFilter(FilterSet):
         return queryset.annotate(slug=Concat(
             'a_prerequisite__course__major__abbreviation',
             Value('-'),
-            'a_prerequisite__course__catalogNumber',
+            'a_prerequisite__course__catalog_number',
             Value(' '),
             'a_prerequisite__course__title',
         )).filter(slug__icontains=value)
@@ -132,7 +149,7 @@ class CourseFilter(FilterSet):
     class Meta:
         model = Course
         fields = [
-            'major', 'catalogNumber', 'title', 'description', 'prereqs', 'is_prereq',
+            'major', 'catalog_number', 'title', 'description', 'prereqs', 'is_prereq',
             'credits_earned'
         ]
 
@@ -149,26 +166,39 @@ class SemesterFilter(FilterSet):
 class SectionFilter(FilterSet):
     semester = CharFilter(Semester.objects, label='Semester', method='filter_semester')
 
-    professor = CharFilter(field_name='professor__user__last_name',
-                           lookup_expr='icontains',
-                           label='Professor Name')
+    professor = CharFilter(label='Professor Name Contains', method='filter_professor')
 
-    course_descr = CharFilter(Course.objects, label='Course', method='filter_course')
+    course_descr = CharFilter(Course.objects, label='Course Info', method='filter_course')
+
+    hours = CharFilter(field_name='hours', lookup_expr='icontains')
+
+    status = ChoiceFilter(choices=Section.STATUSES, field_name='status')
 
     def filter_semester(self, queryset, name, value):
         return queryset.annotate(slug=Concat(
             'semester__semester', Value('-'), 'semester__year', output_field=CharField())).filter(
                 slug__icontains=value)
 
+    def filter_professor(self, queryset, name, value):
+        return queryset.annotate(slug=Concat('professor__user__first_name',
+                                             Value(' '),
+                                             'professor__user__last_name',
+                                             output_field=CharField())).filter(
+                                                 slug__icontains=value)
+
     def filter_course(self, queryset, name, value):
         return queryset.annotate(slug=Concat(
             'course__major__abbreviation',
             Value('-'),
-            'course__catalogNumber',
+            'course__catalog_number',
             Value(' '),
             'course__title',
         )).filter(slug__icontains=value)
 
+    def __init__(self, *args, **kwargs):
+        super(SectionFilter, self).__init__(*args, **kwargs)
+        self.filters['status'].extra.update({'empty_label': 'Any Status'})
+
     class Meta:
         model = Section
-        fields = ['semester', 'course_descr', 'professor']
+        fields = ['semester', 'course_descr', 'professor', 'hours', 'status']

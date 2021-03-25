@@ -1,8 +1,10 @@
 from datetime import datetime
+
 from django.contrib.auth.models import User
 from django.test import TestCase
-from .models import (UpperField, Student, Professor, Major, TranscriptRequest, Course,
-                     CoursePrerequisite, Semester, SectionStudent, Section)
+
+from .models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
+                     Semester, Student, TranscriptRequest, UpperField)
 
 
 class StudentTestCase(TestCase):
@@ -13,7 +15,7 @@ class StudentTestCase(TestCase):
         user_p = User.objects.create(username="prof", first_name="First", last_name="Last")
         major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
         course = Course.objects.create(major=major,
-                                       catalogNumber='101',
+                                       catalog_number='101',
                                        title="Intro To Test",
                                        credits_earned=3.0)
         professor = Professor.objects.create(user=user_p)
@@ -60,7 +62,7 @@ class CourseTestCase(TestCase):
     def setUp(self):
         major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
         Course.objects.create(major=major,
-                              catalogNumber='101',
+                              catalog_number='101',
                               title="Intro To Test",
                               credits_earned=3.0)
 
@@ -80,7 +82,7 @@ class SectionTestCase(TestCase):
         user = User.objects.create(username="prof", first_name="First", last_name="Last")
         major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
         course = Course.objects.create(major=major,
-                                       catalogNumber='101',
+                                       catalog_number='101',
                                        title="Intro To Test",
                                        credits_earned=3.0)
         professor = Professor.objects.create(user=user)

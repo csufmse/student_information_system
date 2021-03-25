@@ -1,9 +1,11 @@
 from datetime import date
+
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
-from sis.models import (Major, Semester, Professor, Student, Course, Section, SectionStudent,
-                        UpperField, CoursePrerequisite)
+
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
+                        Semester, Student, UpperField)
 
 ROLE_CHOICES = (
     ('Student', 'Student'),
@@ -72,7 +74,7 @@ class MajorEditForm(forms.ModelForm):
 
 class CourseCreationForm(forms.ModelForm):
     major = forms.ModelChoiceField(queryset=Major.objects.all())
-    catalogNumber = forms.IntegerField(label='Number')
+    catalog_number = forms.IntegerField(label='Number')
     title = forms.CharField(label='Title', max_length=256)
     description = forms.CharField(label_suffix='Description',
                                   max_length=256,
@@ -84,13 +86,13 @@ class CourseCreationForm(forms.ModelForm):
 
     class Meta:
         model = Course
-        fields = ('major', 'catalogNumber', 'title', 'description', 'credits_earned')
+        fields = ('major', 'catalog_number', 'title', 'description', 'credits_earned')
 
 
 class CourseEditForm(forms.ModelForm):
     major = forms.ModelChoiceField(queryset=Major.objects.all())
 
-    catalogNumber = forms.IntegerField(label='Number')
+    catalog_number = forms.IntegerField(label='Number')
     title = forms.CharField(label='Title', max_length=256)
     description = forms.CharField(label='Description',
                                   max_length=256,
@@ -108,7 +110,7 @@ class CourseEditForm(forms.ModelForm):
 
     class Meta:
         model = Course
-        fields = ('major', 'catalogNumber', 'title', 'description', 'credits_earned', 'prereqs')
+        fields = ('major', 'catalog_number', 'title', 'description', 'credits_earned', 'prereqs')
 
 
 SEASON = (('FALL', 'Fall'), ('SPRING', 'Spring'), ('SUMMER', 'Summer'), ('WINTER', 'Winter'))

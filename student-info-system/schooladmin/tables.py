@@ -1,5 +1,6 @@
 import django_tables2 as tables
 from django.contrib.auth.models import User
+
 from sis.models import *
 
 # from sis.models import Major, Course, Professor
@@ -65,12 +66,49 @@ class UsersTable(tables.Table):
                                         'width': '90px',
                                     }
                                 })
+    class_level = tables.Column(verbose_name='Class',
+                                accessor='student__class_level',
+                                attrs={
+                                    'th': {
+                                        'style': 'text-align: center;'
+                                    },
+                                    'td': {
+                                        'align': 'center',
+                                        'width': '90px',
+                                    }
+                                })
+    student_gpa = tables.Column(verbose_name='GPA',
+                                accessor='student__gpa',
+                                attrs={
+                                    'th': {
+                                        'style': 'text-align: center;'
+                                    },
+                                    'td': {
+                                        'align': 'center',
+                                        'width': '90px',
+                                    }
+                                })
+
+    def render_student_gpa(self, value):
+        return '{:0.2f}'.format(value)
+
+    credits_earned = tables.Column(verbose_name='Credits',
+                                   accessor='student__credits_earned',
+                                   attrs={
+                                       'th': {
+                                           'style': 'text-align: center;'
+                                       },
+                                       'td': {
+                                           'align': 'center',
+                                           'width': '90px',
+                                       }
+                                   })
 
     class Meta:
         model = User
         template_name = "django_tables2/bootstrap.html"
-        fields = ("username", "name", 'student_major', 'professor_department', "access_role",
-                  "is_active")
+        fields = ('username', 'name', 'student_major', 'student_gpa', 'credits_earned',
+                  'class_level', 'professor_department', 'access_role', 'is_active')
         row_attrs = {'class': 'urow', 'data-id': lambda record: record.pk}
 
 
@@ -123,16 +161,16 @@ class BasicCoursesTable(tables.Table):
             'width': '70px'
         }
     })
-    catalogNumber = tables.Column(verbose_name='Number',
-                                  attrs={
-                                      'th': {
-                                          'style': 'text-align: center;'
-                                      },
-                                      'td': {
-                                          'align': 'center',
-                                          'width': '60px'
-                                      }
-                                  })
+    catalog_number = tables.Column(verbose_name='Number',
+                                   attrs={
+                                       'th': {
+                                           'style': 'text-align: center;'
+                                       },
+                                       'td': {
+                                           'align': 'center',
+                                           'width': '60px'
+                                       }
+                                   })
     title = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
     credits_earned = tables.Column(attrs={
         'th': {
@@ -147,7 +185,7 @@ class BasicCoursesTable(tables.Table):
     class Meta:
         model = Course
         template_name = "django_tables2/bootstrap.html"
-        fields = ('major', 'catalogNumber', 'title', 'credits_earned')
+        fields = ('major', 'catalog_number', 'title', 'credits_earned')
         attrs = {"class": 'bcourse'}
         row_attrs = {'class': 'crow', 'data-id': lambda record: record.pk}
 
@@ -179,29 +217,46 @@ class CoursesTable(tables.Table):
             'class': 'mcell'
         }
     })
-    catalogNumber = tables.Column(attrs={'th': {'class': 'cncol'}, 'td': {'class': 'cncell'}})
+    catalog_number = tables.Column(attrs={'th': {'class': 'cncol'}, 'td': {'class': 'cncell'}})
     title = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
     credits_earned = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
 
     class Meta:
         model = Course
         template_name = "django_tables2/bootstrap.html"
-        fields = ('major', 'catalogNumber', 'title', 'credits_earned')
+        fields = ('major', 'catalog_number', 'title', 'credits_earned')
         row_attrs = {'class': 'crow', 'data-id': lambda record: record.pk}
 
 
 class SectionsTable(tables.Table):
-    semester = tables.Column(attrs={'th': {'class': 'cscol'}, 'td': {'class': 'cscell'}})
-    course_descr = tables.Column(attrs={'th': {'class': 'cncol'}, 'td': {'class': 'cncell'}})
-    number = tables.Column(attrs={'th': {'class': 'cnncol'}, 'td': {'class': 'cnncell'}})
-    professor = tables.Column(attrs={'th': {'class': 'cpcol'}, 'td': {'class': 'cpcell'}})
-    hours = tables.Column(attrs={'th': {'class': 'chcol'}, 'td': {'class': 'chcell'}})
-    capacity = tables.Column(attrs={'th': {'class': 'cccol'}, 'td': {'class': 'cccell'}})
+    semester = tables.Column(attrs={'th': {'class': 'sem_col'}, 'td': {'class': 'sem_cell'}})
+    course = tables.Column(attrs={'th': {'class': 'course_col'}, 'td': {'class': 'course_cell'}})
+    number = tables.Column(attrs={'th': {'class': 'secnum_col'}, 'td': {'class': 'secnum_cell'}})
+    status = tables.Column(attrs={
+        'th': {
+            'class': 'secstatus_col'
+        },
+        'td': {
+            'class': 'secstatus_cell'
+        }
+    })
+    course_title = tables.Column(attrs={
+        'th': {
+            'class': 'coursetitle_col'
+        },
+        'td': {
+            'class': 'coursetitle_cell'
+        }
+    })
+    hours = tables.Column(attrs={'th': {'class': 'hours_col'}, 'td': {'class': 'hours_cell'}})
+    professor = tables.Column(attrs={'th': {'class': 'prof_col'}, 'td': {'class': 'prof_cell'}})
+    capacity = tables.Column(attrs={'th': {'class': 'capac_col'}, 'td': {'class': 'capac_cell'}})
 
     class Meta:
         model = Section
         template_name = "django_tables2/bootstrap.html"
-        fields = ('semester', 'course_descr', 'number', 'hours', 'professor', 'capacity')
+        fields = ('semester', 'course', 'number', 'status', 'course_title', 'hours', 'professor',
+                  'capacity')
         row_attrs = {'class': 'srow', 'data-id': lambda record: record.pk}
 
 
