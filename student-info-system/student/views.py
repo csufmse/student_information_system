@@ -20,10 +20,7 @@ def current_schedule_view(request):
 def registration_view(request):
     student = request.user.student
     semester_list = student.semesters.order_by('-date_started')
-    context = {
-        'student': student,
-        'semesters': semester_list
-    }
+    context = {'student': student, 'semesters': semester_list}
     if semester_list.count() == 0:
         return HttpResponse("You are not registered for any semesters.")
 

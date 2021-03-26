@@ -34,18 +34,18 @@
 
       {% for s in sections %}
         {% if s.new_course %}
-            <tr class="course_row">
-              <td>{{s.course.name}}</td>
-              <td>{{s.course.title}}</td>
-              <td>{{s.course.credits_earned}}</td>
-              <td>{{s.course.description}}</td>
-                <td>{% for prereq in s.course.prereqs.all %}<p>{{prereq}}</p>{% endfor %}</td>
-            <tr id="childRow" class="section_heading_row">
-              <th>Section Number</th>
-              <th>Professor</th>
-              <th>Schedule</th>
-              <th>Open Seats</th>
-              <th>Select</th>
+            <tr class="class_heading_row">
+              <th>{{s.course.name}}</th>
+              <th>{{s.course.title}}</th>
+              <th>{{s.course.credits_earned}}</th>
+              <th>{{s.course.description}}</th>
+                <th>{% for prereq in s.course.prereqs.all %}<p>{{prereq}}</p>{% endfor %}</th>
+            <tr id="childRow" class="heading_row">
+              <td>Section Number</td>
+              <td>Professor</td>
+              <td>Schedule</td>
+              <td>Open Seats</td>
+              <td>Select</td>
             </tr>
         {% endif %}
         <tr id="childRow" class="section_row">

@@ -230,7 +230,6 @@ class SemesterStudent(models.Model):
         return self.name
 
 
-
 class SectionStudentManager(models.Manager):
 
     def get_queryset(self):
@@ -285,7 +284,7 @@ class SectionStudent(models.Model):
         (GRADED, GRADED),
         (DROP_REQUESTED, DROP_REQUESTED),
         (DROPPED, DROPPED),
-        (WAITLISTED,WAITLISTED),
+        (WAITLISTED, WAITLISTED),
     )
     status = models.CharField(
         'Student Status',
@@ -383,11 +382,13 @@ class Section(models.Model):
     @property
     def registered(self):
         return self.sectionstudent_set.exclude(status=SectionStudent.DROPPED).count()
+
     registered.fget.short_description = 'Count of Registered'
 
     @property
     def seats_remaining(self):
         return self.capacity - self.registered
+
     seats_remaining.fget.short_description = 'Seats Remaining'
 
     def __str__(self):
