@@ -278,7 +278,8 @@ class CourseTestCase(TestCase):
 class SectionTestCase(TestCase):
 
     @classmethod
-    def setUpTestData(self):
+    def setUpTestData(cls):
+        super(SectionTestCase, cls).setUpTestData()
         user = User.objects.create(username="prof", first_name="First", last_name="Last")
         major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
         course = Course.objects.create(major=major,
@@ -313,3 +314,42 @@ class SectionTestCase(TestCase):
     def test_section_name(self):
         section = Section.objects.get(hours="MW 1200-1400")
         self.assertEqual(section.name, "CPSC-101-1")
+
+
+class MajorTestCase(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        super(MajorTestCase, cls).setUpTestData()
+        MajorTestCase.m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        MajorTestCase.c1 = Course.objects.create(major=MajorTestCase.m1,
+                                                 catalog_number='400',
+                                                 title="ZZZ Intro To Test",
+                                                 credits_earned=3.0)
+        MajorTestCase.c2 = Course.objects.create(major=MajorTestCase.m1,
+                                                 catalog_number='300',
+                                                 title="AAA More Test",
+                                                 credits_earned=3.0)
+        MajorTestCase.c3 = Course.objects.create(major=MajorTestCase.m1,
+                                                 catalog_number='350',
+                                                 title="PPP Still More",
+                                                 credits_earned=3.0)
+        MajorTestCase.m1.courses_required.add(MajorTestCase.c1)
+        MajorTestCase.m1.courses_required.add(MajorTestCase.c2)
+        MajorTestCase.m1.courses_required.add(MajorTestCase.c3)
+        MajorTestCase.m1.save()
+
+    def test_major_abbrev(self):
+        m = Major.objects.get(name='Computer Science')
+        self.assertEqual(m.abbreviation, "CPSC")
+
+    def test_major_name(self):
+        m = Major.objects.get(abbreviation='CPSC')
+        self.assertEqual(m.name, "Computer Science")
+
+    def test_required_order(self):
+        m = Major.objects.get(abbreviation='CPSC')
+        self.assertEqual(m.courses_required.count(), 3)
+        self.assertEqual(m.courses_required.all()[0].catalog_number, '300')
+        self.assertEqual(m.courses_required.all()[1].catalog_number, '350')
+        self.assertEqual(m.courses_required.all()[2].catalog_number, '400')
