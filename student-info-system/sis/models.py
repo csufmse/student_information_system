@@ -222,6 +222,13 @@ class SemesterStudent(models.Model):
     class Meta:
         unique_together = (('semester', 'student'),)
 
+    @property
+    def name(self):
+        return str(self.student) + "@" + str(self.semester)
+
+    def __str__(self):
+        return self.name
+
 
 class SectionStudentManager(models.Manager):
 
@@ -260,7 +267,7 @@ class SectionStudent(models.Model):
     )
     grade = models.SmallIntegerField(
         choices=GRADES,
-        default=GRADE_F,
+        default=None,
         blank=True,
         null=True,
     )
@@ -270,12 +277,14 @@ class SectionStudent(models.Model):
     GRADED = 'Graded'
     DROP_REQUESTED = 'Drop Requested'
     DROPPED = 'Dropped'
+    WAITLISTED = 'Waitlisted'
     STATUSES = (
         (REGISTERED, REGISTERED),
         (AWAITING_GRADE, AWAITING_GRADE),
         (GRADED, GRADED),
         (DROP_REQUESTED, DROP_REQUESTED),
         (DROPPED, DROPPED),
+        (WAITLISTED, WAITLISTED),
     )
     status = models.CharField(
         'Student Status',
@@ -370,9 +379,17 @@ class Section(models.Model):
 
     semester_name.fget.short_description = 'Semester'
 
-    #  this will implemented as a custom manager -- BJM
+    @property
     def registered(self):
         return self.sectionstudent_set.exclude(status=SectionStudent.DROPPED).count()
+
+    registered.fget.short_description = 'Count of Registered'
+
+    @property
+    def seats_remaining(self):
+        return self.capacity - self.registered
+
+    seats_remaining.fget.short_description = 'Seats Remaining'
 
     def __str__(self):
         return self.name

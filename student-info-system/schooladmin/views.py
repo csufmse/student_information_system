@@ -197,7 +197,7 @@ def majors(request):
 def major(request, abbreviation):
     qs = Major.objects.filter(abbreviation=abbreviation)
     if qs.count() < 1:
-        return HttpResponse("No such major")
+        return HttpResponse("No such major", reason="Invalid Data", status=404)
     the_major = qs.get()
 
     pqueryset = User.objects.filter(professor__major=the_major)
@@ -238,7 +238,7 @@ def major_edit(request, abbreviation):
             messages.error(request, 'Please correct the error(s) below.')
     else:
         form = MajorEditForm(instance=the_major)
-    return render(request, 'schooladmin/major_edit.html', {'form': form})
+    return render(request, 'schooladmin/major_edit.html', {'major': the_major, 'form': form})
 
 
 @role_login_required('Admin')

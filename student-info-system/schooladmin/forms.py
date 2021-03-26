@@ -62,10 +62,10 @@ class MajorEditForm(forms.ModelForm):
     description = forms.CharField(max_length=256,
                                   required=False,
                                   widget=forms.Textarea(attrs={'rows': 3}))
-    courses_required = CourseChoiceField(queryset=Course.objects.all(),
+    courses_required = CourseChoiceField(queryset=Course.objects.all().order_by(
+        'major', 'catalog_number'),
                                          widget=forms.CheckboxSelectMultiple,
-                                         required=False,
-                                         to_field_name='a_prerequisite')
+                                         required=False)
 
     class Meta:
         model = Major
