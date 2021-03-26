@@ -12,7 +12,10 @@ def index(request):
 
 @role_login_required('Student')
 def current_schedule_view(request):
-    context = {'sections': request.user.student.sections.all, 'name': request.user.student.name}
+    context = {
+        'my_sections': request.user.student.sectionstudent_set.all,
+        'name': request.user.student.name
+    }
     return render(request, 'student/current_schedule.html', context)
 
 

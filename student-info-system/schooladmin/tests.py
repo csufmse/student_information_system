@@ -195,7 +195,7 @@ class AdminCoursesViewsTest(TestCase):
                                          hours="MW 1200-1400")
         user_s = User.objects.create(username="stud", first_name="First", last_name="Last")
         self.student = Student.objects.create(user=user_s, major=major)
-        self.student.sections.add(section)
+        SectionStudent.objects.create(student=self.student, section=section)
 
     # list views
     def test_courses_view_exists(self):
@@ -259,7 +259,7 @@ class AdminSectionViewsTest(TestCase):
                                          hours="MW 1200-1400")
         user_s = User.objects.create(username="stud", first_name="First", last_name="Last")
         self.student = Student.objects.create(user=user_s, major=major)
-        self.student.sections.add(section)
+        SectionStudent.objects.create(student=self.student, section=section)
 
     # list views
     def test_sections_view_exists(self):
@@ -317,7 +317,7 @@ class AdminSemesterViewsTest(TestCase):
                                          hours="MW 1200-1400")
         user_s = User.objects.create(username="stud", first_name="First", last_name="Last")
         self.student = Student.objects.create(user=user_s, major=major)
-        self.student.sections.add(section)
+        SectionStudent.objects.create(student=self.student, section=section)
 
     # list views
     def test_semesters_view_exists(self):

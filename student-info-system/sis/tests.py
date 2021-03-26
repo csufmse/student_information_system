@@ -71,7 +71,7 @@ class StudentTestCase_Basic(TestCase):
 
     def test_sections(self):
         student = StudentTestCase_Basic.stud
-        self.assertEqual(student.sections.count(), 0)
+        self.assertEqual(student.sectionstudent_set.count(), 0)
 
     def test_history(self):
         student = StudentTestCase_Basic.stud

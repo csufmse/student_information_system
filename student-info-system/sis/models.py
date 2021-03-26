@@ -51,10 +51,6 @@ class Student(models.Model):
                                        through='SemesterStudent',
                                        symmetrical=False,
                                        related_name='semester_students')
-    sections = models.ManyToManyField('Section',
-                                      through='SectionStudent',
-                                      symmetrical=False,
-                                      related_name='section_students')
 
     class Meta:
         ordering = ['user__username']

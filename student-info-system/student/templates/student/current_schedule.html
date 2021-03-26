@@ -3,7 +3,7 @@
 {% block title %}Student Portal: Current Schedule{% endblock %}
 {% block header_name %}Current Schedule{% endblock %}
 {% block content %}
-  {% if not sections %}
+  {% if not my_sections %}
      <p>No registered sections</p>
   {% else %}
     <table>
@@ -12,13 +12,15 @@
       <th>Section Number</th>
       <th>Professor</th>
       <th>Schedule</th>
+      <th>Status</th>
     </tr>
     <tr>
-    {% for section in sections %}
-      <td>{{section.course.name}}</td>
-      <td>{{section.number}}</td>
-      <td>{{section.professor.name}}</td>
-      <td>{{section.hours}}</td>
+    {% for ssect in my_sections %}
+      <td>{{ssect.section.course.name}}</td>
+      <td>{{ssect.section.number}}</td>
+      <td>{{ssect.section.professor.name}}</td>
+      <td>{{ssect.section.hours}}</td>
+      <td>{{ssect.status}}</td>
     </tr>
     {% endfor %}
     </table>
