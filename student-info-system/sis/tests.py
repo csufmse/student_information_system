@@ -19,25 +19,25 @@ def createProfessor(major=None, username=None):
     return prof
 
 
-class StudentTestCase_Trivial(TestCase):
+class StudentTestCase_Basic(TestCase):
 
     @classmethod
     def setUpTestData(self):
         m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
-        StudentTestCase_Trivial.major = m
+        StudentTestCase_Basic.major = m
 
-        StudentTestCase_Trivial.stud = createStudent(major=m, username='testUser')
+        StudentTestCase_Basic.stud = createStudent(major=m, username='testUser')
 
-        StudentTestCase_Trivial.c1 = Course.objects.create(major=m,
-                                                           catalog_number='101',
-                                                           title="required by major",
-                                                           credits_earned=3.0)
-        StudentTestCase_Trivial.c2 = Course.objects.create(major=m,
-                                                           catalog_number='102',
-                                                           title="required by major",
-                                                           credits_earned=3.0)
+        StudentTestCase_Basic.c1 = Course.objects.create(major=m,
+                                                         catalog_number='101',
+                                                         title="required by major",
+                                                         credits_earned=3.0)
+        StudentTestCase_Basic.c2 = Course.objects.create(major=m,
+                                                         catalog_number='102',
+                                                         title="required by major",
+                                                         credits_earned=3.0)
 
-        StudentTestCase_Trivial.semester = Semester.objects.create(
+        StudentTestCase_Basic.semester = Semester.objects.create(
             date_registration_opens=datetime.now(),
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
@@ -46,126 +46,136 @@ class StudentTestCase_Trivial(TestCase):
             year=2000)
 
     def test_class_level(self):
-        student = StudentTestCase_Trivial.stud
+        student = StudentTestCase_Basic.stud
         self.assertEqual(student.class_level(), 'Freshman')
 
     def test_gpa(self):
-        student = StudentTestCase_Trivial.stud
+        student = StudentTestCase_Basic.stud
         self.assertEqual(student.gpa(), 0.0)
 
     def test_credits_earned(self):
-        student = StudentTestCase_Trivial.stud
+        student = StudentTestCase_Basic.stud
         self.assertEqual(student.credits_earned(), 0)
 
     def test_major(self):
-        student = StudentTestCase_Trivial.stud
-        self.assertEqual(student.major, StudentTestCase_Trivial.major)
+        student = StudentTestCase_Basic.stud
+        self.assertEqual(student.major, StudentTestCase_Basic.major)
 
     def test_name(self):
-        student = StudentTestCase_Trivial.stud
+        student = StudentTestCase_Basic.stud
         self.assertEqual(student.name, 't estUser')
 
     def test_semesters(self):
-        student = StudentTestCase_Trivial.stud
+        student = StudentTestCase_Basic.stud
         self.assertEqual(student.semesters.count(), 0)
 
     def test_sections(self):
-        student = StudentTestCase_Trivial.stud
+        student = StudentTestCase_Basic.stud
         self.assertEqual(student.sections.count(), 0)
 
     def test_history(self):
-        student = StudentTestCase_Trivial.stud
+        student = StudentTestCase_Basic.stud
         self.assertEqual(student.course_history().count(), 0)
 
     def test_remaining_required(self):
-        student = StudentTestCase_Trivial.stud
+        student = StudentTestCase_Basic.stud
         self.assertEqual(student.remaining_required_courses().count(), 0)
 
 
-class StudentTestCase(TestCase):
+class StudentTestCase_History(TestCase):
 
     @classmethod
     def setUpTestData(self):
         m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
-        StudentTestCase.major = m
+        StudentTestCase_History.major = m
 
-        StudentTestCase.stud = createStudent(major=m, username='testUser')
+        StudentTestCase_History.stud = createStudent(major=m, username='testUser')
         p = createProfessor(major=m, username='tprof1')
 
         m_eng = Major.objects.create(abbreviation="ENGL", name="English")
 
-        StudentTestCase.c1 = Course.objects.create(major=m,
-                                                   catalog_number='101',
-                                                   title="required by major",
-                                                   credits_earned=3.0)
-        StudentTestCase.c2 = Course.objects.create(major=m,
-                                                   catalog_number='102',
-                                                   title="required by major",
-                                                   credits_earned=2.0)
-        StudentTestCase.c3 = Course.objects.create(major=m,
-                                                   catalog_number='103',
-                                                   title="required by major",
-                                                   credits_earned=6.0)
-        StudentTestCase.c4 = Course.objects.create(major=m,
-                                                   catalog_number='104',
-                                                   title="not required by major",
-                                                   credits_earned=2.0)
-        StudentTestCase.e1 = Course.objects.create(major=m_eng,
-                                                   catalog_number='218',
-                                                   title="required by CPSC 104",
-                                                   credits_earned=3.0)
-        StudentTestCase.e2 = Course.objects.create(major=m_eng,
-                                                   catalog_number='300',
-                                                   title="required by CPSC 102",
-                                                   credits_earned=3.0)
+        StudentTestCase_History.c1 = Course.objects.create(major=m,
+                                                           catalog_number='101',
+                                                           title="required by major",
+                                                           credits_earned=3.0)
+        StudentTestCase_History.c2 = Course.objects.create(major=m,
+                                                           catalog_number='102',
+                                                           title="required by major",
+                                                           credits_earned=2.0)
+        StudentTestCase_History.c3 = Course.objects.create(major=m,
+                                                           catalog_number='103',
+                                                           title="required by major",
+                                                           credits_earned=6.0)
+        StudentTestCase_History.c4 = Course.objects.create(major=m,
+                                                           catalog_number='104',
+                                                           title="not required by major",
+                                                           credits_earned=2.0)
+        StudentTestCase_History.e1 = Course.objects.create(major=m_eng,
+                                                           catalog_number='218',
+                                                           title="required by CPSC 104",
+                                                           credits_earned=3.0)
+        StudentTestCase_History.e2 = Course.objects.create(major=m_eng,
+                                                           catalog_number='300',
+                                                           title="required by CPSC 102",
+                                                           credits_earned=3.0)
 
         # set up required by major
-        m.courses_required.add(StudentTestCase.c1, StudentTestCase.c2, StudentTestCase.c3)
+        m.courses_required.add(StudentTestCase_History.c1, StudentTestCase_History.c2,
+                               StudentTestCase_History.c3)
         m.save()
 
         # set up course prereqs
-        CoursePrerequisite.objects.create(course=StudentTestCase.c2,
-                                          prerequisite=StudentTestCase.e2)
-        CoursePrerequisite.objects.create(course=StudentTestCase.c4,
-                                          prerequisite=StudentTestCase.e1)
+        CoursePrerequisite.objects.create(course=StudentTestCase_History.c2,
+                                          prerequisite=StudentTestCase_History.e2)
+        CoursePrerequisite.objects.create(course=StudentTestCase_History.c4,
+                                          prerequisite=StudentTestCase_History.e1)
 
-        StudentTestCase.semester = Semester.objects.create(date_registration_opens=datetime.now(),
-                                                           date_started=datetime.now(),
-                                                           date_last_drop=datetime.now(),
-                                                           date_ended=datetime.now(),
-                                                           semester='FA',
-                                                           year=2000)
+        StudentTestCase_History.semester = Semester.objects.create(
+            date_registration_opens=datetime.now(),
+            date_started=datetime.now(),
+            date_last_drop=datetime.now(),
+            date_ended=datetime.now(),
+            semester='FA',
+            year=2000)
 
-        StudentTestCase.stud.semesters.add(StudentTestCase.semester)
-        StudentTestCase.stud.save()
+        StudentTestCase_History.stud.semesters.add(StudentTestCase_History.semester)
+        StudentTestCase_History.stud.save()
 
-        StudentTestCase.sec1 = Section.objects.create(course=StudentTestCase.c1,
-                                                      semester=StudentTestCase.semester,
-                                                      professor=p)
-        StudentTestCase.sec2 = Section.objects.create(course=StudentTestCase.c2,
-                                                      semester=StudentTestCase.semester,
-                                                      professor=p)
-        StudentTestCase.sec3 = Section.objects.create(course=StudentTestCase.c3,
-                                                      semester=StudentTestCase.semester,
-                                                      professor=p)
-        StudentTestCase.sec4 = Section.objects.create(course=StudentTestCase.e2,
-                                                      semester=StudentTestCase.semester,
-                                                      professor=p)
-        StudentTestCase.studsec1 = SectionStudent.objects.create(section=StudentTestCase.sec1,
-                                                                 student=StudentTestCase.stud,
-                                                                 status=SectionStudent.GRADED,
-                                                                 grade=SectionStudent.GRADE_B)
-        StudentTestCase.studsec2 = SectionStudent.objects.create(section=StudentTestCase.sec2,
-                                                                 student=StudentTestCase.stud,
-                                                                 status=SectionStudent.GRADED,
-                                                                 grade=SectionStudent.GRADE_F)
-        StudentTestCase.studsec3 = SectionStudent.objects.create(section=StudentTestCase.sec3,
-                                                                 student=StudentTestCase.stud,
-                                                                 status=SectionStudent.DROPPED)
-        StudentTestCase.studsec4 = SectionStudent.objects.create(section=StudentTestCase.sec4,
-                                                                 student=StudentTestCase.stud,
-                                                                 status=SectionStudent.GRADED,
-                                                                 grade=SectionStudent.GRADE_C)
+        StudentTestCase_History.sec1 = Section.objects.create(
+            course=StudentTestCase_History.c1,
+            semester=StudentTestCase_History.semester,
+            professor=p)
+        StudentTestCase_History.sec2 = Section.objects.create(
+            course=StudentTestCase_History.c2,
+            semester=StudentTestCase_History.semester,
+            professor=p)
+        StudentTestCase_History.sec3 = Section.objects.create(
+            course=StudentTestCase_History.c3,
+            semester=StudentTestCase_History.semester,
+            professor=p)
+        StudentTestCase_History.sec4 = Section.objects.create(
+            course=StudentTestCase_History.e2,
+            semester=StudentTestCase_History.semester,
+            professor=p)
+        StudentTestCase_History.studsec1 = SectionStudent.objects.create(
+            section=StudentTestCase_History.sec1,
+            student=StudentTestCase_History.stud,
+            status=SectionStudent.GRADED,
+            grade=SectionStudent.GRADE_B)
+        StudentTestCase_History.studsec2 = SectionStudent.objects.create(
+            section=StudentTestCase_History.sec2,
+            student=StudentTestCase_History.stud,
+            status=SectionStudent.GRADED,
+            grade=SectionStudent.GRADE_F)
+        StudentTestCase_History.studsec3 = SectionStudent.objects.create(
+            section=StudentTestCase_History.sec3,
+            student=StudentTestCase_History.stud,
+            status=SectionStudent.DROPPED)
+        StudentTestCase_History.studsec4 = SectionStudent.objects.create(
+            section=StudentTestCase_History.sec4,
+            student=StudentTestCase_History.stud,
+            status=SectionStudent.GRADED,
+            grade=SectionStudent.GRADE_C)
         # c1: required, passed (B)
         # c2: required, failed
         # c3: required, (DROPPED)
@@ -178,62 +188,62 @@ class StudentTestCase(TestCase):
         self.assertEqual(student.gpa(), (3 * 3.0 + 0 * 2.0 + 2 * 3.0) / (3.0 + 2.0 + 3.0))
 
     def test_semesters(self):
-        student = StudentTestCase.stud
+        student = StudentTestCase_History.stud
         self.assertEqual(student.semesters.count(), 1)
 
     def test_history_all(self):
-        student = StudentTestCase.stud
+        student = StudentTestCase_History.stud
         history = student.course_history()
         self.assertEqual(history.count(), 4)
-        self.assertEqual(history[0].section, StudentTestCase.sec1)
-        self.assertEqual(history[1].section, StudentTestCase.sec2)
-        self.assertEqual(history[2].section, StudentTestCase.sec3)
-        self.assertEqual(history[3].section, StudentTestCase.sec4)
+        self.assertEqual(history[0].section, StudentTestCase_History.sec1)
+        self.assertEqual(history[1].section, StudentTestCase_History.sec2)
+        self.assertEqual(history[2].section, StudentTestCase_History.sec3)
+        self.assertEqual(history[3].section, StudentTestCase_History.sec4)
 
     def test_history_passed(self):
-        student = StudentTestCase.stud
+        student = StudentTestCase_History.stud
         history = student.course_history(passed=True)
         self.assertEqual(history.count(), 2)
-        self.assertEqual(history[0].section, StudentTestCase.sec1)
-        self.assertEqual(history[1].section, StudentTestCase.sec4)
+        self.assertEqual(history[0].section, StudentTestCase_History.sec1)
+        self.assertEqual(history[1].section, StudentTestCase_History.sec4)
 
     def test_history_graded(self):
-        student = StudentTestCase.stud
+        student = StudentTestCase_History.stud
         history = student.course_history(graded=True)
         self.assertEqual(history.count(), 3)
-        self.assertEqual(history[0].section, StudentTestCase.sec1)
-        self.assertEqual(history[1].section, StudentTestCase.sec2)
-        self.assertEqual(history[2].section, StudentTestCase.sec4)
+        self.assertEqual(history[0].section, StudentTestCase_History.sec1)
+        self.assertEqual(history[1].section, StudentTestCase_History.sec2)
+        self.assertEqual(history[2].section, StudentTestCase_History.sec4)
 
     def test_history_required(self):
-        student = StudentTestCase.stud
+        student = StudentTestCase_History.stud
         history = student.course_history(required=True)
         self.assertEqual(history.count(), 3)
-        self.assertEqual(history[0].section, StudentTestCase.sec1)
-        self.assertEqual(history[1].section, StudentTestCase.sec2)
-        self.assertEqual(history[2].section, StudentTestCase.sec3)
+        self.assertEqual(history[0].section, StudentTestCase_History.sec1)
+        self.assertEqual(history[1].section, StudentTestCase_History.sec2)
+        self.assertEqual(history[2].section, StudentTestCase_History.sec3)
 
     def test_history_prereqs_not_fulfilled(self):
-        student = StudentTestCase.stud
-        history = student.course_history(prereqs_for=StudentTestCase.c4)
+        student = StudentTestCase_History.stud
+        history = student.course_history(prereqs_for=StudentTestCase_History.c4)
         self.assertEqual(history.count(), 0)
 
     def test_history_prereqs_fulfilled(self):
-        student = StudentTestCase.stud
-        history = student.course_history(prereqs_for=StudentTestCase.c2)
+        student = StudentTestCase_History.stud
+        history = student.course_history(prereqs_for=StudentTestCase_History.c2)
         self.assertEqual(history.count(), 1)
-        self.assertEqual(history[0].section, StudentTestCase.sec4)
+        self.assertEqual(history[0].section, StudentTestCase_History.sec4)
 
     def test_credits_earned(self):
-        student = StudentTestCase.stud
+        student = StudentTestCase_History.stud
         self.assertEqual(student.credits_earned(), 3.0 + 3.0)
 
     def test_remaining_required(self):
-        student = StudentTestCase.stud
+        student = StudentTestCase_History.stud
         rem = student.remaining_required_courses()
         self.assertEqual(rem.count(), 2)
-        self.assertEqual(rem[0], StudentTestCase.c2)
-        self.assertEqual(rem[1], StudentTestCase.c3)
+        self.assertEqual(rem[0], StudentTestCase_History.c2)
+        self.assertEqual(rem[1], StudentTestCase_History.c3)
 
 
 class ProfessorTestCase(TestCase):
