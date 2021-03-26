@@ -15,18 +15,24 @@ class StudentTestCase(TestCase):
 
         StudentTestCase.major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
 
-        StudentTestCase.u_stud = User.objects.create(username="testUser", first_name="First", last_name="Last")
-        StudentTestCase.stud = Student.objects.create(user=StudentTestCase.u_stud, major=StudentTestCase.major)
+        StudentTestCase.u_stud = User.objects.create(username="testUser",
+                                                     first_name="First",
+                                                     last_name="Last")
+        StudentTestCase.stud = Student.objects.create(user=StudentTestCase.u_stud,
+                                                      major=StudentTestCase.major)
 
-        StudentTestCase.u_prof = User.objects.create(username="prof", first_name="First", last_name="Last")
-        StudentTestCase.prof = Professor.objects.create(user=StudentTestCase.u_prof, major=StudentTestCase.major)
+        StudentTestCase.u_prof = User.objects.create(username="prof",
+                                                     first_name="First",
+                                                     last_name="Last")
+        StudentTestCase.prof = Professor.objects.create(user=StudentTestCase.u_prof,
+                                                        major=StudentTestCase.major)
 
         StudentTestCase.sem = Semester.objects.create(date_registration_opens=datetime.now(),
-                                           date_started=datetime.now(),
-                                           date_last_drop=datetime.now(),
-                                           date_ended=datetime.now(),
-                                           semester='FA',
-                                           year=2000)
+                                                      date_started=datetime.now(),
+                                                      date_last_drop=datetime.now(),
+                                                      date_ended=datetime.now(),
+                                                      semester='FA',
+                                                      year=2000)
 
         StudentTestCase.stud.semesters.add(StudentTestCase.sem)
         StudentTestCase.stud.save()
@@ -54,10 +60,9 @@ class StudentTestCase(TestCase):
                                                     hours="WF 0900-0930")
 
         StudentTestCase.ss1 = SectionStudent.objects.create(student=StudentTestCase.stud,
-                           section=StudentTestCase.s1,
-                           grade=None,
-                           status=SectionStudent.REGISTERED)
-
+                                                            section=StudentTestCase.s1,
+                                                            grade=None,
+                                                            status=SectionStudent.REGISTERED)
 
     def test_class_level(self):
         student = (User.objects.get(username="testUser")).student
@@ -89,7 +94,6 @@ class StudentTestCase(TestCase):
         StudentTestCase.ss1.save()
         student = Student.objects.get(user__username="testUser")
         self.assertEqual(student.gpa(), 3.0)
-
 
 
 class ProfessorTestCase(TestCase):
@@ -161,25 +165,25 @@ class SectionTestCase(TestCase):
         section = Section.objects.get(hours="MW 1200-1400")
         self.assertEqual(section.name, "CPSC-101-1")
 
+
 class MajorTestCase(TestCase):
 
     @classmethod
     def setUpTestData(cls):
         super(MajorTestCase, cls).setUpTestData()
-        MajorTestCase.m1 = Major.objects.create(abbreviation="CPSC",
-                                                      name="Computer Science")
+        MajorTestCase.m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")
         MajorTestCase.c1 = Course.objects.create(major=MajorTestCase.m1,
-                                                       catalog_number='400',
-                                                       title="ZZZ Intro To Test",
-                                                       credits_earned=3.0)
+                                                 catalog_number='400',
+                                                 title="ZZZ Intro To Test",
+                                                 credits_earned=3.0)
         MajorTestCase.c2 = Course.objects.create(major=MajorTestCase.m1,
-                                                       catalog_number='300',
-                                                       title="AAA More Test",
-                                                       credits_earned=3.0)
+                                                 catalog_number='300',
+                                                 title="AAA More Test",
+                                                 credits_earned=3.0)
         MajorTestCase.c3 = Course.objects.create(major=MajorTestCase.m1,
-                                                       catalog_number='350',
-                                                       title="PPP Still More",
-                                                       credits_earned=3.0)
+                                                 catalog_number='350',
+                                                 title="PPP Still More",
+                                                 credits_earned=3.0)
         MajorTestCase.m1.courses_required.add(MajorTestCase.c1)
         MajorTestCase.m1.courses_required.add(MajorTestCase.c2)
         MajorTestCase.m1.courses_required.add(MajorTestCase.c3)
@@ -199,4 +203,3 @@ class MajorTestCase(TestCase):
         self.assertEqual(m.courses_required.all()[0].catalog_number, '300')
         self.assertEqual(m.courses_required.all()[1].catalog_number, '350')
         self.assertEqual(m.courses_required.all()[2].catalog_number, '400')
-

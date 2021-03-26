@@ -143,7 +143,6 @@ class TranscriptRequest(models.Model):
         unique_together = (('student', 'date_requested'),)
         ordering = ['student']
 
-
     def __str__(self):
         return self.student.name + '@' + str(self.date_requested)
 
@@ -158,7 +157,7 @@ class Course(models.Model):
 
     class Meta:
         unique_together = (('major', 'catalog_number'),)
-        ordering = ['major','catalog_number','title']
+        ordering = ['major', 'catalog_number', 'title']
 
     @property
     def major_name(self):
@@ -190,7 +189,7 @@ class CoursePrerequisite(models.Model):
 
     class Meta:
         unique_together = (('course', 'prerequisite'),)
-        ordering = ['course','prerequisite']
+        ordering = ['course', 'prerequisite']
 
     def __str__(self):
         return self.course.name + ' requires ' + self.prerequisite.name
@@ -235,7 +234,7 @@ class SemesterStudent(models.Model):
 
     class Meta:
         unique_together = (('semester', 'student'),)
-        ordering = ['semester','student']
+        ordering = ['semester', 'student']
 
     @property
     def name(self):
@@ -310,7 +309,7 @@ class SectionStudent(models.Model):
 
     class Meta:
         unique_together = (('section', 'student'),)
-        ordering = ['section','student']
+        ordering = ['section', 'student']
 
     @property
     def professor(self):
@@ -366,7 +365,7 @@ class Section(models.Model):
 
     class Meta:
         unique_together = (('course', 'semester', 'number'),)
-        ordering = ['semester','course','number']
+        ordering = ['semester', 'course', 'number']
 
     @property
     def name(self):
