@@ -8,3 +8,4 @@ django-phone-field==1.8.1
 django-tables2==2.3.4
 django-bootstrap3==14.2.0
 django-filter==2.4.0
+isort==5.8.0

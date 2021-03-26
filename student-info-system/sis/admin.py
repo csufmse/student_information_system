@@ -1,8 +1,9 @@
 from django.contrib import admin
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
-from .models import (Admin, Student, Professor, Major, TranscriptRequest, Course, Semester,
-                     Section, SectionStudent, CoursePrerequisite)
+
+from .models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
+                     Semester, SemesterStudent, Student, TranscriptRequest)
 
 admin.site.site_title = "CSUF Student Information System Site Admin"
 admin.site.site_header = "Administrative Access to ALL Data"
@@ -25,7 +26,7 @@ admin.site.register(Admin, AdminAdmin)
 
 
 class StudentAdmin(admin.ModelAdmin):
-    list_display = ('user', 'name', 'major', 'gpa', 'class_level')
+    list_display = ('user', 'name', 'major')
 
 
 admin.site.register(Student, StudentAdmin)
@@ -79,6 +80,13 @@ class SectionStudentAdmin(admin.ModelAdmin):
 
 
 admin.site.register(SectionStudent, SectionStudentAdmin)
+
+
+class SemesterStudentAdmin(admin.ModelAdmin):
+    list_display = ('semester', 'student')
+
+
+admin.site.register(SemesterStudent, SemesterStudentAdmin)
 
 
 class CoursePrerequisiteAdmin(admin.ModelAdmin):

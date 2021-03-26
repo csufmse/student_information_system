@@ -1,26 +1,28 @@
 from datetime import date
-from django.http import HttpResponse
-from django.shortcuts import render, redirect
-from django_tables2 import RequestConfig
+
 from django.contrib import messages
 from django.contrib.auth.forms import AdminPasswordChangeForm
-from django.forms.models import model_to_dict
-
 from django.contrib.auth.models import User
+from django.forms.models import model_to_dict
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
+from django_tables2 import RequestConfig
+
 from sis.authentication_helpers import role_login_required
-from sis.models import (Student, Admin, Professor, Major, Course, CoursePrerequisite, Semester,
-                        Section)
-from .forms import (CustomUserCreationForm, UserEditForm, MajorCreationForm, MajorEditForm,
-                    SectionCreationForm, SectionEditForm, SemesterCreationForm, CourseEditForm,
-                    CourseCreationForm)
-from .tables import (UsersTable, MajorsTable, BasicProfsTable, BasicCoursesTable, SemestersTable,
-                     CoursesTable, SectionsTable, SectionStudentsTable)
-from .filters import UserFilter, MajorFilter, SemesterFilter, SectionFilter, CourseFilter
+from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
+                        Student)
+
+from .filters import (CourseFilter, MajorFilter, SectionFilter, SemesterFilter, UserFilter)
+from .forms import (CourseCreationForm, CourseEditForm, CustomUserCreationForm, MajorCreationForm,
+                    MajorEditForm, SectionCreationForm, SectionEditForm, SemesterCreationForm,
+                    UserEditForm)
+from .tables import (BasicCoursesTable, BasicProfsTable, CoursesTable, MajorsTable, SectionsTable,
+                     SectionStudentsTable, SemestersTable, UsersTable)
 
 
 @role_login_required('Admin')
 def index(request):
-    return render(request, 'home_admin.html')
+    return render(request, 'schooladmin/home_admin.html')
 
 
 # USERS
@@ -31,9 +33,9 @@ def users(request):
     queryset = User.annotated().all()
     f = UserFilter(request.GET, queryset=queryset)
     has_filter = any(field in request.GET for field in set(f.get_fields()))
-    table = UsersTable(f.qs)
+    table = UsersTable(list(f.qs))
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
-    return render(request, 'users.html', {
+    return render(request, 'schooladmin/users.html', {
         'table': table,
         'filter': f,
         'has_filter': has_filter,
@@ -54,7 +56,7 @@ def user(request, userid):
             the_user.is_active = True
             the_user.save()
         return redirect('schooladmin:users')
-    return render(request, 'user.html', {'user': the_user})
+    return render(request, 'schooladmin/user.html', {'user': the_user})
 
 
 @role_login_required('Admin')
@@ -74,7 +76,10 @@ def user_change_password(request, userid):
             messages.error(request, 'Please correct the error below.')
     else:
         form = AdminPasswordChangeForm(request.user)
-    return render(request, 'user_change_password.html', {'user': the_user, 'form': form})
+    return render(request, 'schooladmin/user_change_password.html', {
+        'user': the_user,
+        'form': form
+    })
 
 
 @role_login_required('Admin')
@@ -139,7 +144,7 @@ def user_edit(request, userid):
         elif studs.count() > 0:
             dict['major'] = studs[0].major
         form = UserEditForm(dict)
-    return render(request, 'user_edit.html', {
+    return render(request, 'schooladmin/user_edit.html', {
         'user': the_user,
         'original_role': the_user.access_role(),
         'form': form
@@ -168,7 +173,7 @@ def user_new(request):
             return redirect('schooladmin:users')
     else:
         form = CustomUserCreationForm()
-    return render(request, 'user_new.html', {'form': form})
+    return render(request, 'schooladmin/user_new.html', {'form': form})
 
 
 # MAJORS
@@ -179,9 +184,9 @@ def majors(request):
     queryset = Major.objects.all()
     f = MajorFilter(request.GET, queryset=queryset)
     has_filter = any(field in request.GET for field in set(f.get_fields()))
-    table = MajorsTable(f.qs)
+    table = MajorsTable(list(f.qs))
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
-    return render(request, 'majors.html', {
+    return render(request, 'schooladmin/majors.html', {
         'table': table,
         'filter': f,
         'has_filter': has_filter,
@@ -207,7 +212,7 @@ def major(request, abbreviation):
     course_table = BasicCoursesTable(cqueryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(course_table)
 
-    return render(request, 'major.html', {
+    return render(request, 'schooladmin/major.html', {
         'major': the_major,
         'profs': prof_table,
         'required': required_table,
@@ -233,7 +238,7 @@ def major_edit(request, abbreviation):
             messages.error(request, 'Please correct the error(s) below.')
     else:
         form = MajorEditForm(instance=the_major)
-    return render(request, 'major_edit.html', {'form': form})
+    return render(request, 'schooladmin/major_edit.html', {'form': form})
 
 
 @role_login_required('Admin')
@@ -245,7 +250,7 @@ def major_new(request):
             return redirect('schooladmin:majors')
     else:
         form = MajorCreationForm()
-    return render(request, 'major_new.html', {'form': form})
+    return render(request, 'schooladmin/major_new.html', {'form': form})
 
 
 @role_login_required('Admin')
@@ -253,9 +258,9 @@ def courses(request):
     queryset = Course.objects.all()
     f = CourseFilter(request.GET, queryset=queryset)
     has_filter = any(field in request.GET for field in set(f.get_fields()))
-    table = CoursesTable(f.qs)
+    table = CoursesTable(list(f.qs))
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
-    return render(request, 'courses.html', {
+    return render(request, 'schooladmin/courses.html', {
         'table': table,
         'filter': f,
         'has_filter': has_filter,
@@ -277,7 +282,7 @@ def course(request, courseid):
     ntable = BasicCoursesTable(nqueryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(ntable)
 
-    return render(request, 'course.html', {
+    return render(request, 'schooladmin/course.html', {
         'course': the_course,
         'prereqs': ptable,
         'needed_by': ntable,
@@ -300,7 +305,7 @@ def course_edit(request, courseid):
             messages.error(request, 'Please correct the error(s) below.')
     else:
         form = CourseEditForm(instance=the_course)
-    return render(request, 'course_edit.html', {'form': form})
+    return render(request, 'schooladmin/course_edit.html', {'form': form})
 
 
 @role_login_required('Admin')
@@ -312,7 +317,7 @@ def course_new(request):
             return redirect('schooladmin:courses')
     else:
         form = CourseCreationForm()
-    return render(request, 'course_new.html', {'form': form})
+    return render(request, 'schooladmin/course_new.html', {'form': form})
 
 
 @role_login_required('Admin')
@@ -328,19 +333,17 @@ def course_section_new(request, courseid):
         form_values['semester'] = semesters[0]
 
     form = SectionCreationForm(form_values)
-    return render(request, 'section_new.html', {'form': form})
+    return render(request, 'schooladmin/section_new.html', {'form': form})
 
 
 @role_login_required('Admin')
 def semesters(request):
-    if request.user.access_role() != 'Admin':
-        return redirect('sis:access_denied')
     queryset = Semester.objects.all()
     f = SemesterFilter(request.GET, queryset=queryset)
     has_filter = any(field in request.GET for field in set(f.get_fields()))
-    table = SemestersTable(f.qs)
+    table = SemestersTable(list(f.qs))
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
-    return render(request, 'semesters.html', {
+    return render(request, 'schooladmin/semesters.html', {
         'table': table,
         'filter': f,
         'has_filter': has_filter,
@@ -349,8 +352,6 @@ def semesters(request):
 
 @role_login_required('Admin')
 def semester(request, semester_id):
-    if request.user.access_role() != 'Admin':
-        return redirect('sis:access_denied')
     qs = Semester.objects.filter(id=semester_id)
     if qs.count() < 1:
         return HttpResponse("No such semester")
@@ -360,10 +361,25 @@ def semester(request, semester_id):
     sections_table = SectionsTable(sections_qs)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
 
-    return render(request, 'semester.html', {
+    return render(request, 'schooladmin/semester.html', {
         'semester': the_semester,
         'sections': sections_table
     })
+
+
+@role_login_required('Admin')
+def semester_edit(request, semester_id):
+    qs = Semester.objects.filter(id=semester_id)
+    if qs.count() < 1:
+        return HttpResponse("No such semester")
+    the_semester = qs.get()
+
+    return HttpResponse(f'Sorry, no editing of semester {the_semester.id} yet.')
+
+
+@role_login_required('Admin')
+def semester_new(request):
+    return HttpResponse(f'Sorry, no new semesters yet.')
 
 
 @role_login_required('Admin')
@@ -374,13 +390,11 @@ def semester_section_new(request, semester_id):
     the_semester = qs.get()
     form_values = {'semester': the_semester}
     form = SectionCreationForm(form_values)
-    return render(request, 'section_new.html', {'form': form})
+    return render(request, 'schooladmin/section_new.html', {'form': form})
 
 
 @role_login_required('Admin')
 def new_semester(request):
-    if request.user.access_role() != 'Admin':
-        return redirect('sis:access_denied')
     if request.method == 'POST':
         form = SemesterCreationForm(request.POST)
         if form.is_valid():
@@ -388,7 +402,7 @@ def new_semester(request):
             return redirect('schooladmin:semesters')
     else:
         form = SemesterCreationForm()
-    return render(request, 'new_semester.html', {'form': form})
+    return render(request, 'schooladmin/new_semester.html', {'form': form})
 
 
 @role_login_required('Admin')
@@ -396,9 +410,9 @@ def sections(request):
     queryset = Section.objects.all()
     f = SectionFilter(request.GET, queryset=queryset)
     has_filter = any(field in request.GET for field in set(f.get_fields()))
-    table = SectionsTable(f.qs)
+    table = SectionsTable(list(f.qs))
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
-    return render(request, 'sections.html', {
+    return render(request, 'schooladmin/sections.html', {
         'table': table,
         'filter': f,
         'has_filter': has_filter,
@@ -416,7 +430,10 @@ def section(request, sectionid):
     student_table = SectionStudentsTable(student_qs)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(student_table)
 
-    return render(request, 'section.html', {'section': the_section, 'students': student_table})
+    return render(request, 'schooladmin/section.html', {
+        'section': the_section,
+        'students': student_table
+    })
 
 
 @role_login_required('Admin')
@@ -437,7 +454,10 @@ def section_edit(request, sectionid):
             messages.error(request, 'Please correct the error(s) below.')
     else:
         form = SectionEditForm(instance=the_section)
-    return render(request, 'section_edit.html', {'form': form, 'section': the_section})
+    return render(request, 'schooladmin/section_edit.html', {
+        'form': form,
+        'section': the_section
+    })
 
 
 @role_login_required('Admin')
@@ -449,4 +469,4 @@ def section_new(request):
             return redirect('schooladmin:sections')
     else:
         form = SectionCreationForm(request.GET)
-    return render(request, 'section_new.html', {'form': form})
+    return render(request, 'schooladmin/section_new.html', {'form': form})

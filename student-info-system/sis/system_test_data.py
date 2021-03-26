@@ -1,7 +1,9 @@
 from datetime import date
+
 from django.contrib.auth.models import User
-from .models import (Student, Professor, Major, TranscriptRequest, Course, CoursePrerequisite,
-                     Semester, SectionStudent, Section)
+
+from .models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
+                     Semester, Student, TranscriptRequest)
 
 # Creation of test data (for developing, demoing, maybe acceptance testing)
 #
@@ -95,32 +97,32 @@ class Courses():
     @classmethod
     def create(cls) -> None:
         Courses.cpsc101 = Course(major=Majors.cpsc,
-                                 catalogNumber='101',
+                                 catalog_number='101',
                                  title='Intro to Programming',
                                  credits_earned=3.0)
         Courses.cpsc101.save()
         Courses.cpsc345 = Course(major=Majors.cpsc,
-                                 catalogNumber='345',
+                                 catalog_number='345',
                                  title='Data Structures',
                                  credits_earned=3.0)
         Courses.cpsc345.save()
         Courses.engl218 = Course(major=Majors.engl,
-                                 catalogNumber='218',
+                                 catalog_number='218',
                                  title='Technical Writing',
                                  credits_earned=3.0)
         Courses.engl218.save()
         Courses.engl255 = Course(major=Majors.engl,
-                                 catalogNumber='255',
+                                 catalog_number='255',
                                  title='Bible as Literature',
                                  credits_earned=3.0)
         Courses.engl255.save()
         Courses.phys405 = Course(major=Majors.phys,
-                                 catalogNumber='405',
+                                 catalog_number='405',
                                  title='Quantum Mechanics',
                                  credits_earned=4.0)
         Courses.phys405.save()
         Courses.phys406 = Course(major=Majors.phys,
-                                 catalogNumber='406',
+                                 catalog_number='406',
                                  title='Advanced Quantum Mechanics',
                                  credits_earned=4.0)
         Courses.phys406.save()
@@ -128,12 +130,12 @@ class Courses():
     @classmethod
     def fetch(cls) -> None:
         Majors.fetch()
-        Courses.cpsc101 = Course.objects.filter(major=Majors.cpsc, catalogNumber='101').get()
-        Courses.cpsc345 = Course.objects.filter(major=Majors.cpsc, catalogNumber='345').get()
-        Courses.engl218 = Course.objects.filter(major=Majors.engl, catalogNumber='218').get()
-        Courses.engl255 = Course.objects.filter(major=Majors.engl, catalogNumber='255').get()
-        Courses.phys405 = Course.objects.filter(major=Majors.phys, catalogNumber='405').get()
-        Courses.phys406 = Course.objects.filter(major=Majors.phys, catalogNumber='406').get()
+        Courses.cpsc101 = Course.objects.filter(major=Majors.cpsc, catalog_number='101').get()
+        Courses.cpsc345 = Course.objects.filter(major=Majors.cpsc, catalog_number='345').get()
+        Courses.engl218 = Course.objects.filter(major=Majors.engl, catalog_number='218').get()
+        Courses.engl255 = Course.objects.filter(major=Majors.engl, catalog_number='255').get()
+        Courses.phys405 = Course.objects.filter(major=Majors.phys, catalog_number='405').get()
+        Courses.phys406 = Course.objects.filter(major=Majors.phys, catalog_number='406').get()
 
 
 class Professors():

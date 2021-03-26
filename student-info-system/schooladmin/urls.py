@@ -1,4 +1,4 @@
-from django.urls import path, include
+from django.urls import include, path
 
 from . import views
 
@@ -25,9 +25,11 @@ urlpatterns = [
     path('section/<int:sectionid>', views.section, name='section'),
     path('section_new', views.section_new, name='section_new'),
     path('semesters', views.semesters, name='semesters'),
+    path('semester_new', views.semester_new, name='semester_new'),
     path('semester/<int:semester_id>/section_new',
          views.semester_section_new,
          name='semester_section_new'),
+    path('semester/<int:semester_id>/edit', views.semester_edit, name='semester_edit'),
     path('semester/<int:semester_id>', views.semester, name='semester'),
     path('new_semester', views.new_semester, name='new_semester'),
 ]
