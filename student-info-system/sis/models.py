@@ -28,6 +28,9 @@ class UpperField(models.CharField):
 class Admin(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
 
+    class Meta:
+        ordering = ['user__username']
+
     @property
     def username(self):
         return self.user.username
@@ -52,6 +55,9 @@ class Student(models.Model):
                                       through='SectionStudent',
                                       symmetrical=False,
                                       related_name='section_students')
+
+    class Meta:
+        ordering = ['user__username']
 
     def credits_earned(self):
         completed = SectionStudent.objects.filter(
@@ -100,6 +106,9 @@ class Professor(models.Model):
     # Professor's department
     major = models.ForeignKey('Major', on_delete=models.CASCADE, blank=True, null=True)
 
+    class Meta:
+        ordering = ['user__username']
+
     @property
     def name(self):
         return self.user.first_name + ' ' + self.user.last_name
@@ -132,6 +141,8 @@ class TranscriptRequest(models.Model):
 
     class Meta:
         unique_together = (('student', 'date_requested'),)
+        ordering = ['student']
+
 
     def __str__(self):
         return self.student.name + '@' + str(self.date_requested)
@@ -147,6 +158,7 @@ class Course(models.Model):
 
     class Meta:
         unique_together = (('major', 'catalog_number'),)
+        ordering = ['major','catalog_number','title']
 
     @property
     def major_name(self):
@@ -178,6 +190,7 @@ class CoursePrerequisite(models.Model):
 
     class Meta:
         unique_together = (('course', 'prerequisite'),)
+        ordering = ['course','prerequisite']
 
     def __str__(self):
         return self.course.name + ' requires ' + self.prerequisite.name
@@ -206,6 +219,7 @@ class Semester(models.Model):
 
     class Meta:
         unique_together = (('semester', 'year'),)
+        ordering = ['date_registration_opens']
 
     @property
     def name(self):
@@ -221,6 +235,7 @@ class SemesterStudent(models.Model):
 
     class Meta:
         unique_together = (('semester', 'student'),)
+        ordering = ['semester','student']
 
 
 class SectionStudentManager(models.Manager):
@@ -286,6 +301,7 @@ class SectionStudent(models.Model):
 
     class Meta:
         unique_together = (('section', 'student'),)
+        ordering = ['section','student']
 
     @property
     def professor(self):
@@ -341,6 +357,7 @@ class Section(models.Model):
 
     class Meta:
         unique_together = (('course', 'semester', 'number'),)
+        ordering = ['semester','course','number']
 
     @property
     def name(self):
