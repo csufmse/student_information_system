@@ -46,7 +46,7 @@
 {% block content %}
 <dl class="dl-horizontal">
   <dt>Major</dt>
-  <dd>{{ course.major.abbreviation }}</dd>
+    <dd><a href="{% url 'schooladmin:major' abbreviation=course.major %}">{{ course.major }}: {{  course.major.name }}</a></dd>
   <dt>Catalog Number</dt>
   <dd>{{ course.catalog_number }}</dd>
   <dt>Title</dt>
@@ -57,14 +57,28 @@
   <dd>{{ course.credits_earned }}</dd>
 </dl>
 
-    <div id="Prereqs">
+    <div id="Prereqs" class="data-table">
         <h3>Has Prerequisites:</h3>
     {% render_table prereqs 'django_tables2/bootstrap.html' %}
     </div>
 
-    <div id="IsPrereq">
         <h3>Is Prerequisite For:</h3>
+    <div id="IsPrereq" class="data-table">
         {% render_table needed_by 'django_tables2/bootstrap.html' %}
+    </div>
+
+        <h3>Sections:</h3>
+    <div id="Sections" class="data-table-alt">
+        {% if filter %}
+            <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
+            {% bootstrap_form filter.form layout='inline' %}
+            <button class="btn btn-primary">Filter</button>
+            {% if has_filter %}
+              <a  class="btn btn-success" href="{%  url 'schooladmin:sections' %}">Clear</a>
+            {% endif %}
+            </form>
+        {% endif %}
+        {% render_table sections 'django_tables2/bootstrap.html' %}
     </div>
 
     <input
@@ -84,24 +98,37 @@
         value="Edit Course"
     />
 <script>
-function selectCourse(evt) {
-    var id = this.getAttribute('data-id');
-    var url = "/schooladmin/course/"+id;
-    open(url,'_self');
-}
-
 function edit_course(evt) {
-    open('/schooladmin/course/{{ course.id }}/edit','_self');
+    var url = "{% url 'schooladmin:course_edit' courseid=course.id %}";
+    open(url,'_self');
     return false;
 }
 
 function new_section(evt) {
-    open('/schooladmin/course/{{ course.id }}/section_new','_self');
+    var url = "{% url 'schooladmin:course_section_new' courseid=course.id %}";
+    open(url,'_self');
     return false;
 }
 
+function selectSection(evt) {
+    var id = this.getAttribute('data-id');
+    var url = "{% url 'schooladmin:section' sectionid=1234599 %}".replace(/1234599/, id.toString());
+    open(url,'_self');
+}
+
+function selectCourse(evt) {
+    var id = this.getAttribute('data-id');
+    var url = "{% url 'schooladmin:course' courseid=1234599 %}".replace(/1234599/, id.toString());
+    open(url,'_self');
+}
+
+var tablerows = document.getElementsByClassName('section_row')
+for (var i=0, len=tablerows.length; i<len; i=i+1) {
+    tablerows[i].addEventListener("click", selectSection, false);
+}
+
 // Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('crow')
+var tablerows = document.getElementsByClassName('course_row')
 for (var i=0, len=tablerows.length; i<len; i=i+1) {
     tablerows[i].addEventListener("click", selectCourse, false);
 }

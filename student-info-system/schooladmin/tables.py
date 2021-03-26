@@ -3,8 +3,6 @@ from django.contrib.auth.models import User
 
 from sis.models import *
 
-# from sis.models import Major, Course, Professor
-
 
 # For User names we want to show the full name ("first last") but sort by "last, first"
 class NameColumn(tables.Column):
@@ -109,7 +107,7 @@ class UsersTable(tables.Table):
         template_name = "django_tables2/bootstrap.html"
         fields = ('username', 'name', 'student_major', 'student_gpa', 'credits_earned',
                   'class_level', 'professor_department', 'access_role', 'is_active')
-        row_attrs = {'class': 'urow', 'data-id': lambda record: record.pk}
+        row_attrs = {'class': 'user_row', 'data-id': lambda record: record.pk}
 
 
 class MajorsTable(tables.Table):
@@ -148,37 +146,26 @@ class BasicProfsTable(tables.Table):
         template_name = "django_tables2/bootstrap.html"
         fields = ('username', 'name')
         attrs = {"class": 'bprof'}
-        row_attrs = {'class': 'prow', 'data-id': lambda record: record.pk}
+        row_attrs = {'class': 'prof_row', 'data-id': lambda record: record.pk}
 
 
 class BasicCoursesTable(tables.Table):
-    major = tables.Column(attrs={
+    major = tables.Column(attrs={'th': {'class': 'major_col'}, 'td': {'class': 'major_cell'}})
+    catalog_number = tables.Column(attrs={
         'th': {
-            'style': 'text-align: center;'
+            'class': 'catnumber_col'
         },
         'td': {
-            'align': 'center',
-            'width': '70px'
+            'class': 'catnumber_cell'
         }
     })
-    catalog_number = tables.Column(verbose_name='Number',
-                                   attrs={
-                                       'th': {
-                                           'style': 'text-align: center;'
-                                       },
-                                       'td': {
-                                           'align': 'center',
-                                           'width': '60px'
-                                       }
-                                   })
-    title = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    title = tables.Column(attrs={'th': {'class': 'course_col'}, 'td': {'class': 'course_cell'}})
     credits_earned = tables.Column(attrs={
         'th': {
-            'style': 'text-align: center;'
+            'class': 'credits_col'
         },
         'td': {
-            'align': 'center',
-            'width': '75px'
+            'class': 'credits_cell'
         }
     })
 
@@ -187,7 +174,7 @@ class BasicCoursesTable(tables.Table):
         template_name = "django_tables2/bootstrap.html"
         fields = ('major', 'catalog_number', 'title', 'credits_earned')
         attrs = {"class": 'bcourse'}
-        row_attrs = {'class': 'crow', 'data-id': lambda record: record.pk}
+        row_attrs = {'class': 'course_row', 'data-id': lambda record: record.pk}
 
 
 class SemestersTable(tables.Table):
@@ -208,24 +195,30 @@ class SemestersTable(tables.Table):
 
 
 class CoursesTable(tables.Table):
-    major = tables.Column(attrs={
+    major = tables.Column(attrs={'th': {'class': 'major_col'}, 'td': {'class': 'major_cell'}})
+    catalog_number = tables.Column(attrs={
         'th': {
-            'class': 'mcol',
-            'style': 'text-align: center;'
+            'class': 'catnumber_col'
         },
         'td': {
-            'class': 'mcell'
+            'class': 'catnumber_cell'
         }
     })
-    catalog_number = tables.Column(attrs={'th': {'class': 'cncol'}, 'td': {'class': 'cncell'}})
-    title = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
-    credits_earned = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    title = tables.Column(attrs={'th': {'class': 'course_col'}, 'td': {'class': 'course_cell'}})
+    credits_earned = tables.Column(attrs={
+        'th': {
+            'class': 'credits_col'
+        },
+        'td': {
+            'class': 'credits_cell'
+        }
+    })
 
     class Meta:
         model = Course
         template_name = "django_tables2/bootstrap.html"
         fields = ('major', 'catalog_number', 'title', 'credits_earned')
-        row_attrs = {'class': 'crow', 'data-id': lambda record: record.pk}
+        row_attrs = {'class': 'course_row', 'data-id': lambda record: record.pk}
 
 
 class SectionsTable(tables.Table):
@@ -234,10 +227,10 @@ class SectionsTable(tables.Table):
     number = tables.Column(attrs={'th': {'class': 'secnum_col'}, 'td': {'class': 'secnum_cell'}})
     status = tables.Column(attrs={
         'th': {
-            'class': 'secstatus_col'
+            'class': 'sectionstatus_col'
         },
         'td': {
-            'class': 'secstatus_cell'
+            'class': 'sectionstatus_cell'
         }
     })
     course_title = tables.Column(attrs={
@@ -251,50 +244,77 @@ class SectionsTable(tables.Table):
     hours = tables.Column(attrs={'th': {'class': 'hours_col'}, 'td': {'class': 'hours_cell'}})
     professor = tables.Column(attrs={'th': {'class': 'prof_col'}, 'td': {'class': 'prof_cell'}})
     capacity = tables.Column(attrs={'th': {'class': 'capac_col'}, 'td': {'class': 'capac_cell'}})
+    seats_remaining = tables.Column(attrs={
+        'th': {
+            'class': 'remaining_col'
+        },
+        'td': {
+            'class': 'remaining_cell'
+        }
+    })
 
     class Meta:
         model = Section
         template_name = "django_tables2/bootstrap.html"
         fields = ('semester', 'course', 'number', 'status', 'course_title', 'hours', 'professor',
-                  'capacity')
-        row_attrs = {'class': 'srow', 'data-id': lambda record: record.pk}
+                  'capacity', 'seats_remaining')
+        row_attrs = {'class': 'section_row', 'data-id': lambda record: record.pk}
 
 
 class SectionStudentsTable(tables.Table):
-    username = tables.Column(accessor='user__username',
+    username = tables.Column(accessor='student__user__username',
                              attrs={
                                  'th': {
-                                     'class': 'sucol'
+                                     'class': 'username_col'
                                  },
                                  'td': {
-                                     'class': 'sucell'
+                                     'class': 'username_cell'
                                  }
                              })
-    name = tables.Column(attrs={'th': {'class': 'sncol'}, 'td': {'class': 'sncell'}})
-    major = tables.Column(attrs={'th': {'class': 'smcol'}, 'td': {'class': 'smcell'}})
+    name = tables.Column(accessor='student__user__name',
+                         attrs={
+                             'th': {
+                                 'class': 'name_col'
+                             },
+                             'td': {
+                                 'class': 'name_cell'
+                             }
+                         })
+    major = tables.Column(accessor='student__major',
+                          attrs={
+                              'th': {
+                                  'class': 'major_col'
+                              },
+                              'td': {
+                                  'class': 'major_cell'
+                              }
+                          })
     status = tables.Column(verbose_name="Status",
-                           accessor='sectionstudent__status',
+                           accessor='status',
                            attrs={
                                'th': {
-                                   'class': 'smcol'
+                                   'class': 'sectionstatus_col'
                                },
                                'td': {
-                                   'class': 'smcell'
+                                   'class': 'sectionstatus_cell'
                                }
                            })
     letter_grade = tables.Column(verbose_name="Grade",
-                                 accessor='sectionstudent__letter_grade',
+                                 accessor='grade',
                                  attrs={
                                      'th': {
-                                         'class': 'smcol'
+                                         'class': 'lettergrade_col'
                                      },
                                      'td': {
-                                         'class': 'smcell'
+                                         'class': 'lettergrade_cell'
                                      }
                                  })
 
     class Meta:
-        model = Student
+        model = SectionStudent
         template_name = "django_tables2/bootstrap.html"
-        fields = ("username", "name", 'major', 'status', 'letter_grade')
-        row_attrs = {'class': 'srow', 'data-id': lambda record: record.pk}
+        fields = ('username', 'name', 'major', 'status', 'letter_grade')
+        row_attrs = {
+            'class': 'sectionstudent_row',
+            'data-id': lambda record: record.student.user.pk
+        }

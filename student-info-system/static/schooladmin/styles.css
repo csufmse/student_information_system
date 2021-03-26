@@ -62,7 +62,21 @@
 .data-table th, .data-table-alt th {
   padding-top: 12px;
   padding-bottom: 12px;
-  text-align: left;
+  text-align: center;
   background-color: #4CAF50;
   color: white;
+}
+
+.username_col, .name_col, .major_col, .sectionstatus_col, .lettergrade_col, .sem_col,
+.course_col, .secnum_col, .coursetitle_col, .hours_col, .professor_col, .capac_col, .remaining_col {
+  text-align: center;
+
+}
+.major_cell, .sectionstatus_cell, .lettergrade_cell, .sem_cell, .secnum_cell,
+.coursetitle_cell, .hours_cell, .prof_cell, .capac_cell, .remaining_cell {
+  text-align: center;
+
+}
+.prof_cell, .course_cell, .username_cell, .name_cell {
+  text-align: left;
 }

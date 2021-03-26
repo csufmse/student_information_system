@@ -10,7 +10,7 @@ from django_tables2 import RequestConfig
 
 from sis.authentication_helpers import role_login_required
 from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
-                        Student)
+                        Student, SectionStudent)
 
 from .filters import (CourseFilter, MajorFilter, SectionFilter, SemesterFilter, UserFilter)
 from .forms import (CourseCreationForm, CourseEditForm, CustomUserCreationForm, MajorCreationForm,
@@ -282,10 +282,15 @@ def course(request, courseid):
     ntable = BasicCoursesTable(nqueryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(ntable)
 
+    squeryset = Section.objects.filter(course=the_course)
+    stable = SectionsTable(squeryset)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(stable)
+
     return render(request, 'schooladmin/course.html', {
         'course': the_course,
         'prereqs': ptable,
         'needed_by': ntable,
+        'sections': stable,
     })
 
 
@@ -426,14 +431,24 @@ def section(request, sectionid):
         return HttpResponse("No such section")
     the_section = qs.get()
 
-    student_qs = Student.objects.filter(sectionstudent__section=the_section)
-    student_table = SectionStudentsTable(student_qs)
+    student_qs = SectionStudent.objects.filter(section=the_section)
+    student_table = SectionStudentsTable(list(student_qs))
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(student_table)
 
     return render(request, 'schooladmin/section.html', {
         'section': the_section,
         'students': student_table
     })
+
+
+@role_login_required('Admin')
+def section_students_manage(request, sectionid):
+    qs = Section.objects.filter(id=sectionid)
+    if qs.count() < 1:
+        return HttpResponse("No such section")
+    the_section = qs.get()
+
+    return HttpResponse('not implemented yet')
 
 
 @role_login_required('Admin')
