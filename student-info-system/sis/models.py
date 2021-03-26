@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Case, Count, ExpressionWrapper, F, Q, Sum
+from django.db.models import Case, Count, ExpressionWrapper, F, Q, Sum, Subquery
 from django.db.models import Value
 from django.db.models import Value as V
 from django.db.models import When
@@ -53,17 +53,42 @@ class Student(models.Model):
                                       symmetrical=False,
                                       related_name='section_students')
 
+    def course_history(self, graded=False, passed=False, required=False, prereqs_for=None):
+        hist = self.sectionstudent_set.all()
+        if passed:
+            graded = True
+        if graded:
+            hist = hist.filter(status__exact='Graded')
+        if passed:
+            hist = hist.filter(grade__gt=0)
+        if required:
+            major_required = self.major.courses_required.all()
+            hist = hist.filter(section__course__in=Subquery(major_required.all().values('id')))
+        if prereqs_for is not None:
+            course_prereqs = CoursePrerequisite.objects.filter(course=prereqs_for)
+            hist = hist.filter(
+                section__course__in=Subquery(course_prereqs.values('prerequisite')))
+
+        return hist
+
+    def remaining_required_courses(self):
+        hist = self.course_history(passed=True)
+        major_required = self.major.courses_required.all()
+        major_required = major_required.exclude(
+            id__in=Subquery(hist.values('section__course__id')))
+
+        return major_required
+
     def credits_earned(self):
-        completed = SectionStudent.objects.filter(
-            student=self, status__exact='Graded', grade__gt=0).aggregate(
-                Sum('section__course__credits_earned'))['section__course__credits_earned__sum']
+        completed = self.course_history(passed=True).aggregate(
+            Sum('section__course__credits_earned'))['section__course__credits_earned__sum']
 
         if completed is None:
             completed = 0
         return completed
 
     def gpa(self):
-        completed = SectionStudent.objects.filter(student=self, status__exact='Graded')
+        completed = self.course_history(graded=True)
         grade_points = 0
         credits_attempted = 0
         for ss in completed:
