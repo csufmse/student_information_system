@@ -290,7 +290,7 @@ class CourseTestCase_deps(TestCase):
         CourseTestCase_deps.major = m
 
         CourseTestCase_deps.courses = {}
-        for i in range(1, 10):
+        for i in range(1, 15):
             CourseTestCase_deps.courses[i] = createCourse(m, str(i))
 
     def test_none(self):
@@ -318,6 +318,26 @@ class CourseTestCase_deps(TestCase):
         self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2]]), False)
         cp1.delete()
         cp2.delete()
+
+    def test_double_dep(self):
+        cs = CourseTestCase_deps.courses
+        cp1 = CoursePrerequisite.objects.create(course=cs[2], prerequisite=cs[3])
+        cp2 = CoursePrerequisite.objects.create(course=cs[5], prerequisite=cs[3])
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2],cs[5]]), True)
+        cp1.delete()
+        cp2.delete()
+
+    def test_offset(self):
+        cs = CourseTestCase_deps.courses
+        def cp(c,p):
+            return CoursePrerequisite.objects.create(course=cs[c], prerequisite=cs[p])
+
+        cp(1,11)
+        cp(11,5)
+        cp(1,5)
+        cp(5,6)
+        cp(6,7)
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid(), True)
 
 
 class SectionTestCase(TestCase):

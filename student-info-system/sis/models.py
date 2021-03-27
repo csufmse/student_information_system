@@ -203,16 +203,35 @@ class Course(models.Model):
     # with a list, tests if that list would cause a loop or not
     # (without storing it to db -- used for form validation)
     def are_candidate_prerequisites_valid(self, candidate_list=None):
-        seen = {}
-        to_see = [self]
-        if candidate_list is not None:
-            to_see.extend(candidate_list)
+        could_cause_loop = {}
+        to_visit = [self]
         loop_seen = False
-        while len(to_see) > 0 and not loop_seen:
-            examine = to_see.pop()
-            loop_seen = examine in seen
-            to_see.extend(examine.prereqs.all())
-            seen[examine] = True
+        print(f'checking {self} with list {candidate_list}')
+
+        while len(to_visit) > 0 and not loop_seen:
+            examine = to_visit.pop()
+            print(f'examining {examine}')
+
+            prereqs = []
+            if examine.prereqs.count():
+                prereqs.extend(examine.prereqs.all())
+            if examine.id == self.id and candidate_list is not None:
+                prereqs.extend(candidate_list)
+
+            for p in prereqs:
+                print(f'{p} is prereq...')
+                to_visit.append(p)
+                if p.id in could_cause_loop:
+                    print(f'...and its in ccl')
+                    # we've seen it and it has prereqs. So it's a loop
+                    loop_seen = True
+                    break
+
+                # only things that have prereqs could cause a loop
+                if p.prereqs.count() > 0:
+                    print(f'... add {examine} to ccl')
+                    could_cause_loop[examine.id] = True
+        print(f'returning {not loop_seen}')
         return not loop_seen
 
 
