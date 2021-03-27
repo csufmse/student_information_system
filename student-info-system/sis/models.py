@@ -154,9 +154,9 @@ class Major(models.Model):
                                               blank=True,
                                               symmetrical=False,
                                               related_name="required_by")
+
     class Meta:
         ordering = ['abbreviation']
-
 
     def __str__(self):
         return self.abbreviation
