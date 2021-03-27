@@ -4,7 +4,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from .models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                     Semester, Student, TranscriptRequest, UpperField)
+                     Semester, Student, TranscriptRequest)
 
 
 def createStudent(major=None, username=None):
@@ -257,7 +257,7 @@ class ProfessorTestCase(TestCase):
         self.assertEqual(professor.name, "First Last")
 
 
-class CourseTestCase(TestCase):
+class CourseTestCase_Basic(TestCase):
 
     def setUp(self):
         major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
@@ -273,6 +273,51 @@ class CourseTestCase(TestCase):
     def test_course_name(self):
         course = Course.objects.get(title="Intro To Test")
         self.assertEqual(course.name, "CPSC-101")
+
+
+def createCourse(major, num):
+    return Course.objects.create(major=major,
+                                 catalog_number=num,
+                                 title='c' + num,
+                                 credits_earned=1.0)
+
+
+class CourseTestCase_deps(TestCase):
+
+    @classmethod
+    def setUpTestData(self):
+        m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        CourseTestCase_deps.major = m
+
+        CourseTestCase_deps.courses = {}
+        for i in range(1, 10):
+            CourseTestCase_deps.courses[i] = createCourse(m, str(i))
+
+    def test_none(self):
+        cs = CourseTestCase_deps.courses
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid(), True)
+
+    def test_valid_candidate(self):
+        cs = CourseTestCase_deps.courses
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2]]), True)
+
+    def test_candidate_loop(self):
+        cs = CourseTestCase_deps.courses
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[1]]), False)
+
+    def test_candidate_chain(self):
+        cs = CourseTestCase_deps.courses
+        cp = CoursePrerequisite.objects.create(course=cs[2], prerequisite=cs[3])
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2]]), True)
+        cp.delete()
+
+    def test_candidate_loop(self):
+        cs = CourseTestCase_deps.courses
+        cp1 = CoursePrerequisite.objects.create(course=cs[2], prerequisite=cs[3])
+        cp2 = CoursePrerequisite.objects.create(course=cs[3], prerequisite=cs[1])
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2]]), False)
+        cp1.delete()
+        cp2.delete()
 
 
 class SectionTestCase(TestCase):
