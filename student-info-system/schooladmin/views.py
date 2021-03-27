@@ -310,7 +310,7 @@ def course_edit(request, courseid):
             messages.error(request, 'Please correct the error(s) below.')
     else:
         form = CourseEditForm(instance=the_course)
-    return render(request, 'schooladmin/course_edit.html', {'form': form})
+    return render(request, 'schooladmin/course_edit.html', {'form': form, 'course': the_course})
 
 
 @role_login_required('Admin')
@@ -323,6 +323,27 @@ def course_new(request):
     else:
         form = CourseCreationForm()
     return render(request, 'schooladmin/course_new.html', {'form': form})
+
+
+@role_login_required('Admin')
+def course_section_new(request, courseid):
+    qs = Course.objects.filter(id=courseid)
+    if qs.count() < 1:
+        return HttpResponse("No such course")
+    the_course = qs.get()
+    form_values = {'course': the_course}
+    semesters = Semester.objects.order_by('-date_registration_opens').filter(
+        date_registration_opens__lte=date.today(), date_last_drop__gte=date.today())
+    if semesters.count() > 0:
+        form_values['semester'] = semesters[0]
+
+    form = SectionCreationForm(form_values)
+    return render(
+        request, 'schooladmin/section_new.html', {
+            'profs': Professor.objects.filter(user__is_active=True, major=the_course.major),
+            'courses': Course.objects.filter(id=the_course.id),
+            'form': form,
+        })
 
 
 @role_login_required('Admin')
@@ -472,26 +493,5 @@ def section_new(request):
         request, 'schooladmin/section_new.html', {
             'profs': Professor.objects.filter(user__is_active=True),
             'courses': Course.objects.all(),
-            'form': form,
-        })
-
-
-@role_login_required('Admin')
-def course_section_new(request, courseid):
-    qs = Course.objects.filter(id=courseid)
-    if qs.count() < 1:
-        return HttpResponse("No such course")
-    the_course = qs.get()
-    form_values = {'course': the_course}
-    semesters = Semester.objects.order_by('-date_registration_opens').filter(
-        date_registration_opens__lte=date.today(), date_last_drop__gte=date.today())
-    if semesters.count() > 0:
-        form_values['semester'] = semesters[0]
-
-    form = SectionCreationForm(form_values)
-    return render(
-        request, 'schooladmin/section_new.html', {
-            'profs': Professor.objects.filter(user__is_active=True, major=the_course.major),
-            'courses': Course.objects.filter(id=the_course.id),
             'form': form,
         })

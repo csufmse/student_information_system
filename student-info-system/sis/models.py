@@ -1,10 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Case, Count, ExpressionWrapper, F, Q, Sum, Subquery
-from django.db.models import Value
-from django.db.models import Value as V
-from django.db.models import When
+from django.db.models import Case, ExpressionWrapper, F, Q, Sum, Subquery, Value, When
 from django.db.models.fields import (CharField, DateField, DecimalField, FloatField, IntegerField)
 from django.db.models.functions import Concat
 from django.db.models.signals import post_save
@@ -203,6 +200,23 @@ class Course(models.Model):
 
     def __str__(self):
         return self.name
+
+    # don't want user specifying a prereq loop
+    # with no list, validates existing prereqs.
+    # with a list, tests if that list would cause a loop or not
+    # (without storing it to db -- used for form validation)
+    def are_candidate_prerequisites_valid(self, candidate_list=None):
+        seen = {}
+        to_see = [self]
+        if candidate_list is not None:
+            to_see.extend(candidate_list)
+        loop_seen = False
+        while len(to_see) > 0 and not loop_seen:
+            examine = to_see.pop()
+            loop_seen = examine in seen
+            to_see.extend(examine.prereqs.all())
+            seen[examine] = True
+        return not loop_seen
 
 
 class CoursePrerequisite(models.Model):

@@ -1,5 +1,5 @@
 from datetime import date
-from django.db.models import OuterRef, Subquery
+from django.core.exceptions import ValidationError
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
@@ -112,6 +112,21 @@ class CourseEditForm(forms.ModelForm):
     class Meta:
         model = Course
         fields = ('major', 'catalog_number', 'title', 'description', 'credits_earned', 'prereqs')
+
+    def __init__(self, *args, **kwargs):
+        super(CourseEditForm, self).__init__(*args, **kwargs)
+
+        # we defer loading of professors until we know what major is chosen
+        if kwargs['instance']:
+            the_course = kwargs['instance']
+            if the_course:
+                self.fields['prereqs'].queryset = Course.objects.exclude(id=the_course.id)
+
+    def clean(self):
+        cleaned_data = super().clean()
+        are_valid = self.instance.are_candidate_prerequisites_valid(cleaned_data['prereqs'])
+        if not are_valid:
+            self.add_error('prereqs', "Prerequisites lead back to this course.")
 
 
 SEASON = (('FALL', 'Fall'), ('SPRING', 'Spring'), ('SUMMER', 'Summer'), ('WINTER', 'Winter'))
