@@ -4,7 +4,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                     Semester, Student, TranscriptRequest)
+                        Semester, Student, TranscriptRequest)
 
 
 def createStudent(major=None, username=None):
