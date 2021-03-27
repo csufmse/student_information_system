@@ -1,4 +1,5 @@
 from datetime import date
+from django.db.models import OuterRef, Subquery
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
@@ -151,7 +152,7 @@ class SectionCreationForm(forms.ModelForm):
     course = forms.ModelChoiceField(queryset=Course.objects.all())
     number = forms.IntegerField()
     hours = forms.CharField(max_length=100)
-    professor = forms.ModelChoiceField(queryset=Professor.objects.filter(user__is_active=True))
+    professor = forms.ModelChoiceField(queryset=Professor.objects.all())
     capacity = forms.IntegerField()
 
     class Meta:
@@ -161,9 +162,19 @@ class SectionCreationForm(forms.ModelForm):
 
 class SectionEditForm(forms.ModelForm):
     hours = forms.CharField(max_length=100)
-    professor = forms.ModelChoiceField(queryset=Professor.objects.filter(user__is_active=True))
+    professor = forms.ModelChoiceField(queryset=Professor.objects.none())
     capacity = forms.IntegerField()
 
     class Meta:
         model = Section
         fields = ('hours', 'professor', 'capacity')
+
+    def __init__(self, *args, **kwargs):
+        super(SectionEditForm, self).__init__(*args, **kwargs)
+
+        # we defer loading of professors until we know what major is chosen
+        if kwargs['instance']:
+            major = kwargs['instance'].course.major
+            if major:
+                self.fields['professor'].queryset = Professor.objects.filter(user__is_active=True,
+                                                                             major=major)

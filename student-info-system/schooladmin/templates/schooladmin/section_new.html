@@ -35,4 +35,39 @@
     <button type="submit" class="btn btn-primary">Save Section</button>
   </form>
 
+<script>
+var courseMajors = {
+{%  for course in courses %}
+    '{{ course.id }}':'{{ course.major }}',{%  endfor %}
+};
+
+var majorProfs = {
+};
+function recordMajors() {
+{%  for prof in profs %}
+    if ( ! majorProfs['{{ prof.major }}']) {
+        majorProfs['{{ prof.major }}'] = [];
+    }
+    majorProfs['{{ prof.major }}'].push({ "id":{{ prof.pk }}, "name":'{{ prof.name }}'});{%  endfor %}
+}
+
+function courseChosen(evt) {
+  var c = document.getElementById("id_course").value;
+  var m = courseMajors[c];
+  var profs = majorProfs[m];
+
+  var optionlist = '<option value="" selected>---------</option>';
+  if (profs) {
+      for (var p of profs) {
+          optionlist += '<option value="' + p['id'] + '">' + p['name'] + '</option> ';
+      }
+  }
+  document.getElementById("id_professor").innerHTML = optionlist;
+}
+
+recordMajors();
+courseChosen();
+document.getElementById("id_course").addEventListener("change", courseChosen);
+</script>
+
 {% endblock %}

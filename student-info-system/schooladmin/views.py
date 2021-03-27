@@ -10,7 +10,7 @@ from django_tables2 import RequestConfig
 
 from sis.authentication_helpers import role_login_required
 from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
-                        Student)
+                        Student, SectionStudent)
 
 from .filters import (CourseFilter, MajorFilter, SectionFilter, SemesterFilter, UserFilter)
 from .forms import (CourseCreationForm, CourseEditForm, CustomUserCreationForm, MajorCreationForm,
@@ -282,10 +282,15 @@ def course(request, courseid):
     ntable = BasicCoursesTable(nqueryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(ntable)
 
+    squeryset = Section.objects.filter(course=the_course)
+    stable = SectionsTable(squeryset)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(stable)
+
     return render(request, 'schooladmin/course.html', {
         'course': the_course,
         'prereqs': ptable,
         'needed_by': ntable,
+        'sections': stable,
     })
 
 
@@ -318,22 +323,6 @@ def course_new(request):
     else:
         form = CourseCreationForm()
     return render(request, 'schooladmin/course_new.html', {'form': form})
-
-
-@role_login_required('Admin')
-def course_section_new(request, courseid):
-    qs = Course.objects.filter(id=courseid)
-    if qs.count() < 1:
-        return HttpResponse("No such course")
-    the_course = qs.get()
-    form_values = {'course': the_course}
-    semesters = Semester.objects.order_by('-date_registration_opens').filter(
-        date_registration_opens__lte=date.today(), date_last_drop__gte=date.today())
-    if semesters.count() > 0:
-        form_values['semester'] = semesters[0]
-
-    form = SectionCreationForm(form_values)
-    return render(request, 'schooladmin/section_new.html', {'form': form})
 
 
 @role_login_required('Admin')
@@ -426,14 +415,24 @@ def section(request, sectionid):
         return HttpResponse("No such section")
     the_section = qs.get()
 
-    student_qs = Student.objects.filter(sectionstudent__section=the_section)
-    student_table = SectionStudentsTable(student_qs)
+    student_qs = SectionStudent.objects.filter(section=the_section)
+    student_table = SectionStudentsTable(list(student_qs))
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(student_table)
 
     return render(request, 'schooladmin/section.html', {
         'section': the_section,
         'students': student_table
     })
+
+
+@role_login_required('Admin')
+def section_students_manage(request, sectionid):
+    qs = Section.objects.filter(id=sectionid)
+    if qs.count() < 1:
+        return HttpResponse("No such section")
+    the_section = qs.get()
+
+    return HttpResponse('not implemented yet')
 
 
 @role_login_required('Admin')
@@ -466,7 +465,33 @@ def section_new(request):
         form = SectionCreationForm(request.POST)
         if form.is_valid():
             the_new_section = form.save()
-            return redirect('schooladmin:sections')
+            return redirect('schooladmin:section', the_new_section.id)
     else:
         form = SectionCreationForm(request.GET)
-    return render(request, 'schooladmin/section_new.html', {'form': form})
+    return render(
+        request, 'schooladmin/section_new.html', {
+            'profs': Professor.objects.filter(user__is_active=True),
+            'courses': Course.objects.all(),
+            'form': form,
+        })
+
+
+@role_login_required('Admin')
+def course_section_new(request, courseid):
+    qs = Course.objects.filter(id=courseid)
+    if qs.count() < 1:
+        return HttpResponse("No such course")
+    the_course = qs.get()
+    form_values = {'course': the_course}
+    semesters = Semester.objects.order_by('-date_registration_opens').filter(
+        date_registration_opens__lte=date.today(), date_last_drop__gte=date.today())
+    if semesters.count() > 0:
+        form_values['semester'] = semesters[0]
+
+    form = SectionCreationForm(form_values)
+    return render(
+        request, 'schooladmin/section_new.html', {
+            'profs': Professor.objects.filter(user__is_active=True, major=the_course.major),
+            'courses': Course.objects.filter(id=the_course.id),
+            'form': form,
+        })

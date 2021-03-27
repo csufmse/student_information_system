@@ -58,15 +58,16 @@
 </div>
 </div>
 <script>
-function selectRow(evt) {
-    id = this.getAttribute('data-id');
-    open("/schooladmin/course/"+id,'_self');
+function selectCourse(evt) {
+    var id = this.getAttribute('data-id');
+    var url = "{% url 'schooladmin:course' courseid=1234599 %}".replace(/1234599/, id.toString());
+    open(url,'_self');
 }
 
 // Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('crow')
+var tablerows = document.getElementsByClassName('course_row')
 for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectRow, false);
+    tablerows[i].addEventListener("click", selectCourse, false);
 }
 
 var e = document.getElementById('id_catalog_number_0')

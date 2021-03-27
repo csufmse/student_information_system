@@ -10,58 +10,32 @@
 <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
 <style>
-.bcourse {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 500px;
-}
-
-.bcourse th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: center;
-  background-color: #4CAF50;
-  color: white;
-}
-.bcourse td, .bprof th {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-.bcourse tr:nth-child(even){background-color: #f2f2f2;}
-
-.bcourse tr:hover {background-color: #ddd;}
-
-.bcourse th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: center;
-  background-color: #4CAF50;
-  color: white;
-}
 </style>
 
 {% endblock css %}
 
 {% block content %}
 <dl class="dl-horizontal">
+<h3>Section: {{ section }}</h3>
   <dt>Course</dt>
-  <dd>{{ section.name }}</dd>
+    <dd><a href="{% url 'schooladmin:course' courseid=section.course.id %}">{{ section.course.name }}: {{  section.course.title }}</a></dd>
   <dt>Section Number</dt>
   <dd>{{ section.number }}</dd>
+  <dt>Major</dt>
+    <dd><a href="{% url 'schooladmin:major' abbreviation=section.course.major %}">{{ section.course.major }}: {{  section.course.major.name }}</a></dd>
   <dt>Semester</dt>
-  <dd>{{ section.semester }}</dd>
+    <dd><a href="{% url 'schooladmin:semester' semester_id=section.semester.id %}">{{ section.semester }}</a></dd>
   <dt>Professor</dt>
-  <dd>{{ section.professor }}</dd>
+    <dd><a href="{% url 'schooladmin:user' userid=section.professor.user.id %}">{{ section.professor }}</a></dd>
   <dt>Hours</dt>
   <dd>{{ section.hours }}</dd>
   <dt>Capacity</dt>
-  <dd>{{ section.capacity }}</dd>
+  <dd>{{ section.seats_remaining }} / {{ section.capacity }}</dd>
   <dt>Status</dt>
   <dd>{{ section.status }}</dd>
 </dl>
 
-    <div id="Students">
+    <div id="Students" class="data-table">
         <h3>Students:</h3>
     {% render_table students 'django_tables2/bootstrap.html' %}
     </div>
@@ -95,17 +69,17 @@
 <script>
 function selectStudent(evt) {
     var id = this.getAttribute('data-id');
-    var url = "/schooladmin/student/"+id;
+    var url = "{% url 'schooladmin:user' userid=1234599 %}".replace(/1234599/, id.toString());
     open(url,'_self');
 }
 
 function edit_section(evt) {
-    open('/schooladmin/section/{{ section.id }}/edit','_self');
+    open('{% url 'schooladmin:section_edit' sectionid=section.id %}','_self');
     return false;
 }
 
 function manage_student_sections(evt) {
-    open('/schooladmin/section/{{ section.id }}/students_manage','_self');
+    open('{% url 'schooladmin:section_students_manage' sectionid=section.id %}','_self');
     return false;
 }
 
@@ -130,7 +104,7 @@ if ( btn ) {
 }
 
 // Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('srow')
+var tablerows = document.getElementsByClassName('sectionstudent_row')
 for (var i=0, len=tablerows.length; i<len; i=i+1) {
     tablerows[i].addEventListener("click", selectStudent, false);
 }
