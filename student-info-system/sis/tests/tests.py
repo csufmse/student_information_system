@@ -323,20 +323,21 @@ class CourseTestCase_deps(TestCase):
         cs = CourseTestCase_deps.courses
         cp1 = CoursePrerequisite.objects.create(course=cs[2], prerequisite=cs[3])
         cp2 = CoursePrerequisite.objects.create(course=cs[5], prerequisite=cs[3])
-        self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2],cs[5]]), True)
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2], cs[5]]), True)
         cp1.delete()
         cp2.delete()
 
     def test_offset(self):
         cs = CourseTestCase_deps.courses
-        def cp(c,p):
+
+        def cp(c, p):
             return CoursePrerequisite.objects.create(course=cs[c], prerequisite=cs[p])
 
-        cp(1,11)
-        cp(11,5)
-        cp(1,5)
-        cp(5,6)
-        cp(6,7)
+        cp(1, 11)
+        cp(11, 5)
+        cp(1, 5)
+        cp(5, 6)
+        cp(6, 7)
         self.assertEqual(cs[1].are_candidate_prerequisites_valid(), True)
 
 

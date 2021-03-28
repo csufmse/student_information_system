@@ -228,7 +228,8 @@ class Course(models.Model):
                 all_requirements_for_course[course_to_check].append(a_prereq)
                 # through a_prereq, course_to_check is dependent on everything a_prereq is.
                 if a_prereq in all_requirements_for_course:
-                    all_requirements_for_course[course_to_check].extend(all_requirements_for_course[a_prereq])
+                    all_requirements_for_course[course_to_check].extend(
+                        all_requirements_for_course[a_prereq])
 
             # did we just add a loop back to ourselves?
             if course_to_check in all_requirements_for_course[course_to_check]:

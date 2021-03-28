@@ -18,6 +18,7 @@ max_num_prereqs = 3
 def randobj(objs):
     return objs.objects.all()[randint(0, objs.objects.count() - 1)]
 
+
 # number of courses to add prereqs to:
 to_generate = int(Course.objects.count() * percent_that_have_prereq)
 
@@ -50,6 +51,3 @@ while ii < to_generate:
                 print(f'added prereq {the_pre} to {the_course}')
         else:
             j = j - 1
-
-
-
