@@ -32,8 +32,12 @@ class CustomUserCreationForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     last_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     email = forms.EmailField(max_length=254, help_text='Required. Enter a valid email address.')
+
     role = forms.ChoiceField(choices=ROLE_CHOICES, required=True, help_text='Select type of user')
+    role.widget.attrs.update({'class': 'role_sel selectpicker'})
+
     major = forms.ModelChoiceField(queryset=None, required=False)
+    major.widget.attrs.update({'class': 'major_sel selectpicker'})
 
     class Meta:
         model = User
@@ -75,6 +79,8 @@ class MajorEditForm(forms.ModelForm):
 
 class CourseCreationForm(forms.ModelForm):
     major = forms.ModelChoiceField(queryset=Major.objects.all())
+    major.widget.attrs.update({'class': 'major_sel selectpicker'})
+
     catalog_number = forms.IntegerField(label='Number')
     title = forms.CharField(label='Title', max_length=256)
     description = forms.CharField(label_suffix='Description',
@@ -92,6 +98,7 @@ class CourseCreationForm(forms.ModelForm):
 
 class CourseEditForm(forms.ModelForm):
     major = forms.ModelChoiceField(queryset=Major.objects.all())
+    major.widget.attrs.update({'class': 'major_sel selectpicker'})
 
     catalog_number = forms.IntegerField(label='Number')
     title = forms.CharField(label='Title', max_length=256)
@@ -134,6 +141,8 @@ SEASON = (('FALL', 'Fall'), ('SPRING', 'Spring'), ('SUMMER', 'Summer'), ('WINTER
 
 class SemesterCreationForm(forms.Form):
     semester = forms.ChoiceField(choices=SEASON)
+    semester.widget.attrs.update({'class': 'season_sel selectpicker'})
+
     year = forms.IntegerField()
     date_started = forms.DateField()
     date_ended = forms.DateField()
@@ -150,11 +159,12 @@ class UserEditForm(forms.Form):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     last_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     email = forms.EmailField(max_length=254, help_text='Required. Enter a valid email address.')
-    role = forms.ChoiceField(choices=ROLE_CHOICES, required=True, help_text='Select type of user')
-    major = forms.ModelChoiceField(queryset=Major.objects.all(), required=False)
 
-    role.widget.attrs.update({'class': 'rolesel selectpicker'})
-    major.widget.attrs.update({'class': 'majorsel selectpicker'})
+    role = forms.ChoiceField(choices=ROLE_CHOICES, required=True, help_text='Select type of user')
+    role.widget.attrs.update({'class': 'role_sel selectpicker'})
+
+    major = forms.ModelChoiceField(queryset=Major.objects.all(), required=False)
+    major.widget.attrs.update({'class': 'major_sel selectpicker'})
 
     class Meta:
         model = User
@@ -164,10 +174,17 @@ class UserEditForm(forms.Form):
 class SectionCreationForm(forms.ModelForm):
     semester = forms.ModelChoiceField(queryset=Semester.objects.filter(
         date_ended__gt=date.today()))
+    semester.widget.attrs.update({'class': 'semester_sel selectpicker'})
+
     course = forms.ModelChoiceField(queryset=Course.objects.all())
+    course.widget.attrs.update({'class': 'course_sel selectpicker'})
+
     number = forms.IntegerField()
     hours = forms.CharField(max_length=100)
+
     professor = forms.ModelChoiceField(queryset=Professor.objects.all())
+    professor.widget.attrs.update({'class': 'user_sel selectpicker'})
+
     capacity = forms.IntegerField()
 
     class Meta:
@@ -177,7 +194,10 @@ class SectionCreationForm(forms.ModelForm):
 
 class SectionEditForm(forms.ModelForm):
     hours = forms.CharField(max_length=100)
+
     professor = forms.ModelChoiceField(queryset=Professor.objects.none())
+    professor.widget.attrs.update({'class': 'user_sel selectpicker'})
+
     capacity = forms.IntegerField()
 
     class Meta:

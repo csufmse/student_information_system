@@ -155,7 +155,7 @@ class CourseFilter(FilterSet):
 
 
 class SemesterFilter(FilterSet):
-    semester = ChoiceFilter(label="Session",choices=Semester.SEASONS, field_name='semester')
+    semester = ChoiceFilter(label="Session", choices=Semester.SEASONS, field_name='semester')
     year = RangeFilter(field_name='year')
 
     class Meta:

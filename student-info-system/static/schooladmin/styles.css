@@ -67,27 +67,44 @@
   color: white;
 }
 
+/* TABLE COLUMN HEADERS AND DATA CELLS */
+
 /* all column headers are centered */
-.active_col, .capac_col, .classlevel_col, .course_col, .coursetitle_col, .credits_col, .date_col, .gpa_col,
+.active_col, .capac_col, .catnumber_col, .classlevel_col, .course_col, .coursetitle_col, .credits_col, .date_col, .gpa_col,
 .hours_col, .lettergrade_col, .major_col, .majordescr_col, .majorname_col, .professor_col, .remaining_col,
 .role_col, .secnum_col, .sectionstatus_col, .sem_col, .semester_col, .user_name_col, .username_col {
   text-align: center;
 }
 /* most (data) cells are centered */
-.active_cell, .capac_cell, .classlevel_cell, .course_cell, .credits_cell, .date_cell, .gpa_cell,
+.active_cell, .capac_cell, .catnumber_cell, .classlevel_cell, .course_cell, .credits_cell, .date_cell, .gpa_cell,
 .hours_cell, .lettergrade_cell, .major_cell, .majorname_cell, .prof_cell, .remaining_cell, .role_cell,
 .secnum_cell, .sectionstatus_cell, .sem_cell, .semester_cell, .year_cell {
   text-align: center;
 }
-.coursetitle_cell, .majordescr_cell, .prof_cell, .username_cell, .user_name_cell {
+.coursetitle_cell, .majordescr_cell, .majorname_cell, .prof_cell, .username_cell, .user_name_cell {
   text-align: left;
 }
-.classlevel_cell, .course_cell, .date_cell, .gpa_cell, .major_cell {
-  width: 90px;
+.active_cell, .catnumber_cell. .credits_cell, .role_cell, .semester_cell, .year_cell {
+  width: 80px;
+}
+.classlevel_cell, .date_cell, .gpa_cell, .major_cell {
+  width: 110px;
+}
+.course_cell {
+  width: 150px;
 }
 .user_name_cell {
   width: 200px;
 }
-.active_cell, .role_cell, .semester_cell, .year_cell {
-  width: 80px;
+.coursetitle_cell {
+  width: 300px;
 }
+
+/* SELECT/PULLDOWNS */
+.role_sel, .course_sel, .major_sel, .role_sel, .season_sel, .semester_sel, .user_sel {
+  font-family: Arial, Helvetica, sans-serif;
+    data-style: btn_primary;
+  width: 180px;
+  height: 30px;
+}
+

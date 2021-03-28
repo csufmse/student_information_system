@@ -38,7 +38,7 @@ function selectRow(evt) {
 }
 
 // Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('mrow')
+var tablerows = document.getElementsByClassName('major_row')
 for (var i=0, len=tablerows.length; i<len; i=i+1) {
     tablerows[i].addEventListener("click", selectRow, false);
 }

@@ -3,17 +3,21 @@ from django.contrib.auth.models import User
 
 from sis.models import *
 
+
 # Each column and cell has its own CSS class based on the type of
 # data in it.
 def field_css_classes(field_name):
-    return {'th': {'class': field_name+'_col'}, 'td': {'class': field_name+'_cell'}}
+    return {'th': {'class': field_name + '_col'}, 'td': {'class': field_name + '_cell'}}
+
 
 class ClassyColumn(tables.Column):
+
     def __init__(self, *args, **kwargs):
         if 'css_class_base' in kwargs:
             css_class_base = kwargs.pop('css_class_base', None)
             kwargs['attrs'] = field_css_classes(css_class_base)
-        super(ClassyColumn,self).__init__(*args, **kwargs)
+        super(ClassyColumn, self).__init__(*args, **kwargs)
+
 
 # For User names we want to show the full name ("first last") but sort by "last, first"
 class NameColumn(ClassyColumn):
@@ -33,22 +37,27 @@ class AbilityColumn(tables.BooleanColumn):
 class UsersTable(tables.Table):
     username = ClassyColumn(css_class_base='username')
     name = NameColumn(css_class_base='user_name')
-    student_major = ClassyColumn(verbose_name='Student Major',  css_class_base='major',
-                                  accessor='student__major__abbreviation')
-    professor_department = ClassyColumn(verbose_name='Professor Dept',  css_class_base='major',
-                                         accessor='professor__major__abbreviation')
+    student_major = ClassyColumn(verbose_name='Student Major',
+                                 css_class_base='major',
+                                 accessor='student__major__abbreviation')
+    professor_department = ClassyColumn(verbose_name='Professor Dept',
+                                        css_class_base='major',
+                                        accessor='professor__major__abbreviation')
     is_active = AbilityColumn(null=False, attrs=field_css_classes('active'))
     access_role = ClassyColumn(verbose_name='User Role', css_class_base='role')
-    class_level = ClassyColumn(verbose_name='Class', css_class_base='classlevel',
-                                accessor='student__class_level')
-    student_gpa = ClassyColumn(verbose_name='GPA',  css_class_base='gpa',
-                                accessor='student__gpa')
+    class_level = ClassyColumn(verbose_name='Class',
+                               css_class_base='classlevel',
+                               accessor='student__class_level')
+    student_gpa = ClassyColumn(verbose_name='GPA', css_class_base='gpa', accessor='student__gpa')
 
     def render_student_gpa(self, value):
         return '{:0.2f}'.format(value)
 
-    credits_earned = ClassyColumn(verbose_name='Credits',css_class_base='credits',
-                                   accessor='student__credits_earned', )
+    credits_earned = ClassyColumn(
+        verbose_name='Credits',
+        css_class_base='credits',
+        accessor='student__credits_earned',
+    )
 
     class Meta:
         model = User
@@ -67,7 +76,7 @@ class MajorsTable(tables.Table):
         model = Major
         template_name = "django_tables2/bootstrap.html"
         fields = ('abbreviation', 'name', 'description')
-        row_attrs = {'class': 'mrow', 'data-id': lambda record: record.pk}
+        row_attrs = {'class': 'major_row', 'data-id': lambda record: record.pk}
 
 
 class BasicProfsTable(tables.Table):
@@ -79,11 +88,12 @@ class BasicProfsTable(tables.Table):
         template_name = "django_tables2/bootstrap.html"
         fields = ('username', 'name')
         attrs = {"class": 'bprof'}
-        row_attrs = {'class': 'prof_row', 'data-id': lambda record: record.pk}
+        row_attrs = {'class': 'professor_row', 'data-id': lambda record: record.pk}
+
 
 class BasicCoursesTable(tables.Table):
     major = ClassyColumn(css_class_base='major')
-    catalog_number = ClassyColumn(verbose_name='Catalog Number', css_class_base='course')
+    catalog_number = ClassyColumn(verbose_name='Catalog Number', css_class_base='catnumber')
     title = ClassyColumn(css_class_base='coursetitle')
     credits_earned = ClassyColumn(css_class_base='credits')
 
@@ -100,7 +110,8 @@ class SemestersTable(tables.Table):
     year = ClassyColumn(css_class_base='year')
     date_started = ClassyColumn(verbose_name='Start of Classes', css_class_base='date')
     date_ended = ClassyColumn(verbose_name='End of Classes', css_class_base='date')
-    date_registration_opens = ClassyColumn(verbose_name='Registration Opens', css_class_base='date')
+    date_registration_opens = ClassyColumn(verbose_name='Registration Opens',
+                                           css_class_base='date')
     date_last_drop = ClassyColumn(verbose_name='Date of Last Drop', css_class_base='date')
 
     class Meta:
@@ -109,12 +120,12 @@ class SemestersTable(tables.Table):
         fields = ('semester', 'year', 'date_started', 'date_ended', 'date_registration_opens',
                   'date_last_drop')
 
-        row_attrs = {'class': 'urow', 'data-id': lambda record: record.pk}
+        row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}
 
 
 class CoursesTable(tables.Table):
     major = ClassyColumn(css_class_base='major')
-    catalog_number = ClassyColumn(css_class_base='course')
+    catalog_number = ClassyColumn(css_class_base='catnumber')
     title = ClassyColumn(css_class_base='coursetitle')
     credits_earned = ClassyColumn(css_class_base='credits')
 
@@ -148,10 +159,15 @@ class SectionStudentsTable(tables.Table):
     username = ClassyColumn(accessor='student__user__username', css_class_base='username')
     name = ClassyColumn(accessor='student__user__name', css_class_base='user_name')
     major = ClassyColumn(accessor='student__major', css_class_base='major')
-    status = ClassyColumn(verbose_name="Status", css_class_base='sectionstatus',
-                          accessor='status',  )
-    letter_grade = ClassyColumn(verbose_name="Grade", accessor='grade',
-                                 css_class_base='lettergrade')
+    status = ClassyColumn(
+        verbose_name="Status",
+        css_class_base='sectionstatus',
+        accessor='status',
+    )
+    letter_grade = ClassyColumn(verbose_name="Grade",
+                                accessor='grade',
+                                css_class_base='lettergrade')
+
     class Meta:
         model = SectionStudent
         template_name = "django_tables2/bootstrap.html"
