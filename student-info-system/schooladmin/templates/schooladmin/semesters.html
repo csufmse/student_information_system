@@ -30,15 +30,16 @@
     </div>
 </div>
 <script>
-function selectRow(evt) {
-    id = this.getAttribute('data-id');
-  open("/schooladmin/semester/"+id,'_self');
+function selectSemester(evt) {
+    var id = this.getAttribute('data-id');
+    var url = "{% url 'schooladmin:semester' semester_id=1234599 %}".replace(/1234599/, id.toString());
+    open(url,'_self');
 }
 
 // Add onclick to each row so that it leaps off to the detail
 var tablerows = document.getElementsByClassName('semester_row')
 for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectRow, false);
+    tablerows[i].addEventListener("click", selectSemester, false);
 }
 var e = document.getElementById('id_year_0')
 e.placeholder = "From Year"
