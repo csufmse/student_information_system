@@ -67,16 +67,27 @@
   color: white;
 }
 
-.username_col, .name_col, .major_col, .sectionstatus_col, .lettergrade_col, .sem_col,
-.course_col, .secnum_col, .coursetitle_col, .hours_col, .professor_col, .capac_col, .remaining_col {
+/* all column headers are centered */
+.active_col, .capac_col, .classlevel_col, .course_col, .coursetitle_col, .credits_col, .date_col, .gpa_col,
+.hours_col, .lettergrade_col, .major_col, .majordescr_col, .majorname_col, .professor_col, .remaining_col,
+.role_col, .secnum_col, .sectionstatus_col, .sem_col, .semester_col, .user_name_col, .username_col {
   text-align: center;
-
 }
-.major_cell, .sectionstatus_cell, .lettergrade_cell, .sem_cell, .secnum_cell,
-.coursetitle_cell, .hours_cell, .prof_cell, .capac_cell, .remaining_cell {
+/* most (data) cells are centered */
+.active_cell, .capac_cell, .classlevel_cell, .course_cell, .credits_cell, .date_cell, .gpa_cell,
+.hours_cell, .lettergrade_cell, .major_cell, .majorname_cell, .prof_cell, .remaining_cell, .role_cell,
+.secnum_cell, .sectionstatus_cell, .sem_cell, .semester_cell, .year_cell {
   text-align: center;
-
 }
-.prof_cell, .course_cell, .username_cell, .name_cell {
+.coursetitle_cell, .majordescr_cell, .prof_cell, .username_cell, .user_name_cell {
   text-align: left;
+}
+.classlevel_cell, .course_cell, .date_cell, .gpa_cell, .major_cell {
+  width: 90px;
+}
+.user_name_cell {
+  width: 200px;
+}
+.active_cell, .role_cell, .semester_cell, .year_cell {
+  width: 80px;
 }

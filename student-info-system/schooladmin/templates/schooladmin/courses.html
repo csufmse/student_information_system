@@ -31,9 +31,6 @@
   background-color: #4CAF50;
   color: white;
 }
-.mcell, .cncell {
-    text-align: center;
-}
 </style>
 
 {% endblock css %}
@@ -72,14 +69,18 @@ for (var i=0, len=tablerows.length; i<len; i=i+1) {
 
 var e = document.getElementById('id_catalog_number_0')
 e.placeholder = "Min Num"
+e.style.width = '90px';
 
 e = document.getElementById('id_catalog_number_1')
 e.placeholder = "Max Num"
+e.style.width = '90px';
 
 e = document.getElementById('id_credits_earned_0')
 e.placeholder = "Min Cred"
+e.style.width = '90px';
 
 e = document.getElementById('id_credits_earned_1')
 e.placeholder = "Max Cred"
+e.style.width = '90px';
 </script>
 {% endblock content %}
