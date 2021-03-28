@@ -203,35 +203,34 @@ class Course(models.Model):
     # with a list, tests if that list would cause a loop or not
     # (without storing it to db -- used for form validation)
     def are_candidate_prerequisites_valid(self, candidate_list=None):
-        could_cause_loop = {}
-        to_visit = [self]
+        all_requirements_for_course = {}
+        courses_to_visit = [self]
         loop_seen = False
-        print(f'checking {self} with list {candidate_list}')
 
-        while len(to_visit) > 0 and not loop_seen:
-            examine = to_visit.pop()
-            print(f'examining {examine}')
+        while len(courses_to_visit) > 0 and not loop_seen:
+            course_to_check = courses_to_visit.pop()
 
-            prereqs = []
-            if examine.prereqs.count():
-                prereqs.extend(examine.prereqs.all())
-            if examine.id == self.id and candidate_list is not None:
-                prereqs.extend(candidate_list)
+            the_course_prereqs = []
+            if course_to_check.prereqs.count():
+                the_course_prereqs.extend(course_to_check.prereqs.all())
+            if course_to_check.id == self.id and candidate_list is not None:
+                the_course_prereqs.extend(candidate_list)
 
-            for p in prereqs:
-                print(f'{p} is prereq...')
-                to_visit.append(p)
-                if p.id in could_cause_loop:
-                    print(f'...and its in ccl')
-                    # we've seen it and it has prereqs. So it's a loop
-                    loop_seen = True
-                    break
+            if course_to_check not in all_requirements_for_course:
+                all_requirements_for_course[course_to_check] = []
 
-                # only things that have prereqs could cause a loop
-                if p.prereqs.count() > 0:
-                    print(f'... add {examine} to ccl')
-                    could_cause_loop[examine.id] = True
-        print(f'returning {not loop_seen}')
+            for a_prereq in the_course_prereqs:
+                courses_to_visit.append(a_prereq)
+
+                all_requirements_for_course[course_to_check].append(a_prereq)
+                # through a_prereq, course_to_check is dependent on everything a_prereq is.
+                if a_prereq in all_requirements_for_course:
+                    all_requirements_for_course[course_to_check].extend(all_requirements_for_course[a_prereq])
+
+            # did we just add a loop back to ourselves?
+            if course_to_check in all_requirements_for_course[course_to_check]:
+                loop_seen = True
+
         return not loop_seen
 
 
