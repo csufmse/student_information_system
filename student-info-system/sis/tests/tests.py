@@ -1,10 +1,10 @@
+from django.test import TestCase
 from datetime import datetime
 
 from django.contrib.auth.models import User
-from django.test import TestCase
 
-from .models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                     Semester, Student, TranscriptRequest)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
+                        Semester, Student, TranscriptRequest)
 
 
 def createStudent(major=None, username=None):
