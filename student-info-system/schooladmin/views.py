@@ -331,7 +331,9 @@ def course_section_new(request, courseid):
     if qs.count() < 1:
         return HttpResponse("No such course")
     the_course = qs.get()
+
     form_values = {'course': the_course}
+
     semesters = Semester.objects.order_by('-date_registration_opens').filter(
         date_registration_opens__lte=date.today(), date_last_drop__gte=date.today())
     if semesters.count() > 0:
@@ -400,7 +402,12 @@ def semester_section_new(request, semester_id):
     the_semester = qs.get()
     form_values = {'semester': the_semester}
     form = SectionCreationForm(form_values)
-    return render(request, 'schooladmin/section_new.html', {'form': form})
+    return render(request, 'schooladmin/section_new.html', {
+        'form': form,
+        'profs': Professor.objects.filter(user__is_active=True),
+        'courses': Course.objects.all(),
+    })
+
 
 
 @role_login_required('Admin')
