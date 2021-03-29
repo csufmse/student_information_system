@@ -6,11 +6,6 @@
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
 
-{% block css %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-{% endblock css %}
-
 {% block content %}
 <dl class="dl-horizontal">
   <dt>Major</dt>
@@ -48,35 +43,8 @@
         value="Edit Major"
     />
 <script>
-function selectProf(evt) {
-    var id = this.getAttribute('data-id');
-    var url = "{% url 'schooladmin:user' userid=1234599 %}".replace(/1234599/, id.toString());
-    open(url,'_self');
-}
-function selectCourse(evt) {
-    var id = this.getAttribute('data-id');
-    var url = "{% url 'schooladmin:course' courseid=1234599 %}".replace(/1234599/, id.toString());
-    open(url,'_self');
-}
-
-
-function edit_major(evt) {
-    open('{% url 'schooladmin:major_edit' major.abbreviation %}','_self');
-    return false;
-}
-
-// Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('course_row')
-for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectCourse, false);
-}
-tablerows = document.getElementsByClassName('professor_row')
-for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectProf, false);
-}
-btn = document.getElementById("editm");
-if ( btn ) {
-    btn.addEventListener("click", edit_major);
-}
+addButtonClickHandler('editm', '{% url 'schooladmin:major_edit' major.abbreviation %}');
+addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "professor_row");
+addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
 </script>
 {% endblock %}

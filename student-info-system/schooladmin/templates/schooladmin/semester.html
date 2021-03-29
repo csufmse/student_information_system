@@ -6,11 +6,6 @@
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
 
-{% block css %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-{% endblock css %}
-
 {% block content %}
 <h2>Semester {{ semester.semester }}:</h2>
 <h2>Year {{ semester.year }}:</h2>
@@ -26,38 +21,19 @@
         </div>
     </div>
 
-     <input id="new_section"
-        action="action"
+     <input id="section_new" name="section_new" action="action"
            class="btn btn-info"
         value="New Section"
     />
 
     <input
-        action="action"
+        action="action" id="back" name="back"
            class="btn btn-info"
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
 <script>
-function selectSection(evt) {
-    var id = this.getAttribute('data-id');
-    var url = "{% url 'schooladmin:section' sectionid=1234599 %}".replace(/1234599/, id.toString());
-    open(url,'_self');
-}
-
-function new_section(evt) {
-    open('/schooladmin/semester/{{ semester.id }}/section_new','_self');
-    return false;
-}
-btn = document.getElementById("new_section");
-if ( btn ) {
-    btn.addEventListener("click", new_section);
-}
-
-var tablerows = document.getElementsByClassName('section_row')
-for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectSection, false);
-}
-
+addButtonClickHandler('section_new', "{% url 'schooladmin:semester_section_new' semester.id %}");
+addClickHandlers("{% url 'schooladmin:section' sectionid=1234599 %}", "section_row");
 </script>
 {% endblock %}

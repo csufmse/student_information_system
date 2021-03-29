@@ -178,6 +178,8 @@ class SectionFilter(FilterSet):
 
     status = ChoiceFilter(choices=Section.STATUSES, field_name='status')
 
+    # seats_remaining = RangeFilter()
+
     def filter_semester(self, queryset, name, value):
         return queryset.annotate(slug=Concat(
             'semester__semester', Value('-'), 'semester__year', output_field=CharField())).filter(

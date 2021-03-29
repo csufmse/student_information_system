@@ -5,11 +5,6 @@
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
 
-{% block css %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-{% endblock css %}
-
 {% block content %}
   <h3>Edit Section {{ section.course_name }}-{{ section.number }}</h3>
 <dl class="dl-horizontal">
@@ -52,11 +47,9 @@
   </form>
 
 <script>
-
-function confirmit(evt) {
-    this.form.submit();
-    return true;
-}
-document.getElementById("submitme").addEventListener("click", confirmit);
+document.getElementById("submitme").addEventListener("click", function () {
+        this.form.submit();
+        return true;
+    });
 </script>
 {% endblock %}

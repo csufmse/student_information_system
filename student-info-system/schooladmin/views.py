@@ -389,7 +389,15 @@ def semester_edit(request, semester_id):
 
 @role_login_required('Admin')
 def semester_new(request):
-    return HttpResponse(f'Sorry, no new semesters yet.')
+    if request.method == 'POST':
+        form = SemesterCreationForm(request.POST)
+        if form.is_valid():
+            # TODO
+            the_new_semester = form.save()
+            return redirect('schooladmin:semesters')
+    else:
+        form = SemesterCreationForm()
+    return render(request, 'schooladmin/semester_new.html', {'form': form})
 
 
 @role_login_required('Admin')
@@ -401,18 +409,6 @@ def semester_section_new(request, semester_id):
     form_values = {'semester': the_semester}
     form = SectionCreationForm(form_values)
     return render(request, 'schooladmin/section_new.html', {'form': form})
-
-
-@role_login_required('Admin')
-def new_semester(request):
-    if request.method == 'POST':
-        form = SemesterCreationForm(request.POST)
-        if form.is_valid():
-            the_new_semester = form.save()
-            return redirect('schooladmin:semesters')
-    else:
-        form = SemesterCreationForm()
-    return render(request, 'schooladmin/new_semester.html', {'form': form})
 
 
 @role_login_required('Admin')
@@ -495,3 +491,13 @@ def section_new(request):
             'courses': Course.objects.all(),
             'form': form,
         })
+
+
+@role_login_required('Admin')
+def sectionstudent(request, id):
+    qs = SectionStudent.objects.filter(id=id)
+    if qs.count() < 1:
+        return HttpResponse("No such sectionstudent")
+    the_sectionstud = qs.get()
+
+    return HttpResponse('not implemented yet')

@@ -5,15 +5,11 @@
 
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
-{% block css %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-{% endblock css %}
 
 
 {% block content %}
 <div>
-    <button class="btn btn-primary" onclick=location.href="{% url 'schooladmin:new_semester' %}">New Semester</button>
+    <button class="btn btn-primary" onclick=location.href="{% url 'schooladmin:semester_new' %}">New Semester</button>
     <div id="Semesters">
         {% if filter %}
             <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
@@ -30,23 +26,7 @@
     </div>
 </div>
 <script>
-function selectSemester(evt) {
-    var id = this.getAttribute('data-id');
-    var url = "{% url 'schooladmin:semester' semester_id=1234599 %}".replace(/1234599/, id.toString());
-    open(url,'_self');
-}
-
-// Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('semester_row')
-for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectSemester, false);
-}
-var e = document.getElementById('id_year_0')
-e.placeholder = "From Year"
-e.style.width = '90px';
-
-e = document.getElementById('id_year_1')
-e.placeholder = "To Year"
-e.style.width = '90px';
+stylizeRange({field:'year',min_label:'From Year',max_label:'To Year'});
+addClickHandlers("{% url 'schooladmin:semester' semester_id=1234599 %}", "semester_row");
 </script>
 {% endblock content %}

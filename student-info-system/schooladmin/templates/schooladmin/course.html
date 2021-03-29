@@ -6,11 +6,6 @@
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
 
-{% block css %}
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-{% endblock css %}
-
 {% block content %}
 <dl class="dl-horizontal">
   <dt>Major</dt>
@@ -68,48 +63,9 @@
         value="Edit Course"
     />
 <script>
-function edit_course(evt) {
-    var url = "{% url 'schooladmin:course_edit' courseid=course.id %}";
-    open(url,'_self');
-    return false;
-}
-
-function new_section(evt) {
-    var url = "{% url 'schooladmin:course_section_new' courseid=course.id %}";
-    open(url,'_self');
-    return false;
-}
-
-function selectSection(evt) {
-    var id = this.getAttribute('data-id');
-    var url = "{% url 'schooladmin:section' sectionid=1234599 %}".replace(/1234599/, id.toString());
-    open(url,'_self');
-}
-
-function selectCourse(evt) {
-    var id = this.getAttribute('data-id');
-    var url = "{% url 'schooladmin:course' courseid=1234599 %}".replace(/1234599/, id.toString());
-    open(url,'_self');
-}
-
-var tablerows = document.getElementsByClassName('section_row')
-for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectSection, false);
-}
-
-// Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('course_row')
-for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectCourse, false);
-}
-
-btn = document.getElementById("course_edit");
-if ( btn ) {
-    btn.addEventListener("click", edit_course);
-}
-btn = document.getElementById("new_section");
-if ( btn ) {
-    btn.addEventListener("click", new_section);
-}
+addButtonClickHandler('course_edit', "{% url 'schooladmin:course_edit' courseid=course.id %}");
+addButtonClickHandler('new_section', "{% url 'schooladmin:course_section_new' courseid=course.id %}");
+addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
+addClickHandlers("{% url 'schooladmin:section' sectionid=1234599 %}", "section_row");
 </script>
 {% endblock %}

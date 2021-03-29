@@ -5,11 +5,6 @@
 
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
-{% block css %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-{% endblock css %}
-
 
 {% block content %}
 <div>
@@ -32,16 +27,6 @@
 </div>
 </div>
 <script>
-function selectMajor(evt) {
-    var id = this.getAttribute('data-id');
-    var url = "{% url 'schooladmin:major' abbreviation=1234599 %}".replace(/1234599/, id.toString());
-    open(url,'_self');
-}
-
-// Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('major_row')
-for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectMajor, false);
-}
+addClickHandlers("{% url 'schooladmin:major' abbreviation=1234599 %}", "major_row");
 </script>
 {% endblock content %}

@@ -5,10 +5,6 @@
 
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
-{% block css %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-{% endblock css %}
 
 {% block content %}
 <div>
@@ -29,34 +25,7 @@
     </div>
 </div>
 <script>
-function section_new(evt) {
-    open("{% url 'schooladmin:section_new' %}",'_self');
-}
-var e = document.getElementById('section_new');
-e.addEventListener("click", section_new, false);
-
-function selectSection(evt) {
-    var id = this.getAttribute('data-id');
-    var url = "{% url 'schooladmin:section' sectionid=1234599 %}".replace(/1234599/, id.toString());
-    open(url,'_self');
-}
-
-// Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('section_row')
-for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectSection, false);
-}
-
-e = document.getElementById('id_catalog_number_0')
-e.placeholder = "Min Num"
-
-e = document.getElementById('id_catalog_number_1')
-e.placeholder = "Max Num"
-
-e = document.getElementById('id_credits_earned_0')
-e.placeholder = "Min Cred"
-
-e = document.getElementById('id_credits_earned_1')
-e.placeholder = "Max Cred"
+addButtonClickHandler('section_new', "{% url 'schooladmin:section_new' %}");
+addClickHandlers("{% url 'schooladmin:section' sectionid=1234599 %}", "section_row");
 </script>
 {% endblock content %}

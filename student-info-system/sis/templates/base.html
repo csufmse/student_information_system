@@ -4,11 +4,17 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
-    {% block css %}
-    {% endblock css %}
-<meta charset="utf-8">
-<title>{% block title %}Student Info System{% endblock %}</title>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}" />
+    {% block css %}{% endblock css %}
+
+    <script src="{%  static 'schooladmin/common.js' %}" ></script>
+    {% block scripts %}{% endblock scripts %}
+
+    <meta charset="utf-8">
+    <title>{% block title %}Student Info System{% endblock %}</title>
 </head>
+
 <body>
 <div class="header">
 <span class="name">
@@ -23,5 +29,6 @@
 </div>
   {% block content %}
   {% endblock %}
+    {% block late_scripts %}{% endblock late_scripts %}
 </body>
 </html>

@@ -5,11 +5,6 @@
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
 
-{% block css %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-{% endblock css %}
-
 {% block content %}
   <h3>Edit User {{ user.username }} / {{ user.name }}</h3>
   <form method="post">
@@ -44,17 +39,7 @@
   </form>
 
 <script>
-function selectItem(selectElement,valToSelect) {
-    var opts = selectElement.options;
-    for (var opt, j = 0; opt = opts[j]; j++) {
-        if (opt.value == valToSelect) {
-            selectElement.selectedIndex = j;
-            break;
-        }
-    }
-}
-
-function manageMajor(evt) {
+function manageMajor() {
   var role_select = document.getElementById("id_role")
   var major_select = document.getElementById("id_major")
   var major_label = major_select.labels[0]
@@ -79,22 +64,22 @@ function manageMajor(evt) {
   }
 }
 
-function confirmit(evt) {
-    var orig_role = document.getElementById("original_role").value;
-    var role_select = document.getElementById("id_role")
-    if (role_select.value != orig_role) {
-        var answer = window.confirm("Role has been changed. Are you sure?");
-        if (answer) {
+document.getElementById("submitme").addEventListener("click", function () {
+        var orig_role = document.getElementById("original_role").value;
+        var role_select = document.getElementById("id_role")
+        if (role_select.value != orig_role) {
+            var answer = window.confirm("Role has been changed. Are you sure?");
+            if (answer) {
+                this.form.submit();
+                return true;
+            }
+        } else {
             this.form.submit();
             return true;
         }
-    } else {
-        this.form.submit();
-        return true;
-    }
-    return false;
-}
-document.getElementById("submitme").addEventListener("click", confirmit);
+        return false;
+    })
+);
 
 document.getElementById("id_role").addEventListener("change", manageMajor);
 document.getElementById("reset_button").addEventListener("change", manageMajor);

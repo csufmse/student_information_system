@@ -338,7 +338,7 @@ class AdminSemesterViewsTest(TestCase):
         self.assertEqual(response.status_code, 200)
 
     # create views
-    def test_new_semesters_view_exists(self):
+    def test_semesters_new_view_exists(self):
         login = self.client.login(username='testuser1', password='1X<23fwd+tuK')
         response = self.client.get('/schooladmin/semester_new')
         self.assertEqual(response.status_code, 200)

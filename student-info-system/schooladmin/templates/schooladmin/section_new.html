@@ -5,11 +5,6 @@
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
 
-{% block css %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-{% endblock css %}
-
 {% block content %}
   <h3>Add Section to Class</h3>
   <form method="post" action="{% url 'schooladmin:section_new' %}">
@@ -66,8 +61,9 @@ function courseChosen(evt) {
 }
 
 recordMajors();
-courseChosen();
 document.getElementById("id_course").addEventListener("change", courseChosen);
+// seed the options on load
+courseChosen();
 </script>
 
 {% endblock %}
