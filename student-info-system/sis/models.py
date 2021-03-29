@@ -8,16 +8,19 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from phone_field import PhoneField
 
-class AccessRoles:
-    ADMIN_ROLE='Admin'
-    PROFESSOR_ROLE='Professor'
-    STUDENT_ROLE='Student'
-    UNKNOWN_ROLE='Unknown'
 
-    ROLES=((ADMIN_ROLE,ADMIN_ROLE),
-           (PROFESSOR_ROLE,PROFESSOR_ROLE),
-           (STUDENT_ROLE,STUDENT_ROLE),
-           )
+class AccessRoles:
+    ADMIN_ROLE = 'Admin'
+    PROFESSOR_ROLE = 'Professor'
+    STUDENT_ROLE = 'Student'
+    UNKNOWN_ROLE = 'Unknown'
+
+    ROLES = (
+        (ADMIN_ROLE, ADMIN_ROLE),
+        (PROFESSOR_ROLE, PROFESSOR_ROLE),
+        (STUDENT_ROLE, STUDENT_ROLE),
+    )
+
 
 class UpperField(models.CharField):
     """
@@ -461,6 +464,7 @@ class Section(models.Model):
 
 
 # making it so users know about roles, but without overhead of subclassing
+
 
 def access_role(self):
     is_admin = Admin.objects.filter(user_id=self.id).count() > 0

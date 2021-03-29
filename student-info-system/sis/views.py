@@ -4,6 +4,7 @@ from django.shortcuts import redirect, render
 
 from .models import AccessRoles
 
+
 @login_required
 def index(request):
     access_role = request.user.access_role()

@@ -25,7 +25,9 @@ class CustomUserCreationForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     last_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     email = forms.EmailField(max_length=254, help_text='Required. Enter a valid email address.')
-    role = forms.ChoiceField(choices=AccessRoles.ROLES, required=True, help_text='Select type of user')
+    role = forms.ChoiceField(choices=AccessRoles.ROLES,
+                             required=True,
+                             help_text='Select type of user')
     major = forms.ModelChoiceField(queryset=None, required=False)
 
     class Meta:
@@ -139,7 +141,9 @@ class UserEditForm(forms.Form):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     last_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     email = forms.EmailField(max_length=254, help_text='Required. Enter a valid email address.')
-    role = forms.ChoiceField(choices=AccessRoles.ROLES, required=True, help_text='Select type of user')
+    role = forms.ChoiceField(choices=AccessRoles.ROLES,
+                             required=True,
+                             help_text='Select type of user')
     major = forms.ModelChoiceField(queryset=Major.objects.all(), required=False)
 
     role.widget.attrs.update({'class': 'rolesel selectpicker'})
