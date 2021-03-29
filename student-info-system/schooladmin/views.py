@@ -500,7 +500,7 @@ def section_new_from_section(request, sectionid):
                               semester_id=the_section.semester.id)
 
 
-@role_login_required('Admin')
+@role_login_required(AccessRoles.ADMIN_ROLE)
 def section_new(request):
     return section_new_helper(request)
 
@@ -542,7 +542,7 @@ def section_new_helper(request, semester_id=None, courseid=None):
         })
 
 
-@role_login_required('Admin')
+@role_login_required(AccessRoles.ADMIN_ROLE)
 def sectionstudent(request, id):
     qs = SectionStudent.objects.filter(id=id)
     if qs.count() < 1:
