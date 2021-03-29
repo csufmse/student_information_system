@@ -79,8 +79,8 @@ STATICFILES_DIRS = [
 ]
 
 DEBUG_TOOLBAR_CONFIG = {
-# COMMENT OUT this line to ENABLE debug toolbar
-# UNCOMMENT this line to DISABLE debug toolbar
+    # COMMENT OUT this line to ENABLE debug toolbar
+    # UNCOMMENT this line to DISABLE debug toolbar
     'SHOW_TOOLBAR_CALLBACK': lambda r: False,
     'SHOW_COLLAPSED': True,
     'SQL_WARNING_THRESHOLD': 100,

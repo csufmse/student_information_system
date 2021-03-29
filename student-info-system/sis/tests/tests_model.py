@@ -420,7 +420,9 @@ class MajorTestCase(TestCase):
         self.assertEqual(m.courses_required.all()[1].catalog_number, '350')
         self.assertEqual(m.courses_required.all()[2].catalog_number, '400')
 
+
 class ClassLevel_tests(TestCase):
+
     def test_null_credits(self):
         self.assertEqual(ClassLevel.level(None), ClassLevel.FRESHMAN)
 
@@ -438,4 +440,3 @@ class ClassLevel_tests(TestCase):
 
     def test_senior(self):
         self.assertEqual(ClassLevel.level(98), ClassLevel.SENIOR)
-
