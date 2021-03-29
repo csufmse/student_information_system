@@ -15,9 +15,9 @@ from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Sec
 from .filters import (CourseFilter, MajorFilter, SectionFilter, SemesterFilter, UserFilter)
 from .forms import (CourseCreationForm, CourseEditForm, CustomUserCreationForm, MajorCreationForm,
                     MajorEditForm, SectionCreationForm, SectionEditForm, SemesterCreationForm,
-                    UserEditForm)
-from .tables import (BasicCoursesTable, BasicProfsTable, CoursesTable, MajorsTable, SectionsTable,
-                     SectionStudentsTable, SemestersTable, UsersTable)
+                    UserEditForm, SemesterEditForm)
+from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable,
+                     SectionStudentsTable, SemestersTable, FullUsersTable)
 
 
 @role_login_required('Admin')
@@ -33,7 +33,7 @@ def users(request):
     queryset = User.annotated().all()
     f = UserFilter(request.GET, queryset=queryset)
     has_filter = any(field in request.GET for field in set(f.get_fields()))
-    table = UsersTable(list(f.qs))
+    table = FullUsersTable(list(f.qs))
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
     return render(request, 'schooladmin/users.html', {
         'table': table,
@@ -201,15 +201,15 @@ def major(request, abbreviation):
     the_major = qs.get()
 
     pqueryset = User.objects.filter(professor__major=the_major)
-    prof_table = BasicProfsTable(pqueryset)
+    prof_table = UsersTable(pqueryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(prof_table)
 
     rqueryset = Course.objects.filter(required_by=the_major)
-    required_table = BasicCoursesTable(rqueryset)
+    required_table = CoursesTable(rqueryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(required_table)
 
     cqueryset = Course.objects.filter(major=the_major)
-    course_table = BasicCoursesTable(cqueryset)
+    course_table = CoursesTable(cqueryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(course_table)
 
     return render(request, 'schooladmin/major.html', {
@@ -275,11 +275,11 @@ def course(request, courseid):
     the_course = qs.get()
 
     pqueryset = Course.objects.filter(a_prerequisite__course=the_course)
-    ptable = BasicCoursesTable(pqueryset)
+    ptable = CoursesTable(pqueryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(ptable)
 
     nqueryset = Course.objects.filter(a_course__prerequisite=the_course)
-    ntable = BasicCoursesTable(nqueryset)
+    ntable = CoursesTable(nqueryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(ntable)
 
     squeryset = Section.objects.filter(course=the_course)
@@ -354,7 +354,7 @@ def semesters(request):
     table = SemestersTable(list(f.qs))
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
     return render(request, 'schooladmin/semesters.html', {
-        'table': table,
+        'semesters': table,
         'filter': f,
         'has_filter': has_filter,
     })
@@ -368,12 +368,22 @@ def semester(request, semester_id):
     the_semester = qs.get()
 
     sections_qs = Section.objects.filter(semester=the_semester)
-    sections_table = SectionsTable(sections_qs)
+    sections_table = SectionsTable(list(sections_qs))
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
+
+    professors_qs = the_semester.professors_teaching()
+    professors_table = UsersTable(professors_qs)
+    RequestConfig(request, paginate={"per_page": 10, "page": 1}).configure(professors_table)
+
+    students_qs = the_semester.students_attending()
+    students_table = UsersTable(students_qs)
+    RequestConfig(request, paginate={"per_page": 15, "page": 1}).configure(students_table)
 
     return render(request, 'schooladmin/semester.html', {
         'semester': the_semester,
-        'sections': sections_table
+        'sections': sections_table,
+        'students': students_table,
+        'professors': professors_table,
     })
 
 
@@ -384,7 +394,18 @@ def semester_edit(request, semester_id):
         return HttpResponse("No such semester")
     the_semester = qs.get()
 
-    return HttpResponse(f'Sorry, no editing of semester {the_semester.id} yet.')
+    if request.method == 'POST':
+        form = SemesterEditForm(request.POST, instance=the_semester)
+        if form.is_valid():
+            form.save()
+            return redirect('schooladmin:semester', semester_id)
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
+    else:
+        form = SemesterEditForm(instance=the_semester)
+    return render(request, 'schooladmin/semester_edit.html', {
+        'form': form, 'semester': the_semester })
+
 
 
 @role_login_required('Admin')

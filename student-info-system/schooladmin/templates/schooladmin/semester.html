@@ -7,17 +7,39 @@
 {% block header_name %}{% endblock header_name %}
 
 {% block content %}
-<h2>Semester {{ semester.semester }}:</h2>
-<h2>Year {{ semester.year }}:</h2>
-<h2>Start Date {{ semester.date_started }}:</h2>
-<h2>End Date {{ semester.date_ended }}:</h2>
-<h2>Registration Open {{ semester.date_registration_opens }}:</h2>
-<h2>Last Drop Date {{ semester.date_last_drop }}:</h2>
+<dl class="dl-horizontal">
+  <dt>Semester</dt>
+    <dd>{{ semester.semester }}</dd>
+  <dt>Year</dt>
+  <dd>{{ semester.year }}</dd>
+  <dt>Start Date</dt>
+  <dd>{{ semester.date_started }}</dd>
+  <dt>End Date</dt>
+  <dd>{{ semester.date_ended }}</dd>
+  <dt>Registration Open</dt>
+  <dd>{{ semester.date_registration_opens }}</dd>
+  <dt>Last Drop Date</dt>
+  <dd>{{ semester.date_last_drop }}</dd>
+</dl>
 
     <div id="Sections">
         <h3>Sections:</h3>
         <div class="data-table-alt"
             {% render_table sections 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+
+    <div id="Students">
+        <h3>Enrolled Students:</h3>
+        <div class="data-table-alt"
+            {% render_table students 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+
+    <div id="Professors">
+        <h3>Professors Teaching:</h3>
+        <div class="data-table-alt"
+            {% render_table professors 'django_tables2/bootstrap.html' %}
         </div>
     </div>
 
@@ -32,8 +54,15 @@
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
+     <input id="edit_semester"
+        action="action"
+           class="btn btn-info"
+        value="Edit Semester"
+    />
 <script>
 addButtonClickHandler('section_new', "{% url 'schooladmin:semester_section_new' semester.id %}");
+addButtonClickHandler('edit_semester', "{% url 'schooladmin:semester_edit' semester.id %}");
+addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "user_row");
 addClickHandlers("{% url 'schooladmin:section' sectionid=1234599 %}", "section_row");
 </script>
 {% endblock %}

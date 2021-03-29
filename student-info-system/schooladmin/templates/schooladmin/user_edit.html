@@ -9,19 +9,7 @@
   <h3>Edit User {{ user.username }} / {{ user.name }}</h3>
   <form method="post">
     {% csrf_token %}
-    <input type="hidden" id="original_role" value="{{ original_role }}"/>
-    {% for field in form %}
-      <p>
-        {{ field.label_tag }}<br>
-        {{ field }}
-        {% if field.help_text %}
-          <small style="color: grey">{{ field.help_text }}</small>
-        {% endif %}
-        {% for error in field.errors %}
-          <p style="color: red">{{ error }}</p>
-        {% endfor %}
-      </p>
-    {% endfor %}
+      <table>{{ form.as_table }}</table>
     <input
         action="action"
         onclick="window.history.go(-1); return false;"

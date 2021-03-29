@@ -34,7 +34,7 @@ class AbilityColumn(tables.BooleanColumn):
     header = "Enabled?"
 
 
-class UsersTable(tables.Table):
+class FullUsersTable(tables.Table):
     username = ClassyColumn(css_class_base='username')
     name = NameColumn(css_class_base='user_name')
     student_major = ClassyColumn(verbose_name='Student Major',
@@ -65,6 +65,7 @@ class UsersTable(tables.Table):
         fields = ('username', 'name', 'student_major', 'student_gpa', 'credits_earned',
                   'class_level', 'professor_department', 'access_role', 'is_active')
         row_attrs = {'class': 'user_row', 'data-id': lambda record: record.pk}
+        attrs = {"class": 'fulluser_table'}
 
 
 class MajorsTable(tables.Table):
@@ -77,9 +78,10 @@ class MajorsTable(tables.Table):
         template_name = "django_tables2/bootstrap.html"
         fields = ('abbreviation', 'name', 'description')
         row_attrs = {'class': 'major_row', 'data-id': lambda record: record.pk}
+        attrs = {"class": 'major_table'}
 
 
-class BasicProfsTable(tables.Table):
+class UsersTable(tables.Table):
     name = NameColumn(css_class_base='user_name')
     username = ClassyColumn(css_class_base='username')
 
@@ -87,11 +89,11 @@ class BasicProfsTable(tables.Table):
         model = User
         template_name = "django_tables2/bootstrap.html"
         fields = ('username', 'name')
-        attrs = {"class": 'bprof'}
-        row_attrs = {'class': 'professor_row', 'data-id': lambda record: record.pk}
+        attrs = {"class": 'user_table'}
+        row_attrs = {'class': 'user_row', 'data-id': lambda record: record.pk}
 
 
-class BasicCoursesTable(tables.Table):
+class CoursesTable(tables.Table):
     major = ClassyColumn(css_class_base='major')
     catalog_number = ClassyColumn(verbose_name='Catalog Number', css_class_base='catnumber')
     title = ClassyColumn(css_class_base='coursetitle')
@@ -101,8 +103,8 @@ class BasicCoursesTable(tables.Table):
         model = Course
         template_name = "django_tables2/bootstrap.html"
         fields = ('major', 'catalog_number', 'title', 'credits_earned')
-        attrs = {"class": 'bcourse'}
         row_attrs = {'class': 'course_row', 'data-id': lambda record: record.pk}
+        attrs = {"class": 'course_table'}
 
 
 class SemestersTable(tables.Table):
@@ -119,21 +121,9 @@ class SemestersTable(tables.Table):
         template_name = "django_tables2/bootstrap.html"
         fields = ('semester', 'year', 'date_started', 'date_ended', 'date_registration_opens',
                   'date_last_drop')
-
+        attrs = {"class": 'semester_table'}
         row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}
 
-
-class CoursesTable(tables.Table):
-    major = ClassyColumn(css_class_base='major')
-    catalog_number = ClassyColumn(css_class_base='catnumber')
-    title = ClassyColumn(css_class_base='coursetitle')
-    credits_earned = ClassyColumn(css_class_base='credits')
-
-    class Meta:
-        model = Course
-        template_name = "django_tables2/bootstrap.html"
-        fields = ('major', 'catalog_number', 'title', 'credits_earned')
-        row_attrs = {'class': 'course_row', 'data-id': lambda record: record.pk}
 
 
 class SectionsTable(tables.Table):
@@ -153,6 +143,7 @@ class SectionsTable(tables.Table):
         fields = ('semester', 'course', 'number', 'status', 'course_title', 'hours', 'professor',
                   'capacity', 'seats_remaining')
         row_attrs = {'class': 'section_row', 'data-id': lambda record: record.pk}
+        attrs = {"class": 'section_table'}
 
 
 class SectionStudentsTable(tables.Table):
@@ -176,3 +167,4 @@ class SectionStudentsTable(tables.Table):
             'class': 'sectionstudent_row',
             'data-id': lambda record: record.student.user.pk
         }
+        attrs = {"class": 'sectionstudent_table'}

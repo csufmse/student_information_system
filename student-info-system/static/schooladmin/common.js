@@ -6,9 +6,9 @@ function addClickHandlers(template, row_class) {
     var tablerows = document.getElementsByClassName(row_class)
     for (var i = 0, len = tablerows.length; i < len; i = i + 1) {
         var row = tablerows[i];
+        var id = row.getAttribute('data-id');
+        let url = template.replace(/1234599/, id.toString());
         row.addEventListener("click", function() {
-            var id = row.getAttribute('data-id');
-            var url = template.replace(/1234599/, id.toString());
             open(url,'_self');
         }, false);
     }

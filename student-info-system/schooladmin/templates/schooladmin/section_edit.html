@@ -18,18 +18,7 @@
 
   <form method="post">
     {% csrf_token %}
-    {% for field in form %}
-      <p>
-        {{ field.label_tag }}<br>
-        {{ field }}
-        {% if field.help_text %}
-          <small style="color: grey">{{ field.help_text }}</small>
-        {% endif %}
-        {% for error in field.errors %}
-          <p style="color: red">{{ error }}</p>
-        {% endfor %}
-      </p>
-    {% endfor %}
+      <table>{{ form.as_table }}</table>
     <input
         action="action"
         onclick="window.history.go(-1); return false;"
@@ -48,8 +37,18 @@
 
 <script>
 document.getElementById("submitme").addEventListener("click", function () {
-        this.form.submit();
-        return true;
+        var new_cap = document.getElementById("id_capacity").value;
+        if (new_cap < {{ section.registered }}) {
+            var answer = window.confirm("New capacity is less than the number of registered students ({{ section.registered }}). Are you sure?");
+            if (answer) {
+                this.form.submit();
+                return true;
+            }
+        } else {
+            this.form.submit();
+            return true;
+        }
+        return false;
     });
 </script>
 {% endblock %}

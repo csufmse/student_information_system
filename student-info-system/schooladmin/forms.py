@@ -136,10 +136,10 @@ class CourseEditForm(forms.ModelForm):
             self.add_error('prereqs', "Prerequisites lead back to this course.")
 
 
-SEASON = (('FALL', 'Fall'), ('SPRING', 'Spring'), ('SUMMER', 'Summer'), ('WINTER', 'Winter'))
+SEASON = (('FA', 'Fall'), ('SP', 'Spring'), ('SU', 'Summer'), ('WI', 'Winter'))
 
 
-class SemesterCreationForm(forms.Form):
+class SemesterCreationForm(forms.ModelForm):
     semester = forms.ChoiceField(choices=SEASON)
     semester.widget.attrs.update({'class': 'season_sel selectpicker'})
 
@@ -149,11 +149,37 @@ class SemesterCreationForm(forms.Form):
     date_registration_opens = forms.DateField()
     date_last_drop = forms.DateField()
 
+    def clean(self):
+        rego = self.cleaned_data.get('date_registration_opens')
+        st = self.cleaned_data.get('date_started')
+        de = self.cleaned_data.get('date_ended')
+        ld = self.cleaned_data.get('date_last_drop')
+        if not ( rego <= st <= ld <= de ):
+            raise forms.ValidationError('Dates are not in order.')
+
     class Meta:
         model = Semester
         fields = ('semester', 'year', 'date_started', 'date_ended', 'date_registration_opens',
                   'date_last_drop')
 
+class SemesterEditForm(forms.ModelForm):
+    date_started = forms.DateField()
+    date_ended = forms.DateField()
+    date_registration_opens = forms.DateField()
+    date_last_drop = forms.DateField()
+
+    def clean(self):
+        rego = self.cleaned_data.get('date_registration_opens')
+        st = self.cleaned_data.get('date_started')
+        de = self.cleaned_data.get('date_ended')
+        ld = self.cleaned_data.get('date_last_drop')
+        if not ( rego <= st <= ld <= de ):
+            raise forms.ValidationError('Dates are not in order.')
+
+    class Meta:
+        model = Semester
+        fields = ('date_started', 'date_ended', 'date_registration_opens',
+                  'date_last_drop')
 
 class UserEditForm(forms.Form):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
@@ -186,10 +212,11 @@ class SectionCreationForm(forms.ModelForm):
     professor.widget.attrs.update({'class': 'user_sel selectpicker'})
 
     capacity = forms.IntegerField()
+    status = forms.ChoiceField(choices=Section.STATUSES)
 
     class Meta:
         model = Section
-        fields = ('semester', 'course', 'number', 'hours', 'professor', 'capacity')
+        fields = ('semester', 'course', 'number', 'hours', 'professor', 'capacity', 'status')
 
 
 class SectionEditForm(forms.ModelForm):
@@ -199,10 +226,11 @@ class SectionEditForm(forms.ModelForm):
     professor.widget.attrs.update({'class': 'user_sel selectpicker'})
 
     capacity = forms.IntegerField()
+    status = forms.ChoiceField(choices=Section.STATUSES)
 
     class Meta:
         model = Section
-        fields = ('hours', 'professor', 'capacity')
+        fields = ('hours', 'professor', 'capacity', 'status')
 
     def __init__(self, *args, **kwargs):
         super(SectionEditForm, self).__init__(*args, **kwargs)
