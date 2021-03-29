@@ -19,12 +19,13 @@ else:
 
 # APPLICATION DEFINITION
 INSTALLED_APPS = [
+    "django.contrib.staticfiles",
+    'debug_toolbar',
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
     "django.contrib.sessions",
     "django.contrib.messages",
-    "django.contrib.staticfiles",
     "bootstrap3",
     "phone_field",
     "django_tables2",
@@ -36,6 +37,7 @@ INSTALLED_APPS = [
 ]
 
 MIDDLEWARE = [
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
     "django.middleware.security.SecurityMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -74,6 +76,18 @@ STATIC_ROOT = os.path.join(BASE_DIR, 'static_files')
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
+]
+
+DEBUG_TOOLBAR_CONFIG = {
+# COMMENT OUT this line to ENABLE debug toolbar
+# UNCOMMENT this line to DISABLE debug toolbar
+    'SHOW_TOOLBAR_CALLBACK': lambda r: False,
+    'SHOW_COLLAPSED': True,
+    'SQL_WARNING_THRESHOLD': 100,
+}
+
+INTERNAL_IPS = [
+    '127.0.0.1',
 ]
 
 WSGI_APPLICATION = "config.wsgi.application"
