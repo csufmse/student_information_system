@@ -16,8 +16,8 @@ from .filters import (CourseFilter, MajorFilter, SectionFilter, SemesterFilter, 
 from .forms import (CourseCreationForm, CourseEditForm, CustomUserCreationForm, MajorCreationForm,
                     MajorEditForm, SectionCreationForm, SectionEditForm, SemesterCreationForm,
                     UserEditForm, SemesterEditForm)
-from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable,
-                     SectionStudentsTable, SemestersTable, FullUsersTable)
+from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable, SectionStudentsTable,
+                     SemestersTable, FullUsersTable)
 
 
 @role_login_required('Admin')
@@ -379,12 +379,13 @@ def semester(request, semester_id):
     students_table = UsersTable(students_qs)
     RequestConfig(request, paginate={"per_page": 15, "page": 1}).configure(students_table)
 
-    return render(request, 'schooladmin/semester.html', {
-        'semester': the_semester,
-        'sections': sections_table,
-        'students': students_table,
-        'professors': professors_table,
-    })
+    return render(
+        request, 'schooladmin/semester.html', {
+            'semester': the_semester,
+            'sections': sections_table,
+            'students': students_table,
+            'professors': professors_table,
+        })
 
 
 @role_login_required('Admin')
@@ -404,8 +405,9 @@ def semester_edit(request, semester_id):
     else:
         form = SemesterEditForm(instance=the_semester)
     return render(request, 'schooladmin/semester_edit.html', {
-        'form': form, 'semester': the_semester })
-
+        'form': form,
+        'semester': the_semester
+    })
 
 
 @role_login_required('Admin')

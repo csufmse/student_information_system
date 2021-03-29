@@ -154,13 +154,14 @@ class SemesterCreationForm(forms.ModelForm):
         st = self.cleaned_data.get('date_started')
         de = self.cleaned_data.get('date_ended')
         ld = self.cleaned_data.get('date_last_drop')
-        if not ( rego <= st <= ld <= de ):
+        if not (rego <= st <= ld <= de):
             raise forms.ValidationError('Dates are not in order.')
 
     class Meta:
         model = Semester
         fields = ('semester', 'year', 'date_started', 'date_ended', 'date_registration_opens',
                   'date_last_drop')
+
 
 class SemesterEditForm(forms.ModelForm):
     date_started = forms.DateField()
@@ -173,13 +174,13 @@ class SemesterEditForm(forms.ModelForm):
         st = self.cleaned_data.get('date_started')
         de = self.cleaned_data.get('date_ended')
         ld = self.cleaned_data.get('date_last_drop')
-        if not ( rego <= st <= ld <= de ):
+        if not (rego <= st <= ld <= de):
             raise forms.ValidationError('Dates are not in order.')
 
     class Meta:
         model = Semester
-        fields = ('date_started', 'date_ended', 'date_registration_opens',
-                  'date_last_drop')
+        fields = ('date_started', 'date_ended', 'date_registration_opens', 'date_last_drop')
+
 
 class UserEditForm(forms.Form):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')

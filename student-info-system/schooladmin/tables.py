@@ -125,7 +125,6 @@ class SemestersTable(tables.Table):
         row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}
 
 
-
 class SectionsTable(tables.Table):
     semester = ClassyColumn(css_class_base='sem')
     course = ClassyColumn(css_class_base='course')
