@@ -44,7 +44,7 @@
     />
 <script>
 addButtonClickHandler('editm', '{% url 'schooladmin:major_edit' major.abbreviation %}');
-addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "professor_row");
+addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "user_row");
 addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
 </script>
 {% endblock %}

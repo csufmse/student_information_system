@@ -3,17 +3,17 @@ from django.shortcuts import render
 from django_tables2 import RequestConfig
 
 from sis.authentication_helpers import role_login_required
-from sis.models import Professor, Section
+from sis.models import Professor, Section, AccessRoles
 
 from .tables import SectionsTable
 
 
-@role_login_required('Professor')
+@role_login_required(AccessRoles.PROFESSOR_ROLE)
 def index(request):
     return render(request, 'home_professor.html')
 
 
-@role_login_required('Professor')
+@role_login_required(AccessRoles.PROFESSOR_ROLE)
 def sections(request):
     u = request.user
 

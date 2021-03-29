@@ -4,7 +4,7 @@ from django.db.models.functions import Concat
 from django_filters import (CharFilter, ChoiceFilter, FilterSet, ModelChoiceFilter, RangeFilter)
 
 from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
-                        Student)
+                        Student, AccessRoles)
 
 
 class UserFilter(FilterSet):
@@ -12,8 +12,7 @@ class UserFilter(FilterSet):
     name = CharFilter(field_name='name', label='Name', lookup_expr='icontains')
     access_role = ChoiceFilter(field_name='access_role',
                                label='Access Role',
-                               choices=(('Admin', 'Admin'), ('Professor', 'Professor'),
-                                        ('Student', 'Student')))
+                               choices=AccessRoles.ROLES)
     major = ModelChoiceFilter(
         queryset=Major.objects.order_by('abbreviation'),
         # provided because it needs one. Will be ignoring this.

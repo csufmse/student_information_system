@@ -2,15 +2,15 @@ from django.shortcuts import redirect, render
 from django.http import HttpResponse
 
 from sis.authentication_helpers import role_login_required
-from sis.models import Course, Section, Semester, SectionStudent
+from sis.models import Course, Section, Semester, SectionStudent, AccessRoles
 
 
-@role_login_required('Student')
+@role_login_required(AccessRoles.STUDENT_ROLE)
 def index(request):
     return redirect('student:current_schedule.html')
 
 
-@role_login_required('Student')
+@role_login_required(AccessRoles.STUDENT_ROLE)
 def current_schedule_view(request):
     context = {
         'my_sections': request.user.student.sectionstudent_set.all,
@@ -19,7 +19,7 @@ def current_schedule_view(request):
     return render(request, 'student/current_schedule.html', context)
 
 
-@role_login_required('Student')
+@role_login_required(AccessRoles.STUDENT_ROLE)
 def registration_view(request):
     student = request.user.student
     semester_list = student.semesters.order_by('-date_started')
