@@ -1,18 +1,11 @@
 from datetime import date
-from django.core.exceptions import ValidationError
 
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, Student, UpperField)
-
-ROLE_CHOICES = (
-    ('Student', 'Student'),
-    ('Professor', 'Professor'),
-    ('Admin', 'Admin'),
-)
+                        Semester, Student, UpperField, AccessRoles)
 
 
 class UpperFormField(forms.CharField):
@@ -32,7 +25,7 @@ class CustomUserCreationForm(UserCreationForm):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     last_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     email = forms.EmailField(max_length=254, help_text='Required. Enter a valid email address.')
-    role = forms.ChoiceField(choices=ROLE_CHOICES, required=True, help_text='Select type of user')
+    role = forms.ChoiceField(choices=AccessRoles.ROLES, required=True, help_text='Select type of user')
     major = forms.ModelChoiceField(queryset=None, required=False)
 
     class Meta:
@@ -42,7 +35,6 @@ class CustomUserCreationForm(UserCreationForm):
 
     def __init__(self, *args, **kwargs):
         super(CustomUserCreationForm, self).__init__(*args, **kwargs)
-        # this may be necessary: applyClassConfig2FormControl(self)
         self.fields['major'].queryset = Major.objects.all()
 
 
@@ -129,11 +121,8 @@ class CourseEditForm(forms.ModelForm):
             self.add_error('prereqs', "Prerequisites lead back to this course.")
 
 
-SEASON = (('FALL', 'Fall'), ('SPRING', 'Spring'), ('SUMMER', 'Summer'), ('WINTER', 'Winter'))
-
-
 class SemesterCreationForm(forms.Form):
-    semester = forms.ChoiceField(choices=SEASON)
+    semester = forms.ChoiceField(choices=Semester.SEASONS)
     year = forms.IntegerField()
     date_started = forms.DateField()
     date_ended = forms.DateField()
@@ -150,7 +139,7 @@ class UserEditForm(forms.Form):
     first_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     last_name = forms.CharField(max_length=30, required=False, help_text='Optional.')
     email = forms.EmailField(max_length=254, help_text='Required. Enter a valid email address.')
-    role = forms.ChoiceField(choices=ROLE_CHOICES, required=True, help_text='Select type of user')
+    role = forms.ChoiceField(choices=AccessRoles.ROLES, required=True, help_text='Select type of user')
     major = forms.ModelChoiceField(queryset=Major.objects.all(), required=False)
 
     role.widget.attrs.update({'class': 'rolesel selectpicker'})

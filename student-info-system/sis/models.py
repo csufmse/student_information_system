@@ -8,6 +8,16 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from phone_field import PhoneField
 
+class AccessRoles:
+    ADMIN_ROLE='Admin'
+    PROFESSOR_ROLE='Professor'
+    STUDENT_ROLE='Student'
+    UNKNOWN_ROLE='Unknown'
+
+    ROLES=((ADMIN_ROLE,ADMIN_ROLE),
+           (PROFESSOR_ROLE,PROFESSOR_ROLE),
+           (STUDENT_ROLE,STUDENT_ROLE),
+           )
 
 class UpperField(models.CharField):
     """
@@ -243,7 +253,8 @@ class Semester(models.Model):
     SUMMER = 'SU'
     WINTER = 'WI'
     SEASONS = ((FALL, 'Fall'), (SPRING, 'Spring'), (SUMMER, 'Summer'), (WINTER, 'Winter'))
-    semester = models.CharField('semester', choices=SEASONS, default='FA', max_length=6)
+
+    semester = models.CharField('semester', choices=SEASONS, default=FALL, max_length=6)
     year = models.IntegerField('year',
                                default=2000,
                                validators=[MinValueValidator(1900),
@@ -451,19 +462,18 @@ class Section(models.Model):
 
 # making it so users know about roles, but without overhead of subclassing
 
-
 def access_role(self):
     is_admin = Admin.objects.filter(user_id=self.id).count() > 0
     is_student = Student.objects.filter(user_id=self.id).count() > 0
     is_professor = Professor.objects.filter(user_id=self.id).count() > 0
     if is_admin:
-        return 'Admin'
+        return AccessRoles.ADMIN_ROLE
     elif is_professor:
-        return 'Professor'
+        return AccessRoles.PROFESSOR_ROLE
     elif is_student:
-        return 'Student'
+        return AccessRoles.STUDENT_ROLE
     else:
-        return 'Unknown'
+        return AccessRoles.UNKNOWN_ROLE
 
 
 def name(self):
@@ -480,15 +490,15 @@ User.add_to_class('name', name)
 def uannotated(cls):
     return User.objects.annotate(
         access_role=Case(
-            When(student__user__isnull=False, then=Value('Student')),
-            When(admin__user__isnull=False, then=Value('Admin')),
-            When(professor__user__isnull=False, then=Value('Professor')),
-            default=Value('Unknown'),
+            When(admin__user__isnull=False, then=Value(AccessRoles.ADMIN_ROLE)),
+            When(professor__user__isnull=False, then=Value(AccessRoles.PROFESSOR_ROLE)),
+            When(student__user__isnull=False, then=Value(AccessRoles.STUDENT_ROLE)),
+            default=Value(AccessRoles.UNKNOWN_ROLE),
             output_field=models.CharField(),
         ),
         name=Concat(F("first_name"), Value(' '), F("last_name")),
         name_sort=Concat(F("last_name"), Value(', '), F("first_name")),
-    ).exclude(access_role='Unknown')
+    ).exclude(access_role=AccessRoles.UNKNOWN_ROLE)
 
 
 User.annotated = classmethod(uannotated)
