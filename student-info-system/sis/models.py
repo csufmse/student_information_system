@@ -52,8 +52,40 @@ class Admin(models.Model):
     def __str__(self):
         return self.name
 
+class ClassLevel:
+    FRESHMAN = 'Freshman'
+    SENIOR = 'Senior'
+    JUNIOR = 'Junior'
+    SOPHOMORE = 'Sophomore'
+    LEVELS = (
+        (FRESHMAN, FRESHMAN),
+        (SOPHOMORE, SOPHOMORE),
+        (JUNIOR, JUNIOR),
+        (SENIOR, SENIOR),
+    )
+    CREDITS_FOR_LEVEL = {
+        FRESHMAN: 0,
+        SOPHOMORE: 30,
+        JUNIOR: 60,
+        SENIOR: 90,
+    }
+
+    @classmethod
+    def level(cls,creds):
+        l = ClassLevel.FRESHMAN
+        if creds is None:
+            pass
+        elif creds > ClassLevel.CREDITS_FOR_LEVEL[ClassLevel.SENIOR]:
+            l = ClassLevel.SENIOR
+        elif creds > ClassLevel.CREDITS_FOR_LEVEL[ClassLevel.JUNIOR]:
+            l = ClassLevel.JUNIOR
+        elif creds > ClassLevel.CREDITS_FOR_LEVEL[ClassLevel.SOPHOMORE]:
+            l = ClassLevel.SOPHOMORE
+
+        return l
 
 class Student(models.Model):
+
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
     major = models.ForeignKey('Major', on_delete=models.CASCADE, blank=True, null=True)
@@ -113,15 +145,7 @@ class Student(models.Model):
 
     def class_level(self):
         creds = self.credits_earned()
-        level = 'Freshman'
-        if creds is None:
-            pass
-        if creds > 90:
-            level = 'Senior'
-        elif creds > 60:
-            level = 'Junior'
-        elif creds > 30:
-            level = 'Sophomore'
+        level = ClassLevel.level(creds)
         return level
 
     @property

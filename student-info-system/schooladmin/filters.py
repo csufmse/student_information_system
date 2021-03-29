@@ -28,7 +28,7 @@ class UserFilter(FilterSet):
 
     # class_level = ChoiceFilter(field_name='student__class_level',
     #                            label='Class Level',
-    #                            choices=(('Freshman','Freshman'),('Sophomore','Sophomore'),('Junior','Junior'),('Senior','Senior'),
+    #                            choices=Student.CLASSLEVELS,
     #                                     ),method='filter_class_level')
     # gpa = RangeFilter(field_name='student__gpa')
     #
