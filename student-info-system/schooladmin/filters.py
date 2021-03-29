@@ -4,7 +4,7 @@ from django.db.models.functions import Concat
 from django_filters import (CharFilter, ChoiceFilter, FilterSet, ModelChoiceFilter, RangeFilter)
 
 from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
-                        Student)
+                        Student, AccessRoles)
 
 
 class UserFilter(FilterSet):
@@ -12,8 +12,7 @@ class UserFilter(FilterSet):
     name = CharFilter(field_name='name', label='Name', lookup_expr='icontains')
     access_role = ChoiceFilter(field_name='access_role',
                                label='Access Role',
-                               choices=(('Admin', 'Admin'), ('Professor', 'Professor'),
-                                        ('Student', 'Student')))
+                               choices=AccessRoles.ROLES)
     major = ModelChoiceFilter(
         queryset=Major.objects.order_by('abbreviation'),
         # provided because it needs one. Will be ignoring this.
@@ -155,12 +154,16 @@ class CourseFilter(FilterSet):
 
 
 class SemesterFilter(FilterSet):
-    semester = CharFilter(field_name='semester', lookup_expr='icontains')
-    year = CharFilter(field_name='year', lookup_expr='icontains')
+    semester = ChoiceFilter(label="Session", choices=Semester.SEASONS, field_name='semester')
+    year = RangeFilter(field_name='year')
 
     class Meta:
         model = Semester
         fields = ['semester', 'year']
+
+    def __init__(self, *args, **kwargs):
+        super(SemesterFilter, self).__init__(*args, **kwargs)
+        self.filters['semester'].extra.update({'empty_label': 'Session...'})
 
 
 class SectionFilter(FilterSet):
@@ -173,6 +176,8 @@ class SectionFilter(FilterSet):
     hours = CharFilter(field_name='hours', lookup_expr='icontains')
 
     status = ChoiceFilter(choices=Section.STATUSES, field_name='status')
+
+    # seats_remaining = RangeFilter()
 
     def filter_semester(self, queryset, name, value):
         return queryset.annotate(slug=Concat(

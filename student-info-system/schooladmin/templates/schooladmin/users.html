@@ -5,46 +5,26 @@
 
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
-{% block css %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<style>
-</style>
-
-{% endblock css %}
-
 
 {% block content %}
 <div>
 <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
-<div>
-<div id="Users">
-    {% if filter %}
-        <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
-            {% bootstrap_form filter.form layout='inline' %}
-            <button class="btn btn-primary">Filter</button>
-            {% if has_filter %}
-                <a  class="btn btn-success" href="{%  url 'schooladmin:users' %}">Clear</a>
-            {% endif %}
-        </form>
-    {% endif %}
-    <div class="data-table-alt">
-        {% render_table table 'django_tables2/bootstrap.html' %}
+    <div id="Users">
+        {% if filter %}
+            <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:users' %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table table 'django_tables2/bootstrap.html' %}
+        </div>
     </div>
 </div>
-</div>
-</div>
 <script>
-function selectUser(evt) {
-    var id = this.getAttribute('data-id');
-    var url = "{% url 'schooladmin:user' userid=1234599 %}".replace(/1234599/, id.toString());
-    open(url,'_self');
-}
-
-// Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('user_row')
-for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectUser, false);
-}
+addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "user_row");
 </script>
 {% endblock content %}

@@ -9,6 +9,19 @@ from django.dispatch import receiver
 from phone_field import PhoneField
 
 
+class AccessRoles:
+    ADMIN_ROLE = 'Admin'
+    PROFESSOR_ROLE = 'Professor'
+    STUDENT_ROLE = 'Student'
+    UNKNOWN_ROLE = 'Unknown'
+
+    ROLES = (
+        (ADMIN_ROLE, ADMIN_ROLE),
+        (PROFESSOR_ROLE, PROFESSOR_ROLE),
+        (STUDENT_ROLE, STUDENT_ROLE),
+    )
+
+
 class UpperField(models.CharField):
     """
     a subclass that returns the upper-cased version of its text. Effect is user cannot
@@ -206,16 +219,35 @@ class Course(models.Model):
     # with a list, tests if that list would cause a loop or not
     # (without storing it to db -- used for form validation)
     def are_candidate_prerequisites_valid(self, candidate_list=None):
-        seen = {}
-        to_see = [self]
-        if candidate_list is not None:
-            to_see.extend(candidate_list)
+        all_requirements_for_course = {}
+        courses_to_visit = [self]
         loop_seen = False
-        while len(to_see) > 0 and not loop_seen:
-            examine = to_see.pop()
-            loop_seen = examine in seen
-            to_see.extend(examine.prereqs.all())
-            seen[examine] = True
+
+        while len(courses_to_visit) > 0 and not loop_seen:
+            course_to_check = courses_to_visit.pop()
+
+            the_course_prereqs = []
+            if course_to_check.prereqs.count():
+                the_course_prereqs.extend(course_to_check.prereqs.all())
+            if course_to_check.id == self.id and candidate_list is not None:
+                the_course_prereqs.extend(candidate_list)
+
+            if course_to_check not in all_requirements_for_course:
+                all_requirements_for_course[course_to_check] = []
+
+            for a_prereq in the_course_prereqs:
+                courses_to_visit.append(a_prereq)
+
+                all_requirements_for_course[course_to_check].append(a_prereq)
+                # through a_prereq, course_to_check is dependent on everything a_prereq is.
+                if a_prereq in all_requirements_for_course:
+                    all_requirements_for_course[course_to_check].extend(
+                        all_requirements_for_course[a_prereq])
+
+            # did we just add a loop back to ourselves?
+            if course_to_check in all_requirements_for_course[course_to_check]:
+                loop_seen = True
+
         return not loop_seen
 
 
@@ -243,7 +275,8 @@ class Semester(models.Model):
     SUMMER = 'SU'
     WINTER = 'WI'
     SEASONS = ((FALL, 'Fall'), (SPRING, 'Spring'), (SUMMER, 'Summer'), (WINTER, 'Winter'))
-    semester = models.CharField('semester', choices=SEASONS, default='FA', max_length=6)
+
+    semester = models.CharField('semester', choices=SEASONS, default=FALL, max_length=6)
     year = models.IntegerField('year',
                                default=2000,
                                validators=[MinValueValidator(1900),
@@ -257,6 +290,12 @@ class Semester(models.Model):
     class Meta:
         unique_together = (('semester', 'year'),)
         ordering = ['date_registration_opens']
+
+    def professors_teaching(self):
+        return User.objects.filter(professor__section__semester=self.id)
+
+    def students_attending(self):
+        return User.objects.filter(student__semesterstudent__semester=self.id)
 
     @property
     def name(self):
@@ -457,13 +496,13 @@ def access_role(self):
     is_student = Student.objects.filter(user_id=self.id).count() > 0
     is_professor = Professor.objects.filter(user_id=self.id).count() > 0
     if is_admin:
-        return 'Admin'
+        return AccessRoles.ADMIN_ROLE
     elif is_professor:
-        return 'Professor'
+        return AccessRoles.PROFESSOR_ROLE
     elif is_student:
-        return 'Student'
+        return AccessRoles.STUDENT_ROLE
     else:
-        return 'Unknown'
+        return AccessRoles.UNKNOWN_ROLE
 
 
 def name(self):
@@ -480,15 +519,15 @@ User.add_to_class('name', name)
 def uannotated(cls):
     return User.objects.annotate(
         access_role=Case(
-            When(student__user__isnull=False, then=Value('Student')),
-            When(admin__user__isnull=False, then=Value('Admin')),
-            When(professor__user__isnull=False, then=Value('Professor')),
-            default=Value('Unknown'),
+            When(admin__user__isnull=False, then=Value(AccessRoles.ADMIN_ROLE)),
+            When(professor__user__isnull=False, then=Value(AccessRoles.PROFESSOR_ROLE)),
+            When(student__user__isnull=False, then=Value(AccessRoles.STUDENT_ROLE)),
+            default=Value(AccessRoles.UNKNOWN_ROLE),
             output_field=models.CharField(),
         ),
         name=Concat(F("first_name"), Value(' '), F("last_name")),
         name_sort=Concat(F("last_name"), Value(', '), F("first_name")),
-    ).exclude(access_role='Unknown')
+    ).exclude(access_role=AccessRoles.UNKNOWN_ROLE)
 
 
 User.annotated = classmethod(uannotated)

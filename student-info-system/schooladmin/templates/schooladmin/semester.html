@@ -6,98 +6,63 @@
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
 
-{% block css %}
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<style>
-#Professors th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: center;
-  background-color: #4CAF50;
-  color: white;
-}
-#Professors {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
-
-#Professors td, #Professors th {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-#Professors tr:nth-child(even){background-color: #f2f2f2;}
-
-#Professors tr:hover {background-color: #ddd;}
-
-#Courses th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: center;
-  background-color: #4CAF50;
-  color: white;
-}
-#Courses {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
-
-#Courses td, #Professors th {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-#Courses tr:nth-child(even){background-color: #f2f2f2;}
-
-#Courses tr:hover {background-color: #ddd;}
-
-#Courses th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: center;
-  background-color: #4CAF50;
-  color: white;
-}
-</style>
-
-{% endblock css %}
-
 {% block content %}
-<h2>Semester {{ semester.semester }}:</h2>
-<h2>Year {{ semester.year }}:</h2>
-<h2>Start Date {{ semester.date_started }}:</h2>
-<h2>End Date {{ semester.date_ended }}:</h2>
-<h2>Registration Open {{ semester.date_registration_opens }}:</h2>
-<h2>Last Drop Date {{ semester.date_last_drop }}:</h2>
+<dl class="dl-horizontal">
+  <dt>Semester</dt>
+    <dd>{{ semester.semester }}</dd>
+  <dt>Year</dt>
+  <dd>{{ semester.year }}</dd>
+  <dt>Start Date</dt>
+  <dd>{{ semester.date_started }}</dd>
+  <dt>End Date</dt>
+  <dd>{{ semester.date_ended }}</dd>
+  <dt>Registration Open</dt>
+  <dd>{{ semester.date_registration_opens }}</dd>
+  <dt>Last Drop Date</dt>
+  <dd>{{ semester.date_last_drop }}</dd>
+</dl>
 
     <div id="Sections">
         <h3>Sections:</h3>
-    {% render_table sections 'django_tables2/bootstrap.html' %}
+        <div class="data-table-alt"
+            {% render_table sections 'django_tables2/bootstrap.html' %}
+        </div>
     </div>
 
-     <input id="new_section"
-        action="action"
+    <div id="Students">
+        <h3>Enrolled Students:</h3>
+        <div class="data-table-alt"
+            {% render_table students 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+
+    <div id="Professors">
+        <h3>Professors Teaching:</h3>
+        <div class="data-table-alt"
+            {% render_table professors 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+
+     <input id="section_new" name="section_new" action="action"
            class="btn btn-info"
         value="New Section"
     />
 
     <input
-        action="action"
+        action="action" id="back" name="back"
            class="btn btn-info"
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
+     <input id="edit_semester"
+        action="action"
+           class="btn btn-info"
+        value="Edit Semester"
+    />
 <script>
-function new_section(evt) {
-    open('/schooladmin/semester/{{ semester.id }}/section_new','_self');
-    return false;
-}
-btn = document.getElementById("new_section");
-if ( btn ) {
-    btn.addEventListener("click", new_section);
-}
+addButtonClickHandler('section_new', "{% url 'schooladmin:semester_section_new' semester.id %}");
+addButtonClickHandler('edit_semester', "{% url 'schooladmin:semester_edit' semester.id %}");
+addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "user_row");
+addClickHandlers("{% url 'schooladmin:section' sectionid=1234599 %}", "section_row");
 </script>
 {% endblock %}

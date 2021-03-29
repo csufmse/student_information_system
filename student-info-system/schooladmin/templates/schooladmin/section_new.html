@@ -5,27 +5,11 @@
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
 
-{% block css %}
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-{% endblock css %}
-
 {% block content %}
   <h3>Add Section to Class</h3>
   <form method="post" action="{% url 'schooladmin:section_new' %}">
     {% csrf_token %}
-      {% for field in form %}
-      <p>
-        {{ field.label_tag }}<br>
-        {{ field }}
-        {% if field.help_text %}
-          <small style="color: grey">{{ field.help_text }}</small>
-        {% endif %}
-        {% for error in field.errors %}
-          <p style="color: red">{{ error }}</p>
-        {% endfor %}
-      </p>
-    {% endfor %}
+      <table>{{ form.as_table }}</table>
     <input
         action="action"
         onclick="window.history.go(-1); return false;"
@@ -66,8 +50,9 @@ function courseChosen(evt) {
 }
 
 recordMajors();
-courseChosen();
 document.getElementById("id_course").addEventListener("change", courseChosen);
+// seed the options on load
+courseChosen();
 </script>
 
 {% endblock %}
