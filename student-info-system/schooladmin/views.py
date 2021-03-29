@@ -327,25 +327,7 @@ def course_new(request):
 
 @role_login_required('Admin')
 def course_section_new(request, courseid):
-    qs = Course.objects.filter(id=courseid)
-    if qs.count() < 1:
-        return HttpResponse("No such course")
-    the_course = qs.get()
-
-    form_values = {'course': the_course}
-
-    semesters = Semester.objects.order_by('-date_registration_opens').filter(
-        date_registration_opens__lte=date.today(), date_last_drop__gte=date.today())
-    if semesters.count() > 0:
-        form_values['semester'] = semesters[0]
-
-    form = SectionCreationForm(form_values)
-    return render(
-        request, 'schooladmin/section_new.html', {
-            'profs': Professor.objects.filter(user__is_active=True, major=the_course.major),
-            'courses': Course.objects.filter(id=the_course.id),
-            'form': form,
-        })
+    return section_new_helper(request, courseid=courseid)
 
 
 @role_login_required('Admin')
@@ -396,18 +378,7 @@ def semester_new(request):
 
 @role_login_required('Admin')
 def semester_section_new(request, semester_id):
-    qs = Semester.objects.filter(id=semester_id)
-    if qs.count() < 1:
-        return HttpResponse("No such semester")
-    the_semester = qs.get()
-    form_values = {'semester': the_semester}
-    form = SectionCreationForm(form_values)
-    return render(request, 'schooladmin/section_new.html', {
-        'form': form,
-        'profs': Professor.objects.filter(user__is_active=True),
-        'courses': Course.objects.all(),
-    })
-
+    return section_new_helper(request, semester_id=semester_id)
 
 
 @role_login_required('Admin')
@@ -488,14 +459,50 @@ def section_edit(request, sectionid):
 
 
 @role_login_required('Admin')
+def section_new_from_section(request, sectionid):
+    qs = Section.objects.filter(id=sectionid)
+    if qs.count() < 1:
+        return HttpResponse("No such section")
+    the_section = qs.get()
+    return section_new_helper(request,
+                              courseid=the_section.course.id,
+                              semester_id=the_section.semester.id)
+
+
+@role_login_required('Admin')
 def section_new(request):
+    return section_new_helper(request)
+
+
+def section_new_helper(request, semester_id=None, courseid=None):
     if request.method == 'POST':
         form = SectionCreationForm(request.POST)
         if form.is_valid():
             the_new_section = form.save()
             return redirect('schooladmin:section', the_new_section.id)
     else:
-        form = SectionCreationForm(request.GET)
+        form_values = {}
+        if courseid is not None:
+            qs = Course.objects.filter(id=courseid)
+            if qs.count() < 1:
+                return HttpResponse("No such course")
+            the_course = qs.get()
+
+            form_values['course'] = the_course
+
+        if semester_id is not None:
+            qs = Semester.objects.filter(id=semester_id)
+            if qs.count() < 1:
+                return HttpResponse("No such semester")
+            the_semester = qs.get()
+            form_values['semester'] = the_semester
+        else:
+            semesters = Semester.objects.order_by('-date_registration_opens').filter(
+                date_registration_opens__lte=date.today(), date_last_drop__gte=date.today())
+            if semesters.count() > 0:
+                form_values['semester'] = semesters[0]
+
+        form = SectionCreationForm(form_values)
     return render(
         request, 'schooladmin/section_new.html', {
             'profs': Professor.objects.filter(user__is_active=True),

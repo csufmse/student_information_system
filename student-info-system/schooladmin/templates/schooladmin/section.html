@@ -49,6 +49,11 @@
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
+     <input id="new_section"
+        action="action"
+           class="btn btn-info"
+        value="New Section of this Class"
+    />
      <input id="edit_section"
         action="action"
            class="btn btn-info"
@@ -75,6 +80,11 @@ function selectStudent(evt) {
 
 function edit_section(evt) {
     open('{% url 'schooladmin:section_edit' sectionid=section.id %}','_self');
+    return false;
+}
+
+function new_section(evt) {
+    open('{% url 'schooladmin:section_new_from_section' sectionid=section.id %}','_self');
     return false;
 }
 
@@ -112,6 +122,10 @@ for (var i=0, len=tablerows.length; i<len; i=i+1) {
 btn = document.getElementById("edit_section");
 if ( btn ) {
     btn.addEventListener("click", edit_section);
+}
+btn = document.getElementById("new_section");
+if ( btn ) {
+    btn.addEventListener("click", new_section);
 }
 </script>
 {% endblock %}

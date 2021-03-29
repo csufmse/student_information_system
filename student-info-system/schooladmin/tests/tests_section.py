@@ -64,3 +64,8 @@ class AdminSectionViewsTest(TestCase):
         login = self.client.login(username='testuser1', password='1X<23fwd+tuK')
         response = self.client.get('/schooladmin/section_new')
         self.assertEqual(response.status_code, 200)
+
+    def test_section_new_from_section_view_exists(self):
+        login = self.client.login(username='testuser1', password='1X<23fwd+tuK')
+        response = self.client.get('/schooladmin/section/1/new_from_section')
+        self.assertEqual(response.status_code, 200)
