@@ -41,6 +41,11 @@
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
+     <input id="new_section"
+        action="action"
+           class="btn btn-info"
+        value="New Section of this Class"
+    />
      <input id="edit_section"
         action="action"
            class="btn btn-info"
@@ -68,7 +73,7 @@ document.getElementById("delete_section").addEventListener("click", function() {
         return false;
     }
 );
-
+addButtonClickHandler('new_section', '{% url 'schooladmin:section_new_from_section' sectionid=section.id %}');
 addButtonClickHandler('edit_section', '{% url 'schooladmin:section_edit' sectionid=section.id %}');
 addButtonClickHandler('manage_students', '{% url 'schooladmin:section_students_manage' sectionid=section.id %}');
 addClickHandlers("{% url 'schooladmin:sectionstudent' id=1234599 %}", "sectionstudent_row");
