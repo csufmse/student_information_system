@@ -129,7 +129,7 @@ class CourseEditForm(forms.ModelForm):
             self.add_error('prereqs', "Prerequisites lead back to this course.")
 
 
-class SemesterCreationForm(forms.Form):
+class SemesterCreationForm(forms.ModelForm):
     semester = forms.ChoiceField(choices=Semester.SEASONS)
     semester.widget.attrs.update({'class': 'season_sel selectpicker'})
     year = forms.IntegerField()
