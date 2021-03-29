@@ -492,14 +492,11 @@ class Section(models.Model):
 
 
 def access_role(self):
-    is_admin = Admin.objects.filter(user_id=self.id).count() > 0
-    is_student = Student.objects.filter(user_id=self.id).count() > 0
-    is_professor = Professor.objects.filter(user_id=self.id).count() > 0
-    if is_admin:
+    if Admin.objects.filter(user_id=self.id).count() > 0:
         return AccessRoles.ADMIN_ROLE
-    elif is_professor:
+    elif Professor.objects.filter(user_id=self.id).count() > 0:
         return AccessRoles.PROFESSOR_ROLE
-    elif is_student:
+    elif Student.objects.filter(user_id=self.id).count() > 0:
         return AccessRoles.STUDENT_ROLE
     else:
         return AccessRoles.UNKNOWN_ROLE
