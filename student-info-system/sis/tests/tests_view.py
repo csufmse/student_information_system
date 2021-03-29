@@ -1,6 +1,6 @@
-from django.contrib.auth.models import User
 from django.test import TestCase
 
+from django.contrib.auth.models import User
 from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section,
                         SectionStudent, Semester, SemesterStudent, Student, TranscriptRequest,
                         UpperField)
@@ -29,11 +29,10 @@ class ViewsAccess(TestCase):
         response = self.client.get('/')
         self.assertEqual(response.status_code, 302)
 
-    def test_home_view_exists_for_stud(self):
+    def test_home_view_redirects_for_stud(self):
         login = self.client.login(username='u3', password='hello')
-        response = self.client.get('/', follow=True)
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(str(response.context['user']), 'u3')
+        response = self.client.get('/')
+        self.assertEqual(response.status_code, 302)
 
     def test_home_view_redirect_login_for_loser(self):
         response = self.client.get('/')
@@ -54,12 +53,7 @@ class ViewsUseTemplate(TestCase):
         ViewsAccess.u = User.objects.create_user(username='u', password='hello')
         Student.objects.create(user=ViewsAccess.u, major=m1)
 
-    def current_schedule(self):
+    def access_denied(self):
         login = self.client.login(username='u', password='hello')
-        response = self.client.get('/')
-        self.assertTemplateUsed(response, 'student/current_schedule.html')
-
-    def registration(self):
-        login = self.client.login(username='u', password='hello')
-        response = self.client.get('/registration')
-        self.assertTemplateUsed(response, 'student/registration.html')
+        response = self.client.get('/access_denied')
+        self.assertTemplateUsed(response, 'sis/access_denied.html')
