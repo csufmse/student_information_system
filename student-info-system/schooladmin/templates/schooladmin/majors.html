@@ -5,36 +5,6 @@
 
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
-{% block css %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<style>
-#Majors {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
-
-#Majors td, #Majors th {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-#Majors tr:nth-child(even){background-color: #f2f2f2;}
-
-#Majors tr:hover {background-color: #ddd;}
-
-#Majors th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: #4CAF50;
-  color: white;
-}
-</style>
-
-{% endblock css %}
-
 
 {% block content %}
 <div>
@@ -50,20 +20,13 @@
 {% endif %}
     </form>
     {% endif %}
-    {% render_table table 'django_tables2/bootstrap.html' %}
+    <div class="data-table-alt">
+        {% render_table table 'django_tables2/bootstrap.html' %}
+    </div>
 </div>
 </div>
 </div>
 <script>
-function selectRow(evt) {
-    id = this.getAttribute('data-id');
-    open("/schooladmin/major/"+id,'_self');
-}
-
-// Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('mrow')
-for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectRow, false);
-}
+addClickHandlers("{% url 'schooladmin:major' abbreviation=1234599 %}", "major_row");
 </script>
 {% endblock content %}

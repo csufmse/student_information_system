@@ -6,7 +6,7 @@
 {% block header_name %}{% endblock header_name %}
 
 {% block content %}
-  <h3>Create New Course</h3>
+  <h3>Create New Semester</h3>
   <form method="post">
     {% csrf_token %}
       <table>{{ form.as_table }}</table>
@@ -16,7 +16,7 @@
         type="submit"
         value="Cancel" class="btn btn-info"
     />
-    <button type="submit" class="btn btn-primary">Create Course</button>
+    <button type="submit" class="btn btn-primary">Create Semester</button>
   </form>
 
 {% endblock %}

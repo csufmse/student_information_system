@@ -219,16 +219,35 @@ class Course(models.Model):
     # with a list, tests if that list would cause a loop or not
     # (without storing it to db -- used for form validation)
     def are_candidate_prerequisites_valid(self, candidate_list=None):
-        seen = {}
-        to_see = [self]
-        if candidate_list is not None:
-            to_see.extend(candidate_list)
+        all_requirements_for_course = {}
+        courses_to_visit = [self]
         loop_seen = False
-        while len(to_see) > 0 and not loop_seen:
-            examine = to_see.pop()
-            loop_seen = examine in seen
-            to_see.extend(examine.prereqs.all())
-            seen[examine] = True
+
+        while len(courses_to_visit) > 0 and not loop_seen:
+            course_to_check = courses_to_visit.pop()
+
+            the_course_prereqs = []
+            if course_to_check.prereqs.count():
+                the_course_prereqs.extend(course_to_check.prereqs.all())
+            if course_to_check.id == self.id and candidate_list is not None:
+                the_course_prereqs.extend(candidate_list)
+
+            if course_to_check not in all_requirements_for_course:
+                all_requirements_for_course[course_to_check] = []
+
+            for a_prereq in the_course_prereqs:
+                courses_to_visit.append(a_prereq)
+
+                all_requirements_for_course[course_to_check].append(a_prereq)
+                # through a_prereq, course_to_check is dependent on everything a_prereq is.
+                if a_prereq in all_requirements_for_course:
+                    all_requirements_for_course[course_to_check].extend(
+                        all_requirements_for_course[a_prereq])
+
+            # did we just add a loop back to ourselves?
+            if course_to_check in all_requirements_for_course[course_to_check]:
+                loop_seen = True
+
         return not loop_seen
 
 
@@ -271,6 +290,12 @@ class Semester(models.Model):
     class Meta:
         unique_together = (('semester', 'year'),)
         ordering = ['date_registration_opens']
+
+    def professors_teaching(self):
+        return User.objects.filter(professor__section__semester=self.id)
+
+    def students_attending(self):
+        return User.objects.filter(student__semesterstudent__semester=self.id)
 
     @property
     def name(self):

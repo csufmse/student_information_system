@@ -4,8 +4,23 @@ from django.contrib.auth.models import User
 from sis.models import *
 
 
+# Each column and cell has its own CSS class based on the type of
+# data in it.
+def field_css_classes(field_name):
+    return {'th': {'class': field_name + '_col'}, 'td': {'class': field_name + '_cell'}}
+
+
+class ClassyColumn(tables.Column):
+
+    def __init__(self, *args, **kwargs):
+        if 'css_class_base' in kwargs:
+            css_class_base = kwargs.pop('css_class_base', None)
+            kwargs['attrs'] = field_css_classes(css_class_base)
+        super(ClassyColumn, self).__init__(*args, **kwargs)
+
+
 # For User names we want to show the full name ("first last") but sort by "last, first"
-class NameColumn(tables.Column):
+class NameColumn(ClassyColumn):
 
     def render(self, record):
         return record.name
@@ -19,88 +34,30 @@ class AbilityColumn(tables.BooleanColumn):
     header = "Enabled?"
 
 
-class UsersTable(tables.Table):
-    username = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
-    name = NameColumn(attrs={'th': {'style': 'text-align: center;'}})
-    student_major = tables.Column(verbose_name='Student Major',
-                                  accessor='student__major__abbreviation',
-                                  attrs={
-                                      'th': {
-                                          'style': 'text-align: center;'
-                                      },
-                                      'td': {
-                                          'align': 'center',
-                                          'width': '90px',
-                                      }
-                                  })
-    professor_department = tables.Column(verbose_name='Professor Dept',
-                                         accessor='professor__major__abbreviation',
-                                         attrs={
-                                             'th': {
-                                                 'style': 'text-align: center;'
-                                             },
-                                             'td': {
-                                                 'align': 'center',
-                                                 'width': '90px',
-                                             }
-                                         })
-    is_active = AbilityColumn(null=False,
-                              attrs={
-                                  'th': {
-                                      'style': 'text-align: center;'
-                                  },
-                                  'td': {
-                                      'align': 'center',
-                                      'width': '80px',
-                                  }
-                              })
-    access_role = tables.Column(verbose_name='User Role',
-                                attrs={
-                                    'th': {
-                                        'style': 'text-align: center;'
-                                    },
-                                    'td': {
-                                        'align': 'center',
-                                        'width': '90px',
-                                    }
-                                })
-    class_level = tables.Column(verbose_name='Class',
-                                accessor='student__class_level',
-                                attrs={
-                                    'th': {
-                                        'style': 'text-align: center;'
-                                    },
-                                    'td': {
-                                        'align': 'center',
-                                        'width': '90px',
-                                    }
-                                })
-    student_gpa = tables.Column(verbose_name='GPA',
-                                accessor='student__gpa',
-                                attrs={
-                                    'th': {
-                                        'style': 'text-align: center;'
-                                    },
-                                    'td': {
-                                        'align': 'center',
-                                        'width': '90px',
-                                    }
-                                })
+class FullUsersTable(tables.Table):
+    username = ClassyColumn(css_class_base='username')
+    name = NameColumn(css_class_base='user_name')
+    student_major = ClassyColumn(verbose_name='Student Major',
+                                 css_class_base='major',
+                                 accessor='student__major__abbreviation')
+    professor_department = ClassyColumn(verbose_name='Professor Dept',
+                                        css_class_base='major',
+                                        accessor='professor__major__abbreviation')
+    is_active = AbilityColumn(null=False, attrs=field_css_classes('active'))
+    access_role = ClassyColumn(verbose_name='User Role', css_class_base='role')
+    class_level = ClassyColumn(verbose_name='Class',
+                               css_class_base='classlevel',
+                               accessor='student__class_level')
+    student_gpa = ClassyColumn(verbose_name='GPA', css_class_base='gpa', accessor='student__gpa')
 
     def render_student_gpa(self, value):
         return '{:0.2f}'.format(value)
 
-    credits_earned = tables.Column(verbose_name='Credits',
-                                   accessor='student__credits_earned',
-                                   attrs={
-                                       'th': {
-                                           'style': 'text-align: center;'
-                                       },
-                                       'td': {
-                                           'align': 'center',
-                                           'width': '90px',
-                                       }
-                                   })
+    credits_earned = ClassyColumn(
+        verbose_name='Credits',
+        css_class_base='credits',
+        accessor='student__credits_earned',
+    )
 
     class Meta:
         model = User
@@ -108,150 +65,76 @@ class UsersTable(tables.Table):
         fields = ('username', 'name', 'student_major', 'student_gpa', 'credits_earned',
                   'class_level', 'professor_department', 'access_role', 'is_active')
         row_attrs = {'class': 'user_row', 'data-id': lambda record: record.pk}
+        attrs = {"class": 'fulluser_table'}
 
 
 class MajorsTable(tables.Table):
-    abbreviation = tables.Column(attrs={
-        'th': {
-            'style': 'text-align: center;'
-        },
-        'td': {
-            'align': 'center'
-        }
-    })
-    name = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
-    description = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    abbreviation = ClassyColumn(css_class_base='major')
+    name = ClassyColumn(css_class_base='majorname')
+    description = ClassyColumn(css_class_base='majordescr')
 
     class Meta:
         model = Major
         template_name = "django_tables2/bootstrap.html"
         fields = ('abbreviation', 'name', 'description')
-        row_attrs = {'class': 'mrow', 'data-id': lambda record: record.pk}
+        row_attrs = {'class': 'major_row', 'data-id': lambda record: record.pk}
+        attrs = {"class": 'major_table'}
 
 
-class BasicProfsTable(tables.Table):
-    name = NameColumn(attrs={'th': {'style': 'text-align: center;'}, 'td': {'width': '200px'}})
-    username = tables.Column(attrs={
-        'th': {
-            'style': 'text-align: center;'
-        },
-        'td': {
-            'align': 'center',
-            'width': '100px'
-        }
-    })
+class UsersTable(tables.Table):
+    name = NameColumn(css_class_base='user_name')
+    username = ClassyColumn(css_class_base='username')
 
     class Meta:
         model = User
         template_name = "django_tables2/bootstrap.html"
         fields = ('username', 'name')
-        attrs = {"class": 'bprof'}
-        row_attrs = {'class': 'prof_row', 'data-id': lambda record: record.pk}
+        attrs = {"class": 'user_table'}
+        row_attrs = {'class': 'user_row', 'data-id': lambda record: record.pk}
 
 
-class BasicCoursesTable(tables.Table):
-    major = tables.Column(attrs={'th': {'class': 'major_col'}, 'td': {'class': 'major_cell'}})
-    catalog_number = tables.Column(attrs={
-        'th': {
-            'class': 'catnumber_col'
-        },
-        'td': {
-            'class': 'catnumber_cell'
-        }
-    })
-    title = tables.Column(attrs={'th': {'class': 'course_col'}, 'td': {'class': 'course_cell'}})
-    credits_earned = tables.Column(attrs={
-        'th': {
-            'class': 'credits_col'
-        },
-        'td': {
-            'class': 'credits_cell'
-        }
-    })
+class CoursesTable(tables.Table):
+    major = ClassyColumn(css_class_base='major')
+    catalog_number = ClassyColumn(verbose_name='Catalog Number', css_class_base='catnumber')
+    title = ClassyColumn(css_class_base='coursetitle')
+    credits_earned = ClassyColumn(css_class_base='credits')
 
     class Meta:
         model = Course
         template_name = "django_tables2/bootstrap.html"
         fields = ('major', 'catalog_number', 'title', 'credits_earned')
-        attrs = {"class": 'bcourse'}
         row_attrs = {'class': 'course_row', 'data-id': lambda record: record.pk}
+        attrs = {"class": 'course_table'}
 
 
 class SemestersTable(tables.Table):
-    semester = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
-    year = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
-    date_started = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
-    date_ended = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
-    date_registration_opens = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
-    date_last_drop = tables.Column(attrs={'th': {'style': 'text-align: center;'}})
+    semester = ClassyColumn(verbose_name='Session', css_class_base='semester')
+    year = ClassyColumn(css_class_base='year')
+    date_started = ClassyColumn(verbose_name='Start of Classes', css_class_base='date')
+    date_ended = ClassyColumn(verbose_name='End of Classes', css_class_base='date')
+    date_registration_opens = ClassyColumn(verbose_name='Registration Opens',
+                                           css_class_base='date')
+    date_last_drop = ClassyColumn(verbose_name='Date of Last Drop', css_class_base='date')
 
     class Meta:
         model = Semester
         template_name = "django_tables2/bootstrap.html"
         fields = ('semester', 'year', 'date_started', 'date_ended', 'date_registration_opens',
                   'date_last_drop')
-
-        row_attrs = {'class': 'urow', 'data-id': lambda record: record.pk}
-
-
-class CoursesTable(tables.Table):
-    major = tables.Column(attrs={'th': {'class': 'major_col'}, 'td': {'class': 'major_cell'}})
-    catalog_number = tables.Column(attrs={
-        'th': {
-            'class': 'catnumber_col'
-        },
-        'td': {
-            'class': 'catnumber_cell'
-        }
-    })
-    title = tables.Column(attrs={'th': {'class': 'course_col'}, 'td': {'class': 'course_cell'}})
-    credits_earned = tables.Column(attrs={
-        'th': {
-            'class': 'credits_col'
-        },
-        'td': {
-            'class': 'credits_cell'
-        }
-    })
-
-    class Meta:
-        model = Course
-        template_name = "django_tables2/bootstrap.html"
-        fields = ('major', 'catalog_number', 'title', 'credits_earned')
-        row_attrs = {'class': 'course_row', 'data-id': lambda record: record.pk}
+        attrs = {"class": 'semester_table'}
+        row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}
 
 
 class SectionsTable(tables.Table):
-    semester = tables.Column(attrs={'th': {'class': 'sem_col'}, 'td': {'class': 'sem_cell'}})
-    course = tables.Column(attrs={'th': {'class': 'course_col'}, 'td': {'class': 'course_cell'}})
-    number = tables.Column(attrs={'th': {'class': 'secnum_col'}, 'td': {'class': 'secnum_cell'}})
-    status = tables.Column(attrs={
-        'th': {
-            'class': 'sectionstatus_col'
-        },
-        'td': {
-            'class': 'sectionstatus_cell'
-        }
-    })
-    course_title = tables.Column(attrs={
-        'th': {
-            'class': 'coursetitle_col'
-        },
-        'td': {
-            'class': 'coursetitle_cell'
-        }
-    })
-    hours = tables.Column(attrs={'th': {'class': 'hours_col'}, 'td': {'class': 'hours_cell'}})
-    professor = tables.Column(attrs={'th': {'class': 'prof_col'}, 'td': {'class': 'prof_cell'}})
-    capacity = tables.Column(attrs={'th': {'class': 'capac_col'}, 'td': {'class': 'capac_cell'}})
-    seats_remaining = tables.Column(attrs={
-        'th': {
-            'class': 'remaining_col'
-        },
-        'td': {
-            'class': 'remaining_cell'
-        }
-    })
+    semester = ClassyColumn(css_class_base='sem')
+    course = ClassyColumn(css_class_base='course')
+    number = ClassyColumn(css_class_base='secnum')
+    status = ClassyColumn(css_class_base='sectionstatus')
+    course_title = ClassyColumn(css_class_base='coursetitle')
+    hours = ClassyColumn(css_class_base='hours')
+    professor = ClassyColumn(css_class_base='user_name')
+    capacity = ClassyColumn(css_class_base='capac')
+    seats_remaining = ClassyColumn(css_class_base='remaining')
 
     class Meta:
         model = Section
@@ -259,56 +142,21 @@ class SectionsTable(tables.Table):
         fields = ('semester', 'course', 'number', 'status', 'course_title', 'hours', 'professor',
                   'capacity', 'seats_remaining')
         row_attrs = {'class': 'section_row', 'data-id': lambda record: record.pk}
+        attrs = {"class": 'section_table'}
 
 
 class SectionStudentsTable(tables.Table):
-    username = tables.Column(accessor='student__user__username',
-                             attrs={
-                                 'th': {
-                                     'class': 'username_col'
-                                 },
-                                 'td': {
-                                     'class': 'username_cell'
-                                 }
-                             })
-    name = tables.Column(accessor='student__user__name',
-                         attrs={
-                             'th': {
-                                 'class': 'name_col'
-                             },
-                             'td': {
-                                 'class': 'name_cell'
-                             }
-                         })
-    major = tables.Column(accessor='student__major',
-                          attrs={
-                              'th': {
-                                  'class': 'major_col'
-                              },
-                              'td': {
-                                  'class': 'major_cell'
-                              }
-                          })
-    status = tables.Column(verbose_name="Status",
-                           accessor='status',
-                           attrs={
-                               'th': {
-                                   'class': 'sectionstatus_col'
-                               },
-                               'td': {
-                                   'class': 'sectionstatus_cell'
-                               }
-                           })
-    letter_grade = tables.Column(verbose_name="Grade",
-                                 accessor='grade',
-                                 attrs={
-                                     'th': {
-                                         'class': 'lettergrade_col'
-                                     },
-                                     'td': {
-                                         'class': 'lettergrade_cell'
-                                     }
-                                 })
+    username = ClassyColumn(accessor='student__user__username', css_class_base='username')
+    name = ClassyColumn(accessor='student__user__name', css_class_base='user_name')
+    major = ClassyColumn(accessor='student__major', css_class_base='major')
+    status = ClassyColumn(
+        verbose_name="Status",
+        css_class_base='sectionstatus',
+        accessor='status',
+    )
+    letter_grade = ClassyColumn(verbose_name="Grade",
+                                accessor='grade',
+                                css_class_base='lettergrade')
 
     class Meta:
         model = SectionStudent
@@ -318,3 +166,4 @@ class SectionStudentsTable(tables.Table):
             'class': 'sectionstudent_row',
             'data-id': lambda record: record.student.user.pk
         }
+        attrs = {"class": 'sectionstudent_table'}
