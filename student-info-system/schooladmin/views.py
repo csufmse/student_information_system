@@ -100,8 +100,8 @@ def user_edit(request, userid):
             new_role = form.cleaned_data['role']
             if old_role != new_role:
                 if old_role == AccessRoles.STUDENT_ROLE:
-                    stud = Student.objects.filter(user_id=the_user.id).get()
-                    stud.delete()
+                    # NOT deleting Student here so that we don't lose the data
+                    pass
                 elif old_role == AccessRoles.PROFESSOR_ROLE:
                     prof = Professor.objects.filter(user_id=the_user.id).get()
                     prof.delete()
