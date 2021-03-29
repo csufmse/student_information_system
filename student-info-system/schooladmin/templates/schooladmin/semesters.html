@@ -5,40 +5,11 @@
 
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
-{% block css %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<style>
-#Semesters {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
-
-#Semesters td, #Semesters th {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-#Semesters tr:nth-child(even){background-color: #f2f2f2;}
-
-#Semesters tr:hover {background-color: #ddd;}
-
-#Semesters th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: left;
-  background-color: #4CAF50;
-  color: white;
-}
-</style>
-
-{% endblock css %}
 
 
 {% block content %}
 <div>
-    <button class="btn btn-primary" onclick=location.href="{% url 'schooladmin:new_semester' %}">New Semester</button>
+    <button class="btn btn-primary" onclick=location.href="{% url 'schooladmin:semester_new' %}">New Semester</button>
     <div id="Semesters">
         {% if filter %}
             <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
@@ -49,19 +20,13 @@
             {% endif %}
             </form>
         {% endif %}
-        {% render_table table 'django_tables2/bootstrap.html' %}
+        <div class="data-table-alt">
+            {% render_table semesters 'django_tables2/bootstrap.html' %}
+        </div>
     </div>
 </div>
 <script>
-function selectRow(evt) {
-    id = this.getAttribute('data-id');
-  open("/schooladmin/semester/"+id,'_self');
-}
-
-// Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('urow')
-for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectRow, false);
-}
+stylizeRange({field:'year',min_label:'From Year',max_label:'To Year'});
+addClickHandlers("{% url 'schooladmin:semester' semester_id=1234599 %}", "semester_row");
 </script>
 {% endblock content %}

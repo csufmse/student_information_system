@@ -5,39 +5,6 @@
 
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
-{% block css %}
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<style>
-#Courses {
-  font-family: Arial, Helvetica, sans-serif;
-  border-collapse: collapse;
-  width: 100%;
-}
-
-#Courses td, #Courses th {
-  border: 1px solid #ddd;
-  padding: 8px;
-}
-
-#Courses tr:nth-child(even){background-color: #f2f2f2;}
-
-#Courses tr:hover {background-color: #ddd;}
-
-#Courses th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: center;
-  background-color: #4CAF50;
-  color: white;
-}
-.mcell, .cncell {
-    text-align: center;
-}
-</style>
-
-{% endblock css %}
-
 
 {% block content %}
 <div>
@@ -53,33 +20,16 @@
 {% endif %}
     </form>
     {% endif %}
+<div class="data-table-alt">
     {% render_table table 'django_tables2/bootstrap.html' %}
 </div>
 </div>
+
+</div>
 </div>
 <script>
-function selectCourse(evt) {
-    var id = this.getAttribute('data-id');
-    var url = "{% url 'schooladmin:course' courseid=1234599 %}".replace(/1234599/, id.toString());
-    open(url,'_self');
-}
-
-// Add onclick to each row so that it leaps off to the detail
-var tablerows = document.getElementsByClassName('course_row')
-for (var i=0, len=tablerows.length; i<len; i=i+1) {
-    tablerows[i].addEventListener("click", selectCourse, false);
-}
-
-var e = document.getElementById('id_catalog_number_0')
-e.placeholder = "Min Num"
-
-e = document.getElementById('id_catalog_number_1')
-e.placeholder = "Max Num"
-
-e = document.getElementById('id_credits_earned_0')
-e.placeholder = "Min Cred"
-
-e = document.getElementById('id_credits_earned_1')
-e.placeholder = "Max Cred"
+stylizeRange({field:'catalog_number',name:'Cat Num'});
+stylizeRange({field:'credits_earned',name:'Cred'});
+addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
 </script>
 {% endblock content %}

@@ -277,6 +277,12 @@ class Semester(models.Model):
         unique_together = (('semester', 'year'),)
         ordering = ['date_registration_opens']
 
+    def professors_teaching(self):
+        return User.objects.filter(professor__section__semester=self.id)
+
+    def students_attending(self):
+        return User.objects.filter(student__semesterstudent__semester=self.id)
+
     @property
     def name(self):
         return str(self.semester) + "-" + str(self.year)

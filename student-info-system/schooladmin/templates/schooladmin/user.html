@@ -6,8 +6,8 @@
 {% block header_name %}{% endblock header_name %}
 
 {% block css %}
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
 <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
 {% endblock css %}
 
 {% block content %}
@@ -65,16 +65,6 @@
 
   </form>
 <script>
-function change_pass(evt) {
-    open('/schooladmin/user/{{ user.id }}/change_password','_self');
-    return false;
-}
-
-function edit_user(evt) {
-    open('/schooladmin/user/{{ user.id }}/edit','_self');
-    return false;
-}
-
 function confirmit(evt) {
     var btntitle = evt.target.value;
     var answer = window.confirm("Are you sure you want to "+btntitle+"?");
@@ -84,9 +74,6 @@ function confirmit(evt) {
     }
     return false;
 }
-
-  // run your script in here
-// start the page with the default tab (this id)
 var btn = document.getElementById("disbutton");
 if ( btn ) {
     btn.addEventListener("click", confirmit);
@@ -95,13 +82,7 @@ btn = document.getElementById("enabutton");
 if ( btn ) {
     btn.addEventListener("click", confirmit);
 }
-btn = document.getElementById("passchg");
-if ( btn ) {
-    btn.addEventListener("click", change_pass);
-}
-btn = document.getElementById("editu");
-if ( btn ) {
-    btn.addEventListener("click", edit_user);
-}
+addButtonClickHandler('passchg', "{% url 'schooladmin:change_password' user.id %}");
+addButtonClickHandler('editu', "{% url 'schooladmin:user_edit' user.id %}");
 </script>
 {% endblock %}

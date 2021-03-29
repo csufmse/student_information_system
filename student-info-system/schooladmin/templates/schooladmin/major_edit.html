@@ -5,41 +5,11 @@
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
 
-{% block css %}
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-<style>
-.rolesel {
-  font-family: Arial, Helvetica, sans-serif;
-    data-style: btn_primary;
-  width: 180px;
-  height: 30px;
-}
-.majorsel {
-  font-family: Arial, Helvetica, sans-serif;
-    data-style: btn_primary;
-  width: 180px;
-  height: 30px;
-}
-</style>
-{% endblock css %}
-
 {% block content %}
   <h3>Edit Major {{ major.name }} ({{ major.abbreviation }}) :</h3>
   <form method="post">
     {% csrf_token %}
-    {% for field in form %}
-      <p>
-        {{ field.label_tag }}<br>
-        {{ field }}
-        {% if field.help_text %}
-          <small style="color: grey">{{ field.help_text }}</small>
-        {% endif %}
-        {% for error in field.errors %}
-          <p style="color: red">{{ error }}</p>
-        {% endfor %}
-      </p>
-    {% endfor %}
+      <table>{{ form.as_table }}</table>
     <input
         action="action"
         onclick="window.history.go(-1); return false;"
@@ -57,11 +27,9 @@
   </form>
 
 <script>
-
-function confirmit(evt) {
-    this.form.submit();
-    return true;
-}
-document.getElementById("submitme").addEventListener("click", confirmit);
+document.getElementById("submitme").addEventListener("click", function () {
+        this.form.submit();
+        return true;
+    });
 </script>
 {% endblock %}

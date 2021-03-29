@@ -155,12 +155,16 @@ class CourseFilter(FilterSet):
 
 
 class SemesterFilter(FilterSet):
-    semester = CharFilter(field_name='semester', lookup_expr='icontains')
-    year = CharFilter(field_name='year', lookup_expr='icontains')
+    semester = ChoiceFilter(label="Session", choices=Semester.SEASONS, field_name='semester')
+    year = RangeFilter(field_name='year')
 
     class Meta:
         model = Semester
         fields = ['semester', 'year']
+
+    def __init__(self, *args, **kwargs):
+        super(SemesterFilter, self).__init__(*args, **kwargs)
+        self.filters['semester'].extra.update({'empty_label': 'Session...'})
 
 
 class SectionFilter(FilterSet):
@@ -173,6 +177,8 @@ class SectionFilter(FilterSet):
     hours = CharFilter(field_name='hours', lookup_expr='icontains')
 
     status = ChoiceFilter(choices=Section.STATUSES, field_name='status')
+
+    # seats_remaining = RangeFilter()
 
     def filter_semester(self, queryset, name, value):
         return queryset.annotate(slug=Concat(

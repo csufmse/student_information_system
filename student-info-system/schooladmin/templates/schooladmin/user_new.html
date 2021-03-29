@@ -5,27 +5,11 @@
 {% block title %}{% endblock title %}
 {% block header_name %}{% endblock header_name %}
 
-{% block css %}
-<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-{% endblock css %}
-
 {% block content %}
   <h3>Create New User</h3>
   <form method="post">
     {% csrf_token %}
-    {% for field in form %}
-      <p>
-        {{ field.label_tag }}<br>
-        {{ field }}
-        {% if field.help_text %}
-          <small style="color: grey">{{ field.help_text }}</small>
-        {% endif %}
-        {% for error in field.errors %}
-          <p style="color: red">{{ error }}</p>
-        {% endfor %}
-      </p>
-    {% endfor %}
+      <table>{{ form.as_table }}</table>
     <input
         action="action"
         onclick="window.history.go(-1); return false;"
@@ -39,7 +23,7 @@
   </form>
 
 <script>
-function manageMajor(evt) {
+function manageMajor() {
   var role_select = document.getElementById("id_role")
   var major_select = document.getElementById("id_major")
   var major_label = major_select.labels[0]
@@ -67,21 +51,20 @@ function manageMajor(evt) {
 document.getElementById("id_role").addEventListener("change", manageMajor);
 manageMajor();
 
-function confirmit(evt) {
-    var username = document.getElementById("id_username").value;
-    var user_name = document.getElementById("id_first_name").value + ' ' + document.getElementById("id_last_name").value;
-    var role_select = document.getElementById("id_role").value
-    var message = "Are you sure you wish to create user:\n\n" +
-        "Username: "+username+"\n"+
-        "Full name: "+user_name+"\n"+
-        "Access Role: "+role_select;
-    var answer = window.confirm(message);
-    if (answer) {
-        this.form.submit();
-        return true;
-    }
-    return false;
-}
-document.getElementById("submitme").addEventListener("click", confirmit);
+document.getElementById("submitme").addEventListener("click", function () {
+        var username = document.getElementById("id_username").value;
+        var user_name = document.getElementById("id_first_name").value + ' ' + document.getElementById("id_last_name").value;
+        var role_select = document.getElementById("id_role").value
+        var message = "Are you sure you wish to create user:\n\n" +
+            "Username: "+username+"\n"+
+            "Full name: "+user_name+"\n"+
+            "Access Role: "+role_select;
+        var answer = window.confirm(message);
+        if (answer) {
+            this.form.submit();
+            return true;
+        }
+        return false;
+    });
 </script>
 {% endblock %}
