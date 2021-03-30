@@ -16,21 +16,22 @@
   <dd>{{ major.description }}</dd>
 </dl>
 
-    <div id="Professors" class="data-table">
         <h3>Professors:</h3>
+    <div id="Professors" class="data-table ">
     {% render_table profs 'django_tables2/bootstrap.html' %}
     </div>
 
-    <div id="Required" class="data-table-alt">
         <h3>Required Courses:</h3>
+    <div id="Required" class="data-table-alt ">
         {% render_table required 'django_tables2/bootstrap.html' %}
     </div>
 
-    <div id="Courses" class="data-table-alt">
         <h3>Courses offered by Major:</h3>
+    <div id="Courses" class="data-table-alt ">
         {% render_table courses 'django_tables2/bootstrap.html' %}
     </div>
 
+    <div>
     <input
         action="action"
            class="btn btn-info"
@@ -42,6 +43,7 @@
            class="btn btn-info"
         value="Edit Major"
     />
+    </div>
 <script>
 addButtonClickHandler('editm', '{% url 'schooladmin:major_edit' major.abbreviation %}');
 addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "user_row");
