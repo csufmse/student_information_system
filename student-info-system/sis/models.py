@@ -53,6 +53,39 @@ class Admin(models.Model):
         return self.name
 
 
+class ClassLevel:
+    FRESHMAN = 'Freshman'
+    SENIOR = 'Senior'
+    JUNIOR = 'Junior'
+    SOPHOMORE = 'Sophomore'
+    LEVELS = (
+        (FRESHMAN, FRESHMAN),
+        (SOPHOMORE, SOPHOMORE),
+        (JUNIOR, JUNIOR),
+        (SENIOR, SENIOR),
+    )
+    CREDITS_FOR_LEVEL = {
+        FRESHMAN: 0,
+        SOPHOMORE: 30,
+        JUNIOR: 60,
+        SENIOR: 90,
+    }
+
+    @classmethod
+    def level(cls, creds):
+        lvl = ClassLevel.FRESHMAN
+        if creds is None:
+            pass
+        elif creds > ClassLevel.CREDITS_FOR_LEVEL[ClassLevel.SENIOR]:
+            lvl = ClassLevel.SENIOR
+        elif creds > ClassLevel.CREDITS_FOR_LEVEL[ClassLevel.JUNIOR]:
+            lvl = ClassLevel.JUNIOR
+        elif creds > ClassLevel.CREDITS_FOR_LEVEL[ClassLevel.SOPHOMORE]:
+            lvl = ClassLevel.SOPHOMORE
+
+        return lvl
+
+
 class Student(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
@@ -113,15 +146,7 @@ class Student(models.Model):
 
     def class_level(self):
         creds = self.credits_earned()
-        level = 'Freshman'
-        if creds is None:
-            pass
-        if creds > 90:
-            level = 'Senior'
-        elif creds > 60:
-            level = 'Junior'
-        elif creds > 30:
-            level = 'Sophomore'
+        level = ClassLevel.level(creds)
         return level
 
     @property
@@ -492,14 +517,11 @@ class Section(models.Model):
 
 
 def access_role(self):
-    is_admin = Admin.objects.filter(user_id=self.id).count() > 0
-    is_student = Student.objects.filter(user_id=self.id).count() > 0
-    is_professor = Professor.objects.filter(user_id=self.id).count() > 0
-    if is_admin:
+    if Admin.objects.filter(user_id=self.id).count() > 0:
         return AccessRoles.ADMIN_ROLE
-    elif is_professor:
+    elif Professor.objects.filter(user_id=self.id).count() > 0:
         return AccessRoles.PROFESSOR_ROLE
-    elif is_student:
+    elif Student.objects.filter(user_id=self.id).count() > 0:
         return AccessRoles.STUDENT_ROLE
     else:
         return AccessRoles.UNKNOWN_ROLE

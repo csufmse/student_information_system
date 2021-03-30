@@ -1,9 +1,11 @@
+import debug_toolbar
 from django.contrib import admin
 from django.urls import include, path
 
 from sis import views as sis_views
 
 urlpatterns = [
+    path('__debug__/', include(debug_toolbar.urls)),
     path('sis/', include('sis.urls')),
     path('student/', include('student.urls')),
     path("siteadmin/", admin.site.urls),

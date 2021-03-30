@@ -100,8 +100,8 @@ def user_edit(request, userid):
             new_role = form.cleaned_data['role']
             if old_role != new_role:
                 if old_role == AccessRoles.STUDENT_ROLE:
-                    stud = Student.objects.filter(user_id=the_user.id).get()
-                    stud.delete()
+                    # NOT deleting Student here so that we don't lose the data
+                    pass
                 elif old_role == AccessRoles.PROFESSOR_ROLE:
                     prof = Professor.objects.filter(user_id=the_user.id).get()
                     prof.delete()
@@ -500,7 +500,7 @@ def section_new_from_section(request, sectionid):
                               semester_id=the_section.semester.id)
 
 
-@role_login_required('Admin')
+@role_login_required(AccessRoles.ADMIN_ROLE)
 def section_new(request):
     return section_new_helper(request)
 
@@ -542,7 +542,7 @@ def section_new_helper(request, semester_id=None, courseid=None):
         })
 
 
-@role_login_required('Admin')
+@role_login_required(AccessRoles.ADMIN_ROLE)
 def sectionstudent(request, id):
     qs = SectionStudent.objects.filter(id=id)
     if qs.count() < 1:

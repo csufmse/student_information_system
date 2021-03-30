@@ -4,7 +4,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, Student, TranscriptRequest)
+                        Semester, Student, TranscriptRequest, AccessRoles, ClassLevel)
 
 
 def createStudent(major=None, username=None):
@@ -22,7 +22,7 @@ def createProfessor(major=None, username=None):
 class StudentTestCase_Basic(TestCase):
 
     @classmethod
-    def setUpTestData(self):
+    def setUpTestData(cls):
         m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
         StudentTestCase_Basic.major = m
 
@@ -85,7 +85,7 @@ class StudentTestCase_Basic(TestCase):
 class StudentTestCase_History(TestCase):
 
     @classmethod
-    def setUpTestData(self):
+    def setUpTestData(cls):
         m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
         StudentTestCase_History.major = m
 
@@ -285,7 +285,7 @@ def createCourse(major, num):
 class CourseTestCase_deps(TestCase):
 
     @classmethod
-    def setUpTestData(self):
+    def setUpTestData(cls):
         m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
         CourseTestCase_deps.major = m
 
@@ -419,3 +419,24 @@ class MajorTestCase(TestCase):
         self.assertEqual(m.courses_required.all()[0].catalog_number, '300')
         self.assertEqual(m.courses_required.all()[1].catalog_number, '350')
         self.assertEqual(m.courses_required.all()[2].catalog_number, '400')
+
+
+class ClassLevel_tests(TestCase):
+
+    def test_null_credits(self):
+        self.assertEqual(ClassLevel.level(None), ClassLevel.FRESHMAN)
+
+    def test_nega_credits(self):
+        self.assertEqual(ClassLevel.level(-34), ClassLevel.FRESHMAN)
+
+    def test_freshman(self):
+        self.assertEqual(ClassLevel.level(10), ClassLevel.FRESHMAN)
+
+    def test_sophomore(self):
+        self.assertEqual(ClassLevel.level(40), ClassLevel.SOPHOMORE)
+
+    def test_junior(self):
+        self.assertEqual(ClassLevel.level(68), ClassLevel.JUNIOR)
+
+    def test_senior(self):
+        self.assertEqual(ClassLevel.level(98), ClassLevel.SENIOR)
