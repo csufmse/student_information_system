@@ -7,13 +7,13 @@ sys.path.append(".")  # noqa
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  # noqa
 django.setup()  # noqa
 
-from random import randint, random
+from random import randint, shuffle
 
 from django.contrib.auth.models import User
 
 from sis.models import Major, Professor
 
-to_generate = 50
+to_generate = 75
 
 set_pass = True
 
@@ -8268,6 +8268,16 @@ def randobj(objs):
     return objs.objects.all()[randint(0, objs.objects.count() - 1)]
 
 
+majors = list(Major.objects.all())
+shuffle(majors)
+
+if to_generate < len(majors):
+    print(
+        f'WARNING - fewer professors being generated ({to_generate}) ' +
+        f'than number of majors {len(majors)}. Some majors will not have professors.'
+    )
+
+ix = 0
 for (u, f, l, e) in specs[:to_generate]:
     usr = User(username=u, first_name=f, last_name=l, email=e)
     if set_pass:
@@ -8277,8 +8287,14 @@ for (u, f, l, e) in specs[:to_generate]:
         usr.save()
     except Exception:
         print(f'Unable to save professor(User) {u} ({f} {l})')
+        continue
     else:
-        m = randobj(Major)
+        # ensure that every major has at least one professor
+        if ix < len(majors):
+            m = majors[ix]
+        else:
+            m = majors[randint(0, len(majors) - 1)]
         p = Professor(user=usr, major=m)
         p.save()
         print(f'create prof {u} ({f} {l}) {m}')
+    ix = ix + 1

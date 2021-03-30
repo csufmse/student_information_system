@@ -74,7 +74,7 @@ while i < to_generate:
         i = i - 1
         continue
 
-    p = ps[randint(0, ps.count() - 1)]
+    p = ps[randint(0, len(ps) - 1)]
     sem = Semester.objects.all().order_by('-date_started')[randint(0, sem_count - 1)]
     d = choose_days()
     h = choose_hours()
