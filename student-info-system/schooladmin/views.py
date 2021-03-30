@@ -143,7 +143,7 @@ def user_edit(request, userid):
             dict['major'] = profs[0].major
         elif studs.count() > 0:
             dict['major'] = studs[0].major
-        form = UserEditForm(dict)
+        form = UserEditForm(initial=dict)
     return render(request, 'schooladmin/user_edit.html', {
         'user': the_user,
         'original_role': the_user.access_role(),
@@ -533,7 +533,7 @@ def section_new_helper(request, semester_id=None, courseid=None):
             if semesters.count() > 0:
                 form_values['semester'] = semesters[0]
 
-        form = SectionCreationForm(form_values)
+        form = SectionCreationForm(initial=form_values)
     return render(
         request, 'schooladmin/section_new.html', {
             'profs': Professor.objects.filter(user__is_active=True),
