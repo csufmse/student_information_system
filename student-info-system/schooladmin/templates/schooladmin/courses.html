@@ -3,9 +3,6 @@
 {% load render_table from django_tables2 %}
 {% load bootstrap3 %}
 
-{% block title %}{% endblock title %}
-{% block header_name %}{% endblock header_name %}
-
 {% block content %}
 <div>
 <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:course_new' %}';">New Course</button>
