@@ -3,26 +3,8 @@
 {% load bootstrap3 %}
 
 {% block css %}
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<style>
-.button {
-  background-color: #4CAF50;
-  border: none;
-  color: white;
-  padding: 15px 32px;
-  text-align: center;
-  text-decoration: none;
-  display: inline-block;
-  font-size: 16px;
-  margin: 4px 2px;
-  cursor: pointer;
-}
-.tab {
-  width: 100px;
-}
-</style>
-
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
 {% endblock css %}
 
 {% block title %}Student Info System Administration{% endblock %}
@@ -41,7 +23,7 @@
             class="btn btn-primary"
             href="{% url 'logout' %}">Log Out</a>
 </span>
-</div>
+    </div>
 
 <div class="tab">
   <button class="tablinks" id="defaultOpen">Users</button>
@@ -52,84 +34,83 @@
 </div>
 
 <span height="400" width="300">
-<iframe id="Users" class="tabcontent" title="Admin Users" src="{% url 'schooladmin:users' %}"
-    width="200" height="200"></iframe>
+<iframe id="Users" class="tabcontent samplecontentblock" title="Admin Users" src="{% url 'schooladmin:users' %}"
+    ></iframe>
 <iframe id="Majors" class="tabcontent" title="Majors" src="{% url 'schooladmin:majors' %}"
-    width="200" height="200"></iframe>
+    ></iframe>
 <iframe id="Semesters" class="tabcontent" title="Semesters" src="{% url 'schooladmin:semesters' %}"
-    width="200" height="200"></iframe>
+    ></iframe>
 <iframe id="Courses" class="tabcontent" title="Courses" src="{% url 'schooladmin:courses' %}"
-    width="200" height="200"></iframe>
+    ></iframe>
 <iframe id="Sections" class="tabcontent" title="Sections" src="{% url 'schooladmin:sections' %}"
-    width="200" height="200"></iframe>
+    ></iframe>
 </span>
 
 <script>
-// resize iframe based on window size/resize
-var buffer = 20; //scroll bar buffer
-var iframe = document.getElementById('Users');
+var buffer = 30; // scroll bar buffer
+var samplecontentblock = document.getElementsByClassName('samplecontentblock')[0];
+var defaultButton = document.getElementById("defaultOpen")
+var defaultButtonWidth = defaultButton.offsetWidth;
 
 function pageY(elem) {
     return elem.offsetParent ? (elem.offsetTop + pageY(elem.offsetParent)) : elem.offsetTop;
 }
 
-function resizeIframe() {
+// resize iframe based on window size/resize
+function resizeContentBlocks() {
+    var width = window.innerWidth;
     var height = document.documentElement.clientHeight;
-    // get the default button; use that to find the frame.
-    var width = document.getElementById(document.getElementById('defaultOpen').innerText).offsetWidth;
-    height -= pageY(document.getElementById('Users'))+ buffer ;
+
+    width = width - defaultButtonWidth - buffer;
+
+    height -= pageY(samplecontentblock) + buffer;
     height = (height < 0) ? 0 : height;
-    iframe.style.height = height + 'px';
-    iframe.style.width = width + 'px';
+
+    for (const tc of document.getElementsByClassName('tabcontent')) {
+        tc.style.height = height + 'px';
+        tc.style.width = width + 'px';
+    }
 }
-
-// .onload doesn't work with IE8 and older.
-if (iframe.attachEvent) {
-//    iframe.attachEvent("onload", resizeIframe);
-} else {
-//    iframe.onload=resizeIframe;
-}
-
-//window.onresize = resizeIframe;
-
 
 // handle tab button clicks. Relies on the content (frame) id be the same as the button text
 // that lights it up.
 function openChunk(evt) {
-  // Declare all variables
   var chunkName = this.innerText;
-  var i, tabcontent, tablinks;
 
   // Get all elements with class="tabcontent" and hide them
-  tabcontent = document.getElementsByClassName("tabcontent");
-  for (i = 0; i < tabcontent.length; i++) {
-    if (tabcontent[i].id == chunkName) {
-      tabcontent[i].style.display = "block";
-    } else {
-      tabcontent[i].style.display = "none";
+    for (const tc of document.getElementsByClassName("tabcontent")) {
+        if (tc.id == chunkName) {
+            tc.style.display = "block";
+        } else {
+            tc.style.display = "none";
+        }
     }
-  }
 
-  // Get all elements with class="tablinks" and remove the class "active"
-  tablinks = document.getElementsByClassName("tablinks");
-  for (i = 0; i < tablinks.length; i++) {
-    tablinks[i].className = tablinks[i].className.replace(" active", "");
-  }
+    // Get all elements with class="tablinks" and remove the class "active"
+    for (const link of document.getElementsByClassName("tablinks")) {
+        link.className = link.className.replace(" active", "");
+    }
 
-  // Show the current tab, and add an "active" class to the link that opened the tab
-  document.getElementById(chunkName).style.display = "block";
-  this.className += " active";
+    // Show the current tab, and add an "active" class to the link that opened the tab
+    document.getElementById(chunkName).style.display = "block";
+    this.className += " active";
 }
 
 // Add onclick to each tab button so that it displays the contents
-var tablinks = document.getElementsByClassName('tablinks')
-for (var i=0, len=tablinks.length; i<len; i=i+1) {
-    tablinks[i].addEventListener("click", openChunk, false);
+for (const link of document.getElementsByClassName('tablinks')) {
+    link.addEventListener("click", openChunk, false);
 }
 
-// start the page with the default tab (this id)
-var defaultButton = document.getElementById("defaultOpen")
-defaultButton.click();
+// .onload doesn't work with IE8 and older.
+if (samplecontentblock.attachEvent) {
+    samplecontentblock.addEventListener("load", resizeContentBlocks);
+} else {
+    samplecontentblock.onload=resizeContentBlocks;
+}
 
+window.addEventListener("resize", resizeContentBlocks);
+
+// start the page with the default tab
+defaultButton.click();
 </script>
 {% endblock %}

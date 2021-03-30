@@ -72,12 +72,12 @@ function resizeIframe() {
 
 // .onload doesn't work with IE8 and older.
 if (iframe.attachEvent) {
-    iframe.attachEvent("onload", resizeIframe);
+    iframe.attachEvent("load", resizeIframe);
 } else {
-    iframe.onload=resizeIframe;
+    iframe.attachEvent("load", resizeIframe);
 }
 
-window.onresize = resizeIframe;
+window.attachEvent("load", resizeIframe);
 
 
 // handle tab button clicks. Relies on the content (frame) id be the same as the button text
