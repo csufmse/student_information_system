@@ -1,15 +1,15 @@
 * {box-sizing: border-box}
 
-/* Style the tab */
+/* Styling for left tab buttons and content */
 .tab {
   float: left;
   border: 1px solid #ccc;
   background-color: #f1f1f1;
-  width: 30%;
   height: 300px;
+  width: 100px;
 }
 
-/* Style the buttons that are used to open the tab content */
+/* buttons that are used to open the tab content */
 .tab button {
   display: block;
   background-color: inherit;
@@ -33,21 +33,31 @@
   background-color: #ccc;
 }
 
-/* Style the tab content */
 .tabcontent {
-  float: left;
   padding: 0px 12px;
-  border: 1px solid #ccc;
-  width: 800px;
+  border: 0px;
   border-left: none;
-  height: 600px;
+  resize: both;
+  float: right;
 }
+/* end of styles relevant to tabs and tab content */
 
 
+/* style for all of our data tables. Two types: with alternating
+** row colors, and all one color
+ */
 .data-table, .data-table-alt {
   font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
   width: 100%;
+}
+
+.data-table th, .data-table-alt th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #4CAF50;
+  color: white;
 }
 
 .data-table td, .data-table th, .data-table-alt td, .data-table-alt th {
@@ -58,30 +68,30 @@
 .data-table-alt tr:nth-child(even){background-color: #f2f2f2;}
 
 .data-table tr:hover .data-table-alt tr:hover {background-color: #ddd;}
+/* End data table styling */
 
-.data-table th, .data-table-alt th {
-  padding-top: 12px;
-  padding-bottom: 12px;
-  text-align: center;
-  background-color: #4CAF50;
-  color: white;
-}
 
 /* TABLE COLUMN HEADERS AND DATA CELLS */
 
+/* note that the classes of the cells and headers are based on the data in them */
+
 /* all column headers are centered */
-.active_col, .capac_col, .catnumber_col, .classlevel_col, .course_col, .coursetitle_col, .credits_col, .date_col, .gpa_col,
-.hours_col, .lettergrade_col, .major_col, .majordescr_col, .majorname_col, .professor_col, .remaining_col,
-.role_col, .secnum_col, .sectionstatus_col, .sem_col, .semester_col, .user_name_col, .username_col {
+.active_col, .capac_col, .catnumber_col, .classlevel_col, .course_col, .coursetitle_col,
+.credits_col, .date_col, .gpa_col, .hours_col, .lettergrade_col, .major_col,
+.majordescr_col, .majorname_col, .professor_col, .remaining_col, .role_col, .secnum_col,
+.sectionstatus_col, .sem_col, .semester_col, .user_name_col, .username_col {
   text-align: center;
 }
+
 /* most (data) cells are centered */
-.active_cell, .capac_cell, .catnumber_cell, .classlevel_cell, .course_cell, .credits_cell, .date_cell, .gpa_cell,
-.hours_cell, .lettergrade_cell, .major_cell, .majorname_cell, .prof_cell, .remaining_cell, .role_cell,
-.secnum_cell, .sectionstatus_cell, .sem_cell, .semester_cell, .year_cell {
+.active_cell, .capac_cell, .catnumber_cell, .classlevel_cell, .course_cell, .credits_cell,
+.date_cell, .gpa_cell, .hours_cell, .lettergrade_cell, .major_cell, .majorname_cell,
+.prof_cell, .remaining_cell, .role_cell, .secnum_cell, .sectionstatus_cell, .sem_cell,
+.semester_cell, .year_cell {
   text-align: center;
 }
-.coursetitle_cell, .majordescr_cell, .majorname_cell, .prof_cell, .username_cell, .user_name_cell {
+.coursetitle_cell, .majordescr_cell, .majorname_cell, .prof_cell, .username_cell,
+.user_name_cell {
   text-align: left;
 }
 .active_cell, .catnumber_cell. .credits_cell, .role_cell, .semester_cell, .year_cell {
@@ -102,9 +112,8 @@
 
 /* SELECT/PULLDOWNS */
 .role_sel, .course_sel, .major_sel, .role_sel, .season_sel, .semester_sel, .user_sel {
-  font-family: Arial, Helvetica, sans-serif;
+    font-family: Arial, Helvetica, sans-serif;
     data-style: btn_primary;
-  width: 180px;
-  height: 30px;
+    width: 180px;
+    height: 30px;
 }
-

@@ -3,9 +3,7 @@
 // Call this from JS at end.
 function addClickHandlers(template, row_class) {
     // Add onclick to each row so that it leaps off to the detail
-    var tablerows = document.getElementsByClassName(row_class)
-    for (var i = 0, len = tablerows.length; i < len; i = i + 1) {
-        var row = tablerows[i];
+    for (const row of document.getElementsByClassName(row_class) {
         var id = row.getAttribute('data-id');
         let url = template.replace(/1234599/, id.toString());
         row.addEventListener("click", function() {
