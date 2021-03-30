@@ -3,9 +3,6 @@
 {% load bootstrap3 %}
 {% load render_table from django_tables2 %}
 
-{% block title %}{% endblock title %}
-{% block header_name %}{% endblock header_name %}
-
 {% block content %}
 <dl class="dl-horizontal">
   <dt>Semester</dt>
@@ -22,23 +19,23 @@
   <dd>{{ semester.date_last_drop }}</dd>
 </dl>
 
-    <div id="Sections">
         <h3>Sections:</h3>
-        <div class="data-table-alt"
+    <div id="Sections">
+        <div class="data-table-alt ">
             {% render_table sections 'django_tables2/bootstrap.html' %}
         </div>
     </div>
 
-    <div id="Students">
-        <h3>Enrolled Students:</h3>
-        <div class="data-table-alt"
+         <h3>Enrolled Students:</h3>
+   <div id="Students">
+        <div class="data-table-alt ">
             {% render_table students 'django_tables2/bootstrap.html' %}
         </div>
     </div>
 
-    <div id="Professors">
         <h3>Professors Teaching:</h3>
-        <div class="data-table-alt"
+    <div id="Professors">
+        <div class="data-table-alt ">
             {% render_table professors 'django_tables2/bootstrap.html' %}
         </div>
     </div>

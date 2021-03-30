@@ -2,8 +2,7 @@
 {% load static %}
 {% load bootstrap3 %}
 
-{% block css %}<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+{% block css %}{{block.super}}
 <style>
 .button {
   background-color: #4CAF50;
@@ -72,12 +71,12 @@ function resizeIframe() {
 
 // .onload doesn't work with IE8 and older.
 if (iframe.attachEvent) {
-    iframe.attachEvent("onload", resizeIframe);
+    iframe.attachEvent("load", resizeIframe);
 } else {
-    iframe.onload=resizeIframe;
+    iframe.attachEvent("load", resizeIframe);
 }
 
-window.onresize = resizeIframe;
+window.attachEvent("load", resizeIframe);
 
 
 // handle tab button clicks. Relies on the content (frame) id be the same as the button text

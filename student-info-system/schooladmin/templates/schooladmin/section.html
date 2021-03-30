@@ -3,9 +3,6 @@
 {% load bootstrap3 %}
 {% load render_table from django_tables2 %}
 
-{% block title %}{% endblock title %}
-{% block header_name %}{% endblock header_name %}
-
 {% block content %}
 <dl class="dl-horizontal">
 <h3>Section: {{ section }}</h3>
@@ -27,14 +24,14 @@
   <dd>{{ section.status }}</dd>
 </dl>
 
-    <div id="Students" class="data-table">
         <h3>Students:</h3>
+    <div id="Students" class="data-table ">
     {% render_table students 'django_tables2/bootstrap.html' %}
     </div>
   <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
-
+<div>
     <input
         action="action"
            class="btn btn-info"
@@ -51,28 +48,14 @@
            class="btn btn-info"
         value="Edit Section"
     />
-     <input id="delete_section" name="delete_section"
-        action="action"
-           class="btn btn-info"
-        value="Delete Section"
-    />
      <input id="manage_students"
         action="action"
            class="btn btn-info"
         value="Manage Students in Section"
-    />
+     /></div>
 </form>
 
 <script>
-document.getElementById("delete_section").addEventListener("click", function() {
-        var answer = window.confirm("Are you sure you want to delete this section?");
-        if (answer) {
-            this.form.submit();
-            return true;
-        }
-        return false;
-    }
-);
 addButtonClickHandler('new_section', '{% url 'schooladmin:section_new_from_section' sectionid=section.id %}');
 addButtonClickHandler('edit_section', '{% url 'schooladmin:section_edit' sectionid=section.id %}');
 addButtonClickHandler('manage_students', '{% url 'schooladmin:section_students_manage' sectionid=section.id %}');

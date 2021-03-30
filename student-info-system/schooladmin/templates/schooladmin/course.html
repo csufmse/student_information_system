@@ -20,13 +20,13 @@
   <dd>{{ course.credits_earned }}</dd>
 </dl>
 
-    <div id="Prereqs" class="data-table">
+    <div id="Prereqs" class="data-table ">
         <h3>Has Prerequisites:</h3>
     {% render_table prereqs 'django_tables2/bootstrap.html' %}
     </div>
 
         <h3>Is Prerequisite For:</h3>
-    <div id="IsPrereq" class="data-table">
+    <div id="IsPrereq" class="data-table ">
         {% render_table needed_by 'django_tables2/bootstrap.html' %}
     </div>
 
