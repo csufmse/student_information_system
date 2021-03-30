@@ -1,5 +1,13 @@
 * {box-sizing: border-box}
 
+.tabcontent {
+  padding: 0px 12px;
+  border: 0px;
+  border-left: none;
+  float: right;
+  overflow: hidden;
+}
+
 /* Styling for left tab buttons and content */
 .tab {
   float: left;
@@ -33,13 +41,6 @@
   background-color: #ccc;
 }
 
-.tabcontent {
-  padding: 0px 12px;
-  border: 0px;
-  border-left: none;
-  resize: both;
-  float: right;
-}
 /* end of styles relevant to tabs and tab content */
 
 
@@ -117,3 +118,18 @@
     width: 180px;
     height: 30px;
 }
+
+.major_table, .user_table, .course_table, .fulluser_table, .semester_table,
+.section_table, .sectionstudent_table {
+    position: relative;
+    overflow: auto;
+}
+
+.scrollable-div {
+    /* border: 1px solid red; */
+    display: inline-block;
+    position:relative;
+    overflow:auto;
+}
+
+

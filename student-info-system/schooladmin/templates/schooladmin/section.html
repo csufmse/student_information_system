@@ -27,14 +27,14 @@
   <dd>{{ section.status }}</dd>
 </dl>
 
-    <div id="Students" class="data-table">
         <h3>Students:</h3>
+    <div id="Students" class="data-table ">
     {% render_table students 'django_tables2/bootstrap.html' %}
     </div>
   <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
-
+<div>
     <input
         action="action"
            class="btn btn-info"
@@ -60,7 +60,7 @@
         action="action"
            class="btn btn-info"
         value="Manage Students in Section"
-    />
+     /></div>
 </form>
 
 <script>

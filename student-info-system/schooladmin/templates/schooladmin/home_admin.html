@@ -3,11 +3,8 @@
 {% load bootstrap3 %}
 
 {% block css %}
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
-    <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
-<style>
-</style>
-
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
 {% endblock css %}
 
 {% block title %}Student Info System Administration{% endblock %}
@@ -26,7 +23,7 @@
             class="btn btn-primary"
             href="{% url 'logout' %}">Log Out</a>
 </span>
-</div>
+    </div>
 
 <div class="tab">
   <button class="tablinks" id="defaultOpen">Users</button>
@@ -50,7 +47,7 @@
 </span>
 
 <script>
-var buffer = 25; // scroll bar buffer
+var buffer = 30; // scroll bar buffer
 var samplecontentblock = document.getElementsByClassName('samplecontentblock')[0];
 var defaultButton = document.getElementById("defaultOpen")
 var defaultButtonWidth = defaultButton.offsetWidth;
@@ -106,12 +103,12 @@ for (const link of document.getElementsByClassName('tablinks')) {
 
 // .onload doesn't work with IE8 and older.
 if (samplecontentblock.attachEvent) {
-    samplecontentblock.attachEvent("onload", resizeContentBlocks);
+    samplecontentblock.addEventListener("load", resizeContentBlocks);
 } else {
     samplecontentblock.onload=resizeContentBlocks;
 }
 
-window.onresize = resizeContentBlocks;
+window.addEventListener("resize", resizeContentBlocks);
 
 // start the page with the default tab
 defaultButton.click();

@@ -19,12 +19,14 @@
             {% endif %}
             </form>
         {% endif %}
-        <div class="data-table-alt">
+        <div class="data-table-alt scrollify-me">
             {% render_table table 'django_tables2/bootstrap.html' %}
         </div>
     </div>
 </div>
 <script>
+const handler = insertScrollableDivs(applyHandlers=true);
+handler();
 addButtonClickHandler('section_new', "{% url 'schooladmin:section_new' %}");
 addClickHandlers("{% url 'schooladmin:section' sectionid=1234599 %}", "section_row");
 </script>

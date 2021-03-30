@@ -20,12 +20,14 @@
             {% endif %}
             </form>
         {% endif %}
-        <div class="data-table-alt">
+        <div class="data-table-alt scrollify-me">
             {% render_table semesters 'django_tables2/bootstrap.html' %}
         </div>
     </div>
 </div>
 <script>
+const handler = insertScrollableDivs(applyHandlers=true);
+handler();
 stylizeRange({field:'year',min_label:'From Year',max_label:'To Year'});
 addClickHandlers("{% url 'schooladmin:semester' semester_id=1234599 %}", "semester_row");
 </script>
