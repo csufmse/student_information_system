@@ -4,9 +4,10 @@
 
 <html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
 <head>
+{% block css %}
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
     <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}" />
-    {% block css %}{% endblock css %}
+{% endblock css %}
 
     <script src="{%  static 'schooladmin/common.js' %}" ></script>
     {% block scripts %}{% endblock scripts %}
