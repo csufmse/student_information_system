@@ -22,6 +22,7 @@ def randobj(objs):
 # number of courses to add prereqs to:
 to_generate = int(Course.objects.count() * percent_that_have_prereq)
 
+error_count = 0
 ii = 0
 while ii < to_generate:
     ii = ii + 1
@@ -36,18 +37,24 @@ while ii < to_generate:
         j = j + 1
         max_tries = max_tries + 1
 
-        the_pre = randobj(Course)
-        while the_course == the_pre:
+        added = {the_course.id: True}
+        while True:
             the_pre = randobj(Course)
+            if the_pre.id not in added:
+                break
+        added[the_pre.id] = True
 
         if the_course.are_candidate_prerequisites_valid(candidate_list=[the_pre]):
             cp = CoursePrerequisite(course=the_course, prerequisite=the_pre)
             try:
                 cp.save()
             except Exception:
-                print(f'could not add prereq {the_pre} to {the_course}')
+                error_count = error_count + 1
+                print(f'ERROR: could not add prereq {the_pre} to {the_course}')
                 j = j - 1
             else:
                 print(f'added prereq {the_pre} to {the_course}')
         else:
             j = j - 1
+if error_count:
+    print(f'ERROR: {error_count} errors occurred')

@@ -21,12 +21,12 @@ prob_fulfilled = 0.5
 def randobj(objs):
     return objs.objects.all()[randint(0, objs.objects.count() - 1)]
 
-
+error_count = 0
 for ii in range(int(Student.objects.count() * percent_that_have_request)):
     s = randobj(Student)
 
     if s.semesters.count() == 0:
-        print(f'{s} does not have any semesters\n')
+        print(f'WARNING: {s} does not have any semesters\n')
         continue
 
     earliest = s.semesters.order_by('date_started')[0].date_started
@@ -34,8 +34,14 @@ for ii in range(int(Student.objects.count() * percent_that_have_request)):
     period = (latest - earliest).days
 
     to_add = int(max_num_req * random())
+    dates_added = {}
     for j in range(to_add):
-        date_of = earliest + timedelta(days=randint(1, period))
+        while True:
+            date_of = earliest + timedelta(days=randint(1, period))
+            if date_of not in dates_added:
+                break
+        dates_added[date_of] = True
+
         if random() < prob_fulfilled:
             date_fulfilled = date_of + timedelta(days=randint(1, 7))
         else:
@@ -45,6 +51,10 @@ for ii in range(int(Student.objects.count() * percent_that_have_request)):
         try:
             tr.save()
         except Exception:
-            print(f'could not add tr {tr}')
+            print(f'ERROR: could not add tr {tr} [stud={s.user_id}, req={date_of}, date_fulf={date_fulfilled}]')
+            error_count = error_count + 1
         else:
             print(f'added request {tr}')
+
+if error_count:
+    print(f'ERROR: {error_count} errors occurred')
