@@ -8272,10 +8272,8 @@ majors = list(Major.objects.all())
 shuffle(majors)
 
 if to_generate < len(majors):
-    print(
-        f'WARNING - fewer professors being generated ({to_generate}) ' +
-        f'than number of majors {len(majors)}. Some majors will not have professors.'
-    )
+    print(f'WARNING - fewer professors being generated ({to_generate}) ' +
+          f'than number of majors {len(majors)}. Some majors will not have professors.')
 
 ix = 0
 for (u, f, l, e) in specs[:to_generate]:

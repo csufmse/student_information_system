@@ -1,6 +1,7 @@
 {% extends 'base.html' %}
 {% load static %}
 {% load bootstrap3 %}
+{% load render_table from django_tables2 %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -15,6 +16,12 @@
 {%  if user.access_role == 'Student' %}
   <dt>Student Major</dt>
   <dd>{{ user.student.major.abbreviation }}: {{ user.student.major.name }}</dd>
+  <dt>Class Level</dt>
+  <dd>{{ user.student.class_level }}</dd>
+  <dt>GPA</dt>
+  <dd>{{ user.student.gpa|floatformat:-2 }}</dd>
+  <dt>Credits Earned</dt>
+  <dd>{{ user.student.credits_earned }}</dd>
 {% elif user.access_role == 'Professor' %}
   <dt>Teaching Department</dt>
   <dd>{{ user.professor.major.abbreviation }}:{{ user.professor.major.name }}</dd>
@@ -22,6 +29,23 @@
   <dt>Enabled?</dt>
   <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
 </dl>
+
+    {%  if user.access_role == 'Student' %}
+        <h3>Semesters Attended:</h3>
+        <div id="Semesters" class="data-table-alt">
+            {% render_table semesters 'django_tables2/bootstrap.html' %}
+        </div>
+
+        <h3>Course History:</h3>
+        <div id="CourseHistory" class="data-table-alt">
+            {% render_table course_history 'django_tables2/bootstrap.html' %}
+        </div>
+
+        <h3>Remaining Required Courses:</h3>
+        <div id="CourseHistory" class="data-table-alt">
+            {% render_table remaining_required 'django_tables2/bootstrap.html' %}
+        </div>
+    {% endif %}
   <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
@@ -76,5 +100,8 @@ if ( btn ) {
 }
 addButtonClickHandler('passchg', "{% url 'schooladmin:change_password' user.id %}");
 addButtonClickHandler('editu', "{% url 'schooladmin:user_edit' user.id %}");
+addClickHandlers("{% url 'schooladmin:semester' semester_id=1234599 %}", "semester_row");
+addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
+addClickHandlers("{% url 'schooladmin:sectionstudent' id=1234599 %}", "sectionstudent_row");
 </script>
 {% endblock %}

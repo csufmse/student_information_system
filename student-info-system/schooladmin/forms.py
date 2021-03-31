@@ -133,9 +133,9 @@ class SemesterCreationForm(forms.ModelForm):
     semester = forms.ChoiceField(choices=Semester.SEASONS)
     semester.widget.attrs.update({'class': 'season_sel selectpicker'})
     year = forms.IntegerField()
+    date_registration_opens = forms.DateField()
     date_started = forms.DateField()
     date_ended = forms.DateField()
-    date_registration_opens = forms.DateField()
     date_last_drop = forms.DateField()
 
     def clean(self):
@@ -148,8 +148,8 @@ class SemesterCreationForm(forms.ModelForm):
 
     class Meta:
         model = Semester
-        fields = ('semester', 'year', 'date_started', 'date_ended', 'date_registration_opens',
-                  'date_last_drop')
+        fields = ('semester', 'year', 'date_registration_opens', 'date_started', 'date_last_drop',
+                  'date_ended')
 
 
 class SemesterEditForm(forms.ModelForm):
@@ -168,7 +168,7 @@ class SemesterEditForm(forms.ModelForm):
 
     class Meta:
         model = Semester
-        fields = ('date_started', 'date_ended', 'date_registration_opens', 'date_last_drop')
+        fields = ('date_registration_opens', 'date_started', 'date_last_drop', 'date_ended')
 
 
 class UserEditForm(forms.Form):

@@ -110,17 +110,17 @@ class CoursesTable(tables.Table):
 class SemestersTable(tables.Table):
     semester = ClassyColumn(verbose_name='Session', css_class_base='semester')
     year = ClassyColumn(css_class_base='year')
-    date_started = ClassyColumn(verbose_name='Start of Classes', css_class_base='date')
-    date_ended = ClassyColumn(verbose_name='End of Classes', css_class_base='date')
     date_registration_opens = ClassyColumn(verbose_name='Registration Opens',
                                            css_class_base='date')
     date_last_drop = ClassyColumn(verbose_name='Date of Last Drop', css_class_base='date')
+    date_started = ClassyColumn(verbose_name='Start of Classes', css_class_base='date')
+    date_ended = ClassyColumn(verbose_name='End of Classes', css_class_base='date')
 
     class Meta:
         model = Semester
         template_name = "django_tables2/bootstrap.html"
-        fields = ('semester', 'year', 'date_started', 'date_ended', 'date_registration_opens',
-                  'date_last_drop')
+        fields = ('semester', 'year', 'date_registration_opens', 'date_started', 'date_last_drop',
+                  'date_ended')
         attrs = {"class": 'semester_table'}
         row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}
 
