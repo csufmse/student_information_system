@@ -1,0 +1,17 @@
+{% extends 'sis/home_base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+
+{% block content %}
+<div class="tab">
+  <button class="tablinks" id="defaultOpen">Current Schedule</button>
+  <button class="tablinks">Registration</button>
+</div>
+
+<span height="400" width="300">
+  <iframe id="Current Schedule" class="tabcontent samplecontentblock" title="Current Schedule" 
+    src="{% url 'student:current_schedule' %}"></iframe>
+  <iframe id="Registration" class="tabcontent" title="Registration" src="{% url 'student:registration' %}"
+    ></iframe>
+</span>
+{% endblock content %}

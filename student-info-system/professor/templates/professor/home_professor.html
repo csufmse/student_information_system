@@ -1,0 +1,19 @@
+{% extends 'sis/home_base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+
+{% block title %}Professor Home Page{% endblock %}
+
+{% block content %}
+  <div class="tab">
+    <button class="tablinks" id="defaultOpen">Sections</button>
+    <button class="tablinks">Students</button>
+    <button class="tablinks">Grades</button>
+  </div>
+
+  <span height="400" width="300">
+    <iframe id="Sections" class="tabcontent samplecontentblock" title="Sections" src="{% url 'professor:sections' %}"></iframe>
+    <div id="Students" class="tabcontent" title="Students" >Student Search.</div>
+    <div id="Grades" class="tabcontent" title="Grades" >Edit Grades.</div>
+  </span>
+{% endblock %}
