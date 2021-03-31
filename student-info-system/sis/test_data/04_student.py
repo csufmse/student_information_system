@@ -440,6 +440,7 @@ def randobj(objs):
     return objs.objects.all()[randint(0, objs.objects.count() - 1)]
 
 
+error_count = 0
 line = 1
 for (u, f, l, e) in specs[:to_generate]:
     usr = User(username=u, first_name=f, last_name=l, email=e)
@@ -449,11 +450,20 @@ for (u, f, l, e) in specs[:to_generate]:
     try:
         usr.save()
     except Exception:
-        print(f'Unable to create Student(User) {line} {u} ({f} {l})')
+        print(f'ERROR: Unable to create Student(User) {line} {u} ({f} {l})')
+        error_count = error_count + 1
+        continue
     else:
         m = randobj(Major)
         s = Student(user=usr, major=m)
-        s.save()
+
+        try:
+            s.save()
+        except Exception:
+            print(f'ERROR: Able to save User but not Student ***')
+            error_count = error_count + 1
+            usr.delete()
+            continue
 
         start = randint(0, Semester.objects.count() - 1)
         stop = start + randint(1, 12)
@@ -463,3 +473,6 @@ for (u, f, l, e) in specs[:to_generate]:
 
         print(f'create stud {line} {u} ({f} {l}) {m}')
     line = line + 1
+
+if error_count:
+    print(f'ERROR: {error_count} errors occurred')

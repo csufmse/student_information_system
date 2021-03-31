@@ -24,18 +24,29 @@ letter = ('F', 'D', 'C', 'B', 'A')
 
 
 def randobj(objs):
-    return objs.objects.all()[randint(0, objs.objects.count() - 1)]
+    ii = randint(0, objs.objects.count() - 1)
+    obj = None
+    try:
+        obj = objs.objects.all()[ii]
+    except Exception:
+        print(f'could not get ix {ii} of {objs}, count {objs.objects.count()-1}')
+    return obj
 
 
+error_count = 0
 i = 0
 while i < to_generate:
     i = i + 1
 
-    sec = randobj(Section)
+    while True:
+        sec = randobj(Section)
+        if sec is not None:
+            break
 
     semstuds = SemesterStudent.objects.filter(semester_id=sec.semester.id)
     if semstuds.count() == 0:
-        print(f'No students attend {sec.semester}')
+        error_count = error_count + 1
+        print(f'WARNING: No students attend {sec.semester}')
         i = i - 1
         continue
 
@@ -52,8 +63,14 @@ while i < to_generate:
     try:
         ss.save()
     except Exception:
-        print(f'{i} Unable to put {st} in {sec}')
+        error_count = error_count + 1
+        print(
+            f'ERROR: {i} Unable to put {st} in {sec} [sec={sec.id}, stud={st.user_id}, ' +
+            f'status={stat}, grade={g}]'
+        )
         i = i - 1
     else:
         print('{} Added {:20} to {} {:15} ({:14},{})'.format(i, str(st), str(sec.semester),
                                                              str(sec), stat, ltr))
+if error_count:
+    print(f'ERROR: {error_count} errors occurred')

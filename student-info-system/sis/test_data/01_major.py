@@ -190,11 +190,17 @@ specs = (
     ('MSS', 'Miscellaneous Social Sciences', 'Social Science'),
 )
 
+error_count = 0
+
 for (a, t, d) in specs[:to_generate]:
     m = Major(abbreviation=a, name=t, description=d)
     try:
         m.save()
     except Exception:
-        print(f'Unable to save major {a} {t}')
+        print(f'ERROR: Unable to save major {a} {t}')
+        error_count = error_count + 1
     else:
         print(f'create major {a} {t} {d}')
+
+if error_count:
+    print(f'ERROR: {error_count} errors occurred')

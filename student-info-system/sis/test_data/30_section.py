@@ -62,6 +62,7 @@ def randobj(objs):
     return objs.objects.all()[randint(0, objs.objects.count() - 1)]
 
 
+error_count = 0
 i = 0
 while i < to_generate:
     i = i + 1
@@ -70,7 +71,8 @@ while i < to_generate:
 
     ps = Professor.objects.filter(major=c.major)
     if ps.count() == 0:
-        print(f'No teachers for {c} ...')
+        print(f'ERROR: No teachers for {c} ...')
+        error_count = error_count + 1
         i = i - 1
         continue
 
@@ -95,7 +97,11 @@ while i < to_generate:
     try:
         s.save()
     except Exception:
-        print(f'Unable to create sec {n} for {c}')
+        error_count = error_count + 1
+        print(f'ERROR: Unable to create sec {n} for {c}')
         i = i - 1
     else:
         print('{} Created sec {} for {:15} in {} ({})'.format(i, str(n), str(c), str(sem), stat))
+
+if error_count:
+    print(f'ERROR: {error_count} errors occurred')

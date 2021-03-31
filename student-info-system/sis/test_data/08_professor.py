@@ -51,7 +51,6 @@ specs = (
     ('efrost', 'Emma', 'Frost', 'e.frost@x.com'),
     ('fcastle', 'Frank', 'Castle', 'f.castle@x.com'),
     ('lcage', 'Luke', 'Cage', 'l.cage@x.com'),
-    ('jroberts', 'Joseph', 'Robertson', 'j.robertson@x.com'),
     ('pmaximof', 'Pietro', 'Maximoff', 'p.maximoff@x.com'),
     ('vvon', 'Victor', 'von', 'v.von@x.com'),
     ('meisenha', 'Max', 'Eisenhardt', 'm.eisenhardt@x.com'),
@@ -66,7 +65,6 @@ specs = (
     ('drand', 'Daniel', 'Rand', 'd.rand@x.com'),
     ('nsummers', 'Nathan', 'Summers', 'n.summers@x.com'),
     ('ebrant', 'Elizabeth', 'Brant', 'e.brant@x.com'),
-    ('rjones', 'Richard', 'Jones', 'r.jones@x.com'),
     ('ejarvis', 'Edwin', 'Jarvis', 'e.jarvis@x.com'),
     ('asummers', 'Alexander', 'Summers', 'a.summers@x.com'),
     ('pwalker', 'Patricia', 'Walker', 'p.walker@x.com'),
@@ -87,7 +85,6 @@ specs = (
     ('jdrew', 'Jessica', 'Drew', 'j.drew@x.com'),
     ('rda', 'Roberto', 'da', 'r.da@x.com'),
     ('rsinclai', 'Rahne', 'Sinclair', 'r.sinclair@x.com'),
-    ('eross', 'Elizabeth', 'Ross', 'e.ross@x.com'),
     ('ldane', 'Lorna', 'Dane', 'l.dane@x.com'),
     ('bcolt', 'Blaine', 'Colt', 'b.colt@x.com'),
     ('jblaze', 'Johnathon', 'Blaze', 'j.blaze@x.com'),
@@ -8272,9 +8269,10 @@ majors = list(Major.objects.all())
 shuffle(majors)
 
 if to_generate < len(majors):
-    print(f'WARNING - fewer professors being generated ({to_generate}) ' +
+    print(f'ERROR - fewer professors being generated ({to_generate}) ' +
           f'than number of majors {len(majors)}. Some majors will not have professors.')
 
+error_count = 0
 ix = 0
 for (u, f, l, e) in specs[:to_generate]:
     usr = User(username=u, first_name=f, last_name=l, email=e)
@@ -8284,7 +8282,8 @@ for (u, f, l, e) in specs[:to_generate]:
     try:
         usr.save()
     except Exception:
-        print(f'Unable to save professor(User) {u} ({f} {l})')
+        print(f'ERROR: Unable to save professor(User) {u} ({f} {l})')
+        error_count = error_count + 1
         continue
     else:
         # ensure that every major has at least one professor
@@ -8292,7 +8291,18 @@ for (u, f, l, e) in specs[:to_generate]:
             m = majors[ix]
         else:
             m = majors[randint(0, len(majors) - 1)]
+
         p = Professor(user=usr, major=m)
-        p.save()
+        try:
+            p.save()
+        except Exception:
+            print(f'ERROR: Able to save User but not Professor ***')
+            error_count = error_count + 1
+            usr.delete()
+            continue
+
         print(f'create prof {u} ({f} {l}) {m}')
     ix = ix + 1
+
+if error_count:
+    print(f'ERROR: {error_count} errors occurred')
