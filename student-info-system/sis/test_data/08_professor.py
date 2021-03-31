@@ -8269,10 +8269,8 @@ majors = list(Major.objects.all())
 shuffle(majors)
 
 if to_generate < len(majors):
-    print(
-        f'ERROR - fewer professors being generated ({to_generate}) ' +
-        f'than number of majors {len(majors)}. Some majors will not have professors.'
-    )
+    print(f'ERROR - fewer professors being generated ({to_generate}) ' +
+          f'than number of majors {len(majors)}. Some majors will not have professors.')
 
 error_count = 0
 ix = 0

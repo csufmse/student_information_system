@@ -250,6 +250,7 @@ specs = (
 def randobj(objs):
     return objs.objects.all()[randint(0, objs.objects.count() - 1)]
 
+
 error_count = 0
 for (cn, t, d, cr) in specs[:to_generate]:
     m = randobj(Major)
@@ -258,7 +259,10 @@ for (cn, t, d, cr) in specs[:to_generate]:
         c.save()
     except Exception:
         error_count = error_count + 1
-        print(f'ERROR: Unable to save {m}-{cn} {t} [m={m},catalog_number={cn}, title="{t}", description="{d}", credits_earned={cr}]')
+        print(
+            f'ERROR: Unable to save {m}-{cn} {t} [m={m},catalog_number={cn}, ' +
+            f'title="{t}", description="{d}", credits_earned={cr}]'
+        )
     else:
         print(f'create course {m}-{cn} {t}')
 

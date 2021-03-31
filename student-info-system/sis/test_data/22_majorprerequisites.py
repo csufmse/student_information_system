@@ -17,6 +17,7 @@ from sis.models import Course, Major
 def randobj(objs):
     return objs.objects.all()[randint(0, objs.objects.count() - 1)]
 
+
 error_count = 0
 
 for m in Major.objects.all():

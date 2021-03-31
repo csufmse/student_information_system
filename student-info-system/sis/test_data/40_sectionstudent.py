@@ -32,6 +32,7 @@ def randobj(objs):
         print(f'could not get ix {ii} of {objs}, count {objs.objects.count()-1}')
     return obj
 
+
 error_count = 0
 i = 0
 while i < to_generate:
@@ -63,7 +64,10 @@ while i < to_generate:
         ss.save()
     except Exception:
         error_count = error_count + 1
-        print(f'ERROR: {i} Unable to put {st} in {sec} [sec={sec.id}, stud={st.user_id}, status={stat}, grade={g}]')
+        print(
+            f'ERROR: {i} Unable to put {st} in {sec} [sec={sec.id}, stud={st.user_id}, ' +
+            f'status={stat}, grade={g}]'
+        )
         i = i - 1
     else:
         print('{} Added {:20} to {} {:15} ({:14},{})'.format(i, str(st), str(sec.semester),

@@ -21,6 +21,7 @@ prob_fulfilled = 0.5
 def randobj(objs):
     return objs.objects.all()[randint(0, objs.objects.count() - 1)]
 
+
 error_count = 0
 for ii in range(int(Student.objects.count() * percent_that_have_request)):
     s = randobj(Student)
@@ -51,7 +52,10 @@ for ii in range(int(Student.objects.count() * percent_that_have_request)):
         try:
             tr.save()
         except Exception:
-            print(f'ERROR: could not add tr {tr} [stud={s.user_id}, req={date_of}, date_fulf={date_fulfilled}]')
+            print(
+                f'ERROR: could not add tr {tr} [stud={s.user_id}, req={date_of}, ' +
+                f'date_fulf={date_fulfilled}]'
+            )
             error_count = error_count + 1
         else:
             print(f'added request {tr}')
