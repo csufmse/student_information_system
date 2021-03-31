@@ -1,0 +1,20 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+    "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+{% load static %}
+
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  {% block css %}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}" />
+  {% endblock css %}
+  {% block scripts %}<script src="{%  static 'schooladmin/common.js' %}" ></script>
+  {% endblock scripts %}
+
+    <meta charset="utf-8">
+</head>
+<body>
+  {% block content %}{% endblock content %}
+  {% block late_scripts %}{% endblock late_scripts %}
+</body>
+</html>

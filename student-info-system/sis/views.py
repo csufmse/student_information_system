@@ -13,8 +13,8 @@ def index(request):
     elif access_role == AccessRoles.PROFESSOR_ROLE:
         return redirect('professor:index')
     elif access_role == AccessRoles.STUDENT_ROLE:
-        return redirect('student:current_schedule')
+        return redirect('student:index')
 
 
 def access_denied(request):
-    return render(request, 'access_denied.html', None)
+    return render(request, 'sis/access_denied.html', None)

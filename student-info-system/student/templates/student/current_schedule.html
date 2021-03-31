@@ -1,20 +1,21 @@
-{% extends "student/student_base.html" %}
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
 
-{% block title %}Student Portal: Current Schedule{% endblock %}
-{% block header_name %}Current Schedule{% endblock %}
 {% block content %}
   {% if not my_sections %}
      <p>No registered sections</p>
   {% else %}
-    <table>
-    <tr>
+    <table class="data-table">
+    <tr class="reg-row">
       <th>Course Name</th>
       <th>Section Number</th>
       <th>Professor</th>
       <th>Schedule</th>
       <th>Status</th>
     </tr>
-    <tr>
+    <tr class="heading_row">
     {% for ssect in my_sections %}
       <td>{{ssect.section.course.name}}</td>
       <td>{{ssect.section.number}}</td>

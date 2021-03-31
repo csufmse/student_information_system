@@ -7,7 +7,7 @@ from sis.models import (Course, Section, Semester, SectionStudent, AccessRoles, 
 
 @role_login_required(AccessRoles.STUDENT_ROLE)
 def index(request):
-    return redirect('student:current_schedule.html')
+    return render(request, 'student/home_student.html')
 
 
 @role_login_required(AccessRoles.STUDENT_ROLE)
