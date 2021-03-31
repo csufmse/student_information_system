@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django_tables2 import RequestConfig
 
 from sis.authentication_helpers import role_login_required
-from sis.models import Professor, Section, AccessRoles
+from sis.models import Professor, Section, AccessRoles, Semester
 
 from .tables import SectionsTable
 
@@ -15,14 +15,12 @@ def index(request):
 
 @role_login_required(AccessRoles.PROFESSOR_ROLE)
 def sections(request):
-    u = request.user
+    the_prof = request.user.professor
 
-    qs = Professor.objects.filter(user__id=3)
-    if qs.count() < 1:
+    if the_prof is None:
         return HttpResponse("No such professor")
-    the_prof = qs[0]
 
-    sections_qs = Section.objects.filter(professor=the_prof)
+    sections_qs = Section.objects.filter(professor=the_prof).exclude(status=Section.CLOSED)
     sections_table = SectionsTable(sections_qs)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
 
