@@ -22,9 +22,11 @@ def current_schedule_view(request):
 @role_login_required(AccessRoles.STUDENT_ROLE)
 def registration_view(request):
     student = request.user.student
+    # If the student has to register for semesters first, do this:
     # semester_list = student.semesters.order_by('-date_started')
     # if semester_list.count() == 0:
     #     return HttpResponse("You are not registered for any semesters.")
+    # If the student can register for anything open, do this:
     semester_list = Semester.objects.filter(
         date_registration_opens__lte=date.today(),
         date_ended__gte=date.today()).order_by('-date_started')
