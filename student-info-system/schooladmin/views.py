@@ -56,7 +56,29 @@ def user(request, userid):
             the_user.is_active = True
             the_user.save()
         return redirect('schooladmin:users')
-    return render(request, 'schooladmin/user.html', {'user': the_user})
+
+    formdata = {
+        'user': the_user,
+    }
+    if the_user.access_role() == AccessRoles.STUDENT_ROLE:
+        semester_table = SemestersTable(the_user.student.semesters.all())
+        RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(semester_table)
+
+        history_table = SectionStudentsTable(the_user.student.course_history())
+        RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(history_table)
+
+        remaining_required_table = CoursesTable(the_user.student.remaining_required_courses())
+        RequestConfig(request, paginate={
+            "per_page": 25,
+            "page": 1
+        }).configure(remaining_required_table)
+
+        formdata['semesters'] = semester_table
+        formdata['course_history'] = history_table
+        formdata['remaining_required'] = remaining_required_table
+        pass
+
+    return render(request, 'schooladmin/user.html', formdata)
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
