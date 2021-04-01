@@ -327,6 +327,8 @@ def course_edit(request, courseid):
         form = CourseEditForm(request.POST, instance=the_course)
         if form.is_valid():
             form.save()
+            messages.success(request,
+                             f'Course {the_course} successfully updated.')
             return redirect('schooladmin:course', courseid)
         else:
             messages.error(request, 'Please correct the error(s) below.')

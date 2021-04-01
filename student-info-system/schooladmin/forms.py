@@ -115,7 +115,6 @@ class CourseEditForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(CourseEditForm, self).__init__(*args, **kwargs)
-
         # we defer loading of professors until we know what major is chosen
         if kwargs['instance']:
             the_course = kwargs['instance']
