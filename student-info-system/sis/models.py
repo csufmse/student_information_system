@@ -232,7 +232,7 @@ class Course(models.Model):
 
     @property
     def descr(self):
-        return self.name + ':' + self.title
+        return self.name + ': ' + self.title
 
     descr.fget.short_description = 'Course'
 
