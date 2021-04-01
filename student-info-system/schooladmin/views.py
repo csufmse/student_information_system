@@ -552,7 +552,16 @@ def section_new_helper(request, semester_id=None, courseid=None):
     if request.method == 'POST':
         form = SectionCreationForm(request.POST)
         if form.is_valid():
-            the_new_section = form.save()
+            the_course = form.cleaned_data['course']
+            the_sem = form.cleaned_data['semester']
+            current_max_section = the_course.max_section_for_semester(the_sem)
+            if current_max_section is None:
+                next_section = 1
+            else:
+                next_section = current_max_section + 1
+            the_new_section = form.save(commit=False)
+            the_new_section.number = next_section
+            the_new_section.save()
             messages.success(request, f'Section {the_new_section} has been created.')
             return redirect('schooladmin:section', the_new_section.id)
         else:
