@@ -76,8 +76,7 @@ class CourseCreationForm(forms.ModelForm):
 
     catalog_number = forms.IntegerField(label='Number')
     title = forms.CharField(label='Title', max_length=256)
-    description = forms.CharField(label_suffix='Description',
-                                  max_length=256,
+    description = forms.CharField(max_length=256,
                                   required=False,
                                   widget=forms.Textarea(attrs={'rows': 3}))
     credits_earned = forms.DecimalField(label='Credits', max_digits=2, decimal_places=1)
@@ -115,7 +114,6 @@ class CourseEditForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super(CourseEditForm, self).__init__(*args, **kwargs)
-
         # we defer loading of professors until we know what major is chosen
         if kwargs['instance']:
             the_course = kwargs['instance']
@@ -184,7 +182,7 @@ class UserEditForm(forms.Form):
 
     class Meta:
         model = User
-        fields = ('role', 'first_name', 'last_name', 'email', 'major')
+        fields = ('role', 'first_name', 'last_name', 'email', 'major', 'original_role')
 
 
 class SectionCreationForm(forms.ModelForm):
@@ -195,7 +193,7 @@ class SectionCreationForm(forms.ModelForm):
     course = forms.ModelChoiceField(queryset=Course.objects.all())
     course.widget.attrs.update({'class': 'course_sel selectpicker'})
 
-    number = forms.IntegerField()
+    number = forms.CharField(widget=forms.HiddenInput(), required=False)
     hours = forms.CharField(max_length=100)
 
     professor = forms.ModelChoiceField(queryset=Professor.objects.all())

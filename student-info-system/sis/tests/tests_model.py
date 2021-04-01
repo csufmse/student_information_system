@@ -6,17 +6,7 @@ from django.contrib.auth.models import User
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
                         Semester, Student, TranscriptRequest, AccessRoles, ClassLevel)
 
-
-def createStudent(major=None, username=None):
-    user = User.objects.create(username=username, first_name=username[0], last_name=username[1:])
-    stud = Student.objects.create(user=user, major=major)
-    return stud
-
-
-def createProfessor(major=None, username=None):
-    user = User.objects.create(username=username, first_name=username[0], last_name=username[1:])
-    prof = Professor.objects.create(user=user, major=major)
-    return prof
+from sis.tests.utils import (createAdmin, createStudent, createProfessor, createCourse)
 
 
 class StudentTestCase_Basic(TestCase):
