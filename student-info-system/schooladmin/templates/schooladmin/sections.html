@@ -7,18 +7,18 @@
 <div>
     <button class="btn btn-primary" id="section_new">Add Section to Class</button>
     <div id="Sections">
-        {% if filter %}
-            <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
-            {% bootstrap_form filter.form layout='inline' %}
-            <button class="btn btn-primary">Filter</button>
-            {% if has_filter %}
-              <a  class="btn btn-success" href="{%  url 'schooladmin:sections' %}">Clear</a>
+            {% if sections_filter %}
+                <form id="sections_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                    {% bootstrap_form sections_filter.form layout='inline' %}
+                    <button class="btn btn-primary">Filter</button>
+                    {% if sections_has_filter %}
+                        <a  class="btn btn-success" href="{%  url 'schooladmin:sections' %}">Clear</a>
+                    {% endif %}
+                </form>
             {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt scrollify-me">
-            {% render_table table 'django_tables2/bootstrap.html' %}
-        </div>
+            <div class="data-table-alt scrollify-me">
+                {% render_table sections_table 'django_tables2/bootstrap.html' %}
+            </div>
     </div>
 </div>
 <script>

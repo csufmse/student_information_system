@@ -19,13 +19,35 @@
   <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
 </dl>
     <h3>Semesters Taught</h3>
-    <div class="data-table-alt">
-        {% render_table semesters 'django_tables2/bootstrap.html' %}
+    <div id="semesterstaught">
+        {% if semesters_filter %}
+            <form id="semesters_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form semesters_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if semesters_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table semesters_table 'django_tables2/bootstrap.html' %}
+        </div>
     </div>
 
     <h3>Sections Taught</h3>
-    <div class="data-table-alt">
-        {% render_table sections 'django_tables2/bootstrap.html' %}
+    <div id="sectionstaught">
+        {% if sections_filter %}
+            <form id="sections_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form sections_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if sections_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table sections_table 'django_tables2/bootstrap.html' %}
+        </div>
     </div>
 
   <form method="post">

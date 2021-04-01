@@ -70,7 +70,7 @@ class FullUsersTable(tables.Table):
 
 class StudentInMajorTable(tables.Table):
     username = ClassyColumn(css_class_base='username')
-    name = NameColumn(css_class_base='user_name')
+    name = NameColumn(css_class_base='name', accessor='get_full_name')
     is_active = AbilityColumn(null=False, attrs=field_css_classes('active'))
     class_level = ClassyColumn(verbose_name='Class',
                                css_class_base='classlevel',
@@ -224,9 +224,14 @@ class SectionStudentsTable(tables.Table):
     username = ClassyColumn(accessor='student__user__username', css_class_base='username')
     name = ClassyColumn(accessor='student__user__name', css_class_base='user_name')
     major = ClassyColumn(accessor='student__major', css_class_base='major')
-    status = ClassyColumn(
-        verbose_name="Status",
+    sec_status = ClassyColumn(
+        verbose_name="Section Status",
         css_class_base='sectionstatus',
+        accessor='section__status',
+    )
+    stud_status = ClassyColumn(
+        verbose_name="Student Status",
+        css_class_base='sectionstudentstatus',
         accessor='status',
     )
     letter_grade = ClassyColumn(verbose_name="Grade",
@@ -236,7 +241,8 @@ class SectionStudentsTable(tables.Table):
     class Meta:
         model = SectionStudent
         template_name = "django_tables2/bootstrap.html"
-        fields = ('semester', 'course', 'username', 'name', 'major', 'status', 'letter_grade')
+        fields = ('semester', 'course', 'username', 'name', 'major', 'sec_status', 'stud_status',
+                  'letter_grade')
         row_attrs = {
             'class': 'sectionstudent_row',
             'data-id': lambda record: record.student.user.pk

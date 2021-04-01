@@ -19,24 +19,51 @@
   <dd>{{ semester.date_ended }}</dd>
 </dl>
 
-        <h3>Sections:</h3>
+    <h3>Sections:</h3>
     <div id="Sections">
-        <div class="data-table-alt ">
-            {% render_table sections 'django_tables2/bootstrap.html' %}
+        {% if sections_filter %}
+            <form id="sections_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form sections_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if sections_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:semester' semester_id=semester.id %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table sections_table 'django_tables2/bootstrap.html' %}
         </div>
     </div>
 
          <h3>Enrolled Students:</h3>
-   <div id="Students">
-        <div class="data-table-alt ">
-            {% render_table students 'django_tables2/bootstrap.html' %}
+    <div id="students">
+        {% if students_filter %}
+            <form id="students_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form students_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if students_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:semester' semester_id=semester.id %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table students_table 'django_tables2/bootstrap.html' %}
         </div>
     </div>
 
         <h3>Professors Teaching:</h3>
-    <div id="Professors">
-        <div class="data-table-alt ">
-            {% render_table professors 'django_tables2/bootstrap.html' %}
+    <div id="professors">
+        {% if professors_filter %}
+            <form id="professors_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form professors_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if professors_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:semester' semester_id=semester.id %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table professors_table 'django_tables2/bootstrap.html' %}
         </div>
     </div>
 

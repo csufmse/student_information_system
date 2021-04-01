@@ -80,14 +80,14 @@
 .active_col, .capac_col, .catnumber_col, .classlevel_col, .course_col, .coursetitle_col,
 .credits_col, .date_col, .gpa_col, .hours_col, .lettergrade_col, .major_col,
 .majordescr_col, .majorname_col, .professor_col, .remaining_col, .role_col, .secnum_col,
-.sectionstatus_col, .sem_col, .semester_col, .user_name_col, .username_col {
+.sectionstatus_col, .sectionstudentstatus, .sem_col, .semester_col, .user_name_col, .username_col {
   text-align: center;
 }
 
 /* most (data) cells are centered */
 .active_cell, .capac_cell, .catnumber_cell, .classlevel_cell, .course_cell, .credits_cell,
 .date_cell, .gpa_cell, .hours_cell, .lettergrade_cell, .major_cell, .majorname_cell,
-.prof_cell, .remaining_cell, .role_cell, .secnum_cell, .sectionstatus_cell, .sem_cell,
+.prof_cell, .remaining_cell, .role_cell, .secnum_cell, .sectionstatus_cell, .sectionstudentstatus, .sem_cell,
 .semester_cell, .year_cell {
   text-align: center;
 }

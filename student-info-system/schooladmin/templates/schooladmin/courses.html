@@ -8,18 +8,18 @@
 <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:course_new' %}';">New Course</button>
 <div>
 <div id="Courses">
-    {% if filter %}
-    <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
-    {% bootstrap_form filter.form layout='inline' %}
-    <button class="btn btn-primary">Filter</button>
-{% if has_filter %}
-  <a  class="btn btn-success" href="{%  url 'schooladmin:courses' %}">Clear</a>
-{% endif %}
-    </form>
-    {% endif %}
-<div class="data-table-alt scrollify-me">
-    {% render_table table 'django_tables2/bootstrap.html' %}
-</div>
+        {% if courses_filter %}
+            <form id="courses_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form courses_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if courses_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:courses' %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt scrollify-me">
+            {% render_table courses_table 'django_tables2/bootstrap.html' %}
+        </div>
 </div>
 
 </div>
@@ -27,8 +27,8 @@
 <script>
 const handler = insertScrollableDivs(applyHandlers=true);
 handler();
-stylizeRange({field:'catalog_number',name:'Cat Num'});
-stylizeRange({field:'credits_earned',name:'Cred'});
+stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'courses'});
+stylizeRange({field:'credits_earned',name:'Cred',prefix:'courses'});
 addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
 </script>
 {% endblock content %}

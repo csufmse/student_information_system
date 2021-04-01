@@ -7,17 +7,17 @@
 <div>
 <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
     <div id="Users">
-        {% if filter %}
-            <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form filter.form layout='inline' %}
+        {% if users_filter %}
+            <form id="users_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form users_filter.form layout='inline' %}
                 <button class="btn btn-primary">Filter</button>
-                {% if has_filter %}
+                {% if users_has_filter %}
                     <a  class="btn btn-success" href="{%  url 'schooladmin:users' %}">Clear</a>
                 {% endif %}
             </form>
         {% endif %}
         <div class="data-table-alt scrollify-me">
-            {% render_table table 'django_tables2/bootstrap.html' %}
+            {% render_table users_table 'django_tables2/bootstrap.html' %}
         </div>
     </div>
 </div>

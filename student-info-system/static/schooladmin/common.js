@@ -26,7 +26,8 @@ function addButtonClickHandler(button_id, url) {
 
 // Change the empty label for min/max range filters
 function stylizeRange({field=0, name=0, min_label=0,
-                          max_label=0, width='90px'}) {
+                          max_label=0, width='90px',
+                          prefix=0}) {
     var label0;
     var label1;
     if (name) {
@@ -42,10 +43,14 @@ function stylizeRange({field=0, name=0, min_label=0,
         }
     }
     var e;
-    e = document.getElementById('id_'+field+'_0');
+    var fld = 'id_';
+    if (prefix) {
+        fld = fld+prefix+'-';
+    }
+    e = document.getElementById(fld+field+'_0');
     e.placeholder = label0;
     e.style.width = width;
-    e = document.getElementById('id_'+field+'_1');
+    e = document.getElementById(fld+field+'_1');
     e.placeholder = label1;
     e.style.width = width;
 }
