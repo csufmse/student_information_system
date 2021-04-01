@@ -1,0 +1,24 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+{% load django_tables2 %}
+{% load bootstrap3 %}
+
+
+{% block content %}
+<div>
+    <div id="Grades">
+        {% if filter %}
+            <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
+            {% bootstrap_form filter.form layout='inline' %}
+            <button class="btn btn-primary">Filter</button>
+            {% if has_filter %}
+              <a  class="btn btn-success" href="{%  url 'student:grades' %}">Clear</a>
+            {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt scrollify-me">
+            {% render_table grades 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+</div>
+{% endblock content %}

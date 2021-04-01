@@ -2,7 +2,8 @@ from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from datetime import date
 from sis.authentication_helpers import role_login_required
-from sis.models import (Course, Section, Semester, SectionStudent, AccessRoles, SemesterStudent)
+from sis.models import (Course, Section, Semester, SectionStudent, AccessRoles, SemesterStudent, SectionStudent)
+from .tables import GradesTable
 
 
 @role_login_required(AccessRoles.STUDENT_ROLE)
@@ -80,3 +81,11 @@ def registration_view(request):
             last_course = s.course
 
     return render(request, 'student/registration.html', context)
+
+
+@role_login_required(AccessRoles.STUDENT_ROLE)
+def grades(request):
+    context = {
+        'name': request.user.student.name
+    }
+    return render(request, 'student/grades.html', context)

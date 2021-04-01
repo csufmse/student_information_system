@@ -6,12 +6,15 @@
 <div class="tab">
   <button class="tablinks" id="defaultOpen">Current Schedule</button>
   <button class="tablinks">Registration</button>
+  <button class="tablinks">Grades</button>
 </div>
 
 <span height="400" width="300">
   <iframe id="Current Schedule" class="tabcontent samplecontentblock" title="Current Schedule" 
     src="{% url 'student:current_schedule' %}"></iframe>
   <iframe id="Registration" class="tabcontent" title="Registration" src="{% url 'student:registration' %}"
+    ></iframe>
+    <iframe id="Grades" class="tabcontent" title="Grades" src="{% url 'student:grades' %}"
     ></iframe>
 </span>
 {% endblock content %}
