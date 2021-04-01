@@ -76,8 +76,7 @@ class CourseCreationForm(forms.ModelForm):
 
     catalog_number = forms.IntegerField(label='Number')
     title = forms.CharField(label='Title', max_length=256)
-    description = forms.CharField(label_suffix='Description',
-                                  max_length=256,
+    description = forms.CharField(max_length=256,
                                   required=False,
                                   widget=forms.Textarea(attrs={'rows': 3}))
     credits_earned = forms.DecimalField(label='Credits', max_digits=2, decimal_places=1)
@@ -183,7 +182,7 @@ class UserEditForm(forms.Form):
 
     class Meta:
         model = User
-        fields = ('role', 'first_name', 'last_name', 'email', 'major')
+        fields = ('role', 'first_name', 'last_name', 'email', 'major', 'original_role')
 
 
 class SectionCreationForm(forms.ModelForm):

@@ -7,6 +7,8 @@ from django.forms.models import model_to_dict
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django_tables2 import RequestConfig
+from django.utils.html import format_html
+from django.urls import reverse
 
 from sis.authentication_helpers import role_login_required
 from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
@@ -52,9 +54,13 @@ def user(request, userid):
         if request.POST.get('disbutton'):
             the_user.is_active = False
             the_user.save()
+            messages.success(request,
+                             f'User {the_user.get_full_name()} has been disabled from login.')
         elif request.POST.get('enabutton'):
             the_user.is_active = True
             the_user.save()
+            messages.success(request,
+                             f'User {the_user.get_full_name()} has been enabled for login.')
         return redirect('schooladmin:users')
 
     formdata = {
@@ -91,11 +97,14 @@ def user_change_password(request, userid):
         form = AdminPasswordChangeForm(the_user, request.POST)
         if form.is_valid():
             form.save()
-            messages.success(request,
-                             f'Password for {the_user.username} was successfully updated.')
+            messages.success(
+                request,
+                f'Password for "{the_user.username}" {the_user.get_full_name()} ' +
+                'was successfully updated.'
+            )
             return redirect('schooladmin:user', userid)
         else:
-            messages.error(request, 'Please correct the error below.')
+            messages.error(request, 'Please correct the error(s) below.')
     else:
         form = AdminPasswordChangeForm(request.user)
     return render(request, 'schooladmin/user_change_password.html', {
@@ -118,9 +127,11 @@ def user_edit(request, userid):
             the_user.email = form.cleaned_data['email']
             the_user.save()
 
+            message = "User has been updated. "
             old_role = the_user.access_role()
             new_role = form.cleaned_data['role']
             if old_role != new_role:
+                message = message + f"User role changes from {old_role} to {new_role}."
                 if old_role == AccessRoles.STUDENT_ROLE:
                     # NOT deleting Student here so that we don't lose the data
                     pass
@@ -153,6 +164,7 @@ def user_edit(request, userid):
                     prof.major = form.cleaned_data['major']
                     prof.save()
 
+            messages.success(request, message)
             return redirect('schooladmin:user', userid)
         else:
             messages.error(request, 'Please correct the error(s) below.')
@@ -166,6 +178,7 @@ def user_edit(request, userid):
         elif studs.count() > 0:
             dict['major'] = studs[0].major
         form = UserEditForm(initial=dict)
+
     return render(request, 'schooladmin/user_edit.html', {
         'user': the_user,
         'original_role': the_user.access_role(),
@@ -192,7 +205,11 @@ def user_new(request):
             elif access_role == AccessRoles.ADMIN_ROLE:
                 admin = Admin(user=the_new_user)
                 admin.save()
+            messages.success(request,
+                             f'User {the_new_user.get_full_name()} created as a {access_role}.')
             return redirect('schooladmin:users')
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
     else:
         form = CustomUserCreationForm()
     return render(request, 'schooladmin/user_new.html', {'form': form})
@@ -255,6 +272,8 @@ def major_edit(request, abbreviation):
             obj = form.save(commit=False)
             obj.save()
             form.save_m2m()
+            messages.success(
+                request, f'Major {the_major.abbreviation } / {the_major.name} has been updated.')
             return redirect('schooladmin:major', abbreviation)
         else:
             messages.error(request, 'Please correct the error(s) below.')
@@ -269,6 +288,10 @@ def major_new(request):
         form = MajorCreationForm(request.POST)
         if form.is_valid():
             the_new_major = form.save()
+            message = format_html('Major <a href="{}">{} / {}</a> has been created.',
+                                  reverse('schooladmin:major', args=[the_new_major.abbreviation]),
+                                  the_new_major.abbreviation, the_new_major.name)
+            messages.success(request, message)
             return redirect('schooladmin:majors')
     else:
         form = MajorCreationForm()
@@ -326,8 +349,8 @@ def course_edit(request, courseid):
     if request.method == 'POST':
         form = CourseEditForm(request.POST, instance=the_course)
         if form.is_valid():
-            form.save()
-            messages.success(request, f'Course {the_course} successfully updated.')
+            updated_course = form.save()
+            messages.success(request, f'Course {updated_course} successfully updated.')
             return redirect('schooladmin:course', courseid)
         else:
             messages.error(request, 'Please correct the error(s) below.')
@@ -342,7 +365,10 @@ def course_new(request):
         form = CourseCreationForm(request.POST)
         if form.is_valid():
             the_new_course = form.save()
+            messages.success(request, f'Course {the_new_course} has been created.')
             return redirect('schooladmin:courses')
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
     else:
         form = CourseCreationForm()
     return render(request, 'schooladmin/course_new.html', {'form': form})
@@ -405,7 +431,8 @@ def semester_edit(request, semester_id):
     if request.method == 'POST':
         form = SemesterEditForm(request.POST, instance=the_semester)
         if form.is_valid():
-            form.save()
+            the_updated_sem = form.save()
+            messages.success(request, f'Semester {the_update_sem} has been updated.')
             return redirect('schooladmin:semester', semester_id)
         else:
             messages.error(request, 'Please correct the error(s) below.')
@@ -422,29 +449,21 @@ def semester_new(request):
     if request.method == 'POST':
         form = SemesterCreationForm(request.POST)
         if form.is_valid():
-            # TODO
             the_new_semester = form.save()
+            messages.success(request, f'Semester {the_new_semester} has been created.')
             return redirect('schooladmin:semesters')
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
     else:
-        form = SemesterCreationForm()
+        form = SemesterCreationForm(initial={
+            'year': date.today().year,
+        })
     return render(request, 'schooladmin/semester_new.html', {'form': form})
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
 def semester_section_new(request, semester_id):
     return section_new_helper(request, semester_id=semester_id)
-
-
-@role_login_required(AccessRoles.ADMIN_ROLE)
-def new_semester(request):
-    if request.method == 'POST':
-        form = SemesterCreationForm(request.POST)
-        if form.is_valid():
-            the_new_semester = form.save()
-            return redirect('schooladmin:semesters')
-    else:
-        form = SemesterCreationForm()
-    return render(request, 'schooladmin/new_semester.html', {'form': form})
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -501,6 +520,7 @@ def section_edit(request, sectionid):
             obj = form.save(commit=False)
             obj.save()
             form.save_m2m()
+            messages.success(request, f'Section {obj} has been updated.')
             return redirect('schooladmin:section', sectionid)
         else:
             messages.error(request, 'Please correct the error(s) below.')
@@ -533,7 +553,10 @@ def section_new_helper(request, semester_id=None, courseid=None):
         form = SectionCreationForm(request.POST)
         if form.is_valid():
             the_new_section = form.save()
+            messages.success(request, f'Section {the_new_section} has been created.')
             return redirect('schooladmin:section', the_new_section.id)
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
     else:
         form_values = {}
         if courseid is not None:

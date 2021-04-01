@@ -25,15 +25,6 @@
   {% endblock header_content %}
   </span>
 </div>
-    <div class="messages">
-        {% if messages %}
-        <ul>
-           {% for message in messages %}
-               <li>{{ message }}</li>
-           {% endfor %}
-        </ul>
-        {% endif %}
-    </div>
     {% block content %}
   {% endblock content %}
   {% block late_scripts %}{% endblock late_scripts %}

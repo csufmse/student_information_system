@@ -53,8 +53,8 @@ document.getElementById("submitme").addEventListener("click", function () {
         var user_name = document.getElementById("id_first_name").value + ' ' + document.getElementById("id_last_name").value;
         var role_select = document.getElementById("id_role").value
         var message = "Are you sure you wish to create user:\n\n" +
-            "Username: "+username+"\n"+
-            "Full name: "+user_name+"\n"+
+            'Username: "' + username+'"\n' +
+            "Full name: "+user_name+"\n" +
             "Access Role: "+role_select;
         var answer = window.confirm(message);
         if (answer) {
