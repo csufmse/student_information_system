@@ -1,12 +1,10 @@
 from django.test import TestCase
 from datetime import datetime
 
-
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
                         Semester, Student, TranscriptRequest, AccessRoles, ClassLevel)
 
-from sis.tests.utils import (createStudent, createProfessor,
-                            createAdmin, createCourse)
+from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
 
 
 class CourseTestCase_Basic(TestCase):
@@ -33,7 +31,6 @@ class CourseTestCase_Basic(TestCase):
     def test_major(self):
         course = Course.objects.get(title="Intro To Test")
         self.assertEqual(course.major_name, "Computer Science")
-
 
 
 class CourseTestCase_deps(TestCase):
@@ -100,7 +97,7 @@ class CourseTestCase_edit(TestCase):
     @classmethod
     def setUpTestData(cls):
         m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
-        CourseTestCase_edit.m1 = Major.objects.create(abbreviation='XYAZ',name='Bananas')
+        CourseTestCase_edit.m1 = Major.objects.create(abbreviation='XYAZ', name='Bananas')
         CourseTestCase_edit.major = m
 
         CourseTestCase_edit.courses = {}
@@ -146,5 +143,3 @@ class CourseTestCase_edit(TestCase):
         c.save()
         c1 = Course.objects.get(id=1)
         self.assertEqual(c1.major_name, 'Bananas')
-
-

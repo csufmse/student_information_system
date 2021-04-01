@@ -6,11 +6,11 @@ from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, S
 
 from schooladmin.forms import (CourseEditForm, CourseCreationForm)
 
-from sis.tests.utils import (createStudent, createProfessor,
-                             createAdmin, createCourse)
+from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
 
 
 class CourseCreation_formtest(TestCase):
+
     @classmethod
     def setUpTestData(self):
         CourseCreation_formtest.m = Major.objects.create(abbreviation='ABCD', name='The A, The B')
@@ -19,12 +19,13 @@ class CourseCreation_formtest(TestCase):
     def test_blank_data(self):
         form = CourseCreationForm({})
         self.assertFalse(form.is_valid())
-        self.assertEqual(form.errors, {
-            'major': ['This field is required.'],
-            'title': ['This field is required.'],
-            'catalog_number': ['This field is required.'],
-            'credits_earned': ['This field is required.'],
-        })
+        self.assertEqual(
+            form.errors, {
+                'major': ['This field is required.'],
+                'title': ['This field is required.'],
+                'catalog_number': ['This field is required.'],
+                'credits_earned': ['This field is required.'],
+            })
 
     def test_valid_data(self):
         form = CourseCreationForm({
@@ -57,7 +58,9 @@ class CourseCreation_formtest(TestCase):
             'catalog_number': ['Ensure this value has at most 20 characters (it has 30).'],
         })
 
+
 class CourseEdit_formtest(TestCase):
+
     @classmethod
     def setUpTestData(self):
         CourseEdit_formtest.m = Major.objects.create(abbreviation='ABCD', name='The A, The B')
@@ -65,14 +68,16 @@ class CourseEdit_formtest(TestCase):
         CourseEdit_formtest.c1 = createCourse(CourseEdit_formtest.m, 101)
 
     def test_valid_data(self):
-        form = CourseEditForm({
-            'major': 'ASDF',
-            'title': 'the titlicious',
-            'catalog_number': '102',
-            'description': 'descr',
-            'credits_earned': '3.0',
-            'prereqs': [],
-        }, instance=CourseEdit_formtest.c1)
+        form = CourseEditForm(
+            {
+                'major': 'ASDF',
+                'title': 'the titlicious',
+                'catalog_number': '102',
+                'description': 'descr',
+                'credits_earned': '3.0',
+                'prereqs': [],
+            },
+            instance=CourseEdit_formtest.c1)
         self.assertEqual(form.errors, {})
         self.assertTrue(form.is_valid())
         c2 = form.save()
@@ -83,30 +88,33 @@ class CourseEdit_formtest(TestCase):
         self.assertEqual(c2.credits_earned, 3.0)
 
     def test_null_catnumber(self):
-        form = CourseEditForm({
-            'major': 'ASDF',
-            'title': 'the titlicious',
-            'catalog_number': '',
-            'description': 'descr',
-            'credits_earned': '3.0',
-            'prereqs': [],
-        }, instance=CourseEdit_formtest.c1)
+        form = CourseEditForm(
+            {
+                'major': 'ASDF',
+                'title': 'the titlicious',
+                'catalog_number': '',
+                'description': 'descr',
+                'credits_earned': '3.0',
+                'prereqs': [],
+            },
+            instance=CourseEdit_formtest.c1)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {
             'catalog_number': ['This field is required.'],
         })
 
     def test_long_catnumber(self):
-        form = CourseEditForm({
-            'major': 'ASDF',
-            'title': 'the titlicious',
-            'catalog_number': '123451234512345123451234512345',
-            'description': 'descr',
-            'credits_earned': '3.0',
-            'prereqs': [],
-        }, instance=CourseEdit_formtest.c1)
+        form = CourseEditForm(
+            {
+                'major': 'ASDF',
+                'title': 'the titlicious',
+                'catalog_number': '123451234512345123451234512345',
+                'description': 'descr',
+                'credits_earned': '3.0',
+                'prereqs': [],
+            },
+            instance=CourseEdit_formtest.c1)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {
             'catalog_number': ['Ensure this value has at most 20 characters (it has 30).'],
         })
-

@@ -259,10 +259,8 @@ for (cn, t, d, cr) in specs[:to_generate]:
         c.save()
     except Exception:
         error_count = error_count + 1
-        print(
-            f'ERROR: Unable to save {m}-{cn} {t} [m={m},catalog_number={cn}, ' +
-            f'title="{t}", description="{d}", credits_earned={cr}]'
-        )
+        print(f'ERROR: Unable to save {m}-{cn} {t} [m={m},catalog_number={cn}, ' +
+              f'title="{t}", description="{d}", credits_earned={cr}]')
     else:
         print(f'create course {m}-{cn} {t}')
 

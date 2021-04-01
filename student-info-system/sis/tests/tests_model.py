@@ -8,6 +8,7 @@ from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, S
 
 from sis.tests.utils import (createAdmin, createStudent, createProfessor, createCourse)
 
+
 class StudentTestCase_Basic(TestCase):
 
     @classmethod

@@ -78,13 +78,14 @@ class AdminCoursesViewsTest(TestCase):
         response = self.client.get('/schooladmin/course/1/section_new')
         self.assertEqual(response.status_code, 200)
 
+
 class Admin_Course_edit(TestCase):
 
     @classmethod
     def setUpTestData(cls):
         Admin_Course_edit.u1 = createAdmin('admin')
         major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
-        Admin_Course_edit.c1 = createCourse(major,101)
+        Admin_Course_edit.c1 = createCourse(major, 101)
 
     def test_edit_course_view_template(self):
         login = self.client.login(username='admin', password='admin1')
@@ -92,4 +93,3 @@ class Admin_Course_edit(TestCase):
         self.assertEqual(str(response.context['user']), 'admin')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'schooladmin/course_edit.html')
-
