@@ -193,7 +193,7 @@ class SectionCreationForm(forms.ModelForm):
     course = forms.ModelChoiceField(queryset=Course.objects.all())
     course.widget.attrs.update({'class': 'course_sel selectpicker'})
 
-    number = forms.IntegerField()
+    number = forms.CharField(widget=forms.HiddenInput(), required=False)
     hours = forms.CharField(max_length=100)
 
     professor = forms.ModelChoiceField(queryset=Professor.objects.all())
