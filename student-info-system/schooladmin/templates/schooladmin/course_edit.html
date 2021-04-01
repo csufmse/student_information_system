@@ -23,3 +23,12 @@
     />
   </form>
 {% endblock %}
+
+{% block late_scripts %}
+<script>
+document.getElementById("submitme").addEventListener("click", function () {
+        this.form.submit();
+        return true;
+    });
+</script>
+{%  endblock %}
