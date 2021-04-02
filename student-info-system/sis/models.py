@@ -3,6 +3,7 @@ from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Case, ExpressionWrapper, F, Q, Sum, Max, Subquery, Value, When
 from django.db.models.fields import (CharField, DateField, DecimalField, FloatField, IntegerField)
+from django.db.models import Exists, OuterRef
 from django.db.models.functions import Concat
 from django.db.models.signals import post_save
 from django.dispatch import receiver
@@ -116,9 +117,11 @@ class Student(models.Model):
 
         return hist
 
-    def remaining_required_courses(self):
+    def remaining_required_courses(self,major=None):
+        if major is None:
+            major = self.major
         hist = self.course_history(passed=True)
-        major_required = self.major.courses_required.all()
+        major_required = major.courses_required.all()
         major_required = major_required.exclude(
             id__in=Subquery(hist.values('section__course__id')))
 
@@ -185,6 +188,11 @@ class Major(models.Model):
                                               blank=True,
                                               symmetrical=False,
                                               related_name="required_by")
+
+    def requirements_met_list(self, student):
+        return self.courses_required.annotate(met=Exists(
+            student.sectionstudent_set.filter(section__course=
+                                              OuterRef('pk'), grade__gt=0.0)))
 
     class Meta:
         ordering = ['abbreviation']

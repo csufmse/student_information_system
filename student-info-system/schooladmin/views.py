@@ -45,6 +45,20 @@ def users(request):
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
+def students(request):
+    queryset = User.annotated().filter(access_role=AccessRoles.STUDENT_ROLE)
+    students_filter = UserFilter(request.GET, queryset=queryset)
+    students_has_filter = any(field in request.GET for field in set(students_filter.get_fields()))
+    students_table = FullUsersTable(list(students_filter.qs))
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(students_table)
+    return render(request, 'schooladmin/students.html', {
+        'students_table': students_table,
+        'students_filter': students_filter,
+        'students_has_filter': students_has_filter,
+    })
+
+
+@role_login_required(AccessRoles.ADMIN_ROLE)
 def user(request, userid):
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:

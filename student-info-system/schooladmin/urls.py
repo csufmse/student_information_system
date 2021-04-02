@@ -10,6 +10,7 @@ urlpatterns = [
     path('user/<int:userid>/edit', views.user_edit, name='user_edit'),
     path('user/<int:userid>', views.user, name='user'),
     path('user_new', views.user_new, name='user_new'),
+    path('students', views.students, name='students'),
     path('majors', views.majors, name='majors'),
     path('major/<str:abbreviation>/edit', views.major_edit, name='major_edit'),
     path('major/<str:abbreviation>', views.major, name='major'),
