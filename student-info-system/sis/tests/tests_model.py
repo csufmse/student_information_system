@@ -247,6 +247,127 @@ class ProfessorTestCase(TestCase):
         self.assertEqual(professor.name, "First Last")
 
 
+class Professor_teaching_test(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        super(Professor_teaching_test, cls).setUpTestData()
+        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+
+        Professor_teaching_test.professor = createProfessor(major, "test")
+
+        Professor_teaching_test.course = Course.objects.create(major=major,
+                                                               catalog_number='101',
+                                                               title="Intro To Test",
+                                                               credits_earned=3.0)
+
+        Professor_teaching_test.semester = Semester.objects.create(
+            date_registration_opens=datetime.now(),
+            date_started=datetime.now(),
+            date_last_drop=datetime.now(),
+            date_ended=datetime.now(),
+            semester='FA',
+            year=2000)
+
+    def test_no_teaching(self):
+        self.assertEqual(Professor_teaching_test.professor.semesters_teaching().count(), 0)
+
+    def test_teaching(self):
+        s = Section.objects.create(course=Professor_teaching_test.course,
+                                   professor=Professor_teaching_test.professor,
+                                   semester=Professor_teaching_test.semester,
+                                   number=1,
+                                   hours="MW 1200-1400")
+        teaching_sems = Professor_teaching_test.professor.semesters_teaching()
+        self.assertEqual(teaching_sems.count(), 1)
+        self.assertEqual(str(teaching_sems[0]), "FA-2000")
+        s.delete()
+
+
+class CourseTestCase_Basic(TestCase):
+
+    def setUp(self):
+        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        Course.objects.create(major=major,
+                              catalog_number='101',
+                              title="Intro To Test",
+                              credits_earned=3.0)
+
+    def test_course_major_name(self):
+        course = Course.objects.get(title="Intro To Test")
+        self.assertEqual(course.major_name, "Computer Science")
+
+    def test_course_name(self):
+        course = Course.objects.get(title="Intro To Test")
+        self.assertEqual(course.name, "CPSC-101")
+
+
+def createCourse(major, num):
+    return Course.objects.create(major=major,
+                                 catalog_number=num,
+                                 title='c' + num,
+                                 credits_earned=1.0)
+
+
+class CourseTestCase_deps(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        CourseTestCase_deps.major = m
+
+        CourseTestCase_deps.courses = {}
+        for i in range(1, 15):
+            CourseTestCase_deps.courses[i] = createCourse(m, str(i))
+
+    def test_none(self):
+        cs = CourseTestCase_deps.courses
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid(), True)
+
+    def test_valid_candidate(self):
+        cs = CourseTestCase_deps.courses
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2]]), True)
+
+    def test_candidate_loop(self):
+        cs = CourseTestCase_deps.courses
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[1]]), False)
+
+    def test_candidate_chain(self):
+        cs = CourseTestCase_deps.courses
+        cp = CoursePrerequisite.objects.create(course=cs[2], prerequisite=cs[3])
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2]]), True)
+        cp.delete()
+
+    def test_candidate_loop(self):
+        cs = CourseTestCase_deps.courses
+        cp1 = CoursePrerequisite.objects.create(course=cs[2], prerequisite=cs[3])
+        cp2 = CoursePrerequisite.objects.create(course=cs[3], prerequisite=cs[1])
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2]]), False)
+        cp1.delete()
+        cp2.delete()
+
+    def test_double_dep(self):
+        cs = CourseTestCase_deps.courses
+        cp1 = CoursePrerequisite.objects.create(course=cs[2], prerequisite=cs[3])
+        cp2 = CoursePrerequisite.objects.create(course=cs[5], prerequisite=cs[3])
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2], cs[5]]), True)
+        cp1.delete()
+        cp2.delete()
+
+    def test_offset(self):
+        cs = CourseTestCase_deps.courses
+
+        def cp(c, p):
+            return CoursePrerequisite.objects.create(course=cs[c], prerequisite=cs[p])
+
+        cp(1, 11)
+        cp(11, 5)
+        cp(1, 5)
+        cp(5, 6)
+        cp(6, 7)
+        self.assertEqual(cs[1].are_candidate_prerequisites_valid(), True)
+
+
 class SectionTestCase(TestCase):
 
     @classmethod

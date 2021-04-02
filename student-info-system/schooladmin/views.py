@@ -18,8 +18,9 @@ from .filters import (CourseFilter, MajorFilter, SectionFilter, SemesterFilter, 
 from .forms import (CourseCreationForm, CourseEditForm, CustomUserCreationForm, MajorCreationForm,
                     MajorEditForm, SectionCreationForm, SectionEditForm, SemesterCreationForm,
                     UserEditForm, SemesterEditForm)
-from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable, SectionStudentsTable,
-                     SemestersTable, FullUsersTable)
+from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable,
+                     SemestersTable, FullUsersTable, StudentHistoryTable, StudentInMajorTable,
+                     StudentInSectionTable, SemestersSummaryTable, SectionForClassTable)
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -77,28 +78,91 @@ def user(request, userid):
                              f'User {the_user.get_full_name()} has been enabled for login.')
         return redirect('schooladmin:users')
 
+    if the_user.access_role() == AccessRoles.STUDENT_ROLE:
+        return student(request, userid)
+    elif the_user.access_role() == AccessRoles.PROFESSOR_ROLE:
+        return professor(request, userid)
+
     formdata = {
         'user': the_user,
     }
-    if the_user.access_role() == AccessRoles.STUDENT_ROLE:
-        semester_table = SemestersTable(the_user.student.semesters.all())
-        RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(semester_table)
-
-        history_table = SectionStudentsTable(the_user.student.course_history())
-        RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(history_table)
-
-        remaining_required_table = CoursesTable(the_user.student.remaining_required_courses())
-        RequestConfig(request, paginate={
-            "per_page": 25,
-            "page": 1
-        }).configure(remaining_required_table)
-
-        formdata['semesters'] = semester_table
-        formdata['course_history'] = history_table
-        formdata['remaining_required'] = remaining_required_table
-        pass
 
     return render(request, 'schooladmin/user.html', formdata)
+
+
+@role_login_required(AccessRoles.ADMIN_ROLE)
+def student(request, userid):
+    qs = User.objects.filter(id=userid)
+    if qs.count() < 1:
+        return HttpResponse("No such user")
+    the_user = qs.get()
+
+    if the_user.access_role() != AccessRoles.STUDENT_ROLE:
+        return user(request, userid)
+
+    if request.method == 'POST':
+        if request.POST.get('disbutton'):
+            the_user.is_active = False
+            the_user.save()
+        elif request.POST.get('enabutton'):
+            the_user.is_active = True
+            the_user.save()
+        return redirect('schooladmin:users')
+
+    formdata = {
+        'user': the_user,
+    }
+    semester_table = SemestersSummaryTable(the_user.student.semesters.all())
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(semester_table)
+
+    history_table = StudentHistoryTable(the_user.student.course_history())
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(history_table)
+
+    remaining_required_table = CoursesTable(the_user.student.remaining_required_courses())
+    RequestConfig(request, paginate={
+        "per_page": 25,
+        "page": 1
+    }).configure(remaining_required_table)
+
+    formdata['semesters'] = semester_table
+    formdata['course_history'] = history_table
+    formdata['remaining_required'] = remaining_required_table
+
+    return render(request, 'schooladmin/student.html', formdata)
+
+
+@role_login_required(AccessRoles.ADMIN_ROLE)
+def professor(request, userid):
+    qs = User.objects.filter(id=userid)
+    if qs.count() < 1:
+        return HttpResponse("No such user")
+    the_user = qs.get()
+
+    if the_user.access_role() != AccessRoles.PROFESSOR_ROLE:
+        return user(request, userid)
+
+    if request.method == 'POST':
+        if request.POST.get('disbutton'):
+            the_user.is_active = False
+            the_user.save()
+        elif request.POST.get('enabutton'):
+            the_user.is_active = True
+            the_user.save()
+        return redirect('schooladmin:users')
+
+    semester_table = SemestersSummaryTable(the_user.professor.semesters_teaching().all())
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(semester_table)
+
+    sections_table = SectionsTable(the_user.professor.section_set.all())
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
+
+    formdata = {
+        'user': the_user,
+        'semesters': semester_table,
+        'sections': sections_table,
+    }
+
+    return render(request, 'schooladmin/professor.html', formdata)
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -263,11 +327,16 @@ def major(request, abbreviation):
     course_table = CoursesTable(cqueryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(course_table)
 
+    student_qs = User.objects.filter(student__major=the_major)
+    student_table = StudentInMajorTable(list(student_qs))
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(student_table)
+
     return render(request, 'schooladmin/major.html', {
         'major': the_major,
         'profs': prof_table,
         'required': required_table,
         'courses': course_table,
+        'students': student_table,
     })
 
 
@@ -340,7 +409,7 @@ def course(request, courseid):
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(ntable)
 
     squeryset = Section.objects.filter(course=the_course)
-    stable = SectionsTable(squeryset)
+    stable = SectionForClassTable(squeryset)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(stable)
 
     return render(request, 'schooladmin/course.html', {
@@ -500,7 +569,7 @@ def section(request, sectionid):
     the_section = qs.get()
 
     student_qs = SectionStudent.objects.filter(section=the_section)
-    student_table = SectionStudentsTable(list(student_qs))
+    student_table = StudentInSectionTable(list(student_qs))
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(student_table)
 
     return render(request, 'schooladmin/section.html', {
