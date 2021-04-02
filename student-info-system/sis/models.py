@@ -306,6 +306,15 @@ class Semester(models.Model):
     WINTER = 'WI'
     SEASONS = ((FALL, 'Fall'), (SPRING, 'Spring'), (SUMMER, 'Summer'), (WINTER, 'Winter'))
 
+    # convert Season code to name
+    @classmethod
+    def season_name(cls, abbrev):
+        sname = [seas[1] for seas in Semester.SEASONS if seas[0] == abbrev]
+        if len(sname):
+            return sname[0]
+        else:
+            return ''
+
     semester = models.CharField('semester', choices=SEASONS, default=FALL, max_length=6)
     year = models.IntegerField('year',
                                default=2000,
@@ -320,6 +329,10 @@ class Semester(models.Model):
     class Meta:
         unique_together = (('semester', 'year'),)
         ordering = ['date_registration_opens']
+
+    @property
+    def session_name(self):
+        return Semester.season_name(self.semester)
 
     def professors_teaching(self):
         return User.objects.filter(professor__section__semester=self.id)

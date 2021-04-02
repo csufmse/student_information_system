@@ -98,10 +98,8 @@ def user_change_password(request, userid):
         if form.is_valid():
             form.save()
             messages.success(
-                request,
-                f'Password for "{the_user.username}" {the_user.get_full_name()} ' +
-                'was successfully updated.'
-            )
+                request, f'Password for "{the_user.username}" {the_user.get_full_name()} ' +
+                'was successfully updated.')
             return redirect('schooladmin:user', userid)
         else:
             messages.error(request, 'Please correct the error(s) below.')

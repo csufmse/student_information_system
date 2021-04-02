@@ -346,3 +346,15 @@ class ClassLevel_tests(TestCase):
 
     def test_senior(self):
         self.assertEqual(ClassLevel.level(98), ClassLevel.SENIOR)
+
+
+class Semester_tests(TestCase):
+
+    def test_names(self):
+        self.assertEqual(Semester.season_name('FA'), 'Fall')
+        self.assertEqual(Semester.season_name('SP'), 'Spring')
+        self.assertEqual(Semester.season_name('SU'), 'Summer')
+        self.assertEqual(Semester.season_name('WI'), 'Winter')
+
+    def test_bad_name(self):
+        self.assertEqual(Semester.season_name('xx'), '')
