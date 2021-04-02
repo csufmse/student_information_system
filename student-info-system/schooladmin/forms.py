@@ -193,7 +193,6 @@ class SectionCreationForm(forms.ModelForm):
     course = forms.ModelChoiceField(queryset=Course.objects.all())
     course.widget.attrs.update({'class': 'course_sel selectpicker'})
 
-    number = forms.CharField(widget=forms.HiddenInput(), required=False)
     hours = forms.CharField(max_length=100)
 
     professor = forms.ModelChoiceField(queryset=Professor.objects.all())
@@ -204,7 +203,7 @@ class SectionCreationForm(forms.ModelForm):
 
     class Meta:
         model = Section
-        fields = ('semester', 'course', 'number', 'hours', 'professor', 'capacity', 'status')
+        fields = ('semester', 'course', 'hours', 'professor', 'capacity', 'status')
 
 
 class SectionEditForm(forms.ModelForm):
