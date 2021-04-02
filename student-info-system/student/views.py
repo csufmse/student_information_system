@@ -1,8 +1,10 @@
+from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.http import HttpResponse
 from datetime import date
 from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Semester, SectionStudent, AccessRoles, SemesterStudent)
+from schooladmin.filters import SectionFilter
 
 
 @role_login_required(AccessRoles.STUDENT_ROLE)
@@ -21,6 +23,7 @@ def current_schedule_view(request):
 
 @role_login_required(AccessRoles.STUDENT_ROLE)
 def registration_view(request):
+    has_filter = None
     student = request.user.student
     # If the student has to register for semesters first, do this:
     # semester_list = student.semesters.order_by('-date_started')
@@ -37,46 +40,53 @@ def registration_view(request):
         if qs.count() == 1:
             the_sem = qs.get()
             context['semester'] = the_sem.id
-
-            the_sections = the_sem.section_set.all()
-            context['sections'] = the_sections
-            context['any_sections'] = the_sections.count() != 0
+            the_sections = the_sem.section_set.exclude(students=student)
+            filt = SectionFilter(request.GET, queryset=the_sections)
+            has_filter = any(field in request.GET for field in set(filt.get_fields()))
+            context['sections'] = filt.qs
+            context['any_sections'] = filt.qs.count() != 0
 
             if request.POST.get('register') is not None:
                 any_selected = False
 
-                for s in the_sections:
+                for sect in filt.qs:
                     # indicate student is attending this semester...
-                    sem = SemesterStudent.objects.filter(student=student, semester=s.semester)
+                    sem = SemesterStudent.objects.filter(student=student, semester=sect.semester)
                     if sem.count() < 1:
-                        SemesterStudent.objects.create(student=student, semester=s.semester)
+                        SemesterStudent.objects.create(student=student, semester=sect.semester)
 
-                    course_val = request.POST.get(str(s.course.id))
-                    if course_val is not None and int(course_val) == s.id:
+                    course_val = request.POST.get(str(sect.course.id))
+                    if course_val is not None and int(course_val) == sect.id:
                         status = SectionStudent.REGISTERED
-                        if s.seats_remaining < 1:
-                            status = SectionStudent.WAITLISTED
-                        ss = SectionStudent(section=s, student=student, status=status)
-                        ss.save()
-                        any_selected = True
-                        s.is_selected = True
+                        if sect.seats_remaining < 1:
+                             status = SectionStudent.WAITLISTED
+                        sectstud = SectionStudent(section=sect, student=student, status=status)
+                        sectstud.save()
+                        #any_selected = True
+                        sect.is_selected = True
+                        context['registration_success'] = True
 
             # did we complete a registration?
-            if any_selected:
-                return redirect('student:current_schedule')
+            #if any_selected:
+                #return redirect('student:registration')
 
     else:
         the_sem = semester_list[0]
         context['semester'] = the_sem.id
-        the_sections = the_sem.section_set.all()
-        context['sections'] = the_sections
+        the_sections = the_sem.section_set.exclude(students=student)
+        filt = SectionFilter(request.GET, queryset=the_sections)
+        has_filter = any(field in request.GET for field in set(filt.get_fields()))
+        context['sections'] = filt.qs
         context['any_sections'] = the_sections.count() != 0
 
+    if has_filter is not None:
+        context['has_filter'] = has_filter
+        context['filter'] = filt
     # signal template that this entry is a different course from last section
     last_course = None
-    for s in context['sections']:
-        s.new_course = s.course != last_course
-        if s.new_course:
-            last_course = s.course
+    for sect in context['sections']:
+        sect.new_course = sect.course != last_course
+        if sect.new_course:
+            last_course = sect.course
 
     return render(request, 'student/registration.html', context)
