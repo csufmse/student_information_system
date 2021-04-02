@@ -7,7 +7,7 @@ from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Sec
                         SectionStudent, Semester, SemesterStudent, Student, TranscriptRequest,
                         UpperField)
 
-from sis.tests.tests_model import (createAdmin, createStudent, createProfessor, createCourse)
+from sis.tests.utils import (createAdmin, createStudent, createProfessor, createCourse)
 
 
 class AdminCoursesViewsTest(TestCase):
