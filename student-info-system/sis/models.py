@@ -117,7 +117,7 @@ class Student(models.Model):
 
         return hist
 
-    def remaining_required_courses(self,major=None):
+    def remaining_required_courses(self, major=None):
         if major is None:
             major = self.major
         hist = self.course_history(passed=True)
@@ -195,8 +195,7 @@ class Major(models.Model):
 
     def requirements_met_list(self, student):
         return self.courses_required.annotate(met=Exists(
-            student.sectionstudent_set.filter(section__course=
-                                              OuterRef('pk'), grade__gt=0.0)))
+            student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)))
 
     class Meta:
         ordering = ['abbreviation']

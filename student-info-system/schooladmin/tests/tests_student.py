@@ -9,6 +9,7 @@ from sis.models import (Student, Course, CoursePrerequisite, Major, Professor, S
 
 from sis.tests.utils import createAdmin
 
+
 class StudentUserViews(TestCase):
 
     @classmethod
@@ -28,4 +29,3 @@ class StudentUserViews(TestCase):
     #     login = self.client.login(username='frodo', password='frodo1')
     #     response = self.client.get('/schooladmin/student/1')
     #     self.assertEqual(response.status_code, 200)
-
