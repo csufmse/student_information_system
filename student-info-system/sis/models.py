@@ -172,6 +172,10 @@ class Professor(models.Model):
     def __str__(self):
         return self.name
 
+    def semesters_teaching(self):
+        return Semester.objects.filter(
+            section__semester__in=Subquery(self.section_set.values('semester__id'))).distinct()
+
 
 class Major(models.Model):
     abbreviation = UpperField('Abbreviation', max_length=6, primary_key=True)
