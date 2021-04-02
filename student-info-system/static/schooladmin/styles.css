@@ -132,4 +132,48 @@
     overflow:auto;
 }
 
+/* This is the message at the top */
+.success {
+    border-radius: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #04d709;
+  color: black;
+    padding: 22px 10px;
+}
+.error {
+    border-radius: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #ff5454;
+  color: white;
+    padding: 22px 10px;
+}
+.warning {
+    border-radius: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #eeff54;
+  color: black;
+    padding: 22px 10px;
+}
+/* this is the field validation error */
+.errorlist {
+    border-radius: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: #ff5454;
+  color: white;
+    padding: 22px 8px;
+}
+/* this is the input help text */
+.helptext {
+    padding: 22px 5px;
+    font-size: large;
+    font-style: italic;
+    font-weight: bold;
+}
+input {
+    font-size: large;
+}
 
+.editform form table {
+    border-spacing: 5px 1rem;
+    border-collapse: separate;
+}

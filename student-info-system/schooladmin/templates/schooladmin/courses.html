@@ -24,6 +24,9 @@
 
 </div>
 </div>
+{% endblock content %}
+
+{% block late_scripts %}
 <script>
 const handler = insertScrollableDivs(applyHandlers=true);
 handler();
@@ -31,4 +34,4 @@ stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'courses'});
 stylizeRange({field:'credits_earned',name:'Cred',prefix:'courses'});
 addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
 </script>
-{% endblock content %}
+{% endblock %}
