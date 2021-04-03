@@ -377,10 +377,10 @@ class Semester(models.Model):
         return Semester.name_for_session(self.semester)
 
     def professors_teaching(self):
-        return User.annotated().filter(professor__section__semester=self.id)
+        return User.annotated().filter(professor__section__semester=self.id).distinct()
 
     def students_attending(self):
-        return User.annotated().filter(student__semesterstudent__semester=self.id)
+        return User.annotated().filter(student__semesterstudent__semester=self.id).distinct()
 
     @property
     def name(self):
