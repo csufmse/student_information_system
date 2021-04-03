@@ -17,30 +17,52 @@
   <dd>{{ course.credits_earned }}</dd>
 </dl>
 
-    <div id="Prereqs" class="data-table ">
-        <h3>Has Prerequisites:</h3>
-    {% render_table prereqs 'django_tables2/bootstrap.html' %}
-    </div>
-
-        <h3>Is Prerequisite For:</h3>
-    <div id="IsPrereq" class="data-table ">
-        {% render_table needed_by 'django_tables2/bootstrap.html' %}
-    </div>
-
-        <h3>Sections:</h3>
-    <div id="Sections">
-        {% if filter %}
-            <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
-            {% bootstrap_form filter.form layout='inline' %}
-            <button class="btn btn-primary">Filter</button>
-            {% if has_filter %}
-              <a  class="btn btn-success" href="{%  url 'schooladmin:sections' %}">Clear</a>
-            {% endif %}
+    <h3>Has Prerequisites:</h3>
+    <div id="Prereqs">
+        {% if prereqs_filter %}
+            <form id="prereqs_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form prereqs_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if prereqs_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:course' courseid=course.id %}">Clear</a>
+                {% endif %}
             </form>
         {% endif %}
-    <div class="data-table-alt">
-        {% render_table sections 'django_tables2/bootstrap.html' %}
+        <div class="data-table-alt">
+            {% render_table prereqs_table 'django_tables2/bootstrap.html' %}
+        </div>
     </div>
+
+    <h3>Is Prerequisite For:</h3>
+    <div id="IsPrereqFor">
+        {% if neededby_filter %}
+            <form id="neededby_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form neededby_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if neededby_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:course' courseid=course.id %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table neededby_table 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+
+    <h3>Sections:</h3>
+    <div id="Sections">
+        {% if sections_filter %}
+            <form id="sections_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form sections_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if sections_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:sections' %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table sections_table 'django_tables2/bootstrap.html' %}
+        </div>
     </div>
 
     <input

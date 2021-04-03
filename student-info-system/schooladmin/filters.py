@@ -4,12 +4,15 @@ from django.db.models.functions import Concat
 from django_filters import (CharFilter, ChoiceFilter, FilterSet, ModelChoiceFilter, RangeFilter)
 
 from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
-                        Student, AccessRoles)
+                        Student, AccessRoles, SectionStudent)
 
 
 class UserFilter(FilterSet):
     username = CharFilter(lookup_expr='icontains')
-    name = CharFilter(field_name='name', label='Name', lookup_expr='icontains')
+    name = CharFilter(field_name='name',
+                      label='Name',
+                      method='filter_has_name',
+                      lookup_expr='icontains')
     access_role = ChoiceFilter(field_name='access_role',
                                label='Access Role',
                                choices=AccessRoles.ROLES)
@@ -24,8 +27,13 @@ class UserFilter(FilterSet):
         return queryset.filter(
             Q(professor__major__abbreviation=value) | Q(student__major__abbreviation=value))
 
+    def filter_has_name(self, queryset, name, value):
+        return queryset.annotate(fullname=Concat('first_name', Value(' '), 'last_name')).filter(
+            fullname__icontains=value).distinct()
+
     is_active = ChoiceFilter(label='Enabled?', choices=((True, 'Enabled'), (False, 'Disabled')))
 
+    # TODO - implement (BJM)
     # class_level = ChoiceFilter(field_name='student__class_level',
     #                            label='Class Level',
     #                            choices=Student.CLASSLEVELS,
@@ -51,6 +59,45 @@ class UserFilter(FilterSet):
         super(UserFilter, self).__init__(*args, **kwargs)
         self.filters['is_active'].extra.update({'empty_label': 'Enabled/Disabled'})
         self.filters['access_role'].extra.update({'empty_label': 'Any Role'})
+        self.filters['major'].extra.update({'empty_label': 'Any Major/Dept'})
+
+
+class StudentFilter(FilterSet):
+    username = CharFilter(lookup_expr='icontains')
+    name = CharFilter(field_name='name',
+                      label='Name',
+                      method='filter_has_name',
+                      lookup_expr='icontains')
+    major = ModelChoiceFilter(
+        queryset=Major.objects.order_by('abbreviation'),
+        # provided because it needs one. Will be ignoring this.
+        field_name='name',
+        method='filter_has_major',
+        label='Major')
+
+    def filter_has_major(self, queryset, name, value):
+        return queryset.filter(
+            Q(professor__major__abbreviation=value) | Q(student__major__abbreviation=value))
+
+    def filter_has_name(self, queryset, name, value):
+        return queryset.annotate(fullname=Concat('first_name', Value(' '), 'last_name')).filter(
+            fullname__icontains=value).distinct()
+
+    is_active = ChoiceFilter(label='Enabled?', choices=((True, 'Enabled'), (False, 'Disabled')))
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'name',
+            'major',
+            # 'gpa', 'class_level',
+            'is_active'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super(StudentFilter, self).__init__(*args, **kwargs)
+        self.filters['is_active'].extra.update({'empty_label': 'Enabled/Disabled'})
         self.filters['major'].extra.update({'empty_label': 'Any Major/Dept'})
 
 
@@ -94,6 +141,10 @@ class MajorFilter(FilterSet):
     class Meta:
         model = Major
         fields = ['abbreviation', 'name', 'description', 'professors', 'requires']
+
+        def __init__(self, *args, **kwargs):
+            super(MajorFilter, self).__init__(*args, **kwargs)
+            self.filters['abbreviation'].extra.update({'empty_label': 'Any Major/Department...'})
 
 
 class CourseFilter(FilterSet):
@@ -152,9 +203,13 @@ class CourseFilter(FilterSet):
             'credits_earned'
         ]
 
+    def __init__(self, *args, **kwargs):
+        super(CourseFilter, self).__init__(*args, **kwargs)
+        self.filters['major'].extra.update({'empty_label': 'Major...'})
+
 
 class SemesterFilter(FilterSet):
-    semester = ChoiceFilter(label="Session", choices=Semester.SEASONS, field_name='semester')
+    semester = ChoiceFilter(label="Session", choices=Semester.SESSIONS, field_name='semester')
     year = RangeFilter(field_name='year')
 
     class Meta:
@@ -207,3 +262,32 @@ class SectionFilter(FilterSet):
     class Meta:
         model = Section
         fields = ['semester', 'course_descr', 'professor', 'hours', 'status']
+
+
+class SectionStudentFilter(FilterSet):
+    semester = CharFilter(Semester.objects, label='Semester', method='filter_semester')
+
+    def filter_semester(self, queryset, name, value):
+        return queryset.annotate(slug=Concat('section__semester__semester',
+                                             Value('-'),
+                                             'section__semester__year',
+                                             output_field=CharField())).filter(
+                                                 slug__icontains=value)
+
+    sec_status = ChoiceFilter(choices=Section.STATUSES,
+                              field_name='section__status',
+                              label="Section Status")
+    student_status = ChoiceFilter(choices=SectionStudent.STATUSES,
+                                  field_name='status',
+                                  label="Student Status")
+    grade = ChoiceFilter(choices=SectionStudent.GRADES, field_name='grade', label="Grade")
+
+    def __init__(self, *args, **kwargs):
+        super(SectionStudentFilter, self).__init__(*args, **kwargs)
+        self.filters['sec_status'].extra.update({'empty_label': 'Any Section Status'})
+        self.filters['student_status'].extra.update({'empty_label': 'Any Student Status'})
+        self.filters['grade'].extra.update({'empty_label': 'Any Grade'})
+
+    class Meta:
+        model = SectionStudent
+        fields = ['semester', 'sec_status', 'student_status', 'grade']

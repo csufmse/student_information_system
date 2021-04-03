@@ -7,9 +7,8 @@ sys.path.append(".")  # noqa
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  # noqa
 django.setup()  # noqa
 
-from sis.models import Major
-
-to_generate = 50
+from sis.models import Major, Semester
+from django.db import connection
 
 specs = (
     ('GA', 'General Agriculture', 'Agriculture & Natural Resources'),
@@ -22,7 +21,7 @@ specs = (
     ('MA', 'Miscellaneous Agriculture', 'Agriculture & Natural Resources'),
     ('FORE', 'Forestry', 'Agriculture & Natural Resources'),
     ('NRM', 'Natural Resources Management', 'Agriculture & Natural Resources'),
-    ('FA', 'Fine Arts', 'Arts'),
+    (Semester.FALL, 'Fine Arts', 'Arts'),
     ('DATA', 'Drama And Theater Arts', 'Arts'),
     ('MUSI', 'Music', 'Arts'),
     ('VAPA', 'Visual And Performing Arts', 'Arts'),
@@ -190,17 +189,30 @@ specs = (
     ('MSS', 'Miscellaneous Social Sciences', 'Social Science'),
 )
 
-error_count = 0
 
-for (a, t, d) in specs[:to_generate]:
-    m = Major(abbreviation=a, name=t, description=d)
-    try:
-        m.save()
-    except Exception:
-        print(f'ERROR: Unable to save major {a} {t}')
-        error_count = error_count + 1
-    else:
-        print(f'create major {a} {t} {d}')
+def createData():
+    to_generate = 50
 
-if error_count:
-    print(f'ERROR: {error_count} errors occurred')
+    error_count = 0
+
+    for (a, t, d) in specs[:to_generate]:
+        m = Major(abbreviation=a, name=t, description=d)
+        try:
+            m.save()
+        except Exception:
+            print(f'ERROR: Unable to save major {a} {t}')
+            error_count = error_count + 1
+        else:
+            print(f'create major {a} {t} {d}')
+
+    if error_count:
+        print(f'ERROR: {error_count} errors occurred')
+
+
+def cleanData():
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM sis_major")
+
+
+if __name__ == "__main__":
+    createData()
