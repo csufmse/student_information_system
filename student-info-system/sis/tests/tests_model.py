@@ -279,6 +279,7 @@ class Professor_teaching_test(TestCase):
         s = Section.objects.create(course=Professor_teaching_test.course,
                                    professor=Professor_teaching_test.professor,
                                    semester=Professor_teaching_test.semester,
+                                   location="somewhere",
                                    number=1,
                                    hours="MW 1200-1400")
         teaching_sems = Professor_teaching_test.professor.semesters_teaching()
@@ -393,6 +394,7 @@ class SectionTestCase(TestCase):
         Section.objects.create(course=course,
                                professor=professor,
                                semester=semester,
+                               location="x",
                                number=1,
                                hours="MW 1200-1400")
 

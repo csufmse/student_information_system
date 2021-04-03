@@ -95,6 +95,7 @@ def createData():
                     semester=sem,
                     number=n,
                     capacity=cap,
+                    location='somewhere',
                     hours=d + h,
                     status=stat)
         try:

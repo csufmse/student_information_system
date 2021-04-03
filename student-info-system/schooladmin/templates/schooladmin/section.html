@@ -18,6 +18,8 @@
     <dd><a href="{% url 'schooladmin:user' userid=section.professor.user.id %}">{{ section.professor }}</a></dd>
   <dt>Hours</dt>
   <dd>{{ section.hours }}</dd>
+  <dt>Location</dt>
+  <dd>{{ section.location }}</dd>
   <dt>Capacity</dt>
   <dd>{{ section.capacity }} ({{ section.seats_remaining }} remaining)</dd>
   <dt>Status</dt>

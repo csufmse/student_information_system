@@ -9,9 +9,10 @@ class SectionsTable(tables.Table):
     number = tables.Column(attrs={'th': {'class': 'cnncol'}, 'td': {'class': 'cnncell'}})
     hours = tables.Column(attrs={'th': {'class': 'chcol'}, 'td': {'class': 'chcell'}})
     capacity = tables.Column(attrs={'th': {'class': 'cccol'}, 'td': {'class': 'cccell'}})
+    location = tables.Column(attrs={'th': {'class': 'location'}, 'td': {'class': 'location'}})
 
     class Meta:
         model = Section
         template_name = "django_tables2/bootstrap.html"
-        fields = ('semester', 'course', 'number', 'hours', 'capacity')
+        fields = ('semester', 'course', 'number', 'hours', 'capacity', 'location')
         row_attrs = {'class': 'srow', 'data-id': lambda record: record.pk}

@@ -200,6 +200,8 @@ class SectionCreationForm(forms.ModelForm):
 
     hours = forms.CharField(max_length=100)
 
+    location = forms.CharField(max_length=256, widget=forms.Textarea(attrs={'rows': 3}))
+
     professor = forms.ModelChoiceField(queryset=Professor.objects.all())
     professor.widget.attrs.update({'class': 'user_sel selectpicker'})
 
@@ -208,11 +210,13 @@ class SectionCreationForm(forms.ModelForm):
 
     class Meta:
         model = Section
-        fields = ('semester', 'course', 'hours', 'professor', 'capacity', 'status')
+        fields = ('semester', 'course', 'hours', 'professor', 'capacity', 'location', 'status')
 
 
 class SectionEditForm(forms.ModelForm):
     hours = forms.CharField(max_length=100)
+
+    location = forms.CharField(max_length=256, widget=forms.Textarea(attrs={'rows': 3}))
 
     professor = forms.ModelChoiceField(queryset=Professor.objects.none())
     professor.widget.attrs.update({'class': 'user_sel selectpicker'})
@@ -222,7 +226,7 @@ class SectionEditForm(forms.ModelForm):
 
     class Meta:
         model = Section
-        fields = ('hours', 'professor', 'capacity', 'status')
+        fields = ('hours', 'professor', 'capacity', 'location', 'status')
 
     def __init__(self, *args, **kwargs):
         super(SectionEditForm, self).__init__(*args, **kwargs)

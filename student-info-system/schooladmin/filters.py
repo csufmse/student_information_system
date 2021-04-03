@@ -230,6 +230,8 @@ class SectionFilter(FilterSet):
 
     hours = CharFilter(field_name='hours', lookup_expr='icontains')
 
+    location = CharFilter(field_name='location', lookup_expr='icontains')
+
     status = ChoiceFilter(choices=Section.STATUSES, field_name='status')
 
     # seats_remaining = RangeFilter()
@@ -261,7 +263,7 @@ class SectionFilter(FilterSet):
 
     class Meta:
         model = Section
-        fields = ['semester', 'course_descr', 'professor', 'hours', 'status']
+        fields = ['semester', 'course_descr', 'professor', 'hours', 'location', 'status']
 
 
 class SectionStudentFilter(FilterSet):

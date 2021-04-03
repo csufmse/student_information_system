@@ -34,6 +34,7 @@ class ProfessorSectionViewsTest(TestCase):
                                          professor=prof,
                                          semester=semester,
                                          number=1,
+                                         location="somewhere",
                                          hours="MW 1200-1400")
 
     # list views

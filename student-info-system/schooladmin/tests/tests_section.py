@@ -35,6 +35,7 @@ class AdminSectionViewsTest(TestCase):
                                            year=2000)
         section = Section.objects.create(course=course,
                                          professor=professor,
+                                         location="somewhere",
                                          semester=semester,
                                          number=1,
                                          hours="MW 1200-1400")

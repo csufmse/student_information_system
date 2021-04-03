@@ -78,7 +78,7 @@
 
 /* all column headers are centered */
 .active_col, .capac_col, .catnumber_col, .classlevel_col, .course_col, .coursetitle_col,
-.credits_col, .date_col, .gpa_col, .hours_col, .lettergrade_col, .major_col,
+.credits_col, .date_col, .gpa_col, .hours_col, .lettergrade_col, .location_col, .major_col,
 .majordescr_col, .majorname_col, .met_col, .professor_col, .remaining_col, .role_col,
 .sectionstatus_col, .sectionstudentstatus_col, .sem_col, .semester_col, .user_name_col, .username_col {
   text-align: center;
@@ -92,7 +92,7 @@
 .semester_cell, .year_cell {
   text-align: center;
 }
-.coursetitle_cell, .majordescr_cell, .majorname_cell, .prof_cell, .username_cell,
+.coursetitle_cell, .location_cell, .majordescr_cell, .majorname_cell, .prof_cell, .username_cell,
 .user_name_cell {
   text-align: left;
 }

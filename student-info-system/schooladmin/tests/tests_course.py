@@ -39,6 +39,7 @@ class AdminCoursesViewsTest(TestCase):
                                          professor=professor,
                                          semester=semester,
                                          number=1,
+                                         location="somewhere",
                                          hours="MW 1200-1400")
         user_s = User.objects.create(username="stud", first_name="First", last_name="Last")
         self.student = Student.objects.create(user=user_s, major=major)

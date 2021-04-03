@@ -495,6 +495,7 @@ class Section(models.Model):
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
     number = models.IntegerField('Section Number', default=1, validators=[MinValueValidator(1)])
     capacity = models.IntegerField('Capacity', default=0, validators=[MinValueValidator(1)])
+    location = models.CharField('Location', max_length=256)
     hours = models.CharField('Hours', max_length=256)
 
     students = models.ManyToManyField(Student,

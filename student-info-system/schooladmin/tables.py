@@ -258,6 +258,7 @@ class SectionsTable(tables.Table):
     status = ClassyColumn(css_class_base='sectionstatus')
     course_title = ClassyColumn(css_class_base='coursetitle')
     hours = ClassyColumn(css_class_base='hours')
+    location = ClassyColumn(css_class_base='location')
     professor = ClassyColumn(css_class_base='user_name', accessor='professor__name')
     capacity = ClassyColumn(css_class_base='capac')
     seats_remaining = ClassyColumn(css_class_base='remaining')
@@ -265,8 +266,8 @@ class SectionsTable(tables.Table):
     class Meta:
         model = Section
         template_name = "django_tables2/bootstrap.html"
-        fields = ('semester', 'course', 'number', 'status', 'course_title', 'hours', 'professor',
-                  'capacity', 'seats_remaining')
+        fields = ('semester', 'course', 'number', 'status', 'course_title', 'hours', 'location',
+                  'professor', 'capacity', 'seats_remaining')
         row_attrs = {'class': 'section_row', 'data-id': lambda record: record.pk}
         attrs = {"class": 'section_table'}
 
@@ -280,6 +281,7 @@ class SectionForClassTable(tables.Table):
     section = ClassyColumn(css_class_base='section_name', accessor='name')
     status = ClassyColumn(css_class_base='sectionstatus')
     hours = ClassyColumn(css_class_base='hours')
+    location = ClassyColumn(css_class_base='location')
     professor = ClassyColumn(css_class_base='username', accessor='professor__name')
     capacity = ClassyColumn(css_class_base='capac')
     seats_remaining = ClassyColumn(css_class_base='remaining')
@@ -287,7 +289,7 @@ class SectionForClassTable(tables.Table):
     class Meta:
         model = Section
         template_name = "django_tables2/bootstrap.html"
-        fields = ('semester', 'section', 'status', 'hours', 'professor', 'capacity',
+        fields = ('semester', 'section', 'status', 'hours', 'location', 'professor', 'capacity',
                   'seats_remaining')
         row_attrs = {'class': 'section_row', 'data-id': lambda record: record.pk}
         attrs = {"class": 'section_table'}
