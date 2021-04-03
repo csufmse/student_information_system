@@ -28,10 +28,9 @@ def createData():
         start = randint(0, semesters.count() - 1)
         stop = start + randint(1, 12)
         stop = min(stop, len(semesters) - 1)
-        print(
-            f'Student {stud.name} will attend from {semesters[start].session_name}-' +
-            f'{semesters[start].year} '
-            + f'to {semesters[stop].session_name}-{semesters[stop].year}')
+        print(f'Student {stud.name} will attend from {semesters[start].session_name}-' +
+              f'{semesters[start].year} ' +
+              f'to {semesters[stop].session_name}-{semesters[stop].year}')
         for sem in semesters[start:stop]:
             if sem.semester == Semester.SUMMER and random() > prob_of_summer:
                 continue
