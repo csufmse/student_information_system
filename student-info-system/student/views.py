@@ -59,7 +59,7 @@ def registration_view(request):
                     if course_val is not None and int(course_val) == sect.id:
                         status = SectionStudent.REGISTERED
                         if sect.seats_remaining < 1:
-                             status = SectionStudent.WAITLISTED
+                            status = SectionStudent.WAITLISTED
                         sectstud = SectionStudent(section=sect, student=student, status=status)
                         sectstud.save()
                         #any_selected = True
@@ -68,7 +68,7 @@ def registration_view(request):
 
             # did we complete a registration?
             #if any_selected:
-                #return redirect('student:registration')
+            #return redirect('student:registration')
 
     else:
         the_sem = semester_list[0]
