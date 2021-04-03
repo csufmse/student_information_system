@@ -7,9 +7,12 @@ sys.path.append(".")  # noqa
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  # noqa
 django.setup()  # noqa
 
+from django.db import connection
+
 from random import randint
 
-from sis.models import Course, Major
+from sis.models import Course, Major, Semester
+from django.db import connection
 
 to_generate = 150
 
@@ -251,18 +254,28 @@ def randobj(objs):
     return objs.objects.all()[randint(0, objs.objects.count() - 1)]
 
 
-error_count = 0
-for (cn, t, d, cr) in specs[:to_generate]:
-    m = randobj(Major)
-    c = Course(major=m, catalog_number=cn, title=t, description=d, credits_earned=cr)
-    try:
-        c.save()
-    except Exception:
-        error_count = error_count + 1
-        print(f'ERROR: Unable to save {m}-{cn} {t} [m={m},catalog_number={cn}, ' +
-              f'title="{t}", description="{d}", credits_earned={cr}]')
-    else:
-        print(f'create course {m}-{cn} {t}')
+def createData():
+    error_count = 0
+    for (cn, t, d, cr) in specs[:to_generate]:
+        m = randobj(Major)
+        c = Course(major=m, catalog_number=cn, title=t, description=d, credits_earned=cr)
+        try:
+            c.save()
+        except Exception:
+            error_count = error_count + 1
+            print(f'ERROR: Unable to save {m}-{cn} {t} [m={m},catalog_number={cn}, ' +
+                  f'title="{t}", description="{d}", credits_earned={cr}]')
+        else:
+            print(f'create course {m}-{cn} {t}')
 
-if error_count:
-    print(f'ERROR: {error_count} errors occurred')
+    if error_count:
+        print(f'ERROR: {error_count} errors occurred')
+
+
+def cleanData():
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM sis_course")
+
+
+if __name__ == "__main__":
+    createData()

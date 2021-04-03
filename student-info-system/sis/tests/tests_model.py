@@ -32,7 +32,7 @@ class StudentTestCase_Basic(TestCase):
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
             date_ended=datetime.now(),
-            semester='FA',
+            semester=Semester.FALL,
             year=2000)
 
     def test_class_level(self):
@@ -125,7 +125,7 @@ class StudentTestCase_History(TestCase):
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
             date_ended=datetime.now(),
-            semester='FA',
+            semester=Semester.FALL,
             year=2000)
 
         StudentTestCase_History.stud.semesters.add(StudentTestCase_History.semester)
@@ -266,7 +266,7 @@ class Professor_teaching_test(TestCase):
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
             date_ended=datetime.now(),
-            semester='FA',
+            semester=Semester.FALL,
             year=2000)
 
     def test_no_teaching(self):
@@ -384,7 +384,7 @@ class SectionTestCase(TestCase):
                                            date_started=datetime.now(),
                                            date_last_drop=datetime.now(),
                                            date_ended=datetime.now(),
-                                           semester='FA',
+                                           semester=Semester.FALL,
                                            year=2000)
         Section.objects.create(course=course,
                                professor=professor,
@@ -447,6 +447,58 @@ class MajorTestCase(TestCase):
         self.assertEqual(m.courses_required.all()[1].catalog_number, '350')
         self.assertEqual(m.courses_required.all()[2].catalog_number, '400')
 
+    def test_requirements_met_none(self):
+        m1 = MajorTestCase.m1
+        s = createStudent(username='frodo', major=m1)
+        reql = m1.requirements_met_list(s)
+        self.assertEqual(len(reql), 3)
+        for c in reql:
+            self.assertFalse(c.met)
+        s.delete()
+
+    def test_requirements_met_some(self):
+        m1 = MajorTestCase.m1
+        p = createProfessor(major=m1, username='herc')
+        s = createStudent(username='frodo', major=m1)
+
+        sem = Semester.objects.create(date_registration_opens=datetime.now(),
+                                      date_started=datetime.now(),
+                                      date_last_drop=datetime.now(),
+                                      date_ended=datetime.now(),
+                                      semester=Semester.FALL,
+                                      year=2000)
+        sec1 = Section.objects.create(course=MajorTestCase.c1, semester=sem, professor=p)
+
+        sec1stud = SectionStudent.objects.create(section=sec1, student=s, status='REGISTERED')
+
+        # has not completed
+        reql = m1.requirements_met_list(s)
+        self.assertEqual(len(reql), 3)
+        for c in reql:
+            self.assertFalse(c.met)
+
+        # failed
+        sec1stud.status = 'Graded'
+        sec1stud.grade = 0.0
+        sec1stud.save()
+
+        reql = m1.requirements_met_list(s)
+        self.assertEqual(len(reql), 3)
+        for c in reql:
+            self.assertFalse(c.met)
+
+        # passing
+        sec1stud.grade = 3.0
+        sec1stud.save()
+
+        reql = m1.requirements_met_list(s)
+        self.assertEqual(len(reql), 3)
+        for c in reql:
+            if c.met:
+                self.assertEqual(c.catalog_number, '400')
+            else:
+                self.assertNotEqual(c.catalog_number, '400')
+
 
 class ClassLevel_tests(TestCase):
 
@@ -467,3 +519,29 @@ class ClassLevel_tests(TestCase):
 
     def test_senior(self):
         self.assertEqual(ClassLevel.level(98), ClassLevel.SENIOR)
+
+
+class Semester_tests(TestCase):
+
+    def test_names(self):
+        self.assertEqual(Semester.name_for_session(Semester.FALL), 'Fall')
+        self.assertEqual(Semester.name_for_session(Semester.SPRING), 'Spring')
+        self.assertEqual(Semester.name_for_session(Semester.SUMMER), 'Summer')
+        self.assertEqual(Semester.name_for_session(Semester.WINTER), 'Winter')
+
+    def test_bad_name(self):
+        self.assertRaises(Exception, Semester.name_for_session('xx'))
+
+    def test_order_fields(self):
+        s1 = Semester.objects.create(date_registration_opens=datetime.now(),
+                                     date_started=datetime.now(),
+                                     date_last_drop=datetime.now(),
+                                     date_ended=datetime.now(),
+                                     semester=Semester.FALL,
+                                     year=2000)
+        # forcing the fetch here lets the annotation generate the extra attributes
+        s2 = Semester.objects.get(year=2000)
+
+        self.assertEqual(s2.session_name, 'Fall')
+        self.assertEqual(s2.semester_order, '2000-0')
+        self.assertEqual(s2.session_order, 0)

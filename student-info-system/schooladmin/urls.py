@@ -12,6 +12,7 @@ urlpatterns = [
     path('professor/<int:userid>', views.student, name='student'),
     path('student/<int:userid>', views.professor, name='professor'),
     path('user_new', views.user_new, name='user_new'),
+    path('students', views.students, name='students'),
     path('majors', views.majors, name='majors'),
     path('major/<str:abbreviation>/edit', views.major_edit, name='major_edit'),
     path('major/<str:abbreviation>', views.major, name='major'),

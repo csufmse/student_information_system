@@ -7,8 +7,8 @@ sys.path.append(".")  # noqa
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  # noqa
 django.setup()  # noqa
 
-from datetime import timedelta
-from random import randint, random
+from random import choice
+from django.db import connection
 
 from django.contrib.auth.models import User
 
@@ -436,43 +436,47 @@ specs = (
 )
 
 
-def randobj(objs):
-    return objs.objects.all()[randint(0, objs.objects.count() - 1)]
-
-
-error_count = 0
-line = 1
-for (u, f, l, e) in specs[:to_generate]:
-    usr = User(username=u, first_name=f, last_name=l, email=e)
-    if set_pass:
-        usr.set_password(u + '1')
-
-    try:
-        usr.save()
-    except Exception:
-        print(f'ERROR: Unable to create Student(User) {line} {u} ({f} {l})')
-        error_count = error_count + 1
-        continue
-    else:
-        m = randobj(Major)
-        s = Student(user=usr, major=m)
+def createData():
+    error_count = 0
+    line = 1
+    for (u, f, l, e) in specs[:to_generate]:
+        usr = User(username=u, first_name=f, last_name=l, email=e)
+        if set_pass:
+            usr.set_password(u + '1')
 
         try:
-            s.save()
+            usr.save()
         except Exception:
-            print(f'ERROR: Able to save User but not Student ***')
+            print(f'ERROR: Unable to create Student(User) {line} {u} ({f} {l})')
             error_count = error_count + 1
-            usr.delete()
             continue
+        else:
+            m = choice(Major.objects.all())
+            s = Student(user=usr, major=m)
 
-        start = randint(0, Semester.objects.count() - 1)
-        stop = start + randint(1, 12)
-        for sem in Semester.objects.all().order_by("date_started")[start:stop]:
-            sems = SemesterStudent(student=s, semester=sem)
-            sems.save()
+            try:
+                s.save()
+            except Exception:
+                print(f'ERROR: Able to save User but not Student ***')
+                error_count = error_count + 1
+                usr.delete()
+                continue
 
-        print(f'create stud {line} {u} ({f} {l}) {m}')
-    line = line + 1
+            print(f'create stud {line} {u} ({f} {l}) {m}')
+        line = line + 1
 
-if error_count:
-    print(f'ERROR: {error_count} errors occurred')
+    if error_count:
+        print(f'ERROR: {error_count} errors occurred')
+
+
+def cleanData():
+    list = []
+    for ad in Student.objects.all():
+        list.append(str(ad.user_id))
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM sis_student")
+        cursor.execute('DELETE FROM auth_user WHERE id IN (' + (','.join(list)) + ')')
+
+
+if __name__ == "__main__":
+    createData()
