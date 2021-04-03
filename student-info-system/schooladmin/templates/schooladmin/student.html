@@ -5,15 +5,12 @@
 
 {% block content %}
 <dl class="dl-horizontal">
-  <dt>User</dt>
+  <dt>Student</dt>
   <dd>{{ user.name }}</dd>
   <dt>Username</dt>
   <dd>{{ user.username }}</dd>
   <dt>Email</dt>
   <dd>{{ user.email }}</dd>
-  <dt>User Type</dt>
-  <dd>{{ user.access_role }}</dd>
-{%  if user.access_role == 'Student' %}
   <dt>Student Major</dt>
   <dd>{{ user.student.major.abbreviation }}: {{ user.student.major.name }}</dd>
   <dt>Class Level</dt>
@@ -22,15 +19,10 @@
   <dd>{{ user.student.gpa|floatformat:2 }}</dd>
   <dt>Credits Earned</dt>
   <dd>{{ user.student.credits_earned }}</dd>
-{% elif user.access_role == 'Professor' %}
-  <dt>Teaching Department</dt>
-  <dd>{{ user.professor.major.abbreviation }}:{{ user.professor.major.name }}</dd>
-{%  endif %}
   <dt>Enabled?</dt>
   <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
 </dl>
 
-    {%  if user.access_role == 'Student' %}
         <h3>Semesters Attended:</h3>
         <div id="Semesters" class="data-table-alt">
             {% render_table semesters 'django_tables2/bootstrap.html' %}
@@ -45,7 +37,6 @@
         <div id="CourseHistory" class="data-table-alt">
             {% render_table remaining_required 'django_tables2/bootstrap.html' %}
         </div>
-    {% endif %}
   <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
@@ -64,27 +55,26 @@
     <input id="disbutton" name="disbutton"
            class="btn btn-primary"
            action="action"
-        value="Disable User"
+        value="Disable Student"
     />
     {% else %}
     <input id="enabutton" name="enabutton"
         action="action"
            class="btn btn-primary"
-        value="Enable User"
+        value="Enable Student"
    />
    {% endif %}
      <input id="editu"
         action="action"
            class="btn btn-info"
-        value="Edit User"
+        value="Edit Student"
     />
 
   </form>
 <script>
 function confirmit(evt) {
     var btntitle = evt.target.value;
-    var answer = window.confirm("Are you sure you want to "+btntitle+
-                    '\n user "{{ user.username }}" ({{ user.get_full_name }})?');
+    var answer = window.confirm("Are you sure you want to "+btntitle+' \n"{{ user.username }}" ({{ user.get_full_name  }})');
     if (answer) {
         this.form.submit();
         return true;

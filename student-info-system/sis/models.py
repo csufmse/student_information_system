@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Case, ExpressionWrapper, F, Q, Sum, Subquery, Value, When
+from django.db.models import Case, ExpressionWrapper, F, Q, Sum, Max, Subquery, Value, When
 from django.db.models.fields import (CharField, DateField, DecimalField, FloatField, IntegerField)
 from django.db.models.functions import Concat
 from django.db.models.signals import post_save
@@ -172,6 +172,10 @@ class Professor(models.Model):
     def __str__(self):
         return self.name
 
+    def semesters_teaching(self):
+        return Semester.objects.filter(
+            section__semester__in=Subquery(self.section_set.values('semester__id'))).distinct()
+
 
 class Major(models.Model):
     abbreviation = UpperField('Abbreviation', max_length=6, primary_key=True)
@@ -232,7 +236,7 @@ class Course(models.Model):
 
     @property
     def descr(self):
-        return self.name + ':' + self.title
+        return self.name + ': ' + self.title
 
     descr.fget.short_description = 'Course'
 
@@ -274,6 +278,11 @@ class Course(models.Model):
                 loop_seen = True
 
         return not loop_seen
+
+    def max_section_for_semester(self, semester):
+        max_dict = self.section_set.filter(semester=semester).aggregate(Max('number'))
+        max_num = max_dict['number__max']
+        return max_num
 
 
 class CoursePrerequisite(models.Model):

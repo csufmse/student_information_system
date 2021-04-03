@@ -6,17 +6,7 @@ from django.contrib.auth.models import User
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
                         Semester, Student, TranscriptRequest, AccessRoles, ClassLevel)
 
-
-def createStudent(major=None, username=None):
-    user = User.objects.create(username=username, first_name=username[0], last_name=username[1:])
-    stud = Student.objects.create(user=user, major=major)
-    return stud
-
-
-def createProfessor(major=None, username=None):
-    user = User.objects.create(username=username, first_name=username[0], last_name=username[1:])
-    prof = Professor.objects.create(user=user, major=major)
-    return prof
+from sis.tests.utils import (createAdmin, createStudent, createProfessor, createCourse)
 
 
 class StudentTestCase_Basic(TestCase):
@@ -255,6 +245,43 @@ class ProfessorTestCase(TestCase):
         user = User.objects.get(username="prof")
         professor = Professor.objects.create(user=user)
         self.assertEqual(professor.name, "First Last")
+
+
+class Professor_teaching_test(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        super(Professor_teaching_test, cls).setUpTestData()
+        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+
+        Professor_teaching_test.professor = createProfessor(major, "test")
+
+        Professor_teaching_test.course = Course.objects.create(major=major,
+                                                               catalog_number='101',
+                                                               title="Intro To Test",
+                                                               credits_earned=3.0)
+
+        Professor_teaching_test.semester = Semester.objects.create(
+            date_registration_opens=datetime.now(),
+            date_started=datetime.now(),
+            date_last_drop=datetime.now(),
+            date_ended=datetime.now(),
+            semester='FA',
+            year=2000)
+
+    def test_no_teaching(self):
+        self.assertEqual(Professor_teaching_test.professor.semesters_teaching().count(), 0)
+
+    def test_teaching(self):
+        s = Section.objects.create(course=Professor_teaching_test.course,
+                                   professor=Professor_teaching_test.professor,
+                                   semester=Professor_teaching_test.semester,
+                                   number=1,
+                                   hours="MW 1200-1400")
+        teaching_sems = Professor_teaching_test.professor.semesters_teaching()
+        self.assertEqual(teaching_sems.count(), 1)
+        self.assertEqual(str(teaching_sems[0]), "FA-2000")
+        s.delete()
 
 
 class CourseTestCase_Basic(TestCase):
