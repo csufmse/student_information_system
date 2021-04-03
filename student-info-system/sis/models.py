@@ -1,10 +1,10 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Case, ExpressionWrapper, F, Q, Sum, Max, Subquery, Value, When
 from django.db.models.fields import (CharField, DateField, DecimalField, FloatField, IntegerField)
 from django.db.models import Exists, OuterRef
-from django.db.models.functions import Concat
+from django.db.models.functions import Concat, Cast
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from phone_field import PhoneField
@@ -49,6 +49,10 @@ class Admin(models.Model):
     @property
     def name(self):
         return self.user.first_name + ' ' + self.user.last_name
+
+    @property
+    def name_sort(self):
+        return self.user.last_name + ', ' + self.user.first_name
 
     def __str__(self):
         return self.name
@@ -156,6 +160,10 @@ class Student(models.Model):
     def name(self):
         return self.user.first_name + ' ' + self.user.last_name
 
+    @property
+    def name_sort(self):
+        return self.user.last_name + ', ' + self.user.first_name
+
     def __str__(self):
         return self.name
 
@@ -171,6 +179,10 @@ class Professor(models.Model):
     @property
     def name(self):
         return self.user.first_name + ' ' + self.user.last_name
+
+    @property
+    def name_sort(self):
+        return self.user.last_name + ', ' + self.user.first_name
 
     def __str__(self):
         return self.name
@@ -306,50 +318,62 @@ class CoursePrerequisite(models.Model):
         return self.course.name + ' requires ' + self.prerequisite.name
 
 
+class SemesterManager(models.Manager):
+
+    def get_queryset(self):
+        """Overrides the models.Manager method"""
+        qs = super(SemesterManager, self).get_queryset().annotate(
+            session_order=Case(When(Q(semester='FA'), then=0),
+                               When(Q(semester='WI'), then=1),
+                               When(Q(semester='SP'), then=2),
+                               When(Q(semester='SU'), then=3),
+                               default=None,
+                               output_field=IntegerField()),
+            semester_order=Concat(Cast('year', CharField()),
+                                  Value('-'),
+                                  Cast('session_order', CharField()),
+                                  output_field=CharField()),
+        )
+        return qs
+
+
 class Semester(models.Model):
+    objects = SemesterManager()
+
+    FALL = 'FA'
+    WINTER = 'WI'
+    SPRING = 'SP'
+    SUMMER = 'SU'
+    SESSIONS = ((FALL, 'Fall'), (WINTER, 'Winter'), (SPRING, 'Spring'), (SUMMER, 'Summer'))
+    SESSIONS_ORDER = [FALL, WINTER, SPRING, SUMMER]
+
+    # convert Season code to name
+    @classmethod
+    def name_for_session(cls, abbrev):
+        sname = [seas[1] for seas in Semester.SESSIONS if seas[0] == abbrev]
+        if sname is not None and len(sname):
+            return sname[0]
+
     date_registration_opens = models.DateField('Registration Opens')
     date_started = models.DateField('Classes Start')
     date_last_drop = models.DateField('Last Drop')
     date_ended = models.DateField('Classes End')
-    FALL = 'FA'
-    SPRING = 'SP'
-    SUMMER = 'SU'
-    WINTER = 'WI'
-    SEASONS = ((FALL, 'Fall'), (SPRING, 'Spring'), (SUMMER, 'Summer'), (WINTER, 'Winter'))
 
-    # convert Season code to name
-    @classmethod
-    def season_name(cls, abbrev):
-        sname = [seas[1] for seas in Semester.SEASONS if seas[0] == abbrev]
-        if len(sname):
-            return sname[0]
-        else:
-            return ''
-
-    semester = models.CharField('semester', choices=SEASONS, default=FALL, max_length=6)
+    semester = models.CharField('semester', choices=SESSIONS, default=FALL, max_length=6)
     year = models.IntegerField('year',
                                default=2000,
                                validators=[MinValueValidator(1900),
                                            MaxValueValidator(2300)])
 
-    # students = models.ManyToManyField(Student,
-    #                                   through='SemesterStudent',
-    #                                   symmetrical=False,
-    #                                   related_name='semester_students')
-
-    class Meta:
-        unique_together = (('semester', 'year'),)
-        ordering = ['date_registration_opens']
-
     @property
     def session_name(self):
-        return Semester.season_name(self.semester)
+        return Semester.name_for_session(self.semester)
 
     def professors_teaching(self):
-        return User.objects.filter(professor__section__semester=self.id)
+        return User.annotated().filter(professor__section__semester=self.id)
 
     def students_attending(self):
-        return User.objects.filter(student__semesterstudent__semester=self.id)
+        return User.annotated().filter(student__semesterstudent__semester=self.id)
 
     @property
     def name(self):
@@ -357,6 +381,10 @@ class Semester(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        unique_together = (('semester', 'year'),)
+        ordering = ['date_registration_opens']
 
 
 class SemesterStudent(models.Model):
@@ -560,6 +588,11 @@ def name(self):
     return self.first_name + ' ' + self.last_name
 
 
+def student_gpa(self):
+    return self.student.gpa()
+
+
+User.add_to_class('student_gpa', student_gpa)
 User.add_to_class('access_role', access_role)
 User.add_to_class('name', name)
 

@@ -12,7 +12,7 @@
   <dt>Email</dt>
   <dd>{{ user.email }}</dd>
   <dt>Student Major</dt>
-  <dd>{{ user.student.major.abbreviation }}: {{ user.student.major.name }}</dd>
+  <dd><a href="{% url 'schooladmin:major' abbreviation=user.student.major.abbreviation %}">{{ user.student.major.abbreviation }}: {{  user.student.major.name }}</a></dd>
   <dt>Class Level</dt>
   <dd>{{ user.student.class_level }}</dd>
   <dt>GPA</dt>
@@ -69,6 +69,22 @@
         {% endif %}
         <div class="data-table-alt">
             {% render_table remaining_table 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+
+    <h3>Major Required Courses:</h3>
+    <div id="majorCourses">
+        {% if majorcourses_filter %}
+            <form id="majorcourses_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form majorcourses_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if majorcourses_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table majorcourses_table 'django_tables2/bootstrap.html' %}
         </div>
     </div>
 

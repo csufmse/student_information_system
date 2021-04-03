@@ -15,24 +15,33 @@ from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Sec
                         Student, SectionStudent, AccessRoles)
 
 from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFilter,
-                      SemesterFilter, UserFilter)
+                      SemesterFilter, UserFilter, StudentFilter)
 from .forms import (CourseCreationForm, CourseEditForm, CustomUserCreationForm, MajorCreationForm,
                     MajorEditForm, SectionCreationForm, SectionEditForm, SemesterCreationForm,
                     UserEditForm, SemesterEditForm)
 from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable, SemestersTable,
                      FullUsersTable, StudentHistoryTable, StudentInMajorTable,
                      StudentInSectionTable, SemestersSummaryTable, SectionForClassTable,
-                     CoursesForMajorTable)
+                     CoursesForMajorTable, MajorCoursesMetTable, StudentsTable)
 
 
 # helper function to make tables
 # merge the result of this into the response data
-def filtered_table(name=None, qs=None, filter=None, table=None, request=None, page_size=25):
+def filtered_table(name=None,
+                   qs=None,
+                   filter=None,
+                   table=None,
+                   request=None,
+                   page_size=25,
+                   wrap_list=True):
     filt = filter(request.GET, queryset=qs, prefix=name)
     # weird "{name}" thing is because the HTML field has the prefix but the Filter does
     # NOT have it in the field names
     has_filter = any(f'{name}-{field}' in request.GET for field in set(filt.get_fields()))
-    tab = table(list(filt.qs))
+    table_source = filt.qs
+    if wrap_list:
+        table_source = list(table_source)
+    tab = table(table_source, prefix=name + "-")
     RequestConfig(request, paginate={"per_page": page_size, "page": 1}).configure(tab)
     return {name + '_table': tab, name + '_filter': filt, name + '_has_filter': has_filter}
 
@@ -65,8 +74,8 @@ def students(request):
         filtered_table(
             name='students',
             qs=User.annotated().filter(access_role=AccessRoles.STUDENT_ROLE),
-            filter=UserFilter,
-            table=FullUsersTable,
+            filter=StudentFilter,
+            table=StudentsTable,
             request=request,
         ))
 
@@ -131,6 +140,7 @@ def student(request, userid):
             filter=SemesterFilter,
             table=SemestersSummaryTable,
             request=request,
+            wrap_list=False,
         ))
 
     data.update(
@@ -148,6 +158,14 @@ def student(request, userid):
             qs=the_user.student.remaining_required_courses(),
             filter=CourseFilter,
             table=CoursesTable,
+            request=request,
+        ))
+    data.update(
+        filtered_table(
+            name='majorcourses',
+            qs=the_user.student.major.requirements_met_list(the_user.student),
+            filter=CourseFilter,
+            table=MajorCoursesMetTable,
             request=request,
         ))
 
@@ -352,7 +370,7 @@ def major(request, abbreviation):
     data.update(
         filtered_table(
             name='profs',
-            qs=User.objects.filter(professor__major=the_major),
+            qs=User.annotated().filter(professor__major=the_major),
             filter=UserFilter,
             table=UsersTable,
             request=request,
@@ -379,7 +397,7 @@ def major(request, abbreviation):
     data.update(
         filtered_table(
             name='students',
-            qs=User.objects.filter(student__major=the_major),
+            qs=User.annotated().filter(student__major=the_major),
             filter=UserFilter,
             table=StudentInMajorTable,
             request=request,
@@ -555,8 +573,8 @@ def semester(request, semester_id):
         filtered_table(
             name='students',
             qs=the_semester.students_attending(),
-            filter=UserFilter,
-            table=UsersTable,
+            filter=StudentFilter,
+            table=StudentsTable,
             request=request,
         ))
     data.update(
@@ -582,7 +600,7 @@ def semester_edit(request, semester_id):
         form = SemesterEditForm(request.POST, instance=the_semester)
         if form.is_valid():
             the_updated_sem = form.save()
-            messages.success(request, f'Semester {the_update_sem} has been updated.')
+            messages.success(request, f'Semester {the_updated_sem} has been updated.')
             return redirect('schooladmin:semester', semester_id)
         else:
             messages.error(request, 'Please correct the error(s) below.')

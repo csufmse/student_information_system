@@ -62,6 +62,45 @@ class UserFilter(FilterSet):
         self.filters['major'].extra.update({'empty_label': 'Any Major/Dept'})
 
 
+class StudentFilter(FilterSet):
+    username = CharFilter(lookup_expr='icontains')
+    name = CharFilter(field_name='name',
+                      label='Name',
+                      method='filter_has_name',
+                      lookup_expr='icontains')
+    major = ModelChoiceFilter(
+        queryset=Major.objects.order_by('abbreviation'),
+        # provided because it needs one. Will be ignoring this.
+        field_name='name',
+        method='filter_has_major',
+        label='Major')
+
+    def filter_has_major(self, queryset, name, value):
+        return queryset.filter(
+            Q(professor__major__abbreviation=value) | Q(student__major__abbreviation=value))
+
+    def filter_has_name(self, queryset, name, value):
+        return queryset.annotate(fullname=Concat('first_name', Value(' '), 'last_name')).filter(
+            fullname__icontains=value).distinct()
+
+    is_active = ChoiceFilter(label='Enabled?', choices=((True, 'Enabled'), (False, 'Disabled')))
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'name',
+            'major',
+            # 'gpa', 'class_level',
+            'is_active'
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super(StudentFilter, self).__init__(*args, **kwargs)
+        self.filters['is_active'].extra.update({'empty_label': 'Enabled/Disabled'})
+        self.filters['major'].extra.update({'empty_label': 'Any Major/Dept'})
+
+
 # this is useful for the ModelChoice version of professor
 #    def __init__(self, *args, **kwargs):
 #        super(MajorFilter, self).__init__(*args, **kwargs)
@@ -170,7 +209,7 @@ class CourseFilter(FilterSet):
 
 
 class SemesterFilter(FilterSet):
-    semester = ChoiceFilter(label="Session", choices=Semester.SEASONS, field_name='semester')
+    semester = ChoiceFilter(label="Session", choices=Semester.SESSIONS, field_name='semester')
     year = RangeFilter(field_name='year')
 
     class Meta:

@@ -79,15 +79,16 @@
 /* all column headers are centered */
 .active_col, .capac_col, .catnumber_col, .classlevel_col, .course_col, .coursetitle_col,
 .credits_col, .date_col, .gpa_col, .hours_col, .lettergrade_col, .major_col,
-.majordescr_col, .majorname_col, .professor_col, .remaining_col, .role_col, .secnum_col,
-.sectionstatus_col, .sectionstudentstatus, .sem_col, .semester_col, .user_name_col, .username_col {
+.majordescr_col, .majorname_col, .met_col, .professor_col, .remaining_col, .role_col,
+.sectionstatus_col, .sectionstudentstatus_col, .sem_col, .semester_col, .user_name_col, .username_col {
   text-align: center;
 }
 
 /* most (data) cells are centered */
 .active_cell, .capac_cell, .catnumber_cell, .classlevel_cell, .course_cell, .credits_cell,
-.date_cell, .gpa_cell, .hours_cell, .lettergrade_cell, .major_cell, .majorname_cell,
-.prof_cell, .remaining_cell, .role_cell, .secnum_cell, .sectionstatus_cell, .sectionstudentstatus, .sem_cell,
+.date_cell, .gpa_cell, .hours_cell, .lettergrade_cell, .major_cell, .majorname_cell, .met_cell,
+.prof_cell, .remaining_cell, .role_cell, .section_name_cell, .section_number_cell, .sectionstatus_cell,
+.sectionstudentstatus_cell, .sem_cell,
 .semester_cell, .year_cell {
   text-align: center;
 }
@@ -95,13 +96,13 @@
 .user_name_cell {
   text-align: left;
 }
-.active_cell, .catnumber_cell. .credits_cell, .role_cell, .semester_cell, .year_cell {
+.active_cell, .catnumber_cell. .credits_cell, .role_cell, .section_number_cell, .semester_cell, .year_cell {
   width: 80px;
 }
 .classlevel_cell, .date_cell, .gpa_cell, .major_cell {
   width: 110px;
 }
-.course_cell {
+.course_cell, .section_name_cell {
   width: 150px;
 }
 .user_name_cell {
@@ -112,7 +113,7 @@
 }
 
 /* SELECT/PULLDOWNS */
-.role_sel, .course_sel, .major_sel, .role_sel, .season_sel, .semester_sel, .user_sel {
+.role_sel, .course_sel, .major_sel, .role_sel, .session_sel, .semester_sel, .user_sel {
     font-family: Arial, Helvetica, sans-serif;
     data-style: btn_primary;
     width: 180px;

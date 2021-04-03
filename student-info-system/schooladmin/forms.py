@@ -128,8 +128,8 @@ class CourseEditForm(forms.ModelForm):
 
 
 class SemesterCreationForm(forms.ModelForm):
-    semester = forms.ChoiceField(choices=Semester.SEASONS)
-    semester.widget.attrs.update({'class': 'season_sel selectpicker'})
+    semester = forms.ChoiceField(choices=Semester.SESSIONS)
+    semester.widget.attrs.update({'class': 'session_sel selectpicker'})
     year = forms.IntegerField()
     date_registration_opens = forms.DateField()
     date_started = forms.DateField()

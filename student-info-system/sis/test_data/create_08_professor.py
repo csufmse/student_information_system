@@ -7,15 +7,12 @@ sys.path.append(".")  # noqa
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  # noqa
 django.setup()  # noqa
 
-from random import randint, shuffle
+from random import shuffle, choice
 
 from django.contrib.auth.models import User
+from django.db import connection
 
-from sis.models import Major, Professor
-
-to_generate = 75
-
-set_pass = True
+from sis.models import Major, Professor, Semester
 
 specs = (
     ('rexifer', 'Tyrannobarkus', 'Rex', 'rexipoo@x.com'),
@@ -2246,7 +2243,7 @@ specs = (
     ('dcasseas', 'Diego', 'Casseas', 'd.casseas@x.com'),
     ('jshappe', 'Joss', 'Shappe', 'j.shappe@x.com'),
     ('mdelgado', 'Marco', 'Delgado', 'm.delgado@x.com'),
-    ('syin', 'Su', 'Yin', 's.yin@x.com'),
+    ('syin', Semester.SUMMER, 'Yin', 's.yin@x.com'),
     ('mdrakonm', 'Mikal', 'Drakonmegas', 'm.drakonmegas@x.com'),
     ('gterraer', 'Gregory', 'Terraerton', 'g.terraerton@x.com'),
     ('jgirard', 'Jacques', 'Girard', 'j.girard@x.com'),
@@ -8261,48 +8258,62 @@ specs = (
 )
 
 
-def randobj(objs):
-    return objs.objects.all()[randint(0, objs.objects.count() - 1)]
+def createData():
+    to_generate = 75
 
+    set_pass = True
 
-majors = list(Major.objects.all())
-shuffle(majors)
+    majors = list(Major.objects.all())
+    shuffle(majors)
 
-if to_generate < len(majors):
-    print(f'ERROR - fewer professors being generated ({to_generate}) ' +
-          f'than number of majors {len(majors)}. Some majors will not have professors.')
+    if to_generate < len(majors):
+        print(f'ERROR - fewer professors being generated ({to_generate}) ' +
+              f'than number of majors {len(majors)}. Some majors will not have professors.')
 
-error_count = 0
-ix = 0
-for (u, f, l, e) in specs[:to_generate]:
-    usr = User(username=u, first_name=f, last_name=l, email=e)
-    if set_pass:
-        usr.set_password(u + '1')
+    error_count = 0
+    ix = 0
+    for (u, f, l, e) in specs[:to_generate]:
+        usr = User(username=u, first_name=f, last_name=l, email=e)
+        if set_pass:
+            usr.set_password(u + '1')
 
-    try:
-        usr.save()
-    except Exception:
-        print(f'ERROR: Unable to save professor(User) {u} ({f} {l})')
-        error_count = error_count + 1
-        continue
-    else:
-        # ensure that every major has at least one professor
-        if ix < len(majors):
-            m = majors[ix]
-        else:
-            m = majors[randint(0, len(majors) - 1)]
-
-        p = Professor(user=usr, major=m)
         try:
-            p.save()
+            usr.save()
         except Exception:
-            print(f'ERROR: Able to save User but not Professor ***')
+            print(f'ERROR: Unable to save professor(User) {u} ({f} {l})')
             error_count = error_count + 1
-            usr.delete()
             continue
+        else:
+            # ensure that every major has at least one professor
+            if ix < len(majors):
+                m = majors[ix]
+            else:
+                m = choice(majors)
 
-        print(f'create prof {u} ({f} {l}) {m}')
-    ix = ix + 1
+            p = Professor(user=usr, major=m)
+            try:
+                p.save()
+            except Exception:
+                print(f'ERROR: Able to save User but not Professor ***')
+                error_count = error_count + 1
+                usr.delete()
+                continue
 
-if error_count:
-    print(f'ERROR: {error_count} errors occurred')
+            print(f'create prof {u} ({f} {l}) {m}')
+        ix = ix + 1
+
+    if error_count:
+        print(f'ERROR: {error_count} errors occurred')
+
+
+def cleanData():
+    list = []
+    for ad in Professor.objects.all():
+        list.append(str(ad.user_id))
+    with connection.cursor() as cursor:
+        cursor.execute("DELETE FROM sis_professor")
+        cursor.execute('DELETE FROM auth_user WHERE id IN (' + (','.join(list)) + ')')
+
+
+if __name__ == "__main__":
+    createData()
