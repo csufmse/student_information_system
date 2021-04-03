@@ -29,7 +29,7 @@ def registration_view(request):
     # If the student can register for anything open, do this:
     semester_list = Semester.objects.filter(
         date_registration_opens__lte=date.today(),
-        date_ended__gte=date.today()).order_by('-date_started')
+        date_registration_closes__gte=date.today()).order_by('-date_started')
     context = {'student': student, 'semesters': semester_list}
 
     if request.method == 'POST':

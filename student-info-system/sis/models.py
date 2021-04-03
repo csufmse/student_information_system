@@ -355,6 +355,7 @@ class Semester(models.Model):
             return sname[0]
 
     date_registration_opens = models.DateField('Registration Opens')
+    date_registration_closes = models.DateField('Registration Closes')
     date_started = models.DateField('Classes Start')
     date_last_drop = models.DateField('Last Drop')
     date_ended = models.DateField('Classes End')
@@ -384,7 +385,7 @@ class Semester(models.Model):
 
     class Meta:
         unique_together = (('semester', 'year'),)
-        ordering = ['date_registration_opens']
+        ordering = ['date_started']
 
 
 class SemesterStudent(models.Model):

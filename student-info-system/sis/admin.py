@@ -61,8 +61,8 @@ admin.site.register(Course, CourseAdmin)
 
 
 class SemesterAdmin(admin.ModelAdmin):
-    list_display = ('name', 'date_registration_opens', 'date_started', 'date_last_drop',
-                    'date_ended')
+    list_display = ('name', 'date_registration_opens', 'date_registration_closes', 'date_started',
+                    'date_last_drop', 'date_ended')
 
 
 admin.site.register(Semester, SemesterAdmin)

@@ -29,6 +29,7 @@ class StudentTestCase_Basic(TestCase):
 
         StudentTestCase_Basic.semester = Semester.objects.create(
             date_registration_opens=datetime.now(),
+            date_registration_closes=datetime.now(),
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
             date_ended=datetime.now(),
@@ -122,6 +123,7 @@ class StudentTestCase_History(TestCase):
 
         StudentTestCase_History.semester = Semester.objects.create(
             date_registration_opens=datetime.now(),
+            date_registration_closes=datetime.now(),
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
             date_ended=datetime.now(),
@@ -263,6 +265,7 @@ class Professor_teaching_test(TestCase):
 
         Professor_teaching_test.semester = Semester.objects.create(
             date_registration_opens=datetime.now(),
+            date_registration_closes=datetime.now(),
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
             date_ended=datetime.now(),
@@ -381,6 +384,7 @@ class SectionTestCase(TestCase):
                                        credits_earned=3.0)
         professor = Professor.objects.create(user=user)
         semester = Semester.objects.create(date_registration_opens=datetime.now(),
+                                           date_registration_closes=datetime.now(),
                                            date_started=datetime.now(),
                                            date_last_drop=datetime.now(),
                                            date_ended=datetime.now(),
@@ -462,6 +466,7 @@ class MajorTestCase(TestCase):
         s = createStudent(username='frodo', major=m1)
 
         sem = Semester.objects.create(date_registration_opens=datetime.now(),
+                                      date_registration_closes=datetime.now(),
                                       date_started=datetime.now(),
                                       date_last_drop=datetime.now(),
                                       date_ended=datetime.now(),
@@ -534,6 +539,7 @@ class Semester_tests(TestCase):
 
     def test_order_fields(self):
         s1 = Semester.objects.create(date_registration_opens=datetime.now(),
+                                     date_registration_closes=datetime.now(),
                                      date_started=datetime.now(),
                                      date_last_drop=datetime.now(),
                                      date_ended=datetime.now(),

@@ -15,6 +15,7 @@ class AdminSemesterViewsExist(TestCase):
         test_user1 = User.objects.create_user(username='u1', password='hello')
         admin = Admin.objects.create(user=test_user1)
         semester = Semester.objects.create(date_registration_opens=datetime.now(),
+                                           date_registration_closes=datetime.now(),
                                            date_started=datetime.now(),
                                            date_last_drop=datetime.now(),
                                            date_ended=datetime.now(),
@@ -59,6 +60,7 @@ class AdminSemesterViewsTemplate(TestCase):
         test_user1 = User.objects.create_user(username='u1', password='hello')
         admin = Admin.objects.create(user=test_user1)
         semester = Semester.objects.create(date_registration_opens=datetime.now(),
+                                           date_registration_closes=datetime.now(),
                                            date_started=datetime.now(),
                                            date_last_drop=datetime.now(),
                                            date_ended=datetime.now(),

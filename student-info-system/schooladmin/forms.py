@@ -132,41 +132,46 @@ class SemesterCreationForm(forms.ModelForm):
     semester.widget.attrs.update({'class': 'session_sel selectpicker'})
     year = forms.IntegerField()
     date_registration_opens = forms.DateField()
+    date_registration_closes = forms.DateField()
     date_started = forms.DateField()
     date_ended = forms.DateField()
     date_last_drop = forms.DateField()
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')
+        regc = self.cleaned_data.get('date_registration_closes')
         st = self.cleaned_data.get('date_started')
         de = self.cleaned_data.get('date_ended')
         ld = self.cleaned_data.get('date_last_drop')
-        if not (rego <= st <= ld <= de):
+        if not (rego <= st <= ld <= de and rego <= regc <= de):
             raise forms.ValidationError('Dates are not in order.')
 
     class Meta:
         model = Semester
-        fields = ('semester', 'year', 'date_registration_opens', 'date_started', 'date_last_drop',
-                  'date_ended')
+        fields = ('semester', 'year', 'date_registration_opens', 'date_registration_closes',
+                  'date_started', 'date_last_drop', 'date_ended')
 
 
 class SemesterEditForm(forms.ModelForm):
     date_started = forms.DateField()
     date_ended = forms.DateField()
     date_registration_opens = forms.DateField()
+    date_registration_closes = forms.DateField()
     date_last_drop = forms.DateField()
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')
+        regc = self.cleaned_data.get('date_registration_closes')
         st = self.cleaned_data.get('date_started')
         de = self.cleaned_data.get('date_ended')
         ld = self.cleaned_data.get('date_last_drop')
-        if not (rego <= st <= ld <= de):
+        if not (rego <= st <= ld <= de and rego <= regc <= de):
             raise forms.ValidationError('Dates are not in order.')
 
     class Meta:
         model = Semester
-        fields = ('date_registration_opens', 'date_started', 'date_last_drop', 'date_ended')
+        fields = ('date_registration_opens', 'date_registration_closes', 'date_started',
+                  'date_last_drop', 'date_ended')
 
 
 class UserEditForm(forms.Form):
