@@ -62,13 +62,13 @@ def registration_view(request):
                             status = SectionStudent.WAITLISTED
                         sectstud = SectionStudent(section=sect, student=student, status=status)
                         sectstud.save()
-                        #any_selected = True
+                        # any_selected = True
                         sect.is_selected = True
                         context['registration_success'] = True
 
             # did we complete a registration?
-            #if any_selected:
-            #return redirect('student:registration')
+            # if any_selected:
+            # return redirect('student:registration')
 
     else:
         the_sem = semester_list[0]
