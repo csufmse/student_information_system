@@ -131,6 +131,9 @@ class Student(models.Model):
 
         return major_required
 
+    def prerequisites_met_list(self, course):
+        return course.prerequisites_met_list(self)
+
     def credits_earned(self):
         completed = self.course_history(passed=True).aggregate(
             Sum('section__course__credits_earned'))['section__course__credits_earned__sum']
@@ -303,6 +306,10 @@ class Course(models.Model):
         max_num = max_dict['number__max']
         return max_num
 
+    def prerequisites_met_list(self, student):
+        return self.prereqs.annotate(met=Exists(
+            student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)))
+
 
 class CoursePrerequisite(models.Model):
     course = models.ForeignKey(Course, related_name='a_course', on_delete=models.CASCADE)
@@ -370,10 +377,10 @@ class Semester(models.Model):
         return Semester.name_for_session(self.semester)
 
     def professors_teaching(self):
-        return User.annotated().filter(professor__section__semester=self.id)
+        return User.annotated().filter(professor__section__semester=self.id).distinct()
 
     def students_attending(self):
-        return User.annotated().filter(student__semesterstudent__semester=self.id)
+        return User.annotated().filter(student__semesterstudent__semester=self.id).distinct()
 
     @property
     def name(self):

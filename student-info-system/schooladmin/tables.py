@@ -285,8 +285,8 @@ class SectionForClassTable(tables.Table):
     class Meta:
         model = Section
         template_name = "django_tables2/bootstrap.html"
-        fields = ('semester', 'section', 'status', 'hours', 'professor',
-                  'capacity', 'seats_remaining')
+        fields = ('semester', 'section', 'status', 'hours', 'professor', 'capacity',
+                  'seats_remaining')
         row_attrs = {'class': 'section_row', 'data-id': lambda record: record.pk}
         attrs = {"class": 'section_table'}
 

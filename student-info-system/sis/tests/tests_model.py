@@ -302,13 +302,6 @@ class CourseTestCase_Basic(TestCase):
         self.assertEqual(course.name, "CPSC-101")
 
 
-def createCourse(major, num):
-    return Course.objects.create(major=major,
-                                 catalog_number=num,
-                                 title='c' + num,
-                                 credits_earned=1.0)
-
-
 class CourseTestCase_deps(TestCase):
 
     @classmethod
@@ -366,6 +359,72 @@ class CourseTestCase_deps(TestCase):
         cp(5, 6)
         cp(6, 7)
         self.assertEqual(cs[1].are_candidate_prerequisites_valid(), True)
+
+
+class CourseMeetingPrereqsTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        KLASS = CourseMeetingPrereqsTest
+        super(KLASS, cls).setUpTestData()
+        KLASS.m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        KLASS.c1 = Course.objects.create(major=KLASS.m1,
+                                         catalog_number='300',
+                                         title="Intro To Test",
+                                         credits_earned=3.0)
+        KLASS.c2 = Course.objects.create(major=KLASS.m1,
+                                         catalog_number='400',
+                                         title="Outro To Test",
+                                         credits_earned=3.0)
+        CoursePrerequisite.objects.create(course=KLASS.c2, prerequisite=KLASS.c1)
+        KLASS.sem = Semester.objects.create(date_registration_opens=datetime.now(),
+                                            date_started=datetime.now(),
+                                            date_last_drop=datetime.now(),
+                                            date_ended=datetime.now(),
+                                            semester=Semester.FALL,
+                                            year=2000)
+        p = createProfessor(username='frodo', major=KLASS.m1)
+        KLASS.sec1 = Section.objects.create(course=KLASS.c1,
+                                            professor=p,
+                                            semester=KLASS.sem,
+                                            number=1,
+                                            hours="MW 1200-1400")
+        KLASS.stud = createStudent(username='tester', major=KLASS.m1)
+
+    def test_courseprereqs_none(self):
+        KLASS = CourseMeetingPrereqsTest
+        self.assertEqual(len(KLASS.c1.prerequisites_met_list(student=KLASS.stud)), 0)
+
+    def test_courseprereqs_notmet(self):
+        KLASS = CourseMeetingPrereqsTest
+        pr = KLASS.c2.prerequisites_met_list(student=KLASS.stud)
+        self.assertEqual(len(pr), 1)
+        self.assertEqual(pr[0].name, KLASS.c1.name)
+        self.assertFalse(pr[0].met)
+
+    def test_courseprereqs_not_met_failed(self):
+        KLASS = CourseMeetingPrereqsTest
+        secstud = SectionStudent.objects.create(section=KLASS.sec1, student=KLASS.stud)
+        secstud.status = SectionStudent.GRADED
+        secstud.grade = SectionStudent.GRADE_F
+        secstud.save()
+        pr = KLASS.c2.prerequisites_met_list(student=KLASS.stud)
+        self.assertEqual(len(pr), 1)
+        self.assertEqual(pr[0].name, KLASS.c1.name)
+        self.assertFalse(pr[0].met)
+        secstud.delete()
+
+    def test_courseprereqs_met(self):
+        KLASS = CourseMeetingPrereqsTest
+        secstud = SectionStudent.objects.create(section=KLASS.sec1, student=KLASS.stud)
+        secstud.status = SectionStudent.GRADED
+        secstud.grade = SectionStudent.GRADE_A
+        secstud.save()
+        pr = KLASS.c2.prerequisites_met_list(student=KLASS.stud)
+        self.assertEqual(len(pr), 1)
+        self.assertEqual(pr[0].name, KLASS.c1.name)
+        self.assertTrue(pr[0].met)
+        secstud.delete()
 
 
 class SectionTestCase(TestCase):
@@ -545,3 +604,70 @@ class Semester_tests(TestCase):
         self.assertEqual(s2.session_name, 'Fall')
         self.assertEqual(s2.semester_order, '2000-0')
         self.assertEqual(s2.session_order, 0)
+
+
+class SemesterProf_tests(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):
+        KLASS = SemesterProf_tests
+        super(SemesterProf_tests, cls).setUpTestData()
+        KLASS.sem = Semester.objects.create(date_registration_opens=datetime.now(),
+                                            date_started=datetime.now(),
+                                            date_last_drop=datetime.now(),
+                                            date_ended=datetime.now(),
+                                            semester=Semester.FALL,
+                                            year=2000)
+
+        KLASS.m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        KLASS.p1 = createProfessor(username='frodo', major=KLASS.m1)
+        KLASS.p2 = createProfessor(username='bilbo', major=KLASS.m1)
+        KLASS.courses = []
+        for num in range(100, 120, 2):
+            KLASS.courses.append(createCourse(major=KLASS.m1, num=num))
+
+    def test_professors_none(self):
+        KLASS = SemesterProf_tests
+        self.assertEqual(len(KLASS.sem.professors_teaching()), 0)
+
+    def test_professors_uno(self):
+        KLASS = SemesterProf_tests
+        s1 = Section.objects.create(course=KLASS.courses[0],
+                                    professor=KLASS.p1,
+                                    semester=KLASS.sem,
+                                    number=1,
+                                    hours="MW 1200-1400")
+        self.assertEqual(len(KLASS.sem.professors_teaching()), 1)
+        s1.delete()
+
+    def test_professors_still_uno(self):
+        KLASS = SemesterProf_tests
+        s1 = Section.objects.create(course=KLASS.courses[0],
+                                    professor=KLASS.p1,
+                                    semester=KLASS.sem,
+                                    number=1,
+                                    hours="MW 1200-1400")
+        s2 = Section.objects.create(course=KLASS.courses[1],
+                                    professor=KLASS.p1,
+                                    semester=KLASS.sem,
+                                    number=1,
+                                    hours="MW 1200-1400")
+        self.assertEqual(len(KLASS.sem.professors_teaching()), 1)
+        s1.delete()
+        s2.delete()
+
+    def test_professors_dos(self):
+        KLASS = SemesterProf_tests
+        s1 = Section.objects.create(course=KLASS.courses[0],
+                                    professor=KLASS.p1,
+                                    semester=KLASS.sem,
+                                    number=1,
+                                    hours="MW 1200-1400")
+        s2 = Section.objects.create(course=KLASS.courses[1],
+                                    professor=KLASS.p2,
+                                    semester=KLASS.sem,
+                                    number=1,
+                                    hours="MW 1200-1400")
+        self.assertEqual(len(KLASS.sem.professors_teaching()), 2)
+        s1.delete()
+        s2.delete()
