@@ -4,19 +4,32 @@
 {% load bootstrap3 %}
 
 {% block content %}
-<form action="{% url 'student:registration' %}" method="post">
-{% csrf_token %}
-  <select name="semester">
-  {% for sem in semesters %}
-    <option value="{{sem.id}}" {% if semester == sem.id %}SELECTED{% endif %}>{{ sem.name }}</option>
-  {% endfor %}
-  </select>
-
   {% if not any_sections %}
     <p>No courses offered</P>
   {% else %}
+    {% if registration_success %}
+        <p>Registration complete.</p>
+    {% endif %}
+    {% if filter %}
+      <form id="myfilt" action="" method="get" class="form form in-line" autocomplete="off">
+        {% csrf_token %}
+        {% bootstrap_form filter.form layout='inline' %}
+        <button class="btn btn-primary">Filter</button>
+        {% if has_filter %}
+          <a class-"btn btn-sucess" href="{% url 'student:registration' %}">Clear</a>
+        {% endif %}
+      </form>
+    {% endif %}
 
-      <table class="data-table">
+  <form action="{% url 'student:registration' %}" method="post">
+    {% csrf_token %}
+    <select name="semester">
+    {% for sem in semesters %}
+      <option value="{{sem.id}}" {% if semester == sem.id %}SELECTED{% endif %}>{{ sem.name }}</option>
+    {% endfor %}
+    </select>
+
+    <table class="data-table">
       <tr class="reg-row">
         <th>Number</th>
         <th>Title</th>
@@ -25,14 +38,14 @@
         <th>Prerequisites</th>
       </tr>
 
-      {% for s in sections %}
-        {% if s.new_course %}
-            <tr class="class_heading_row">
-              <th>{{s.course.name}}</th>
-              <th>{{s.course.title}}</th>
-              <th>{{s.course.credits_earned}}</th>
-              <th>{{s.course.description}}</th>
-                <th>{% for prereq in s.course.prereqs.all %}<p>{{prereq}}</p>{% endfor %}</th>
+    {% for s in sections %}
+      {% if s.new_course %}
+        <tr class="class_heading_row">
+          <th>{{s.course.name}}</th>
+          <th>{{s.course.title}}</th>
+          <th>{{s.course.credits_earned}}</th>
+          <th>{{s.course.description}}</th>
+          <th>{% for prereq in s.course.prereqs.all %}<p>{{prereq}}</p>{% endfor %}</th>
             <tr id="childRow" class="heading_row">
               <td>Section Number</td>
               <td>Professor</td>
@@ -46,16 +59,16 @@
           <td>{{s.professor_name}}</td>
           <td>{{s.hours}}</td>
           <td>{{s.seats_remaining}} / {{ s.capacity }}</td>
-            <td>
-                {% if s.seats_remaining <= 0 %}<span class="waitlist_notif">WAITLIST?</span>{% endif %}
-                <input type="radio" name="{{s.course.id}}" value="{{s.id}}" {% if s.is_selected  %}SELECTED{% endif %}/>
-                    <label for="{{ s.course.id }}">{{s.name}}</label>
-            </td>
+          <td>
+            {% if s.seats_remaining <= 0 %}<span class="waitlist_notif">WAITLIST?</span>{% endif %}
+              <input type="radio" name="{{s.course.id}}" value="{{s.id}}" {% if s.is_selected  %}SELECTED{% endif %}/>
+              <label for="{{ s.course.id }}">{{s.name}}</label>
+          </td>
         </tr>
       {% endfor %}
-  </table>
-{% endif %}
-<input type="submit" id="register" name="register" value="Register">
-</form>
+    </table>
+  {% endif %}
+  <input type="submit" id="register" name="register" value="Register">
+  </form>
 {% endblock content %}
     

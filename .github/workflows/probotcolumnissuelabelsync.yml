@@ -27,3 +27,5 @@ defaultLabels:
 # Allowed values: top, bottom, after:
 
 defaultColumnPosition: top
+
+on: push

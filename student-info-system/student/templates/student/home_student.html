@@ -11,7 +11,7 @@
 <span height="400" width="300">
   <iframe id="Current Schedule" class="tabcontent samplecontentblock" title="Current Schedule" 
     src="{% url 'student:current_schedule' %}"></iframe>
-  <iframe id="Registration" class="tabcontent" title="Registration" src="{% url 'student:registration' %}"
+  <iframe id="Registration" class="tabcontent" loading="lazy" title="Registration" src="{% url 'student:registration' %}"
     ></iframe>
 </span>
 {% endblock content %}
