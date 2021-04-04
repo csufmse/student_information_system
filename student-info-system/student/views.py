@@ -1,10 +1,13 @@
-from django.db.models import Q
-from django.shortcuts import redirect, render
-from django.http import HttpResponse
 from datetime import date
+
+from django.db.models import Q
+from django.http import HttpResponse
+from django.shortcuts import redirect, render
+
+from schooladmin.filters import SectionFilter
 from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Semester, SectionStudent, AccessRoles, SemesterStudent)
-from schooladmin.filters import SectionFilter
+from sis.utils import filtered_table
 
 
 @role_login_required(AccessRoles.STUDENT_ROLE)
