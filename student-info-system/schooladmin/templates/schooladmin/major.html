@@ -13,24 +13,68 @@
   <dd>{{ major.description }}</dd>
 </dl>
 
-        <h3>Professors:</h3>
+         <h3>Professors:</h3>
     <div id="Professors" class="data-table ">
-    {% render_table profs 'django_tables2/bootstrap.html' %}
+        {% if profs_filter %}
+            <form id="profs_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form profs_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if profs_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' abbreviation=major.abbreviation %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table profs_table 'django_tables2/bootstrap.html' %}
+        </div>
     </div>
 
         <h3>Required Courses:</h3>
-    <div id="Required" class="data-table-alt ">
-        {% render_table required 'django_tables2/bootstrap.html' %}
+    <div id="required">
+        {% if required_filter %}
+            <form id="required_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form required_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if required_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' abbreviation=major.abbreviation %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table required_table 'django_tables2/bootstrap.html' %}
+        </div>
     </div>
 
         <h3>Courses offered by Major:</h3>
-    <div id="Courses" class="data-table-alt ">
-        {% render_table courses 'django_tables2/bootstrap.html' %}
+    <div id="offered">
+        {% if offered_filter %}
+            <form id="offered_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form offered_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if offered_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' abbreviation=major.abbreviation %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table offered_table 'django_tables2/bootstrap.html' %}
+        </div>
     </div>
 
         <h3>Students with Major:</h3>
-    <div id="Courses" class="data-table-alt ">
-        {% render_table students 'django_tables2/bootstrap.html' %}
+    <div id="students">
+        {% if students_filter %}
+            <form id="students_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form students_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if students_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' abbreviation=major.abbreviation %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table students_table 'django_tables2/bootstrap.html' %}
+        </div>
     </div>
 
     <div>

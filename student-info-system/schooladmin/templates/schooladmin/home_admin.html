@@ -8,6 +8,7 @@
 {% block content %}
 <div class="tab">
   <button class="tablinks" id="defaultOpen">Users</button>
+  <button class="tablinks">Students</button>
   <button class="tablinks">Majors</button>
   <button class="tablinks">Semesters</button>
   <button class="tablinks">Courses</button>
@@ -16,6 +17,8 @@
 
 <span height="400" width="300">
 <iframe id="Users" class="tabcontent samplecontentblock" title="Admin Users" src="{% url 'schooladmin:users' %}"
+    ></iframe>
+<iframe id="Students" class="tabcontent" title="Students" src="{% url 'schooladmin:students' %}"
     ></iframe>
 <iframe id="Majors" class="tabcontent" title="Majors" src="{% url 'schooladmin:majors' %}"
     ></iframe>

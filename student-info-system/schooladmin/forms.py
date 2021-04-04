@@ -128,8 +128,8 @@ class CourseEditForm(forms.ModelForm):
 
 
 class SemesterCreationForm(forms.ModelForm):
-    semester = forms.ChoiceField(choices=Semester.SEASONS)
-    semester.widget.attrs.update({'class': 'season_sel selectpicker'})
+    semester = forms.ChoiceField(choices=Semester.SESSIONS)
+    semester.widget.attrs.update({'class': 'session_sel selectpicker'})
     year = forms.IntegerField()
     date_registration_opens = forms.DateField()
     date_started = forms.DateField()
@@ -193,7 +193,6 @@ class SectionCreationForm(forms.ModelForm):
     course = forms.ModelChoiceField(queryset=Course.objects.all())
     course.widget.attrs.update({'class': 'course_sel selectpicker'})
 
-    number = forms.CharField(widget=forms.HiddenInput(), required=False)
     hours = forms.CharField(max_length=100)
 
     professor = forms.ModelChoiceField(queryset=Professor.objects.all())
@@ -204,7 +203,7 @@ class SectionCreationForm(forms.ModelForm):
 
     class Meta:
         model = Section
-        fields = ('semester', 'course', 'number', 'hours', 'professor', 'capacity', 'status')
+        fields = ('semester', 'course', 'hours', 'professor', 'capacity', 'status')
 
 
 class SectionEditForm(forms.ModelForm):

@@ -1,9 +1,10 @@
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User, AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Case, ExpressionWrapper, F, Q, Sum, Max, Subquery, Value, When
 from django.db.models.fields import (CharField, DateField, DecimalField, FloatField, IntegerField)
-from django.db.models.functions import Concat
+from django.db.models import Exists, OuterRef
+from django.db.models.functions import Concat, Cast
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from phone_field import PhoneField
@@ -48,6 +49,10 @@ class Admin(models.Model):
     @property
     def name(self):
         return self.user.first_name + ' ' + self.user.last_name
+
+    @property
+    def name_sort(self):
+        return self.user.last_name + ', ' + self.user.first_name
 
     def __str__(self):
         return self.name
@@ -116,13 +121,18 @@ class Student(models.Model):
 
         return hist
 
-    def remaining_required_courses(self):
+    def remaining_required_courses(self, major=None):
+        if major is None:
+            major = self.major
         hist = self.course_history(passed=True)
-        major_required = self.major.courses_required.all()
+        major_required = major.courses_required.all()
         major_required = major_required.exclude(
             id__in=Subquery(hist.values('section__course__id')))
 
         return major_required
+
+    def prerequisites_met_list(self, course):
+        return course.prerequisites_met_list(self)
 
     def credits_earned(self):
         completed = self.course_history(passed=True).aggregate(
@@ -153,6 +163,10 @@ class Student(models.Model):
     def name(self):
         return self.user.first_name + ' ' + self.user.last_name
 
+    @property
+    def name_sort(self):
+        return self.user.last_name + ', ' + self.user.first_name
+
     def __str__(self):
         return self.name
 
@@ -168,6 +182,10 @@ class Professor(models.Model):
     @property
     def name(self):
         return self.user.first_name + ' ' + self.user.last_name
+
+    @property
+    def name_sort(self):
+        return self.user.last_name + ', ' + self.user.first_name
 
     def __str__(self):
         return self.name
@@ -189,6 +207,10 @@ class Major(models.Model):
                                               blank=True,
                                               symmetrical=False,
                                               related_name="required_by")
+
+    def requirements_met_list(self, student):
+        return self.courses_required.annotate(met=Exists(
+            student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)))
 
     class Meta:
         ordering = ['abbreviation']
@@ -284,6 +306,10 @@ class Course(models.Model):
         max_num = max_dict['number__max']
         return max_num
 
+    def prerequisites_met_list(self, student):
+        return self.prereqs.annotate(met=Exists(
+            student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)))
+
 
 class CoursePrerequisite(models.Model):
     course = models.ForeignKey(Course, related_name='a_course', on_delete=models.CASCADE)
@@ -299,37 +325,62 @@ class CoursePrerequisite(models.Model):
         return self.course.name + ' requires ' + self.prerequisite.name
 
 
+class SemesterManager(models.Manager):
+
+    def get_queryset(self):
+        """Overrides the models.Manager method"""
+        qs = super(SemesterManager, self).get_queryset().annotate(
+            session_order=Case(When(Q(semester='FA'), then=0),
+                               When(Q(semester='WI'), then=1),
+                               When(Q(semester='SP'), then=2),
+                               When(Q(semester='SU'), then=3),
+                               default=None,
+                               output_field=IntegerField()),
+            semester_order=Concat(Cast('year', CharField()),
+                                  Value('-'),
+                                  Cast('session_order', CharField()),
+                                  output_field=CharField()),
+        )
+        return qs
+
+
 class Semester(models.Model):
+    objects = SemesterManager()
+
+    FALL = 'FA'
+    WINTER = 'WI'
+    SPRING = 'SP'
+    SUMMER = 'SU'
+    SESSIONS = ((FALL, 'Fall'), (WINTER, 'Winter'), (SPRING, 'Spring'), (SUMMER, 'Summer'))
+    SESSIONS_ORDER = [FALL, WINTER, SPRING, SUMMER]
+
+    # convert Season code to name
+    @classmethod
+    def name_for_session(cls, abbrev):
+        sname = [seas[1] for seas in Semester.SESSIONS if seas[0] == abbrev]
+        if sname is not None and len(sname):
+            return sname[0]
+
     date_registration_opens = models.DateField('Registration Opens')
     date_started = models.DateField('Classes Start')
     date_last_drop = models.DateField('Last Drop')
     date_ended = models.DateField('Classes End')
-    FALL = 'FA'
-    SPRING = 'SP'
-    SUMMER = 'SU'
-    WINTER = 'WI'
-    SEASONS = ((FALL, 'Fall'), (SPRING, 'Spring'), (SUMMER, 'Summer'), (WINTER, 'Winter'))
 
-    semester = models.CharField('semester', choices=SEASONS, default=FALL, max_length=6)
+    semester = models.CharField('semester', choices=SESSIONS, default=FALL, max_length=6)
     year = models.IntegerField('year',
                                default=2000,
                                validators=[MinValueValidator(1900),
                                            MaxValueValidator(2300)])
 
-    # students = models.ManyToManyField(Student,
-    #                                   through='SemesterStudent',
-    #                                   symmetrical=False,
-    #                                   related_name='semester_students')
-
-    class Meta:
-        unique_together = (('semester', 'year'),)
-        ordering = ['date_registration_opens']
+    @property
+    def session_name(self):
+        return Semester.name_for_session(self.semester)
 
     def professors_teaching(self):
-        return User.objects.filter(professor__section__semester=self.id)
+        return User.annotated().filter(professor__section__semester=self.id).distinct()
 
     def students_attending(self):
-        return User.objects.filter(student__semesterstudent__semester=self.id)
+        return User.annotated().filter(student__semesterstudent__semester=self.id).distinct()
 
     @property
     def name(self):
@@ -337,6 +388,10 @@ class Semester(models.Model):
 
     def __str__(self):
         return self.name
+
+    class Meta:
+        unique_together = (('semester', 'year'),)
+        ordering = ['date_registration_opens']
 
 
 class SemesterStudent(models.Model):
@@ -540,6 +595,11 @@ def name(self):
     return self.first_name + ' ' + self.last_name
 
 
+def student_gpa(self):
+    return self.student.gpa()
+
+
+User.add_to_class('student_gpa', student_gpa)
 User.add_to_class('access_role', access_role)
 User.add_to_class('name', name)
 

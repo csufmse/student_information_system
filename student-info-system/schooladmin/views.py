@@ -14,13 +14,36 @@ from sis.authentication_helpers import role_login_required
 from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
                         Student, SectionStudent, AccessRoles)
 
-from .filters import (CourseFilter, MajorFilter, SectionFilter, SemesterFilter, UserFilter)
+from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFilter,
+                      SemesterFilter, UserFilter, StudentFilter)
 from .forms import (CourseCreationForm, CourseEditForm, CustomUserCreationForm, MajorCreationForm,
                     MajorEditForm, SectionCreationForm, SectionEditForm, SemesterCreationForm,
                     UserEditForm, SemesterEditForm)
-from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable,
-                     SemestersTable, FullUsersTable, StudentHistoryTable, StudentInMajorTable,
-                     StudentInSectionTable, SemestersSummaryTable, SectionForClassTable)
+from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable, SemestersTable,
+                     FullUsersTable, StudentHistoryTable, StudentInMajorTable,
+                     StudentInSectionTable, SemestersSummaryTable, SectionForClassTable,
+                     CoursesForMajorTable, MajorCoursesMetTable, StudentsTable)
+
+
+# helper function to make tables
+# merge the result of this into the response data
+def filtered_table(name=None,
+                   qs=None,
+                   filter=None,
+                   table=None,
+                   request=None,
+                   page_size=25,
+                   wrap_list=True):
+    filt = filter(request.GET, queryset=qs, prefix=name)
+    # weird "{name}" thing is because the HTML field has the prefix but the Filter does
+    # NOT have it in the field names
+    has_filter = any(f'{name}-{field}' in request.GET for field in set(filt.get_fields()))
+    table_source = filt.qs
+    if wrap_list:
+        table_source = list(table_source)
+    tab = table(table_source, prefix=name + "-")
+    RequestConfig(request, paginate={"per_page": page_size, "page": 1}).configure(tab)
+    return {name + '_table': tab, name + '_filter': filt, name + '_has_filter': has_filter}
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -33,16 +56,28 @@ def index(request):
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
 def users(request):
-    queryset = User.annotated().all()
-    f = UserFilter(request.GET, queryset=queryset)
-    has_filter = any(field in request.GET for field in set(f.get_fields()))
-    table = FullUsersTable(list(f.qs))
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
-    return render(request, 'schooladmin/users.html', {
-        'table': table,
-        'filter': f,
-        'has_filter': has_filter,
-    })
+    return render(
+        request, 'schooladmin/users.html',
+        filtered_table(
+            name='users',
+            qs=User.annotated(),
+            filter=UserFilter,
+            table=FullUsersTable,
+            request=request,
+        ))
+
+
+@role_login_required(AccessRoles.ADMIN_ROLE)
+def students(request):
+    return render(
+        request, 'schooladmin/students.html',
+        filtered_table(
+            name='students',
+            qs=User.annotated().filter(access_role=AccessRoles.STUDENT_ROLE),
+            filter=StudentFilter,
+            table=StudentsTable,
+            request=request,
+        ))
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -95,26 +130,46 @@ def student(request, userid):
             the_user.save()
         return redirect('schooladmin:users')
 
-    formdata = {
+    data = {
         'user': the_user,
     }
-    semester_table = SemestersSummaryTable(the_user.student.semesters.all())
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(semester_table)
+    data.update(
+        filtered_table(
+            name='semesters',
+            qs=the_user.student.semesters,
+            filter=SemesterFilter,
+            table=SemestersSummaryTable,
+            request=request,
+            wrap_list=False,
+        ))
 
-    history_table = StudentHistoryTable(the_user.student.course_history())
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(history_table)
+    data.update(
+        filtered_table(
+            name='history',
+            qs=the_user.student.course_history(),
+            filter=SectionStudentFilter,
+            table=StudentHistoryTable,
+            request=request,
+        ))
 
-    remaining_required_table = CoursesTable(the_user.student.remaining_required_courses())
-    RequestConfig(request, paginate={
-        "per_page": 25,
-        "page": 1
-    }).configure(remaining_required_table)
+    data.update(
+        filtered_table(
+            name='remaining',
+            qs=the_user.student.remaining_required_courses(),
+            filter=CourseFilter,
+            table=CoursesTable,
+            request=request,
+        ))
+    data.update(
+        filtered_table(
+            name='majorcourses',
+            qs=the_user.student.major.requirements_met_list(the_user.student),
+            filter=CourseFilter,
+            table=MajorCoursesMetTable,
+            request=request,
+        ))
 
-    formdata['semesters'] = semester_table
-    formdata['course_history'] = history_table
-    formdata['remaining_required'] = remaining_required_table
-
-    return render(request, 'schooladmin/student.html', formdata)
+    return render(request, 'schooladmin/student.html', data)
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -136,19 +191,28 @@ def professor(request, userid):
             the_user.save()
         return redirect('schooladmin:users')
 
-    semester_table = SemestersSummaryTable(the_user.professor.semesters_teaching().all())
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(semester_table)
-
-    sections_table = SectionsTable(the_user.professor.section_set.all())
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
-
-    formdata = {
+    data = {
         'user': the_user,
-        'semesters': semester_table,
-        'sections': sections_table,
     }
+    data.update(
+        filtered_table(
+            name='semesters',
+            qs=the_user.professor.semesters_teaching(),
+            filter=SemesterFilter,
+            table=SemestersSummaryTable,
+            request=request,
+        ))
 
-    return render(request, 'schooladmin/professor.html', formdata)
+    data.update(
+        filtered_table(
+            name='sections',
+            qs=the_user.professor.section_set,
+            filter=SectionFilter,
+            table=SectionsTable,
+            request=request,
+        ))
+
+    return render(request, 'schooladmin/professor.html', data)
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -282,16 +346,15 @@ def user_new(request):
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
 def majors(request):
-    queryset = Major.objects.all()
-    f = MajorFilter(request.GET, queryset=queryset)
-    has_filter = any(field in request.GET for field in set(f.get_fields()))
-    table = MajorsTable(list(f.qs))
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
-    return render(request, 'schooladmin/majors.html', {
-        'table': table,
-        'filter': f,
-        'has_filter': has_filter,
-    })
+    return render(
+        request, 'schooladmin/majors.html',
+        filtered_table(
+            name='majors',
+            qs=Major.objects,
+            filter=MajorFilter,
+            table=MajorsTable,
+            request=request,
+        ))
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -301,29 +364,46 @@ def major(request, abbreviation):
         return HttpResponse("No such major", reason="Invalid Data", status=404)
     the_major = qs.get()
 
-    pqueryset = User.objects.filter(professor__major=the_major)
-    prof_table = UsersTable(pqueryset)
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(prof_table)
-
-    rqueryset = Course.objects.filter(required_by=the_major)
-    required_table = CoursesTable(rqueryset)
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(required_table)
-
-    cqueryset = Course.objects.filter(major=the_major)
-    course_table = CoursesTable(cqueryset)
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(course_table)
-
-    student_qs = User.objects.filter(student__major=the_major)
-    student_table = StudentInMajorTable(list(student_qs))
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(student_table)
-
-    return render(request, 'schooladmin/major.html', {
+    data = {
         'major': the_major,
-        'profs': prof_table,
-        'required': required_table,
-        'courses': course_table,
-        'students': student_table,
-    })
+    }
+    data.update(
+        filtered_table(
+            name='profs',
+            qs=User.annotated().filter(professor__major=the_major),
+            filter=UserFilter,
+            table=UsersTable,
+            request=request,
+        ))
+
+    data.update(
+        filtered_table(
+            name='required',
+            qs=Course.objects.filter(required_by=the_major),
+            filter=CourseFilter,
+            table=CoursesTable,
+            request=request,
+        ))
+
+    data.update(
+        filtered_table(
+            name='offered',
+            qs=Course.objects.filter(major=the_major),
+            filter=CourseFilter,
+            table=CoursesForMajorTable,
+            request=request,
+        ))
+
+    data.update(
+        filtered_table(
+            name='students',
+            qs=User.annotated().filter(student__major=the_major),
+            filter=UserFilter,
+            table=StudentInMajorTable,
+            request=request,
+        ))
+
+    return render(request, 'schooladmin/major.html', data)
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -367,16 +447,15 @@ def major_new(request):
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
 def courses(request):
-    queryset = Course.objects.all()
-    f = CourseFilter(request.GET, queryset=queryset)
-    has_filter = any(field in request.GET for field in set(f.get_fields()))
-    table = CoursesTable(list(f.qs))
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
-    return render(request, 'schooladmin/courses.html', {
-        'table': table,
-        'filter': f,
-        'has_filter': has_filter,
-    })
+    return render(
+        request, 'schooladmin/courses.html',
+        filtered_table(
+            name='courses',
+            qs=Course.objects.all(),
+            filter=CourseFilter,
+            table=CoursesTable,
+            request=request,
+        ))
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -386,24 +465,37 @@ def course(request, courseid):
         return HttpResponse("No such course")
     the_course = qs.get()
 
-    pqueryset = Course.objects.filter(a_prerequisite__course=the_course)
-    ptable = CoursesTable(pqueryset)
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(ptable)
-
-    nqueryset = Course.objects.filter(a_course__prerequisite=the_course)
-    ntable = CoursesTable(nqueryset)
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(ntable)
-
-    squeryset = Section.objects.filter(course=the_course)
-    stable = SectionForClassTable(squeryset)
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(stable)
-
-    return render(request, 'schooladmin/course.html', {
+    data = {
         'course': the_course,
-        'prereqs': ptable,
-        'needed_by': ntable,
-        'sections': stable,
-    })
+    }
+    data.update(
+        filtered_table(
+            name='sections',
+            qs=Section.objects.filter(course=the_course),
+            filter=SectionFilter,
+            table=SectionForClassTable,
+            request=request,
+        ))
+    data.update(
+        filtered_table(
+            name='prereqs',
+            qs=Course.objects.filter(a_prerequisite__course=the_course),
+            filter=CourseFilter,
+            table=CoursesTable,
+            request=request,
+            page_size=5,
+        ))
+    data.update(
+        filtered_table(
+            name='neededby',
+            qs=Course.objects.filter(a_course__prerequisite=the_course),
+            filter=CourseFilter,
+            table=CoursesTable,
+            request=request,
+            page_size=10,
+        ))
+
+    return render(request, 'schooladmin/course.html', data)
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -448,16 +540,15 @@ def course_section_new(request, courseid):
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
 def semesters(request):
-    queryset = Semester.objects.all()
-    f = SemesterFilter(request.GET, queryset=queryset)
-    has_filter = any(field in request.GET for field in set(f.get_fields()))
-    table = SemestersTable(list(f.qs))
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
-    return render(request, 'schooladmin/semesters.html', {
-        'semesters': table,
-        'filter': f,
-        'has_filter': has_filter,
-    })
+    return render(
+        request, 'schooladmin/semesters.html',
+        filtered_table(
+            name='semesters',
+            qs=Semester.objects.all(),
+            filter=SemesterFilter,
+            table=SemestersTable,
+            request=request,
+        ))
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -467,25 +558,35 @@ def semester(request, semester_id):
         return HttpResponse("No such semester")
     the_semester = qs.get()
 
-    sections_qs = Section.objects.filter(semester=the_semester)
-    sections_table = SectionsTable(list(sections_qs))
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
+    data = {
+        'semester': the_semester,
+    }
+    data.update(
+        filtered_table(
+            name='sections',
+            qs=Section.objects.filter(semester=the_semester),
+            filter=SectionFilter,
+            table=SectionsTable,
+            request=request,
+        ))
+    data.update(
+        filtered_table(
+            name='students',
+            qs=the_semester.students_attending(),
+            filter=StudentFilter,
+            table=StudentsTable,
+            request=request,
+        ))
+    data.update(
+        filtered_table(
+            name='professors',
+            qs=the_semester.professors_teaching(),
+            filter=UserFilter,
+            table=UsersTable,
+            request=request,
+        ))
 
-    professors_qs = the_semester.professors_teaching()
-    professors_table = UsersTable(professors_qs)
-    RequestConfig(request, paginate={"per_page": 10, "page": 1}).configure(professors_table)
-
-    students_qs = the_semester.students_attending()
-    students_table = UsersTable(students_qs)
-    RequestConfig(request, paginate={"per_page": 15, "page": 1}).configure(students_table)
-
-    return render(
-        request, 'schooladmin/semester.html', {
-            'semester': the_semester,
-            'sections': sections_table,
-            'students': students_table,
-            'professors': professors_table,
-        })
+    return render(request, 'schooladmin/semester.html', data)
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -499,7 +600,7 @@ def semester_edit(request, semester_id):
         form = SemesterEditForm(request.POST, instance=the_semester)
         if form.is_valid():
             the_updated_sem = form.save()
-            messages.success(request, f'Semester {the_update_sem} has been updated.')
+            messages.success(request, f'Semester {the_updated_sem} has been updated.')
             return redirect('schooladmin:semester', semester_id)
         else:
             messages.error(request, 'Please correct the error(s) below.')
@@ -535,16 +636,15 @@ def semester_section_new(request, semester_id):
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
 def sections(request):
-    queryset = Section.objects.all()
-    f = SectionFilter(request.GET, queryset=queryset)
-    has_filter = any(field in request.GET for field in set(f.get_fields()))
-    table = SectionsTable(list(f.qs))
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
-    return render(request, 'schooladmin/sections.html', {
-        'table': table,
-        'filter': f,
-        'has_filter': has_filter,
-    })
+    return render(
+        request, 'schooladmin/sections.html',
+        filtered_table(
+            name='sections',
+            qs=Section.objects.all(),
+            filter=SectionFilter,
+            table=SectionsTable,
+            request=request,
+        ))
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -554,14 +654,19 @@ def section(request, sectionid):
         return HttpResponse("No such section")
     the_section = qs.get()
 
-    student_qs = SectionStudent.objects.filter(section=the_section)
-    student_table = StudentInSectionTable(list(student_qs))
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(student_table)
-
-    return render(request, 'schooladmin/section.html', {
+    data = {
         'section': the_section,
-        'students': student_table
-    })
+    }
+    data.update(
+        filtered_table(
+            name='secstud',
+            qs=SectionStudent.objects.filter(section=the_section),
+            filter=SectionStudentFilter,
+            table=StudentInSectionTable,
+            request=request,
+        ))
+
+    return render(request, 'schooladmin/section.html', data)
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
