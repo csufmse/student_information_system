@@ -4,7 +4,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, Student, TranscriptRequest, AccessRoles, ClassLevel)
+                        Semester, Student, AccessRoles, ClassLevel)
 
 from sis.tests.utils import (createAdmin, createStudent, createProfessor, createCourse)
 
@@ -382,7 +382,7 @@ class CourseMeetingPrereqsTest(TestCase):
                                          credits_earned=3.0)
         CoursePrerequisite.objects.create(course=KLASS.c2, prerequisite=KLASS.c1)
         KLASS.sem = Semester.objects.create(date_registration_opens=datetime.now(),
-                                            date_started=datetime.now(),
+                                            date_registration_closes=datetime.now(),date_started=datetime.now(),
                                             date_last_drop=datetime.now(),
                                             date_ended=datetime.now(),
                                             semester=Semester.FALL,
@@ -621,6 +621,7 @@ class SemesterProf_tests(TestCase):
         KLASS = SemesterProf_tests
         super(SemesterProf_tests, cls).setUpTestData()
         KLASS.sem = Semester.objects.create(date_registration_opens=datetime.now(),
+                                            date_registration_closes=datetime.now(),
                                             date_started=datetime.now(),
                                             date_last_drop=datetime.now(),
                                             date_ended=datetime.now(),

@@ -219,19 +219,6 @@ class Major(models.Model):
         return self.abbreviation
 
 
-class TranscriptRequest(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    date_requested = models.DateField('Date Requested')
-    date_fulfilled = models.DateField('Date Fulfilled', null=True, blank=True)
-
-    class Meta:
-        unique_together = (('student', 'date_requested'),)
-        ordering = ['student']
-
-    def __str__(self):
-        return self.student.name + '@' + str(self.date_requested)
-
-
 class Course(models.Model):
     major = models.ForeignKey(Major, on_delete=models.CASCADE)
     catalog_number = models.CharField('Number', max_length=20)

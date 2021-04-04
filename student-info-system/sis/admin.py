@@ -3,7 +3,7 @@ from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth.models import User
 
 from .models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                     Semester, SemesterStudent, Student, TranscriptRequest)
+                     Semester, SemesterStudent, Student)
 
 admin.site.site_title = "CSUF Student Information System Site Admin"
 admin.site.site_header = "Administrative Access to ALL Data"
@@ -44,13 +44,6 @@ class MajorAdmin(admin.ModelAdmin):
 
 
 admin.site.register(Major, MajorAdmin)
-
-
-class TranscriptRequestAdmin(admin.ModelAdmin):
-    list_display = ('student', 'date_requested', 'date_fulfilled')
-
-
-admin.site.register(TranscriptRequest, TranscriptRequestAdmin)
 
 
 class CourseAdmin(admin.ModelAdmin):

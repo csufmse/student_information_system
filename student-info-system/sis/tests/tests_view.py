@@ -2,8 +2,7 @@ from django.test import TestCase
 
 from django.contrib.auth.models import User
 from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section,
-                        SectionStudent, Semester, SemesterStudent, Student, TranscriptRequest,
-                        UpperField)
+                        SectionStudent, Semester, SemesterStudent, Student, UpperField)
 
 
 class ViewsAccess(TestCase):

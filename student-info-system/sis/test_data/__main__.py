@@ -8,7 +8,6 @@ from sis.test_data import create_03_semester
 from sis.test_data import create_04_student
 from sis.test_data import create_06_semesterstudent
 from sis.test_data import create_08_professor
-from sis.test_data import create_15_transcript_request
 from sis.test_data import create_20_course
 from sis.test_data import create_22_majorprerequisites
 from sis.test_data import create_25_courseprerequisites
@@ -39,10 +38,6 @@ modules = [
     (
         8,
         create_08_professor,
-    ),
-    (
-        15,
-        create_15_transcript_request,
     ),
     (
         20,

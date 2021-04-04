@@ -67,7 +67,6 @@ You can tweak things, and perhaps rerun to get more data:
 * course
 
 You can tweak and run to get more (easily):
-* transcript_request
 * major prerequisites
 * course prerequisites
 * section
@@ -102,9 +101,6 @@ like ```Open```.
   * Properly, old semester sectionn should all be closed, etc.
 * Section status ```Grading``` and ```Graded``` are not at all correct.
   * they do not reflect all SectionStudents, etc.
-    
-* transcript requests honor the semesters a student is present, but
-  * there may be multiple beyond reason
     
 * there are some majors with no professors, so those classes cannot be taught.
 
