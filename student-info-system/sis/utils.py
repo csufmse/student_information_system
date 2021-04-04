@@ -1,5 +1,6 @@
 from django_tables2 import RequestConfig
 
+
 # helper function to make tables
 # merge the result of this into the response data
 def filtered_table(name=None,
@@ -19,4 +20,3 @@ def filtered_table(name=None,
     tab = table(table_source, prefix=name + "-")
     RequestConfig(request, paginate={"per_page": page_size, "page": 1}).configure(tab)
     return {name + '_table': tab, name + '_filter': filt, name + '_has_filter': has_filter}
-
