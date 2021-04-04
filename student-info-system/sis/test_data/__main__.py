@@ -1,5 +1,6 @@
 import sys
 import getopt
+
 sys.path.append(".")  # noqa
 
 from sis.test_data import create_01_major
