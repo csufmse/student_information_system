@@ -33,11 +33,11 @@ def sections(request):
 
 @role_login_required(AccessRoles.PROFESSOR_ROLE)
 def students_in_section(request, sectionid):
-    data = {'prof': True}
+    data = {'section': Section.objects.get(id=sectionid)}
     data.update(
         filtered_table(name='students',
                        qs=Section.objects.get(id=sectionid).students.all(),
                        filter=StudentFilter,
                        table=StudentsTable,
                        request=request))
-    return render(request, 'schooladmin/students.html', data)
+    return render(request, 'professor/students.html', data)

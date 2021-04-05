@@ -5,44 +5,25 @@
 
 {% block content %}
 <div>
-{% if not prof %}
   <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
-{% endif %}
-
     <div id="Students">
-        {% if students_filter and not prof %}
+        {% if students_filter %}
             <form id="students_filter" action="" method="get" class="form form-inline" autocomplete="off">
                 {% bootstrap_form students_filter.form layout='inline' %}
                 <button class="btn btn-primary">Filter</button>
                 {% if students_has_filter %}
-                    <a  class="btn btn-success" 
-                      {% if prof %}
-                        href="{% url 'professor:students_in_section' %}"
-                      {% else %}
-                        href="{%  url 'schooladmin:users' %}"
-                      {% endif %}
-                    >Clear</a>
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:users' %}">Clear</a>
                 {% endif %}
             </form>
         {% endif %}
         <div class="data-table-alt scrollify-me">
             {% render_table students_table 'django_tables2/bootstrap.html' %}
         </div>
-        {% if prof %}
-          <input
-            action="action"
-            onclick="window.history.go(-1); return false;"
-            type="submit"
-            value="Back" class="btn btn-info"
-          />
-        {% endif %}
     </div>
 </div>
-{% if not prof %}
   <script>
     const handler = insertScrollableDivs(applyHandlers=true);
     handler();
     addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "user_row");
   </script>
-{% endif %}
 {% endblock content %}
