@@ -22,7 +22,6 @@ def sections(request):
 
     sections_qs = Section.objects.filter(professor=the_prof)
     sections_table = SectionsTable(sections_qs)
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(
-        sections_table)
+    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
 
     return render(request, 'sections.html', {'sections': sections_table})

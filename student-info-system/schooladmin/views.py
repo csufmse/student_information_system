@@ -217,23 +217,23 @@ def major(request, abbreviation):
 
 @role_login_required('Admin')
 def major_edit(request, abbreviation):
-#    qs = Major.objects.filter(abbreviation=abbreviation)
-#    if qs.count() < 1:
-#        return HttpResponse("No such major")
-#    the_major = qs.get()
-#
-#    if request.method == 'POST':
-#        form = MajorEditForm(request.POST, instance=the_major)
-#        if form.is_valid():
-#            obj = form.save(commit=False)
-#            obj.save()
-#            form.save_m2m()
-#            return redirect('schooladmin:major', abbreviation)
-#        else:
-#            messages.error(request, 'Please correct the error(s) below.')
-#    else:
-#        form = MajorEditForm(instance=the_major)
-#    return render(request, 'major_edit.html', {'form': form})
+    #    qs = Major.objects.filter(abbreviation=abbreviation)
+    #    if qs.count() < 1:
+    #        return HttpResponse("No such major")
+    #    the_major = qs.get()
+    #
+    #    if request.method == 'POST':
+    #        form = MajorEditForm(request.POST, instance=the_major)
+    #        if form.is_valid():
+    #            obj = form.save(commit=False)
+    #            obj.save()
+    #            form.save_m2m()
+    #            return redirect('schooladmin:major', abbreviation)
+    #        else:
+    #            messages.error(request, 'Please correct the error(s) below.')
+    #    else:
+    #        form = MajorEditForm(instance=the_major)
+    #    return render(request, 'major_edit.html', {'form': form})
     return HttpResponse("Coming Soon")
 
 
@@ -380,32 +380,32 @@ def semester_section_new(request, semester_id):
 
 @role_login_required('Admin')
 def new_semester(request):
-#    if request.user.access_role() != 'Admin':
-#        return redirect('sis:access_denied')
-#    if request.method == 'POST':
-#        form = SemesterCreationForm(request.POST)
-#        if form.is_valid():
-#            the_new_semester = form.save()
-#            return redirect('schooladmin:semesters')
-#    else:
-#        form = SemesterCreationForm()
-#    return render(request, 'new_semester.html', {'form': form})
+    #    if request.user.access_role() != 'Admin':
+    #        return redirect('sis:access_denied')
+    #    if request.method == 'POST':
+    #        form = SemesterCreationForm(request.POST)
+    #        if form.is_valid():
+    #            the_new_semester = form.save()
+    #            return redirect('schooladmin:semesters')
+    #    else:
+    #        form = SemesterCreationForm()
+    #    return render(request, 'new_semester.html', {'form': form})
     return HttpResponse("Coming Soon")
 
 
 @role_login_required('Admin')
 def sections(request):
-#    queryset = Section.objects.all()
-#    f = SectionFilter(request.GET, queryset=queryset)
-#    has_filter = any(field in request.GET for field in set(f.get_fields()))
-#    table = SectionsTable(f.qs)
-#    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
-#    return render(request, 'sections.html', {
-#        'table': table,
-#        'filter': f,
-#        'has_filter': has_filter,
-#    })
-    return HttpResponse("Coming Soon") 
+    #    queryset = Section.objects.all()
+    #    f = SectionFilter(request.GET, queryset=queryset)
+    #    has_filter = any(field in request.GET for field in set(f.get_fields()))
+    #    table = SectionsTable(f.qs)
+    #    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
+    #    return render(request, 'sections.html', {
+    #        'table': table,
+    #        'filter': f,
+    #        'has_filter': has_filter,
+    #    })
+    return HttpResponse("Coming Soon")
 
 
 @role_login_required('Admin')
