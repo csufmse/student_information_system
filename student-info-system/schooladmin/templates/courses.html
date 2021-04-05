@@ -1,0 +1,84 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+
+{% block title %}{% endblock title %}
+{% block header_name %}{% endblock header_name %}
+{% block css %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}">
+<style>
+#Courses {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#Courses td, #Courses th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#Courses tr:nth-child(even){background-color: #f2f2f2;}
+
+#Courses tr:hover {background-color: #ddd;}
+
+#Courses th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: center;
+  background-color: #4CAF50;
+  color: white;
+}
+.mcell, .cncell {
+    text-align: center;
+}
+</style>
+
+{% endblock css %}
+
+
+{% block content %}
+<div>
+<button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:course_new' %}';">New Course</button>
+<div>
+<div id="Courses">
+    {% if filter %}
+    <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
+    {% bootstrap_form filter.form layout='inline' %}
+    <button class="btn btn-primary">Filter</button>
+{% if has_filter %}
+  <a  class="btn btn-success" href="{%  url 'schooladmin:courses' %}">Clear</a>
+{% endif %}
+    </form>
+    {% endif %}
+    {% render_table table 'django_tables2/bootstrap.html' %}
+</div>
+</div>
+</div>
+<script>
+function selectRow(evt) {
+    id = this.getAttribute('data-id');
+    open("/schooladmin/course/"+id,'_self');
+}
+
+// Add onclick to each row so that it leaps off to the detail
+var tablerows = document.getElementsByClassName('crow')
+for (var i=0, len=tablerows.length; i<len; i=i+1) {
+    tablerows[i].addEventListener("click", selectRow, false);
+}
+
+var e = document.getElementById('id_catalogNumber_0')
+e.placeholder = "Min Num"
+
+e = document.getElementById('id_catalogNumber_1')
+e.placeholder = "Max Num"
+
+e = document.getElementById('id_credits_earned_0')
+e.placeholder = "Min Cred"
+
+e = document.getElementById('id_credits_earned_1')
+e.placeholder = "Max Cred"
+</script>
+{% endblock content %}

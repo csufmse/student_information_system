@@ -1,0 +1,9 @@
+.env
+.idea
+*.pyc
+*.pyo
+
+format.sh
+
+/hdesk
+/venv

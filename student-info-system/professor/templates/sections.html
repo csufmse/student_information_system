@@ -1,0 +1,54 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% load render_table from django_tables2 %}
+
+{% block title %}{% endblock title %}
+{% block header_name %}{% endblock header_name %}
+{% block css %}
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+<style>
+.button {
+  background-color: #4CAF50;
+  border: none;
+  color: white;
+  padding: 15px 32px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-block;
+  font-size: 16px;
+  margin: 4px 2px;
+  cursor: pointer;
+}
+#Sections {
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
+}
+
+#Sections td, #Sections th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+#Sections tr:nth-child(even){background-color: #f2f2f2;}
+
+#Sections tr:hover {background-color: #ddd;}
+
+#Sections th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: #4CAF50;
+  color: white;
+}
+</style>
+
+{% endblock css %}
+
+{% block content %}
+
+{% render_table sections 'django_tables2/bootstrap.html' %}
+
+
+{% endblock content %}
