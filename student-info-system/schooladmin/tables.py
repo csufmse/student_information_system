@@ -209,8 +209,8 @@ class SemestersTable(tables.Table):
                             accessor='name',
                             order_by=('semester_order'))
     session = ClassyColumn(verbose_name='Session',
-                           css_class_base='semester',
-                           accessor='semester',
+                           css_class_base='session',
+                           accessor='session',
                            order_by=('session_order'))
     year = ClassyColumn(css_class_base='year')
     date_registration_opens = ClassyColumn(verbose_name='Registration Opens',
@@ -232,17 +232,17 @@ class SemestersTable(tables.Table):
 
 class SemestersSummaryTable(tables.Table):
     year = ClassyColumn(verbose_name='Year', css_class_base='year')
-    semester = ClassyColumn(verbose_name='Semester',
-                            css_class_base='semester',
-                            accessor='name',
-                            order_by=('semester_order'))
+    session = ClassyColumn(verbose_name='Semester',
+                           css_class_base='session',
+                           accessor='name',
+                           order_by=('semester_order'))
 
     class Meta:
         model = Semester
         template_name = "django_tables2/bootstrap.html"
         fields = (
             'year',
-            'semester',
+            'session',
         )
         attrs = {"class": 'semester_table'}
         row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}
@@ -400,8 +400,7 @@ class ProfReferenceItemsTable(tables.Table):
     title = ClassyColumn(css_class_base='item_title')
     link = tables.TemplateColumn(
         '{% if record.link %}<a href="{{record.link}}" target="_blank">' +
-        '{{record.link}}</a>{% endif %}'
-    )
+        '{{record.link}}</a>{% endif %}')
     edition = ClassyColumn(css_class_base='item_edition')
     description = ClassyColumn(css_class_base='item_description')
 
@@ -419,8 +418,7 @@ class SectionReferenceItemsTable(tables.Table):
     title = ClassyColumn(css_class_base='item_title', accessor='item__title')
     link = tables.TemplateColumn(
         '{% if record.item.link %}<a href="{{record.item.link}}" target="_blank">' +
-        '{{record.item.link}}</a>{% endif %}'
-    )
+        '{{record.item.link}}</a>{% endif %}')
     edition = ClassyColumn(css_class_base='item_edition', accessor='item__edition')
     description = ClassyColumn(css_class_base='item_description', accessor='item__description')
 

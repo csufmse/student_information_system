@@ -33,7 +33,7 @@ class StudentTestCase_Basic(TestCase):
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
             date_ended=datetime.now(),
-            semester=Semester.FALL,
+            session=Semester.FALL,
             year=2000)
 
     def test_class_level(self):
@@ -127,7 +127,7 @@ class StudentTestCase_History(TestCase):
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
             date_ended=datetime.now(),
-            semester=Semester.FALL,
+            session=Semester.FALL,
             year=2000)
 
         StudentTestCase_History.stud.semesters.add(StudentTestCase_History.semester)
@@ -269,7 +269,7 @@ class Professor_teaching_test(TestCase):
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
             date_ended=datetime.now(),
-            semester=Semester.FALL,
+            session=Semester.FALL,
             year=2000)
 
     def test_no_teaching(self):
@@ -386,7 +386,7 @@ class CourseMeetingPrereqsTest(TestCase):
                                             date_started=datetime.now(),
                                             date_last_drop=datetime.now(),
                                             date_ended=datetime.now(),
-                                            semester=Semester.FALL,
+                                            session=Semester.FALL,
                                             year=2000)
         p = createProfessor(username='frodo', major=KLASS.m1)
         KLASS.sec1 = Section.objects.create(course=KLASS.c1,
@@ -449,7 +449,7 @@ class SectionTestCase(TestCase):
                                            date_started=datetime.now(),
                                            date_last_drop=datetime.now(),
                                            date_ended=datetime.now(),
-                                           semester=Semester.FALL,
+                                           session=Semester.FALL,
                                            year=2000)
         Section.objects.create(course=course,
                                professor=professor,
@@ -532,7 +532,7 @@ class MajorTestCase(TestCase):
                                       date_started=datetime.now(),
                                       date_last_drop=datetime.now(),
                                       date_ended=datetime.now(),
-                                      semester=Semester.FALL,
+                                      session=Semester.FALL,
                                       year=2000)
         sec1 = Section.objects.create(course=MajorTestCase.c1, semester=sem, professor=p)
 
@@ -605,7 +605,7 @@ class Semester_tests(TestCase):
                                      date_started=datetime.now(),
                                      date_last_drop=datetime.now(),
                                      date_ended=datetime.now(),
-                                     semester=Semester.FALL,
+                                     session=Semester.FALL,
                                      year=2000)
         # forcing the fetch here lets the annotation generate the extra attributes
         s2 = Semester.objects.get(year=2000)
@@ -626,7 +626,7 @@ class SemesterProf_tests(TestCase):
                                             date_started=datetime.now(),
                                             date_last_drop=datetime.now(),
                                             date_ended=datetime.now(),
-                                            semester=Semester.FALL,
+                                            session=Semester.FALL,
                                             year=2000)
 
         KLASS.m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")

@@ -317,10 +317,10 @@ class SemesterManager(models.Manager):
     def get_queryset(self):
         """Overrides the models.Manager method"""
         qs = super(SemesterManager, self).get_queryset().annotate(
-            session_order=Case(When(Q(semester='FA'), then=0),
-                               When(Q(semester='WI'), then=1),
-                               When(Q(semester='SP'), then=2),
-                               When(Q(semester='SU'), then=3),
+            session_order=Case(When(Q(session='FA'), then=0),
+                               When(Q(session='WI'), then=1),
+                               When(Q(session='SP'), then=2),
+                               When(Q(session='SU'), then=3),
                                default=None,
                                output_field=IntegerField()),
             semester_order=Concat(Cast('year', CharField()),
@@ -354,7 +354,7 @@ class Semester(models.Model):
     date_last_drop = models.DateField('Last Drop')
     date_ended = models.DateField('Classes End')
 
-    semester = models.CharField('semester', choices=SESSIONS, default=FALL, max_length=6)
+    session = models.CharField('semester', choices=SESSIONS, default=FALL, max_length=6)
     year = models.IntegerField('year',
                                default=2000,
                                validators=[MinValueValidator(1900),
@@ -362,7 +362,7 @@ class Semester(models.Model):
 
     @property
     def session_name(self):
-        return Semester.name_for_session(self.semester)
+        return Semester.name_for_session(self.session)
 
     def professors_teaching(self):
         return User.annotated().filter(professor__section__semester=self.id).distinct()
@@ -372,13 +372,13 @@ class Semester(models.Model):
 
     @property
     def name(self):
-        return str(self.semester) + "-" + str(self.year)
+        return str(self.session) + "-" + str(self.year)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        unique_together = (('semester', 'year'),)
+        unique_together = (('session', 'year'),)
         ordering = ['date_started']
 
 

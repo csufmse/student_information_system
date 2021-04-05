@@ -18,7 +18,7 @@ class AdminSemesterViewsExist(TestCase):
                                            date_started=datetime.now(),
                                            date_last_drop=datetime.now(),
                                            date_ended=datetime.now(),
-                                           semester=Semester.FALL,
+                                           session=Semester.FALL,
                                            year=2000)
 
     # list view
@@ -63,7 +63,7 @@ class AdminSemesterViewsTemplate(TestCase):
                                            date_started=datetime.now(),
                                            date_last_drop=datetime.now(),
                                            date_ended=datetime.now(),
-                                           semester=Semester.FALL,
+                                           session=Semester.FALL,
                                            year=2000)
 
     # list view

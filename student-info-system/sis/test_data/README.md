@@ -98,7 +98,7 @@ the "User" table is ```auth_user```.
 ## Application constraints NOT honored
 * ```Section``` may be added to "old" ```Semester``` even with statuses 
 like ```Open```.
-  * Properly, old semester sectionn should all be closed, etc.
+  * Properly, old semester section should all be closed, etc.
 * Section status ```Grading``` and ```Graded``` are not at all correct.
   * they do not reflect all SectionStudents, etc.
     

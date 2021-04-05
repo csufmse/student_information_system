@@ -209,16 +209,16 @@ class CourseFilter(FilterSet):
 
 
 class SemesterFilter(FilterSet):
-    semester = ChoiceFilter(label="Session", choices=Semester.SESSIONS, field_name='semester')
+    session = ChoiceFilter(label="Session", choices=Semester.SESSIONS, field_name='session')
     year = RangeFilter(field_name='year')
 
     class Meta:
         model = Semester
-        fields = ['semester', 'year']
+        fields = ['session', 'year']
 
     def __init__(self, *args, **kwargs):
         super(SemesterFilter, self).__init__(*args, **kwargs)
-        self.filters['semester'].extra.update({'empty_label': 'Session...'})
+        self.filters['session'].extra.update({'empty_label': 'Session...'})
 
 
 class SectionFilter(FilterSet):
@@ -238,7 +238,7 @@ class SectionFilter(FilterSet):
 
     def filter_semester(self, queryset, name, value):
         return queryset.annotate(slug=Concat(
-            'semester__semester', Value('-'), 'semester__year', output_field=CharField())).filter(
+            'semester__session', Value('-'), 'semester__year', output_field=CharField())).filter(
                 slug__icontains=value)
 
     def filter_professor(self, queryset, name, value):
@@ -270,7 +270,7 @@ class SectionStudentFilter(FilterSet):
     semester = CharFilter(Semester.objects, label='Semester', method='filter_semester')
 
     def filter_semester(self, queryset, name, value):
-        return queryset.annotate(slug=Concat('section__semester__semester',
+        return queryset.annotate(slug=Concat('section__semester__session',
                                              Value('-'),
                                              'section__semester__year',
                                              output_field=CharField())).filter(

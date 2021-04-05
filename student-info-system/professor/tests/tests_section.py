@@ -27,7 +27,7 @@ class ProfessorSectionViewsTest(TestCase):
                                            date_started=datetime.now(),
                                            date_last_drop=datetime.now(),
                                            date_ended=datetime.now(),
-                                           semester=Semester.FALL,
+                                           session=Semester.FALL,
                                            year=2000)
         section = Section.objects.create(course=course,
                                          professor=prof,
