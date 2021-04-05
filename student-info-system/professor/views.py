@@ -4,8 +4,12 @@ from django_tables2 import RequestConfig
 
 from sis.authentication_helpers import role_login_required
 from sis.models import Professor, Section, AccessRoles, Semester
+from sis.utils import filtered_table
 
-from .tables import SectionsTable
+from schooladmin.tables import SectionsTable, StudentInSectionTable
+from schooladmin.filters import StudentFilter
+
+from .tables import StudentsTable
 
 
 @role_login_required(AccessRoles.PROFESSOR_ROLE)
@@ -25,3 +29,15 @@ def sections(request):
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
 
     return render(request, 'professor/sections.html', {'sections': sections_table})
+
+
+@role_login_required(AccessRoles.PROFESSOR_ROLE)
+def students_in_section(request, sectionid):
+    data = {'prof': True}
+    data.update(
+        filtered_table(name='students',
+                       qs=Section.objects.get(id=sectionid).students.all(),
+                       filter=StudentFilter,
+                       table=StudentsTable,
+                       request=request))
+    return render(request, 'schooladmin/students.html', data)
