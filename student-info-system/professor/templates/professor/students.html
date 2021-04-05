@@ -1,0 +1,49 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+
+{% block content %}
+<div>
+    <table class="data-table prof-top">
+      <tr class="reg-row">
+        <th>Semester</th>
+        <th>Course</th>
+        <th>Number</th>
+        <th>Course Title</th>
+        <th>Capacity</th>
+        <th>Openings</th>
+      </tr>
+      <tr class="reg-row">
+        <td>{{section.semester_name}}</td>
+        <td>{{section.course_name}}</td>
+        <td>{{section.name}}</td>
+        <td>{{section.course_title}}</td>
+        <td>{{section.capacity}}</td>
+        <td>{{section.seats_remaining}}</td>
+      </tr>
+    </table>
+    <div id="Students">
+        {% comment %}
+        {% if students_filter %}
+            <form id="students_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form students_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if students_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'professor:students' %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        {% endcomment %}
+        <div class="data-table-alt scrollify-me">
+            {% render_table students_table 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+  <input
+    action="action"
+    onclick="window.history.go(-1); return false;"
+    type="submit"
+    value="Back" class="btn btn-info"
+  />
+</div>
+{% endblock content %}
