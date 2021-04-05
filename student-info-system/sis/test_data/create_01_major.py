@@ -196,7 +196,7 @@ def createData():
     error_count = 0
 
     for (a, t, d) in specs[:to_generate]:
-        m = Major(abbreviation=a, name=t, description=d)
+        m = Major(abbreviation=a, title=t, description=d)
         try:
             m.save()
         except Exception:

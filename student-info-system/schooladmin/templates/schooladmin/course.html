@@ -6,7 +6,7 @@
 {% block content %}
 <dl class="dl-horizontal">
   <dt>Major</dt>
-    <dd><a href="{% url 'schooladmin:major' abbreviation=course.major %}">{{ course.major }}: {{  course.major.name }}</a></dd>
+    <dd><a href="{% url 'schooladmin:major' majorid=course.major.id %}">{{ course.major }}: {{  course.major.name }}</a></dd>
   <dt>Catalog Number</dt>
   <dd>{{ course.catalog_number }}</dd>
   <dt>Title</dt>

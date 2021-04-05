@@ -11,7 +11,7 @@ class ProfessorSectionViewsTest(TestCase):
 
     @classmethod
     def setUpTestData(self):
-        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         u1 = User.objects.create_user(username='u1',
                                       first_name='p',
                                       last_name='rof',

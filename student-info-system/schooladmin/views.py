@@ -411,8 +411,8 @@ def majors(request):
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
-def major(request, abbreviation):
-    qs = Major.objects.filter(abbreviation=abbreviation)
+def major(request, majorid):
+    qs = Major.objects.filter(id=majorid)
     if qs.count() < 1:
         return HttpResponse("No such major", reason="Invalid Data", status=404)
     the_major = qs.get()
@@ -460,8 +460,8 @@ def major(request, abbreviation):
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
-def major_edit(request, abbreviation):
-    qs = Major.objects.filter(abbreviation=abbreviation)
+def major_edit(request, majorid):
+    qs = Major.objects.filter(id=majorid)
     if qs.count() < 1:
         return HttpResponse("No such major")
     the_major = qs.get()
@@ -489,7 +489,7 @@ def major_new(request):
         if form.is_valid():
             the_new_major = form.save()
             message = format_html('Major <a href="{}">{} / {}</a> has been created.',
-                                  reverse('schooladmin:major', args=[the_new_major.abbreviation]),
+                                  reverse('schooladmin:major', args=[the_new_major.id]),
                                   the_new_major.abbreviation, the_new_major.name)
             messages.success(request, message)
             return redirect('schooladmin:majors')

@@ -196,8 +196,8 @@ class Professor(models.Model):
 
 
 class Major(models.Model):
-    abbreviation = UpperField('Abbreviation', max_length=6, primary_key=True)
-    name = models.CharField('Name', max_length=256)
+    abbreviation = UpperField('Abbreviation', max_length=6)
+    title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
     professors = models.ManyToManyField(Professor,
                                         symmetrical=False,
@@ -214,6 +214,12 @@ class Major(models.Model):
 
     class Meta:
         ordering = ['abbreviation']
+
+    @property
+    def name(self):
+        return self.title
+
+    name.fget.short_description = 'Major Title'
 
     def __str__(self):
         return self.abbreviation
@@ -235,7 +241,7 @@ class Course(models.Model):
     def major_name(self):
         return self.major.name
 
-    major_name.fget.short_description = 'Major Name'
+    major_name.fget.short_description = 'Major Title'
 
     @property
     def name(self):
@@ -445,14 +451,12 @@ class SectionStudent(models.Model):
     GRADED = 'Graded'
     DROP_REQUESTED = 'Drop Requested'
     DROPPED = 'Dropped'
-    WAITLISTED = 'Waitlisted'
     STATUSES = (
         (REGISTERED, REGISTERED),
         (AWAITING_GRADE, AWAITING_GRADE),
         (GRADED, GRADED),
         (DROP_REQUESTED, DROP_REQUESTED),
         (DROPPED, DROPPED),
-        (WAITLISTED, WAITLISTED),
     )
     status = models.CharField(
         'Student Status',
@@ -573,7 +577,7 @@ class Section(models.Model):
             item.delete()
         if self.professor is not None:
             ix = 1
-            for item in self.professor.referenceitem_set.all():
+            for item in self.professor.referenceitem_set.filter(course=self.course):
                 SectionReferenceItem.objects.create(item=item, section=self, index=ix)
                 ix = ix + 1
 

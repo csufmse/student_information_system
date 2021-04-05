@@ -21,7 +21,7 @@ class AdminCoursesViewsTest(TestCase):
     @classmethod
     def setUpTestData(self):
         user_p = User.objects.create(username="prof", first_name="First", last_name="Last")
-        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         course = Course.objects.create(major=major,
                                        catalog_number='101',
                                        title="Intro To Test",
@@ -85,7 +85,7 @@ class Admin_Course_edit(TestCase):
     @classmethod
     def setUpTestData(cls):
         Admin_Course_edit.u1 = createAdmin('admin')
-        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         Admin_Course_edit.c1 = createCourse(major, 101)
 
     def test_edit_course_view_template(self):

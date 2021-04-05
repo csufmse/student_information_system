@@ -11,7 +11,7 @@
   <dt>Section Number</dt>
   <dd>{{ section.number }}</dd>
   <dt>Major</dt>
-    <dd><a href="{% url 'schooladmin:major' abbreviation=section.course.major %}">{{ section.course.major }}: {{  section.course.major.name }}</a></dd>
+    <dd><a href="{% url 'schooladmin:major' majorid=section.course.major.id %}">{{ section.course.major }}: {{  section.course.major.name }}</a></dd>
   <dt>Semester</dt>
     <dd><a href="{% url 'schooladmin:semester' semester_id=section.semester.id %}">{{ section.semester }}</a></dd>
   <dt>Professor</dt>

@@ -10,7 +10,7 @@ class ViewsAccess(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(ViewsAccess, cls).setUpTestData()
-        m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         ViewsAccess.u1 = User.objects.create_user(username='u1', password='hello')
         Admin.objects.create(user=ViewsAccess.u1)
         ViewsAccess.u2 = User.objects.create_user(username='u2', password='hello')
@@ -49,7 +49,7 @@ class ViewsUseTemplate(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(ViewsUseTemplate, cls).setUpTestData()
-        m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         ViewsAccess.u = User.objects.create_user(username='u', password='hello')
         Student.objects.create(user=ViewsAccess.u, major=m1)
 

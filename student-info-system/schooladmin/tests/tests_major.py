@@ -16,9 +16,9 @@ class AdminMajorViewsTest(TestCase):
                                                                   password='1X<23fwd+tuK')
         Admin.objects.create(user=AdminMajorViewsTest.test_user1)
         AdminMajorViewsTest.m1 = Major.objects.create(abbreviation="CPSC",
-                                                      name="Computer Science")
-        AdminMajorViewsTest.m2 = Major.objects.create(abbreviation="ENGL", name="English")
-        AdminMajorViewsTest.m3 = Major.objects.create(abbreviation="LIT", name="Literature")
+                                                      title="Computer Science")
+        AdminMajorViewsTest.m2 = Major.objects.create(abbreviation="ENGL", title="English")
+        AdminMajorViewsTest.m3 = Major.objects.create(abbreviation="LIT", title="Literature")
         AdminMajorViewsTest.c1 = Course.objects.create(major=AdminMajorViewsTest.m1,
                                                        catalog_number='101',
                                                        title="Intro To Test",
@@ -48,7 +48,7 @@ class AdminMajorViewsTest(TestCase):
     # single-object views
     def test_major_view_exists(self):
         login = self.client.login(username='testuser1', password='1X<23fwd+tuK')
-        response = self.client.get('/schooladmin/major/' + AdminMajorViewsTest.m1.abbreviation)
+        response = self.client.get('/schooladmin/major/' + str(AdminMajorViewsTest.m1.id))
         self.assertEqual(response.status_code, 200)
 
     def test_nonexistent_major_fails_view(self):
@@ -58,14 +58,13 @@ class AdminMajorViewsTest(TestCase):
 
     def test_major_view_uses_template(self):
         login = self.client.login(username='testuser1', password='1X<23fwd+tuK')
-        response = self.client.get('/schooladmin/major/' + AdminMajorViewsTest.m1.abbreviation)
+        response = self.client.get('/schooladmin/major/' + str(AdminMajorViewsTest.m1.id))
         self.assertTemplateUsed(response, 'schooladmin/major.html')
 
     # edit views
     def test_edit_major_view_exists(self):
         login = self.client.login(username='testuser1', password='1X<23fwd+tuK')
-        response = self.client.get('/schooladmin/major/' + AdminMajorViewsTest.m1.abbreviation +
-                                   '/edit')
+        response = self.client.get('/schooladmin/major/' + str(AdminMajorViewsTest.m1.id) + '/edit')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'schooladmin/major_edit.html')
 

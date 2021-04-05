@@ -14,7 +14,7 @@
   <dt>Professor Type</dt>
   <dd>{{ user.access_role }}</dd>
   <dt>Teaching Department</dt>
-  <dd><a href="{% url 'schooladmin:major' abbreviation=user.professor.major.abbreviation %}">{{ user.professor.major.abbreviation }}: {{  user.professor.major.name }}</a></dd>
+  <dd><a href="{% url 'schooladmin:major' majorid=user.professor.major.id %}">{{ user.professor.major.abbreviation }}: {{  user.professor.major.name }}</a></dd>
   <dt>Enabled?</dt>
   <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
 </dl>

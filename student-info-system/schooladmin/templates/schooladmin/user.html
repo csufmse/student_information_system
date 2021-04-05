@@ -15,7 +15,7 @@
   <dd>{{ user.access_role }}</dd>
 {%  if user.access_role == 'Student' %}
   <dt>Student Major</dt>
-  <dd>{{ user.student.major.abbreviation }}: {{ user.student.major.name }}</dd>
+  <dd>{{ user.student.major.abbreviation }}: {{ user.student.major.title }}</dd>
   <dt>Class Level</dt>
   <dd>{{ user.student.class_level }}</dd>
   <dt>GPA</dt>
@@ -24,7 +24,7 @@
   <dd>{{ user.student.credits_earned }}</dd>
 {% elif user.access_role == 'Professor' %}
   <dt>Teaching Department</dt>
-  <dd>{{ user.professor.major.abbreviation }}:{{ user.professor.major.name }}</dd>
+  <dd>{{ user.professor.major.abbreviation }}:{{ user.professor.major.title }}</dd>
 {%  endif %}
   <dt>Enabled?</dt>
   <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>

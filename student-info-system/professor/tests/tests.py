@@ -12,7 +12,7 @@ class ProfessorViewsAccess(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(ProfessorViewsAccess, cls).setUpTestData()
-        m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         ProfessorViewsAccess.u1 = User.objects.create_user(username='u1', password='hello')
         Professor.objects.create(user=ProfessorViewsAccess.u1)
         ProfessorViewsAccess.u2 = User.objects.create_user(username='u2', password='hello')
