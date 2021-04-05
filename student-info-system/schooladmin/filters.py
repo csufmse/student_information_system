@@ -110,7 +110,7 @@ class StudentFilter(FilterSet):
 
 class MajorFilter(FilterSet):
     abbreviation = CharFilter(field_name='abbreviation', lookup_expr='icontains')
-    name = CharFilter(field_name='name', label='Name contains', lookup_expr='icontains')
+    title = CharFilter(field_name='title', label='Title contains', lookup_expr='icontains')
     description = CharFilter(field_name='description',
                              label='Description contains',
                              lookup_expr='icontains')
@@ -140,7 +140,7 @@ class MajorFilter(FilterSet):
 
     class Meta:
         model = Major
-        fields = ['abbreviation', 'name', 'description', 'professors', 'requires']
+        fields = ['abbreviation', 'title', 'description', 'professors', 'requires']
 
         def __init__(self, *args, **kwargs):
             super(MajorFilter, self).__init__(*args, **kwargs)

@@ -45,14 +45,14 @@ class CustomUserCreationForm(UserCreationForm):
 
 class MajorCreationForm(forms.ModelForm):
     abbreviation = UpperFormField(max_length=6, help_text='Abbreviation')
-    name = forms.CharField(max_length=256)
+    title = forms.CharField(max_length=256)
     description = forms.CharField(max_length=256,
                                   required=False,
                                   widget=forms.Textarea(attrs={'rows': 3}))
 
     class Meta:
         model = Major
-        fields = ('abbreviation', 'name', 'description')
+        fields = ('abbreviation', 'title', 'description')
 
 
 class MajorEditForm(forms.ModelForm):

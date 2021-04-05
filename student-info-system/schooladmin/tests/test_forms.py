@@ -13,7 +13,8 @@ class CourseCreation_formtest(TestCase):
 
     @classmethod
     def setUpTestData(self):
-        CourseCreation_formtest.m = Major.objects.create(abbreviation='ABCD', title='The A, The B')
+        CourseCreation_formtest.m = Major.objects.create(abbreviation='ABCD',
+                                                         title='The A, The B')
         CourseCreation_formtest.c1 = createCourse(CourseCreation_formtest.m, 101)
 
     def test_blank_data(self):

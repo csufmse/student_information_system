@@ -490,7 +490,7 @@ def major_new(request):
             the_new_major = form.save()
             message = format_html('Major <a href="{}">{} / {}</a> has been created.',
                                   reverse('schooladmin:major', args=[the_new_major.id]),
-                                  the_new_major.abbreviation, the_new_major.name)
+                                  the_new_major.abbreviation, the_new_major.title)
             messages.success(request, message)
             return redirect('schooladmin:majors')
     else:

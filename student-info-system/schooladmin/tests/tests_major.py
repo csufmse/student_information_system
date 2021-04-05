@@ -64,7 +64,8 @@ class AdminMajorViewsTest(TestCase):
     # edit views
     def test_edit_major_view_exists(self):
         login = self.client.login(username='testuser1', password='1X<23fwd+tuK')
-        response = self.client.get('/schooladmin/major/' + str(AdminMajorViewsTest.m1.id) + '/edit')
+        response = self.client.get('/schooladmin/major/' + str(AdminMajorViewsTest.m1.id) +
+                                   '/edit')
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'schooladmin/major_edit.html')
 
