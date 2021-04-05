@@ -11,7 +11,9 @@ from sis.test_data import create_08_professor
 from sis.test_data import create_20_course
 from sis.test_data import create_22_majorprerequisites
 from sis.test_data import create_25_courseprerequisites
+from sis.test_data import create_27_reference_items
 from sis.test_data import create_30_section
+from sis.test_data import create_32_sectionreferenceitem
 from sis.test_data import create_40_sectionstudent
 
 modules = [
@@ -52,8 +54,16 @@ modules = [
         create_25_courseprerequisites,
     ),
     (
+        27,
+        create_27_reference_items,
+    ),
+    (
         30,
         create_30_section,
+    ),
+    (
+        32,
+        create_32_sectionreferenceitem,
     ),
     (
         40,
@@ -99,10 +109,15 @@ def main(argv):
         print(spec)
         exit()
 
+    if len(args):
+        print('You have leftover arguments. Cowardly refusing to proceed.')
+        print(spec)
+        exit()
+
     if next > last:
         (next, last) = (last, next)
 
-    print(doit + "ing test data")
+    print(doit[0:-1] + "ing test data")
     if doit == 'create':
         for mod in modules:
             if next <= mod[0] <= last:

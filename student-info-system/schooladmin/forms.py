@@ -5,7 +5,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.contrib.auth.models import User
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, Student, UpperField, AccessRoles)
+                        Semester, Student, UpperField, ReferenceItem, AccessRoles)
 
 
 class UpperFormField(forms.CharField):
@@ -237,3 +237,35 @@ class SectionEditForm(forms.ModelForm):
             if major:
                 self.fields['professor'].queryset = Professor.objects.filter(user__is_active=True,
                                                                              major=major)
+
+
+class ReferenceItemCreationForm(forms.ModelForm):
+    type = forms.ChoiceField(choices=ReferenceItem.TYPES)
+    type.widget.attrs.update({'class': 'type_sel selectpicker'})
+
+    course = forms.ModelChoiceField(queryset=Course.objects.all())
+    course.widget.attrs.update({'class': 'course_sel selectpicker'})
+
+    title = forms.CharField(max_length=256)
+    description = forms.CharField(max_length=256,
+                                  widget=forms.Textarea(attrs={'rows': 3}),
+                                  required=False)
+    link = forms.CharField(max_length=256, required=False)
+    edition = forms.CharField(max_length=256, required=False)
+
+    class Meta:
+        model = ReferenceItem
+        fields = ('type', 'course', 'title', 'description', 'link', 'edition')
+
+    def __init__(self, *args, **kwargs):
+        super(ReferenceItemCreationForm, self).__init__(*args, **kwargs)
+
+        # we defer loading of courses until we know what major is chosen
+        if 'initial' in kwargs:
+            major = kwargs['initial']['professor'].major
+            if major:
+                self.fields['course'].queryset = Course.objects.filter(major=major)
+        elif 'instance' in kwargs:
+            major = kwargs['instance'].professor.major
+            if major:
+                self.fields['course'].queryset = Course.objects.filter(major=major)

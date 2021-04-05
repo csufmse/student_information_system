@@ -12,17 +12,18 @@ from django.urls import reverse
 
 from sis.authentication_helpers import role_login_required
 from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
-                        Student, SectionStudent, AccessRoles)
+                        Student, SectionStudent, AccessRoles, ReferenceItem, SectionReferenceItem)
 
 from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFilter,
-                      SemesterFilter, UserFilter, StudentFilter)
+                      SemesterFilter, UserFilter, StudentFilter, ItemFilter, SectionItemFilter)
 from .forms import (CourseCreationForm, CourseEditForm, CustomUserCreationForm, MajorCreationForm,
                     MajorEditForm, SectionCreationForm, SectionEditForm, SemesterCreationForm,
-                    UserEditForm, SemesterEditForm)
+                    UserEditForm, SemesterEditForm, ReferenceItemCreationForm)
 from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable, SemestersTable,
                      FullUsersTable, StudentHistoryTable, StudentInMajorTable,
                      StudentInSectionTable, SemestersSummaryTable, SectionForClassTable,
-                     CoursesForMajorTable, MajorCoursesMetTable, StudentsTable)
+                     CoursesForMajorTable, MajorCoursesMetTable, StudentsTable,
+                     ProfReferenceItemsTable, SectionReferenceItemsTable)
 
 
 # helper function to make tables
@@ -212,7 +213,80 @@ def professor(request, userid):
             request=request,
         ))
 
+    data.update(
+        filtered_table(
+            name='items',
+            qs=the_user.professor.referenceitem_set,
+            filter=ItemFilter,
+            table=ProfReferenceItemsTable,
+            request=request,
+        ))
+
     return render(request, 'schooladmin/professor.html', data)
+
+
+@role_login_required(AccessRoles.ADMIN_ROLE)
+def professor_items(request, userid):
+    qs = User.objects.filter(id=userid)
+    if qs.count() < 1:
+        return HttpResponse("No such user")
+    the_user = qs.get()
+
+    if the_user.access_role() != AccessRoles.PROFESSOR_ROLE:
+        return user(request, userid)
+
+    data = {
+        'user': the_user,
+    }
+    data.update(
+        filtered_table(
+            name='items',
+            qs=the_user.professor.referenceitem_set,
+            filter=ItemFilter,
+            table=ProfReferenceItemsTable,
+            request=request,
+        ))
+
+    return render(request, 'schooladmin/professor_items.html', data)
+
+
+@role_login_required(AccessRoles.ADMIN_ROLE)
+def professor_item(request, userid, item_id):
+    return HttpResponse("not yet")
+
+
+@role_login_required(AccessRoles.ADMIN_ROLE)
+def professor_item_new(request, userid):
+    qs = User.objects.filter(id=userid)
+    if qs.count() < 1:
+        return HttpResponse("No such user")
+    the_prof = qs[0]
+
+    if the_prof.access_role() != AccessRoles.PROFESSOR_ROLE:
+        messages.error(request, "That's not a professor.")
+        return user(request, userid)
+
+    if request.method == 'POST':
+        form = ReferenceItemCreationForm(request.POST)
+        if form.is_valid():
+            the_new_item = form.save(commit=False)
+            the_new_item.professor = the_prof.professor
+            the_new_item.save()
+            form.save_m2m()
+            messages.success(
+                request, f'New item created for ' + f'{the_new_item.course} has been created.')
+            return redirect('schooladmin:professor_items', userid=the_prof.id)
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
+    else:
+        dict = {}
+        profs = Professor.objects.filter(user_id=the_prof.id)
+        dict['professor'] = profs[0]
+        form = ReferenceItemCreationForm(initial=dict)
+    return render(request, 'schooladmin/professor_new_item.html', {
+        'form': form,
+        'user': the_prof
+    })
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -665,8 +739,29 @@ def section(request, sectionid):
             table=StudentInSectionTable,
             request=request,
         ))
+    data.update(
+        filtered_table(
+            name='secitem',
+            qs=the_section.sectionreferenceitem_set,
+            filter=SectionItemFilter,
+            table=SectionReferenceItemsTable,
+            request=request,
+        ))
 
     return render(request, 'schooladmin/section.html', data)
+
+
+@role_login_required(AccessRoles.ADMIN_ROLE)
+def section_refreshitems(request, sectionid):
+    qs = Section.objects.filter(id=sectionid)
+    if qs.count() < 1:
+        return HttpResponse("No such section")
+    the_section = qs.get()
+
+    the_section.refresh_reference_items()
+
+    messages.success(request, "Items refreshed for section")
+    return redirect('schooladmin:section', sectionid)
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
@@ -692,6 +787,7 @@ def section_edit(request, sectionid):
             obj = form.save(commit=False)
             obj.save()
             form.save_m2m()
+            obj.refresh_reference_items()
             messages.success(request, f'Section {obj} has been updated.')
             return redirect('schooladmin:section', sectionid)
         else:
@@ -734,6 +830,7 @@ def section_new_helper(request, semester_id=None, courseid=None):
             the_new_section = form.save(commit=False)
             the_new_section.number = next_section
             the_new_section.save()
+            the_new_section.refresh_reference_items()
             messages.success(request, f'Section {the_new_section} has been created.')
             return redirect('schooladmin:section', the_new_section.id)
         else:

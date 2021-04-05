@@ -4,7 +4,7 @@ from django.db.models.functions import Concat
 from django_filters import (CharFilter, ChoiceFilter, FilterSet, ModelChoiceFilter, RangeFilter)
 
 from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
-                        Student, AccessRoles, SectionStudent)
+                        Student, AccessRoles, SectionStudent, ReferenceItem, SectionReferenceItem)
 
 
 class UserFilter(FilterSet):
@@ -293,3 +293,48 @@ class SectionStudentFilter(FilterSet):
     class Meta:
         model = SectionStudent
         fields = ['semester', 'sec_status', 'student_status', 'grade']
+
+
+class ItemFilter(FilterSet):
+    course = CharFilter(Course.objects, label='Course Info', method='filter_course')
+
+    def filter_course(self, queryset, name, value):
+        return queryset.annotate(slug=Concat(
+            'course__major__abbreviation',
+            Value('-'),
+            'course__catalog_number',
+            Value(' '),
+            'course__title',
+        )).filter(slug__icontains=value)
+
+    type = ChoiceFilter(choices=ReferenceItem.TYPES, field_name='type', label="Type")
+
+    title = CharFilter(field_name='title', lookup_expr='icontains')
+    description = CharFilter(field_name='description', lookup_expr='icontains')
+    link = CharFilter(field_name='link', lookup_expr='icontains')
+
+    def __init__(self, *args, **kwargs):
+        super(ItemFilter, self).__init__(*args, **kwargs)
+        self.filters['type'].extra.update({'empty_label': 'Any Type'})
+
+    class Meta:
+        model = ReferenceItem
+        fields = ['course', 'type', 'title', 'description', 'link']
+
+
+class SectionItemFilter(FilterSet):
+
+    index = RangeFilter(field_name='index')
+    type = ChoiceFilter(choices=ReferenceItem.TYPES, field_name='item__type', label="Type")
+
+    title = CharFilter(field_name='item__title', lookup_expr='icontains')
+    description = CharFilter(field_name='item__description', lookup_expr='icontains')
+    link = CharFilter(field_name='item__link', lookup_expr='icontains')
+
+    def __init__(self, *args, **kwargs):
+        super(SectionItemFilter, self).__init__(*args, **kwargs)
+        self.filters['type'].extra.update({'empty_label': 'Any Type'})
+
+    class Meta:
+        model = SectionReferenceItem
+        fields = ['index', 'type', 'title', 'description', 'link']

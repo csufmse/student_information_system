@@ -1,0 +1,50 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% load render_table from django_tables2 %}
+
+{% block content %}
+<dl class="dl-horizontal">
+  <dt>Professor</dt>
+  <dd>{{ user.name }}</dd>
+  <dt>Professor Name</dt>
+  <dd>{{ user.username }}</dd>
+</dl>
+
+    <h3>Reference Items for Courses</h3>
+    <div id="items">
+        {% if items_filter %}
+            <form id="items_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form items_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if items_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table items_table 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+
+  <form method="post">
+    {% csrf_token %}
+     <input type="hidden" name="userid" value="{{ user.id }}"/>
+    <input
+        action="action"
+           class="btn btn-info"
+        onclick="window.history.go(-1); return false;"
+        value="Back"
+    />
+     <input id="new_item"
+        action="action"
+           class="btn btn-info"
+        value="Add Reference Item"
+    />
+
+  </form>
+<script>
+addButtonClickHandler('new_item', "{% url 'schooladmin:professor_item_new' userid=user.id %}");
+addClickHandlers("{% url 'schooladmin:professor_item' userid=user.id item_id=1234599 %}", "refitem_row");
+</script>
+{% endblock %}

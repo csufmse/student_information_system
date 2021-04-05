@@ -526,6 +526,8 @@ class Section(models.Model):
     def name(self):
         return self.course_name + '-' + str(self.number)
 
+    name.fget.short_description = 'Section'
+
     @property
     def course_title(self):
         return self.course.title
@@ -561,6 +563,65 @@ class Section(models.Model):
         return self.capacity - self.registered
 
     seats_remaining.fget.short_description = 'Seats Remaining'
+
+    def __str__(self):
+        return self.name
+
+    # the prof may have updated them; we may have changed professors...whyever
+    def refresh_reference_items(self):
+        for item in self.sectionreferenceitem_set.all():
+            item.delete()
+        if self.professor is not None:
+            ix = 1
+            for item in self.professor.referenceitem_set.all():
+                SectionReferenceItem.objects.create(item=item, section=self, index=ix)
+                ix = ix + 1
+
+
+class ReferenceItem(models.Model):
+    REQUIRED = 'req'
+    OPTIONAL = 'opt'
+    RECOMMENDED = 'rec'
+    SYLLABUS = 'syl'
+    ASSIGNMENT = 'ass'
+    TYPES = ((REQUIRED, 'Required'), (OPTIONAL, 'Optional'), (RECOMMENDED, 'Recommended'),
+             (SYLLABUS, 'Syllabus'), (ASSIGNMENT, 'Assignment'))
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    professor = models.ForeignKey(Professor, on_delete=models.CASCADE)
+    title = models.CharField('Title', max_length=256)
+    description = models.CharField('Description', blank=True, null=True, max_length=256)
+    link = models.CharField('Link', blank=True, null=True, max_length=256)
+    edition = models.CharField('Edition', blank=True, null=True, max_length=256)
+    type = models.CharField(
+        'Type',
+        choices=TYPES,
+        default=REQUIRED,
+        max_length=3,
+    )
+
+    class Meta:
+        unique_together = (('course', 'professor', 'title'),)
+
+    @property
+    def name(self):
+        return f'{self.course}:{self.professor}/{self.title}'
+
+    def __str__(self):
+        return self.name
+
+
+class SectionReferenceItem(models.Model):
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, null=True)
+    item = models.ForeignKey(ReferenceItem, on_delete=models.CASCADE)
+    index = models.IntegerField(verbose_name="#", default=1)
+
+    class Meta:
+        unique_together = (('section', 'item'), ('section', 'index'))
+
+    @property
+    def name(self):
+        return f'{self.section}:{self.item}'
 
     def __str__(self):
         return self.name
