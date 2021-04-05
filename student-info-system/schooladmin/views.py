@@ -6,13 +6,13 @@ from django.contrib.auth.models import User
 from django.forms.models import model_to_dict
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
-from django_tables2 import RequestConfig
 from django.utils.html import format_html
 from django.urls import reverse
 
 from sis.authentication_helpers import role_login_required
 from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
-                        Student, SectionStudent, AccessRoles, ReferenceItem, SectionReferenceItem)
+                        Student, SectionStudent, AccessRoles)
+from sis.utils import filtered_table
 
 from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFilter,
                       SemesterFilter, UserFilter, StudentFilter, ItemFilter, SectionItemFilter)
@@ -24,27 +24,6 @@ from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable, Semes
                      StudentInSectionTable, SemestersSummaryTable, SectionForClassTable,
                      CoursesForMajorTable, MajorCoursesMetTable, StudentsTable,
                      ProfReferenceItemsTable, SectionReferenceItemsTable)
-
-
-# helper function to make tables
-# merge the result of this into the response data
-def filtered_table(name=None,
-                   qs=None,
-                   filter=None,
-                   table=None,
-                   request=None,
-                   page_size=25,
-                   wrap_list=True):
-    filt = filter(request.GET, queryset=qs, prefix=name)
-    # weird "{name}" thing is because the HTML field has the prefix but the Filter does
-    # NOT have it in the field names
-    has_filter = any(f'{name}-{field}' in request.GET for field in set(filt.get_fields()))
-    table_source = filt.qs
-    if wrap_list:
-        table_source = list(table_source)
-    tab = table(table_source, prefix=name + "-")
-    RequestConfig(request, paginate={"per_page": page_size, "page": 1}).configure(tab)
-    return {name + '_table': tab, name + '_filter': filt, name + '_has_filter': has_filter}
 
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
