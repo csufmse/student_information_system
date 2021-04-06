@@ -37,7 +37,7 @@ DELETE FROM sis_course;
 
 The models specify constraints so all the join-tables will be cleared by these.
 
-### User accounts (Admin, Professor, Student) have passwords set by default
+### User accounts (Professor, Student) have passwords set by default
 
 And they're really dumb passwords. If you want to NOT set passwords,
 go into ```01_admin.py```, ```04_student.py```, and ```08_professor.py``` and

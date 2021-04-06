@@ -1,5 +1,6 @@
 from datetime import date
 
+from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.forms import AdminPasswordChangeForm
 from django.contrib.auth.models import User
@@ -10,15 +11,31 @@ from django.utils.html import format_html
 from django.urls import reverse
 
 from sis.authentication_helpers import role_login_required
-from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
-                        Student, SectionStudent, AccessRoles)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, Semester, Student,
+                        SectionStudent, Profile)
 from sis.utils import filtered_table
 
 from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFilter,
                       SemesterFilter, UserFilter, StudentFilter, ItemFilter, SectionItemFilter)
-from .forms import (CourseCreationForm, CourseEditForm, CustomUserCreationForm, MajorCreationForm,
-                    MajorEditForm, SectionCreationForm, SectionEditForm, SemesterCreationForm,
-                    UserEditForm, SemesterEditForm, ReferenceItemCreationForm)
+from .forms import (
+    CourseCreationForm,
+    CourseEditForm,
+    UserCreationForm,
+    MajorCreationForm,
+    MajorEditForm,
+    SectionCreationForm,
+    SectionEditForm,
+    SemesterCreationForm,
+    UserEditForm,
+    SemesterEditForm,
+    ReferenceItemCreationForm,
+    ProfileCreationForm,
+    ProfileEditForm,
+    StudentEditForm,
+    ProfessorEditForm,
+    StudentCreationForm,
+    ProfessorCreationForm,
+)
 from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable, SemestersTable,
                      FullUsersTable, StudentHistoryTable, StudentInMajorTable,
                      StudentInSectionTable, SemestersSummaryTable, SectionForClassTable,
@@ -26,7 +43,7 @@ from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable, Semes
                      ProfReferenceItemsTable, SectionReferenceItemsTable)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def index(request):
     return render(request, 'schooladmin/home_admin.html')
 
@@ -34,7 +51,7 @@ def index(request):
 # USERS
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def users(request):
     return render(
         request, 'schooladmin/users.html',
@@ -47,20 +64,20 @@ def users(request):
         ))
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def students(request):
     return render(
         request, 'schooladmin/students.html',
         filtered_table(
             name='students',
-            qs=User.annotated().filter(access_role=AccessRoles.STUDENT_ROLE),
+            qs=User.annotated().filter(profile__role=Profile.ACCESS_STUDENT),
             filter=StudentFilter,
             table=StudentsTable,
             request=request,
         ))
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def user(request, userid):
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:
@@ -79,9 +96,9 @@ def user(request, userid):
                              f'User {the_user.get_full_name()} has been enabled for login.')
         return redirect('schooladmin:users')
 
-    if the_user.access_role() == AccessRoles.STUDENT_ROLE:
+    if the_user.profile.role == Profile.ACCESS_STUDENT:
         return student(request, userid)
-    elif the_user.access_role() == AccessRoles.PROFESSOR_ROLE:
+    elif the_user.profile.role == Profile.ACCESS_PROFESSOR:
         return professor(request, userid)
 
     formdata = {
@@ -91,14 +108,14 @@ def user(request, userid):
     return render(request, 'schooladmin/user.html', formdata)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def student(request, userid):
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:
         return HttpResponse("No such user")
     the_user = qs.get()
 
-    if the_user.access_role() != AccessRoles.STUDENT_ROLE:
+    if the_user.profile.role != Profile.ACCESS_STUDENT:
         return user(request, userid)
 
     if request.method == 'POST':
@@ -116,7 +133,7 @@ def student(request, userid):
     data.update(
         filtered_table(
             name='semesters',
-            qs=the_user.student.semesters,
+            qs=the_user.profile.student.semesters.all(),
             filter=SemesterFilter,
             table=SemestersSummaryTable,
             request=request,
@@ -126,7 +143,7 @@ def student(request, userid):
     data.update(
         filtered_table(
             name='history',
-            qs=the_user.student.course_history(),
+            qs=the_user.profile.student.course_history(),
             filter=SectionStudentFilter,
             table=StudentHistoryTable,
             request=request,
@@ -135,7 +152,7 @@ def student(request, userid):
     data.update(
         filtered_table(
             name='remaining',
-            qs=the_user.student.remaining_required_courses(),
+            qs=the_user.profile.student.remaining_required_courses(),
             filter=CourseFilter,
             table=CoursesTable,
             request=request,
@@ -143,7 +160,7 @@ def student(request, userid):
     data.update(
         filtered_table(
             name='majorcourses',
-            qs=the_user.student.major.requirements_met_list(the_user.student),
+            qs=the_user.profile.student.requirements_met_list(),
             filter=CourseFilter,
             table=MajorCoursesMetTable,
             request=request,
@@ -152,14 +169,14 @@ def student(request, userid):
     return render(request, 'schooladmin/student.html', data)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def professor(request, userid):
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:
         return HttpResponse("No such user")
     the_user = qs.get()
 
-    if the_user.access_role() != AccessRoles.PROFESSOR_ROLE:
+    if the_user.profile.role != Profile.ACCESS_PROFESSOR:
         return user(request, userid)
 
     if request.method == 'POST':
@@ -177,7 +194,7 @@ def professor(request, userid):
     data.update(
         filtered_table(
             name='semesters',
-            qs=the_user.professor.semesters_teaching(),
+            qs=the_user.profile.professor.semesters_teaching(),
             filter=SemesterFilter,
             table=SemestersSummaryTable,
             request=request,
@@ -186,7 +203,7 @@ def professor(request, userid):
     data.update(
         filtered_table(
             name='sections',
-            qs=the_user.professor.section_set,
+            qs=the_user.profile.professor.section_set,
             filter=SectionFilter,
             table=SectionsTable,
             request=request,
@@ -195,7 +212,7 @@ def professor(request, userid):
     data.update(
         filtered_table(
             name='items',
-            qs=the_user.professor.referenceitem_set,
+            qs=the_user.profile.professor.referenceitem_set,
             filter=ItemFilter,
             table=ProfReferenceItemsTable,
             request=request,
@@ -204,14 +221,14 @@ def professor(request, userid):
     return render(request, 'schooladmin/professor.html', data)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def professor_items(request, userid):
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:
         return HttpResponse("No such user")
     the_user = qs.get()
 
-    if the_user.access_role() != AccessRoles.PROFESSOR_ROLE:
+    if the_user.profile.role != Profile.ACCESS_PROFESSOR:
         return user(request, userid)
 
     data = {
@@ -220,7 +237,7 @@ def professor_items(request, userid):
     data.update(
         filtered_table(
             name='items',
-            qs=the_user.professor.referenceitem_set,
+            qs=the_user.profile.professor.referenceitem_set,
             filter=ItemFilter,
             table=ProfReferenceItemsTable,
             request=request,
@@ -229,19 +246,19 @@ def professor_items(request, userid):
     return render(request, 'schooladmin/professor_items.html', data)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def professor_item(request, userid, item_id):
     return HttpResponse("not yet")
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def professor_item_new(request, userid):
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:
         return HttpResponse("No such user")
     the_prof = qs[0]
 
-    if the_prof.access_role() != AccessRoles.PROFESSOR_ROLE:
+    if the_prof.profile.role != Profile.ACCESS_PROFESSOR:
         messages.error(request, "That's not a professor.")
         return user(request, userid)
 
@@ -249,7 +266,7 @@ def professor_item_new(request, userid):
         form = ReferenceItemCreationForm(request.POST)
         if form.is_valid():
             the_new_item = form.save(commit=False)
-            the_new_item.professor = the_prof.professor
+            the_new_item.professor = the_prof.profile.professor
             the_new_item.save()
             form.save_m2m()
             messages.success(
@@ -259,7 +276,7 @@ def professor_item_new(request, userid):
             messages.error(request, 'Please correct the error(s) below.')
     else:
         dict = {}
-        profs = Professor.objects.filter(user_id=the_prof.id)
+        profs = Professor.objects.filter(profile__user_id=the_prof.id)
         dict['professor'] = profs[0]
         form = ReferenceItemCreationForm(initial=dict)
     return render(request, 'schooladmin/professor_new_item.html', {
@@ -268,7 +285,7 @@ def professor_item_new(request, userid):
     })
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def user_change_password(request, userid):
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:
@@ -292,112 +309,151 @@ def user_change_password(request, userid):
     })
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@transaction.atomic
+@role_login_required(Profile.ACCESS_ADMIN)
 def user_edit(request, userid):
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:
         return HttpResponse("No such user")
     the_user = qs.get()
     if request.method == 'POST':
-        form = UserEditForm(request.POST)
-        if form.is_valid():
-            the_user.first_name = form.cleaned_data['first_name']
-            the_user.last_name = form.cleaned_data['last_name']
-            the_user.email = form.cleaned_data['email']
-            the_user.save()
+        user_form = UserEditForm(request.POST, instance=the_user, prefix='u')
+        profile = the_user.profile
+        profile_form = ProfileEditForm(request.POST, instance=profile, prefix='p')
+        if user_form.is_valid() and profile_form.is_valid():
+            the_new_user = user_form.save()
+            the_profile = profile_form.save()
 
             message = "User has been updated. "
-            old_role = the_user.access_role()
-            new_role = form.cleaned_data['role']
-            if old_role != new_role:
-                message = message + f"User role changes from {old_role} to {new_role}."
-                if old_role == AccessRoles.STUDENT_ROLE:
-                    # NOT deleting Student here so that we don't lose the data
-                    pass
-                elif old_role == AccessRoles.PROFESSOR_ROLE:
-                    prof = Professor.objects.filter(user_id=the_user.id).get()
-                    prof.delete()
-                elif old_role == AccessRoles.ADMIN_ROLE:
-                    admi = Admin.objects.filter(user_id=the_user.id).get()
-                    admi.delete()
 
-                if new_role == AccessRoles.STUDENT_ROLE:
-                    stud = Student(user_id=the_user.id, major=form.cleaned_data['major'])
-                    stud.save()
-                elif new_role == AccessRoles.PROFESSOR_ROLE:
-                    prof = Professor(user_id=the_user.id, major=form.cleaned_data['major'])
-                    prof.save()
-                elif new_role == AccessRoles.ADMIN_ROLE:
-                    admi = Admin(user_id=the_user.id)
-                    admi.save()
-            elif old_role == AccessRoles.STUDENT_ROLE:
-                # same role, check if major has to be updated
-                stud = Student.objects.filter(user_id=the_user.id).get()
-                if stud.major != form.cleaned_data['major']:
-                    stud.major = form.cleaned_data['major']
-                    stud.save()
-            elif old_role == AccessRoles.PROFESSOR_ROLE:
-                # same role, check if major has to be updated
-                prof = Professor.objects.filter(user_id=the_user.id).get()
-                if prof.major != form.cleaned_data['major']:
-                    prof.major = form.cleaned_data['major']
-                    prof.save()
+            success = True
+            # new model just adds the student/professor object if needed. this way
+            # we don't lose the info from the previous role.
+            if the_profile.role == Profile.ACCESS_STUDENT:
+                if the_profile.has_student():
+                    the_stud = the_profile.student
+                else:
+                    the_stud = Student.objects.create(profile=the_profile)
+                student_form = StudentEditForm(request.POST, instance=the_stud)
 
-            messages.success(request, message)
-            return redirect('schooladmin:user', userid)
+                if student_form.is_valid():
+                    stud = student_form.save(commit=False)
+                    stud.profile = the_profile
+                    stud.save()
+                else:
+                    success = False
+
+            elif the_profile.role == Profile.ACCESS_PROFESSOR:
+                if the_profile.has_professor():
+                    the_prof = the_profile.professor
+                else:
+                    the_prof = Professor.objects.create(profile=the_profile)
+                professor_form = ProfessorEditForm(request.POST, instance=the_prof)
+
+                if professor_form.is_valid():
+                    prof = professor_form.save(commit=False)
+                    prof.profile = the_profile
+                    prof.save()
+                else:
+                    success = False
+
+            if success:
+                messages.success(request, message)
+                return redirect('schooladmin:user', userid)
+            else:
+                messages.error(request, 'Please correct the error(s) below.')
         else:
             messages.error(request, 'Please correct the error(s) below.')
     else:
-        dict = model_to_dict(the_user)
-        dict['role'] = the_user.access_role()
-        profs = Professor.objects.filter(user_id=the_user.id)
-        studs = Student.objects.filter(user_id=the_user.id)
-        if profs.count() > 0:
-            dict['major'] = profs[0].major
-        elif studs.count() > 0:
-            dict['major'] = studs[0].major
-        form = UserEditForm(initial=dict)
+        user_form = UserEditForm(instance=the_user, prefix='u')
+        profile = the_user.profile
+        profile_form = ProfileEditForm(instance=profile, prefix='p')
+        try:
+            stud = profile.student
+            student_form = StudentEditForm(instance=stud)
+        except Exception:
+            student_form = StudentEditForm(initial={})
 
-    return render(request, 'schooladmin/user_edit.html', {
-        'user': the_user,
-        'original_role': the_user.access_role(),
-        'form': form
-    })
+        try:
+            prof = profile.professor
+            professor_form = ProfessorEditForm(instance=prof)
+        except Exception:
+            professor_form = ProfessorEditForm(initial={})
+
+    return render(
+        request, 'schooladmin/user_edit.html', {
+            'user': the_user,
+            'original_role': the_user.profile.role,
+            'user_form': user_form,
+            'profile_form': profile_form,
+            'student_form': student_form,
+            'professor_form': professor_form,
+        })
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@transaction.atomic
+@role_login_required(Profile.ACCESS_ADMIN)
 def user_new(request):
     if request.method == 'POST':
-        form = CustomUserCreationForm(request.POST)
-        if form.is_valid():
-            the_new_user = form.save()
-            access_role = form.cleaned_data.get('role')
-            major = form.cleaned_data.get('major')
-            if access_role == AccessRoles.STUDENT_ROLE:
-                student = Student(user=the_new_user,
-                                  major=Major.objects.filter(abbreviation=major).get())
-                student.save()
-            elif access_role == AccessRoles.PROFESSOR_ROLE:
-                professor = Professor(user=the_new_user,
-                                      major=Major.objects.filter(abbreviation=major).get())
-                professor.save()
-            elif access_role == AccessRoles.ADMIN_ROLE:
-                admin = Admin(user=the_new_user)
-                admin.save()
-            messages.success(request,
-                             f'User {the_new_user.get_full_name()} created as a {access_role}.')
-            return redirect('schooladmin:users')
+        user_form = UserCreationForm(request.POST, prefix='u')
+        profile_form = ProfileCreationForm(request.POST, prefix='p')
+
+        if user_form.is_valid() and profile_form.is_valid():
+            the_new_user = user_form.save()
+            the_new_profile = profile_form.save(commit=False)
+            the_new_profile.user = the_new_user
+            the_new_profile.save()
+
+            access_role = the_new_profile.role
+            success = True
+            if access_role == Profile.ACCESS_STUDENT:
+                student_form = StudentCreationForm(request.POST, prefix='s')
+                if student_form.is_valid():
+                    student = student_form.save(commit=False)
+                    student.profile = the_new_profile
+                    student.save()
+                else:
+                    success = False
+            elif access_role == Profile.ACCESS_PROFESSOR:
+                professor_form = ProfessorCreationForm(request.POST, prefix='r')
+                if professor_form.is_valid():
+                    professor = professor_form.save(commit=False)
+                    professor.profile = the_new_profile
+                    professor.save()
+                else:
+                    success = False
+
+            if success:
+                messages.success(
+                    request, f'User {the_new_user.get_full_name()} created ' +
+                    f'as a {the_new_user.profile.rolename}.')
+                return redirect('schooladmin:users')
+            else:
+                messages.error(request, 'Please correct the error(s) below.')
         else:
+            professor_form = ProfessorCreationForm(request.POST, prefix='r')
+            student_form = StudentCreationForm(request.POST, prefix='s')
+
             messages.error(request, 'Please correct the error(s) below.')
     else:
-        form = CustomUserCreationForm()
-    return render(request, 'schooladmin/user_new.html', {'form': form})
+        user_form = UserCreationForm(prefix='u')
+        profile_form = ProfileCreationForm(prefix='p')
+        student_form = StudentCreationForm(prefix='s')
+        professor_form = ProfessorCreationForm(prefix='r')
+
+    return render(
+        request, 'schooladmin/user_new.html', {
+            'user_form': user_form,
+            'profile_form': profile_form,
+            'student_form': student_form,
+            'professor_form': professor_form
+        })
 
 
 # MAJORS
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def majors(request):
     return render(
         request, 'schooladmin/majors.html',
@@ -410,7 +466,7 @@ def majors(request):
         ))
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def major(request, majorid):
     qs = Major.objects.filter(id=majorid)
     if qs.count() < 1:
@@ -423,7 +479,7 @@ def major(request, majorid):
     data.update(
         filtered_table(
             name='profs',
-            qs=User.annotated().filter(professor__major=the_major),
+            qs=User.annotated().filter(profile__professor__major=the_major),
             filter=UserFilter,
             table=UsersTable,
             request=request,
@@ -450,7 +506,7 @@ def major(request, majorid):
     data.update(
         filtered_table(
             name='students',
-            qs=User.annotated().filter(student__major=the_major),
+            qs=User.annotated().filter(profile__student__major=the_major),
             filter=UserFilter,
             table=StudentInMajorTable,
             request=request,
@@ -459,7 +515,7 @@ def major(request, majorid):
     return render(request, 'schooladmin/major.html', data)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def major_edit(request, majorid):
     qs = Major.objects.filter(id=majorid)
     if qs.count() < 1:
@@ -474,7 +530,7 @@ def major_edit(request, majorid):
             form.save_m2m()
             messages.success(
                 request, f'Major {the_major.abbreviation } / {the_major.name} has been updated.')
-            return redirect('schooladmin:major', abbreviation)
+            return redirect('schooladmin:major', the_major.id)
         else:
             messages.error(request, 'Please correct the error(s) below.')
     else:
@@ -482,7 +538,7 @@ def major_edit(request, majorid):
     return render(request, 'schooladmin/major_edit.html', {'major': the_major, 'form': form})
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def major_new(request):
     if request.method == 'POST':
         form = MajorCreationForm(request.POST)
@@ -498,7 +554,7 @@ def major_new(request):
     return render(request, 'schooladmin/major_new.html', {'form': form})
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def courses(request):
     return render(
         request, 'schooladmin/courses.html',
@@ -511,7 +567,7 @@ def courses(request):
         ))
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def course(request, courseid):
     qs = Course.objects.filter(id=courseid)
     if qs.count() < 1:
@@ -551,7 +607,7 @@ def course(request, courseid):
     return render(request, 'schooladmin/course.html', data)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def course_edit(request, courseid):
     qs = Course.objects.filter(id=courseid)
     if qs.count() < 1:
@@ -571,7 +627,7 @@ def course_edit(request, courseid):
     return render(request, 'schooladmin/course_edit.html', {'form': form, 'course': the_course})
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def course_new(request):
     if request.method == 'POST':
         form = CourseCreationForm(request.POST)
@@ -586,12 +642,12 @@ def course_new(request):
     return render(request, 'schooladmin/course_new.html', {'form': form})
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def course_section_new(request, courseid):
     return section_new_helper(request, courseid=courseid)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def semesters(request):
     return render(
         request, 'schooladmin/semesters.html',
@@ -604,7 +660,7 @@ def semesters(request):
         ))
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def semester(request, semester_id):
     qs = Semester.objects.filter(id=semester_id)
     if qs.count() < 1:
@@ -642,7 +698,7 @@ def semester(request, semester_id):
     return render(request, 'schooladmin/semester.html', data)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def semester_edit(request, semester_id):
     qs = Semester.objects.filter(id=semester_id)
     if qs.count() < 1:
@@ -665,7 +721,7 @@ def semester_edit(request, semester_id):
     })
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def semester_new(request):
     if request.method == 'POST':
         form = SemesterCreationForm(request.POST)
@@ -682,12 +738,12 @@ def semester_new(request):
     return render(request, 'schooladmin/semester_new.html', {'form': form})
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def semester_section_new(request, semester_id):
     return section_new_helper(request, semester_id=semester_id)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def sections(request):
     return render(
         request, 'schooladmin/sections.html',
@@ -700,7 +756,7 @@ def sections(request):
         ))
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def section(request, sectionid):
     qs = Section.objects.filter(id=sectionid)
     if qs.count() < 1:
@@ -730,7 +786,7 @@ def section(request, sectionid):
     return render(request, 'schooladmin/section.html', data)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def section_refreshitems(request, sectionid):
     qs = Section.objects.filter(id=sectionid)
     if qs.count() < 1:
@@ -743,7 +799,7 @@ def section_refreshitems(request, sectionid):
     return redirect('schooladmin:section', sectionid)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def section_students_manage(request, sectionid):
     qs = Section.objects.filter(id=sectionid)
     if qs.count() < 1:
@@ -753,7 +809,7 @@ def section_students_manage(request, sectionid):
     return HttpResponse('not implemented yet')
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def section_edit(request, sectionid):
     qs = Section.objects.filter(id=sectionid)
     if qs.count() < 1:
@@ -779,7 +835,7 @@ def section_edit(request, sectionid):
     })
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def section_new_from_section(request, sectionid):
     qs = Section.objects.filter(id=sectionid)
     if qs.count() < 1:
@@ -790,7 +846,7 @@ def section_new_from_section(request, sectionid):
                               semester_id=the_section.semester.id)
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def section_new(request):
     return section_new_helper(request)
 
@@ -839,13 +895,13 @@ def section_new_helper(request, semester_id=None, courseid=None):
         form = SectionCreationForm(initial=form_values)
     return render(
         request, 'schooladmin/section_new.html', {
-            'profs': Professor.objects.filter(user__is_active=True),
+            'profs': Professor.objects.filter(profile__user__is_active=True),
             'courses': Course.objects.all(),
             'form': form,
         })
 
 
-@role_login_required(AccessRoles.ADMIN_ROLE)
+@role_login_required(Profile.ACCESS_ADMIN)
 def sectionstudent(request, id):
     qs = SectionStudent.objects.filter(id=id)
     if qs.count() < 1:

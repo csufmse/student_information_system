@@ -15,7 +15,7 @@
   <dt>Semester</dt>
     <dd><a href="{% url 'schooladmin:semester' semester_id=section.semester.id %}">{{ section.semester }}</a></dd>
   <dt>Professor</dt>
-    <dd><a href="{% url 'schooladmin:user' userid=section.professor.user.id %}">{{ section.professor }}</a></dd>
+    <dd><a href="{% url 'schooladmin:user' userid=section.professor.profile.user.id %}">{{ section.professor.profile.name }}</a></dd>
   <dt>Hours</dt>
   <dd>{{ section.hours }}</dd>
   <dt>Location</dt>

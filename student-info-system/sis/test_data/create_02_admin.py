@@ -12,8 +12,7 @@ django.setup()  # noqa
 
 from django.contrib.auth.models import User
 from django.db import connection
-
-from sis.models import Admin
+from sis.models import Profile
 
 to_generate = 100
 
@@ -42,15 +41,11 @@ def createData():
 
         try:
             usr.save()
+            profile = usr.profile
+            profile.role = Profile.ACCESS_ADMIN
+            profile.save()
         except Exception:
             print(f'ERROR: Unable to create Admin(User) {line} {u} ({f} {l})')
-            error_count = error_count + 1
-            continue
-
-        try:
-            Admin.objects.create(user=usr)
-        except Exception:
-            print(f'failed creating Admin for user {usr.username}')
             error_count = error_count + 1
             continue
 
@@ -59,10 +54,10 @@ def createData():
 
 def cleanData():
     list = []
-    for ad in Admin.objects.all():
-        list.append(str(ad.user_id))
+    for ad in Profile.objects.filter(role=Profile.ACCESS_ADMIN):
+        list.append(str(ad.user.id))
     with connection.cursor() as cursor:
-        cursor.execute("DELETE FROM sis_admin"),
+        cursor.execute("DELETE FROM sis_profile WHERE user_id in (" + (','.join(list)) + ')')
         cursor.execute('DELETE FROM auth_user WHERE id IN (' + (','.join(list) + ')'))
 
 

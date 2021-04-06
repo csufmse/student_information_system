@@ -2,7 +2,7 @@ from django.test import TestCase
 from datetime import datetime
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, Student, AccessRoles, ClassLevel)
+                        Semester, Student, ClassLevel)
 
 from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
 

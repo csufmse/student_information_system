@@ -10,16 +10,20 @@ class FullUsersTable(tables.Table):
     username = ClassyColumn(css_class_base='username')
     student_major = ClassyColumn(verbose_name='Student Major',
                                  css_class_base='major',
-                                 accessor='student__major__abbreviation')
+                                 accessor='profile__student__major__abbreviation')
     professor_department = ClassyColumn(verbose_name='Professor Dept',
                                         css_class_base='major',
-                                        accessor='professor__major__abbreviation')
+                                        accessor='profile__professor__major__abbreviation')
     is_active = AbilityColumn(null=False, attrs=field_css_classes('active'))
-    access_role = ClassyColumn(verbose_name='User Role', css_class_base='role')
+    access_role = ClassyColumn(verbose_name='User Role',
+                               accessor='profile__rolename',
+                               css_class_base='role')
     class_level = ClassyColumn(verbose_name='Class',
                                css_class_base='classlevel',
-                               accessor='student__class_level')
-    student_gpa = ClassyColumn(verbose_name='GPA', accessor='student__gpa', css_class_base='gpa')
+                               accessor='profile__student__class_level')
+    student_gpa = ClassyColumn(verbose_name='GPA',
+                               accessor='profile__student__gpa',
+                               css_class_base='gpa')
 
     def render_student_gpa(self, value):
         return '{:0.2f}'.format(value)
@@ -27,7 +31,7 @@ class FullUsersTable(tables.Table):
     credits_earned = ClassyColumn(
         verbose_name='Credits',
         css_class_base='credits',
-        accessor='student__credits_earned',
+        accessor='profile__student__credits_earned',
     )
 
     class Meta:
@@ -44,13 +48,14 @@ class StudentsTable(tables.Table):
     username = ClassyColumn(css_class_base='username')
     student_major = ClassyColumn(verbose_name='Student Major',
                                  css_class_base='major',
-                                 accessor='student__major__abbreviation')
+                                 accessor='profile__student__major__abbreviation')
     is_active = AbilityColumn(null=False, attrs=field_css_classes('active'))
-    access_role = ClassyColumn(verbose_name='User Role', css_class_base='role')
     class_level = ClassyColumn(verbose_name='Class',
                                css_class_base='classlevel',
-                               accessor='student__class_level')
-    student_gpa = ClassyColumn(verbose_name='GPA', css_class_base='gpa', accessor='student__gpa')
+                               accessor='profile__student__class_level')
+    student_gpa = ClassyColumn(verbose_name='GPA',
+                               css_class_base='gpa',
+                               accessor='profile__student__gpa')
 
     def render_student_gpa(self, value):
         return '{:0.2f}'.format(value)
@@ -58,7 +63,7 @@ class StudentsTable(tables.Table):
     credits_earned = ClassyColumn(
         verbose_name='Credits',
         css_class_base='credits',
-        accessor='student__credits_earned',
+        accessor='profile__student__credits_earned',
     )
 
     class Meta:
@@ -76,8 +81,8 @@ class StudentInMajorTable(tables.Table):
     is_active = AbilityColumn(null=False, attrs=field_css_classes('active'))
     class_level = ClassyColumn(verbose_name='Class',
                                css_class_base='classlevel',
-                               accessor='student__class_level')
-    gpa = ClassyColumn(verbose_name='GPA', css_class_base='gpa', accessor='student__gpa')
+                               accessor='profile__student__class_level')
+    gpa = ClassyColumn(verbose_name='GPA', css_class_base='gpa', accessor='profile__student__gpa')
 
     def render_gpa(self, value):
         return '{:0.2f}'.format(value)
@@ -85,7 +90,7 @@ class StudentInMajorTable(tables.Table):
     credits_earned = ClassyColumn(
         verbose_name='Credits',
         css_class_base='credits',
-        accessor='student__credits_earned',
+        accessor='profile__student__credits_earned',
     )
 
     class Meta:
@@ -221,7 +226,7 @@ class SectionsTable(tables.Table):
     course_title = ClassyColumn(css_class_base='coursetitle')
     hours = ClassyColumn(css_class_base='hours')
     location = ClassyColumn(css_class_base='location')
-    professor = ClassyColumn(css_class_base='user_name', accessor='professor__name')
+    professor = ClassyColumn(css_class_base='user_name', accessor='professor__profile__name')
     capacity = ClassyColumn(css_class_base='capac')
     seats_remaining = ClassyColumn(css_class_base='remaining')
 
@@ -244,7 +249,7 @@ class SectionForClassTable(tables.Table):
     status = ClassyColumn(css_class_base='sectionstatus')
     hours = ClassyColumn(css_class_base='hours')
     location = ClassyColumn(css_class_base='location')
-    professor = ClassyColumn(css_class_base='username', accessor='professor__name')
+    professor = ClassyColumn(css_class_base='username', accessor='professor__profile__name')
     capacity = ClassyColumn(css_class_base='capac')
     seats_remaining = ClassyColumn(css_class_base='remaining')
 
@@ -264,9 +269,10 @@ class SectionStudentsTable(tables.Table):
                             accessor='name',
                             order_by=('semester_order'))
     course = ClassyColumn(accessor='course', css_class_base='course')
-    username = ClassyColumn(accessor='student__user__username', css_class_base='username')
-    name = ClassyColumn(accessor='student__user__name', css_class_base='user_name')
-    major = ClassyColumn(accessor='student__major__abbreviation', css_class_base='major')
+    username = ClassyColumn(accessor='student__profile__user__username',
+                            css_class_base='username')
+    name = ClassyColumn(accessor='student__profile__user__name', css_class_base='user_name')
+    major = ClassyColumn(accessor='student__profile__major__abbreviation', css_class_base='major')
     sec_status = ClassyColumn(
         verbose_name="Section Status",
         css_class_base='sectionstatus',
@@ -288,15 +294,16 @@ class SectionStudentsTable(tables.Table):
                   'letter_grade')
         row_attrs = {
             'class': 'sectionstudent_row',
-            'data-id': lambda record: record.student.user.pk
+            'data-id': lambda record: record.student.profile.user.pk
         }
         attrs = {"class": 'sectionstudent_table'}
 
 
 # for when the class is known
 class StudentInSectionTable(tables.Table):
-    username = ClassyColumn(accessor='student__user__username', css_class_base='username')
-    name = ClassyColumn(accessor='student__user__name', css_class_base='user_name')
+    username = ClassyColumn(accessor='student__profile__user__username',
+                            css_class_base='username')
+    name = ClassyColumn(accessor='student__profile__user__name', css_class_base='user_name')
     major = ClassyColumn(accessor='student__major__abbreviation', css_class_base='major')
     gpa = ClassyColumn(accessor='student__gpa', css_class_base='gpa')
 
@@ -318,7 +325,7 @@ class StudentInSectionTable(tables.Table):
         fields = ('username', 'name', 'major', 'gpa', 'status', 'letter_grade')
         row_attrs = {
             'class': 'sectionstudent_row',
-            'data-id': lambda record: record.student.user.pk
+            'data-id': lambda record: record.student.profile.user.pk
         }
         attrs = {"class": 'sectionstudent_table'}
 
@@ -351,7 +358,7 @@ class StudentHistoryTable(tables.Table):
         template_name = "django_tables2/bootstrap.html"
         row_attrs = {
             'class': 'sectionstudent_row',
-            'data-id': lambda record: record.student.user.pk
+            'data-id': lambda record: record.student.profile.user.pk
         }
         attrs = {"class": 'sectionstudent_table'}
 

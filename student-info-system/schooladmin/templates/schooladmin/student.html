@@ -12,15 +12,17 @@
   <dt>Email</dt>
   <dd>{{ user.email }}</dd>
   <dt>Student Major</dt>
-  <dd><a href="{% url 'schooladmin:major' majorid=user.student.major.id %}">{{ user.student.major.abbreviation }}: {{  user.student.major.name }}</a></dd>
+  <dd><a href="{% url 'schooladmin:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
   <dt>Class Level</dt>
-  <dd>{{ user.student.class_level }}</dd>
+  <dd>{{ user.profile.student.class_level }}</dd>
   <dt>GPA</dt>
-  <dd>{{ user.student.gpa|floatformat:2 }}</dd>
+  <dd>{{ user.profile.student.gpa|floatformat:2 }}</dd>
   <dt>Credits Earned</dt>
-  <dd>{{ user.student.credits_earned }}</dd>
+  <dd>{{ user.profile.student.credits_earned }}</dd>
   <dt>Enabled?</dt>
   <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
+  <dt>Bio</dt>
+  <dd>{{  user.profile.bio }}</dd>
 </dl>
 
     <h3>Semesters Attended:</h3>

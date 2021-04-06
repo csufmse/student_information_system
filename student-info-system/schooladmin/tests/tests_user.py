@@ -3,8 +3,10 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section,
-                        SectionStudent, Semester, SemesterStudent, Student, UpperField)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
+                        Semester, SemesterStudent, Student, UpperField)
+
+from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
 
 
 class AdminUserViews(TestCase):
@@ -12,8 +14,7 @@ class AdminUserViews(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(AdminUserViews, cls).setUpTestData()
-        AdminUserViews.u1 = User.objects.create_user(username='u1', password='hello')
-        Admin.objects.create(user=AdminUserViews.u1)
+        AdminUserViews.u1 = createAdmin(username='u1', password='hello')
 
     # list views
     def test_users_view_exists(self):

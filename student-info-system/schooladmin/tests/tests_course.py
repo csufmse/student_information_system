@@ -3,8 +3,8 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section,
-                        SectionStudent, Semester, SemesterStudent, Student, UpperField)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
+                        Semester, SemesterStudent, Student, UpperField)
 
 from sis.tests.utils import (createAdmin, createStudent, createProfessor, createCourse)
 
@@ -13,20 +13,15 @@ class AdminCoursesViewsTest(TestCase):
 
     def setUp(self):
         # Create two users
-        test_user1 = User.objects.create_user(username='testuser1', password='hello')
-        test_user1.save()
-        admin = Admin.objects.create(user=test_user1)
-        admin.save()
+        test_user1 = createAdmin(username='testuser1', password='hello')
 
     @classmethod
     def setUpTestData(self):
-        user_p = User.objects.create(username="prof", first_name="First", last_name="Last")
         major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         course = Course.objects.create(major=major,
                                        catalog_number='101',
                                        title="Intro To Test",
                                        credits_earned=3.0)
-        professor = Professor.objects.create(user=user_p, major=major)
         semester = Semester.objects.create(date_registration_opens=datetime.now(),
                                            date_registration_closes=datetime.now(),
                                            date_started=datetime.now(),
@@ -34,15 +29,6 @@ class AdminCoursesViewsTest(TestCase):
                                            date_ended=datetime.now(),
                                            session=Semester.FALL,
                                            year=2000)
-        section = Section.objects.create(course=course,
-                                         professor=professor,
-                                         semester=semester,
-                                         number=1,
-                                         location="somewhere",
-                                         hours="MW 1200-1400")
-        user_s = User.objects.create(username="stud", first_name="First", last_name="Last")
-        self.student = Student.objects.create(user=user_s, major=major)
-        SectionStudent.objects.create(student=self.student, section=section)
 
     # list views
     def test_courses_view_exists(self):

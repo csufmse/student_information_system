@@ -3,8 +3,10 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section,
-                        SectionStudent, Semester, SemesterStudent, Student, UpperField)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
+                        Semester, SemesterStudent, Student, UpperField)
+
+from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
 
 
 class ProfessorSectionViewsTest(TestCase):
@@ -12,11 +14,7 @@ class ProfessorSectionViewsTest(TestCase):
     @classmethod
     def setUpTestData(self):
         major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
-        u1 = User.objects.create_user(username='u1',
-                                      first_name='p',
-                                      last_name='rof',
-                                      password='hello')
-        prof = Professor.objects.create(user=u1, major=major)
+        prof = createProfessor(username='u1', password='hello', major=major)
 
         course = Course.objects.create(major=major,
                                        catalog_number='101',

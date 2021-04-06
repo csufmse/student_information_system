@@ -6,7 +6,10 @@
   <h3>Create New User</h3>
   <form method="post">
     {% csrf_token %}
-      <table>{{ form.as_table }}</table>
+      <table>{{ user_form.as_table }}</table>
+      <table>{{ profile_form.as_table }}</table>
+      <table id="student_table">{{ student_form.as_table }}</table>
+      <table id="professor_table">{{ professor_form.as_table }}</table>
     <input
         action="action"
         onclick="window.history.go(-1); return false;"
@@ -20,42 +23,38 @@
   </form>
 
 <script>
-function manageMajor() {
-  var role_select = document.getElementById("id_role")
-  var major_select = document.getElementById("id_major")
-  var major_label = major_select.labels[0]
+function manageRole() {
+  var role_select = document.getElementById("id_p-role");
+  var student_table = document.getElementById("student_table");
+  var professor_table = document.getElementById("professor_table");
 
-  if ( role_select.value == 'Admin') {
-    major_select.disabled = true;
-    major_select.required = false;
-    major_select.style.visibility = "hidden"
-    major_label.style.visibility = "hidden"
-  }
-  else {
-    major_select.disabled = false;
-    major_select.required = true;
-    major_select.style.visibility = "visible"
-    major_label.style.visibility = "visible"
-    if (role_select.value == 'Student') {
-      major_label.innerHTML = "Student Major";
-    }
-    else {
-      major_label.innerText = "Major Taught"
-    }
+  if ( role_select.value == 'S') {
+    student_table.disabled = false;
+    student_table.style.visibility = "visible"
+    professor_table.disabled = true;
+    professor_table.style.visibility = "hidden"
+  } else if ( role_select.value == 'P') {
+    student_table.disabled = true;
+    student_table.style.visibility = "hidden"
+    professor_table.disabled = false;
+    professor_table.style.visibility = "visible"
+  } else {
+    student_table.disabled = true;
+    student_table.style.visibility = "hidden"
+    professor_table.disabled = true;
+    professor_table.style.visibility = "hidden"
   }
 }
 
-document.getElementById("id_role").addEventListener("change", manageMajor);
-manageMajor();
-
 document.getElementById("submitme").addEventListener("click", function () {
-        var username = document.getElementById("id_username").value;
-        var user_name = document.getElementById("id_first_name").value + ' ' + document.getElementById("id_last_name").value;
-        var role_select = document.getElementById("id_role").value
+        var username = document.getElementById("id_u-username").value;
+        var user_name = document.getElementById("id_u-first_name").value + ' ' + document.getElementById("id_u-last_name").value;
+        var role_select = document.getElementById("id_p-role");
+        var role_val = role_select.options[role_select.selectedIndex].text;
         var message = "Are you sure you wish to create user:\n\n" +
             'Username: "' + username+'"\n' +
             "Full name: "+user_name+"\n" +
-            "Access Role: "+role_select;
+            "Access Role: "+role_val;
         var answer = window.confirm(message);
         if (answer) {
             this.form.submit();
@@ -63,5 +62,9 @@ document.getElementById("submitme").addEventListener("click", function () {
         }
         return false;
     });
+
+document.getElementById("id_p-role").addEventListener("change", manageRole);
+manageRole();
+
 </script>
 {% endblock %}

@@ -1,18 +1,17 @@
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
-
-from .models import AccessRoles
+from .models import Profile
 
 
 @login_required
 def index(request):
-    access_role = request.user.access_role()
-    if access_role == AccessRoles.ADMIN_ROLE:
+    role = request.user.profile.role
+    if role == Profile.ACCESS_ADMIN:
         return redirect('schooladmin:index')
-    elif access_role == AccessRoles.PROFESSOR_ROLE:
+    elif role == Profile.ACCESS_PROFESSOR:
         return redirect('professor:index')
-    elif access_role == AccessRoles.STUDENT_ROLE:
+    elif role == Profile.ACCESS_STUDENT:
         return redirect('student:index')
 
 

@@ -6,7 +6,7 @@ from django.test import TestCase
 from sis.models import (Student, Course, CoursePrerequisite, Major, Professor, Section,
                         SectionStudent, Semester, SemesterStudent, Student, UpperField)
 
-from sis.tests.utils import createAdmin
+from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
 
 
 class StudentUserViews(TestCase):

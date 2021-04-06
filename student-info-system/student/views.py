@@ -6,28 +6,28 @@ from django.shortcuts import redirect, render
 
 from schooladmin.filters import SectionFilter
 from sis.authentication_helpers import role_login_required
-from sis.models import (Course, Section, Semester, SectionStudent, AccessRoles, SemesterStudent)
+from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
 from sis.utils import filtered_table
 
 
-@role_login_required(AccessRoles.STUDENT_ROLE)
+@role_login_required(Profile.ACCESS_STUDENT)
 def index(request):
     return render(request, 'student/home_student.html')
 
 
-@role_login_required(AccessRoles.STUDENT_ROLE)
+@role_login_required(Profile.ACCESS_STUDENT)
 def current_schedule_view(request):
     context = {
-        'my_sections': request.user.student.sectionstudent_set.all,
-        'name': request.user.student.name
+        'my_sections': request.user.profile.student.sectionstudent_set.all,
+        'name': request.user.profile.student.name
     }
     return render(request, 'student/current_schedule.html', context)
 
 
-@role_login_required(AccessRoles.STUDENT_ROLE)
+@role_login_required(Profile.ACCESS_STUDENT)
 def registration_view(request):
     has_filter = None
-    student = request.user.student
+    student = request.user.profile.student
     # If the student has to register for semesters first, do this:
     # semester_list = student.semesters.order_by('-date_started')
     # if semester_list.count() == 0:

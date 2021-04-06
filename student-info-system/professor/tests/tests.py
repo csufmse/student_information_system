@@ -3,8 +3,9 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section,
-                        SectionStudent, Semester, SemesterStudent, Student, UpperField)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
+                        Semester, SemesterStudent, Student, UpperField)
+from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
 
 
 class ProfessorViewsAccess(TestCase):
@@ -13,12 +14,8 @@ class ProfessorViewsAccess(TestCase):
     def setUpTestData(cls):
         super(ProfessorViewsAccess, cls).setUpTestData()
         m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
-        ProfessorViewsAccess.u1 = User.objects.create_user(username='u1', password='hello')
-        Professor.objects.create(user=ProfessorViewsAccess.u1)
-        ProfessorViewsAccess.u2 = User.objects.create_user(username='u2', password='hello')
-        Professor.objects.create(user=ProfessorViewsAccess.u2, major=m1)
-        ProfessorViewsAccess.u3 = User.objects.create_user(username='u3', password='hello')
-        Student.objects.create(user=ProfessorViewsAccess.u3, major=m1)
+        ProfessorViewsAccess.u1 = createProfessor(username='u1', password='hello')
+        ProfessorViewsAccess.u3 = createStudent(username='u3', password='hello', major=m1)
 
     # list views
     def test_home_view_exists_for_professor(self):

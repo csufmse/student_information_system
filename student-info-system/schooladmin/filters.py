@@ -3,8 +3,8 @@ from django.db.models import CharField, F, Q, Value
 from django.db.models.functions import Concat
 from django_filters import (CharFilter, ChoiceFilter, FilterSet, ModelChoiceFilter, RangeFilter)
 
-from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section, Semester,
-                        Student, AccessRoles, SectionStudent, ReferenceItem, SectionReferenceItem)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, Semester, Student,
+                        SectionStudent, Profile, ReferenceItem, SectionReferenceItem)
 
 
 class UserFilter(FilterSet):
@@ -13,9 +13,9 @@ class UserFilter(FilterSet):
                       label='Name',
                       method='filter_has_name',
                       lookup_expr='icontains')
-    access_role = ChoiceFilter(field_name='access_role',
+    access_role = ChoiceFilter(field_name='profile__role',
                                label='Access Role',
-                               choices=AccessRoles.ROLES)
+                               choices=Profile.ROLES)
     major = ModelChoiceFilter(
         queryset=Major.objects.order_by('abbreviation'),
         # provided because it needs one. Will be ignoring this.
@@ -25,7 +25,8 @@ class UserFilter(FilterSet):
 
     def filter_has_major(self, queryset, name, value):
         return queryset.filter(
-            Q(professor__major__abbreviation=value) | Q(student__major__abbreviation=value))
+            Q(profile__professor__major__abbreviation=value) |
+            Q(profile__student__major__abbreviation=value))
 
     def filter_has_name(self, queryset, name, value):
         return queryset.annotate(fullname=Concat('first_name', Value(' '), 'last_name')).filter(
@@ -77,7 +78,8 @@ class StudentFilter(FilterSet):
 
     def filter_has_major(self, queryset, name, value):
         return queryset.filter(
-            Q(professor__major__abbreviation=value) | Q(student__major__abbreviation=value))
+            Q(profile__professor__major__abbreviation=value) |
+            Q(profile__student__major__abbreviation=value))
 
     def filter_has_name(self, queryset, name, value):
         return queryset.annotate(fullname=Concat('first_name', Value(' '), 'last_name')).filter(
@@ -115,7 +117,7 @@ class MajorFilter(FilterSet):
                              label='Description contains',
                              lookup_expr='icontains')
     # this version lets them type part of the profs name
-    professors = CharFilter(field_name='professor__user__last_name',
+    professors = CharFilter(field_name='professor__profile__user__last_name',
                             lookup_expr='icontains',
                             label='Has Professor Name')
     # this version lets them pick professors
@@ -148,9 +150,7 @@ class MajorFilter(FilterSet):
 
 
 class CourseFilter(FilterSet):
-    major = ModelChoiceFilter(queryset=Major.objects,
-                              field_name='major__abbreviation',
-                              label='Major')
+    major = ModelChoiceFilter(queryset=Major.objects, field_name='major__id', label='Major')
 
     catalog_number = RangeFilter(field_name='catalog_number')
     title = CharFilter(field_name='title', label='Title contains', lookup_expr='icontains')
@@ -242,9 +242,9 @@ class SectionFilter(FilterSet):
                 slug__icontains=value)
 
     def filter_professor(self, queryset, name, value):
-        return queryset.annotate(slug=Concat('professor__user__first_name',
+        return queryset.annotate(slug=Concat('professor__profile__user__first_name',
                                              Value(' '),
-                                             'professor__user__last_name',
+                                             'professor__profile__user__last_name',
                                              output_field=CharField())).filter(
                                                  slug__icontains=value)
 

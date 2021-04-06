@@ -4,7 +4,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, Student, AccessRoles, ClassLevel)
+                        Semester, Student, ClassLevel, Profile)
 
 from sis.tests.utils import (createAdmin, createStudent, createProfessor, createCourse)
 
@@ -176,7 +176,7 @@ class StudentTestCase_History(TestCase):
         # e2: a prereq of c2
 
     def test_gpa(self):
-        student = (User.objects.get(username="testUser")).student
+        student = (User.objects.get(username="testUser")).profile.student
         self.assertEqual(student.gpa(), (3 * 3.0 + 0 * 2.0 + 2 * 3.0) / (3.0 + 2.0 + 3.0))
 
     def test_semesters(self):
@@ -240,13 +240,10 @@ class StudentTestCase_History(TestCase):
 
 class ProfessorTestCase(TestCase):
 
-    def setUp(self):
-        User.objects.create(username="prof", first_name="First", last_name="Last")
-
     def test_professor_name(self):
-        user = User.objects.get(username="prof")
-        professor = Professor.objects.create(user=user)
-        self.assertEqual(professor.name, "First Last")
+        u1 = createProfessor(username='prof', first='First', last='Last')
+        self.assertEqual(u1.name, "First Last")
+        u1.delete()
 
 
 class Professor_teaching_test(TestCase):
@@ -437,13 +434,13 @@ class SectionTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(SectionTestCase, cls).setUpTestData()
-        user = User.objects.create(username="prof", first_name="First", last_name="Last")
+        user = createProfessor(username='test', first='First', last='Last')
+        professor = user.profile.professor
         major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         course = Course.objects.create(major=major,
                                        catalog_number='101',
                                        title="Intro To Test",
                                        credits_earned=3.0)
-        professor = Professor.objects.create(user=user)
         semester = Semester.objects.create(date_registration_opens=datetime.now(),
                                            date_registration_closes=datetime.now(),
                                            date_started=datetime.now(),
