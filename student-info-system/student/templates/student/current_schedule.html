@@ -14,6 +14,7 @@
       <th>Professor</th>
       <th>Schedule</th>
       <th>Status</th>
+      <th>Grade</th>
     </tr>
     <tr class="heading_row">
     {% for ssect in my_sections %}
@@ -22,6 +23,7 @@
       <td>{{ssect.section.professor.name}}</td>
       <td>{{ssect.section.hours}}</td>
       <td>{{ssect.status}}</td>
+      <td>{{ssect.letter_grade}}</td>
     </tr>
     {% endfor %}
     </table>
