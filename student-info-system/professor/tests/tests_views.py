@@ -43,7 +43,7 @@ class ProfessorSectionViewsTest(TestCase):
 
 
 class ProfessorStudentsInSectionViewsTest(TestCase):
-    
+
     @classmethod
     def setUpTestData(self):
         major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
@@ -74,8 +74,6 @@ class ProfessorStudentsInSectionViewsTest(TestCase):
                                          hours="MW 1200-1400")
         section.students.add(stud)
         section.save()
-        
-
 
     def test_studentsinsection_view_exists(self):
         login = self.client.login(username='u1', password='hello')
@@ -85,14 +83,16 @@ class ProfessorStudentsInSectionViewsTest(TestCase):
     def test_studentsinsection_grade_posts(self):
         stud = Student.objects.get(user__username='u2')
         login = self.client.login(username='u1', password='hello')
-        response = self.client.post('/professor/section/1/students', data={
-            'sectionid': 1,
-            'student': stud
-        })
+        response = self.client.post('/professor/section/1/students',
+                                    data={
+                                        'sectionid': 1,
+                                        'student': stud
+                                    })
         self.assertEqual(response.status_code, 200)
-        response = self.client.post('/professor/section/1/students', data={
-            'secctionid': 1,
-            'student': stud,
-            str(stud): 3
-        })
+        response = self.client.post('/professor/section/1/students',
+                                    data={
+                                        'secctionid': 1,
+                                        'student': stud,
+                                        str(stud): 3
+                                    })
         self.assertEqual(response.status_code, 200)
