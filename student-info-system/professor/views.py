@@ -33,6 +33,8 @@ def sections(request):
 
 @role_login_required(AccessRoles.PROFESSOR_ROLE)
 def students_in_section(request, sectionid):
+    if request.POST:
+        request.POST.get
     data = {'section': Section.objects.get(id=sectionid)}
     data.update(
         filtered_table(name='students',

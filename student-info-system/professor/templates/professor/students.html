@@ -5,40 +5,51 @@
 
 {% block content %}
 <div>
-    <table class="data-table prof-top">
-      <tr class="reg-row">
-        <th>Semester</th>
-        <th>Course</th>
-        <th>Number</th>
-        <th>Course Title</th>
-        <th>Capacity</th>
-        <th>Openings</th>
-      </tr>
-      <tr class="reg-row">
-        <td>{{section.semester_name}}</td>
-        <td>{{section.course_name}}</td>
-        <td>{{section.name}}</td>
-        <td>{{section.course_title}}</td>
-        <td>{{section.capacity}}</td>
-        <td>{{section.seats_remaining}}</td>
-      </tr>
-    </table>
-    <div id="Students">
-        {% comment %}
-        {% if students_filter %}
-            <form id="students_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form students_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if students_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'professor:students' %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        {% endcomment %}
-        <div class="data-table-alt scrollify-me">
-            {% render_table students_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+  <table class="data-table prof-top">
+    <tr class="reg-row">
+      <th>Semester</th>
+      <th>Course</th>
+      <th>Number</th>
+      <th>Course Title</th>
+      <th>Capacity</th>
+      <th>Openings</th>
+    </tr>
+    <tr class="reg-row">
+      <td>{{section.semester_name}}</td>
+      <td>{{section.course_name}}</td>
+      <td>{{section.name}}</td>
+      <td>{{section.course_title}}</td>
+      <td>{{section.capacity}}</td>
+      <td>{{section.seats_remaining}}</td>
+    </tr>
+  </table>
+
+  <table class="data-table scrollify-me">
+    <tr class="reg-row">
+      <th>Name</th>
+      <th>Major</th>
+      <th>Active</th>
+      <th>Current Grade</th>
+      <th>Select Grade</th>
+      <th></th>
+      <th></th>
+    </tr>
+    <tr class="reg-row">
+      {% for student in students %}
+      <td>{{student.name}}</td>
+      <td>{{student.major}}</td>
+      <td>{{student.is_active}}</td>
+      <td>
+        <form action="{% url 'professor:students_in_section %}" method="post">
+          <select name="grade">
+            {% for grade in grades %}
+              <option value="{{lgrade}}">{{grade}}</option></td>
+            {% endfor %}
+          </select>
+      {% endfor %}
+    </tr>
+  </table>
+
   <input
     action="action"
     onclick="window.history.go(-1); return false;"
