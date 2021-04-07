@@ -1,6 +1,6 @@
 import os
 import sys
-from random import choices, choice
+from random import choices, choice, shuffle, random, randrange, randint
 import django
 
 sys.path.append(".")  # noqa
@@ -9,7 +9,7 @@ django.setup()  # noqa
 
 from sis.models import Section, SectionStudent, SemesterStudent, Student, Semester
 from django.db import connection
-
+from datetime import datetime
 
 def createData():
     to_generate = 1000
@@ -22,22 +22,45 @@ def createData():
     choices((0, 1, 2, 3, 4), weights=[2, 2, 4, 4, 5], k=14)
 
     letter = ('F', 'D', 'C', 'B', 'A')
-    sections = Section.objects.all()
+    sections = list(Section.objects.all())
 
     error_count = 0
-    i = 0
-    while i < to_generate:
-        i = i + 1
+    now = datetime.now()
 
-        sec = choice(sections)
-
-        semstuds = SemesterStudent.objects.filter(semester_id=sec.semester.id)
+    for sem in Semester.objects.all():
+        semstuds = SemesterStudent.objects.filter(semester=sem)
         if semstuds.count() == 0:
-            error_count = error_count + 1
-            print(f'WARNING: No students attend {sec.semester}')
-            i = i - 1
+            print(f'WARNING: No students attend {sem}')
             continue
 
+        number_attended = randrange(1,6)
+        sections = list(Section.objects.filter(semester=sem))
+        for semstud in semstuds:
+            shuffle(sections)
+
+            for sec in sections[0:number_attended]:
+                ss = SectionStudent(section=sec, student=semstud.student)
+                if sec.status == Section.CLOSED:
+                    continue
+                elif sec.status == Section.OPEN:
+                    if random() < 0.1:
+                        if random() < 0.75:
+                            ss.status = SectionStudent.DROPPED
+                        else:
+                            ss.status = SectionStudent.DROP_REQUESTED
+                    else:
+                        ss.status = SectionStudent.REGISTERED
+                elif sec.status == Section.IN_PROGRESS:
+                    ss.status = SectionStudent.AWAITING_GRADE
+                elif sec.status == Section.GRADING:
+                    ss.status = SectionStudent.AWAITING_GRADE
+                elif sec.status == Section.GRADED:
+                    ss.status = SectionStudent.GRADED
+                    g = choices(grades, weights=[2, 2, 4, 4, 5], k=1)[0]
+                    ltr = letter[g]
+                    ss.grade = g
+                elif sec.status == Section.CANCELLED:
+                    ss.status = SectionStudent.DROPPED
         st = choice(semstuds).student
 
         stat = choices(statuses, weights=[20, 3, 50, 3, 1], k=1)[0]
@@ -47,7 +70,6 @@ def createData():
             g = choices(grades, weights=[2, 2, 4, 4, 5], k=1)[0]
             ltr = letter[g]
 
-        ss = SectionStudent(section=sec, student=st, status=stat, grade=g)
         try:
             ss.save()
         except Exception:
