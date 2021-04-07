@@ -726,9 +726,12 @@ def semester_new(request):
     if request.method == 'POST':
         form = SemesterCreationForm(request.POST)
         if form.is_valid():
-            the_new_semester = form.save()
-            messages.success(request, f'Semester {the_new_semester} has been created.')
-            return redirect('schooladmin:semesters')
+            try:
+                the_new_semester = form.save()
+                messages.success(request, f'Semester {the_new_semester} has been created.')
+                return redirect('schooladmin:semesters')
+            except Exception:
+                messages.error(request, 'Semester is a duplicate of an existing one. Please correct.')
         else:
             messages.error(request, 'Please correct the error(s) below.')
     else:
