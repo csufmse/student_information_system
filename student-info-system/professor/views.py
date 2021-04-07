@@ -3,7 +3,7 @@ from django.shortcuts import render
 from django_tables2 import RequestConfig
 
 from sis.authentication_helpers import role_login_required
-from sis.models import Professor, Section, Semester, Profile
+from sis.models import Professor, Section, Semester, Profile, SectionStudent
 from sis.utils import filtered_table
 
 from schooladmin.tables import SectionsTable, StudentInSectionTable
