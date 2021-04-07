@@ -4,8 +4,7 @@ from django.contrib.auth.models import User
 from django.test import TestCase
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Profile, Section,
-                        SectionStudent, Semester, SemesterStudent, Student,
-                        UpperField)
+                        SectionStudent, Semester, SemesterStudent, Student, UpperField)
 
 
 class ProfessorSectionViewsTest(TestCase):
