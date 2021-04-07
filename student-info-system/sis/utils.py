@@ -16,7 +16,6 @@ def filtered_table(name=None,
         # NOT have it in the field names
         has_filter = any(f'{name}-{field}' in request.GET for field in set(filt.get_fields()))
         table_source = filt.qs
-        print(f'{filt}')
     else:
         filt = None
         has_filter = False
