@@ -498,7 +498,7 @@ class SectionStudent(models.Model):
 
     @property
     def letter_grade(self):
-        return dict(GRADES).get(self.grade)
+        return dict(self.GRADES).get(self.grade)
 
     letter_grade.fget.short_description = 'Grade Assigned'
 
