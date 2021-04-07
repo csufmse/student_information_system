@@ -10,11 +10,17 @@ def filtered_table(name=None,
                    request=None,
                    page_size=25,
                    wrap_list=True):
-    filt = filter(request.GET, queryset=qs, prefix=name)
-    # weird "{name}" thing is because the HTML field has the prefix but the Filter does
-    # NOT have it in the field names
-    has_filter = any(f'{name}-{field}' in request.GET for field in set(filt.get_fields()))
-    table_source = filt.qs
+    if filter:
+        filt = filter(request.GET, queryset=qs, prefix=name)
+        # weird "{name}" thing is because the HTML field has the prefix but the Filter does
+        # NOT have it in the field names
+        has_filter = any(f'{name}-{field}' in request.GET for field in set(filt.get_fields()))
+        table_source = filt.qs
+        print(f'{filt}')
+    else:
+        filt = None
+        has_filter = False
+        table_source = qs
     if wrap_list:
         table_source = list(table_source)
     tab = table(table_source, prefix=name + "-")

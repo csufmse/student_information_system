@@ -90,7 +90,39 @@
         </div>
     </div>
 
-  <form method="post">
+         <h3>Received Messages:</h3>
+    <div id="received">
+        {% if received_filter %}
+            <form id="received_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form received_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if received_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table received_table 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+
+        <h3>Sent Messages:</h3>
+    <div id="sent">
+        {% if sent_filter %}
+            <form id="sent_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form sent_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if sent_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table sent_table 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+
+ <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
     <input
