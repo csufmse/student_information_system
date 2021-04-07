@@ -16,9 +16,8 @@ from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, S
 from sis.utils import filtered_table
 
 from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFilter,
-                      SemesterFilter, UserFilter,
-                      FullSentMessageFilter, FullReceivedMessageFilter,
-                      SentMessageFilter, ReceivedMessageFilter,
+                      SemesterFilter, UserFilter, FullSentMessageFilter,
+                      FullReceivedMessageFilter, SentMessageFilter, ReceivedMessageFilter,
                       StudentFilter, ItemFilter, SectionItemFilter)
 from .forms import (
     CourseCreationForm,
@@ -43,8 +42,8 @@ from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable, Semes
                      FullUsersTable, StudentHistoryTable, StudentInMajorTable,
                      StudentInSectionTable, SemestersSummaryTable, SectionForClassTable,
                      CoursesForMajorTable, MajorCoursesMetTable, StudentsTable,
-                     ProfReferenceItemsTable, SectionReferenceItemsTable,
-                     MessageSentTable, MessageReceivedTable)
+                     ProfReferenceItemsTable, SectionReferenceItemsTable, MessageSentTable,
+                     MessageReceivedTable)
 
 
 @role_login_required(Profile.ACCESS_ADMIN)

@@ -17,22 +17,26 @@ from english_words import english_words_set
 from sis.models import Profile, Message, SemesterStudent, Student, Semester
 
 loremgen = Generator(dictionary=english_words_set)
+
+
 def get_sentence():
-    (w,s,text) = loremgen.generate_sentence()
-    return text
-def get_paragraph():
-    (w,s,text) = loremgen.generate_paragraph()
+    (w, s, text) = loremgen.generate_sentence()
     return text
 
+
+def get_paragraph():
+    (w, s, text) = loremgen.generate_paragraph()
+    return text
 
 
 # for every student, 1-3 messages. and some replies
 def rand_between(timedate1, timedate2):
     aDate = timedate1 + random() * (timedate2 - timedate1)
-    aDateTime = datetime.combine(aDate, datetime.min.time()) + timedelta(
-        minutes=480 + randrange(1, 12 * 60))
+    aDateTime = datetime.combine(
+        aDate, datetime.min.time()) + timedelta(minutes=480 + randrange(1, 12 * 60))
     aDateTime = timezone.make_aware(aDateTime)
     return aDateTime
+
 
 def createData():
     to_generate = 3
@@ -63,7 +67,8 @@ def createData():
 
                 subject = get_sentence()
                 body = get_paragraph()
-                msg = Message.objects.create(sender=profile,recipient=anAdmin,
+                msg = Message.objects.create(sender=profile,
+                                             recipient=anAdmin,
                                              time_sent=when,
                                              subject=subject,
                                              body=body)
@@ -73,12 +78,13 @@ def createData():
                     msg.save()
 
                     if random() < 0.75:
-                        response_at = msg.time_read + timedelta(days=random()/2)
+                        response_at = msg.time_read + timedelta(days=random() / 2)
                         subject = get_sentence()
                         body = get_paragraph()
-                        response = Message.objects.create(sender=anAdmin,recipient=profile,
-                                                      time_sent=response_at,
-                                                          subject="But "+subject,
+                        response = Message.objects.create(sender=anAdmin,
+                                                          recipient=profile,
+                                                          time_sent=response_at,
+                                                          subject="But " + subject,
                                                           body=body,
                                                           in_response_to=msg)
                         print(f'   -> Resp {response}')

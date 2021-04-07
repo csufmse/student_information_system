@@ -655,32 +655,35 @@ class SectionReferenceItem(models.Model):
     def __str__(self):
         return self.name
 
+
 class MessageManager(models.Manager):
 
     def get_queryset(self):
         """Overrides the models.Manager method"""
         qs = super(MessageManager, self).get_queryset().annotate(
             unread=ExpressionWrapper(Q(time_read__isnull=True),
-                               output_field=models.BooleanField()),
-            archived=ExpressionWrapper(Q(time_archived__isnull=False),
                                      output_field=models.BooleanField()),
+            archived=ExpressionWrapper(Q(time_archived__isnull=False),
+                                       output_field=models.BooleanField()),
         )
         return qs
+
 
 class Message(models.Model):
     objects = MessageManager()
 
-    sender = models.ForeignKey(Profile, on_delete=models.CASCADE,
+    sender = models.ForeignKey(Profile,
+                               on_delete=models.CASCADE,
                                verbose_name="Sender",
                                related_name='sent_by')
-    recipient = models.ForeignKey(Profile, on_delete=models.CASCADE,
+    recipient = models.ForeignKey(Profile,
+                                  on_delete=models.CASCADE,
                                   verbose_name="Recipient",
                                   related_name='sent_to')
 
     time_sent = models.DateTimeField(verbose_name="Sent at", editable=False)
     time_read = models.DateTimeField(verbose_name="Read at", null=True, blank=True)
-    time_archived = models.DateTimeField(verbose_name='Archived at',
-                                         null=True, blank=True)
+    time_archived = models.DateTimeField(verbose_name='Archived at', null=True, blank=True)
 
     # if a response message,...
     in_response_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
@@ -703,6 +706,7 @@ class Message(models.Model):
         if not self.id and self.time_sent is None:
             self.time_sent = timezone.now()
         return super(Message, self).save(*args, **kwargs)
+
 
 # making it so users know about roles, but without overhead of subclassing
 
