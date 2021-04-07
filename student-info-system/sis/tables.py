@@ -25,6 +25,15 @@ class ClassyBooleanColumn(tables.BooleanColumn):
         super(ClassyBooleanColumn, self).__init__(*args, **kwargs)
 
 
+class ClassyDateTimeColumn(tables.DateTimeColumn):
+
+    def __init__(self, *args, **kwargs):
+        if 'css_class_base' in kwargs:
+            css_class_base = kwargs.pop('css_class_base', None)
+            kwargs['attrs'] = field_css_classes(css_class_base)
+        super(ClassyDateTimeColumn, self).__init__(*args, **kwargs)
+
+
 # For User names we want to show the full name ("first last") but sort by "last, first"
 class NameColumn(ClassyColumn):
 
