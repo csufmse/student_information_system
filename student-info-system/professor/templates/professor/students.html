@@ -3,12 +3,12 @@
 
 {% block content %}
   {% if grade_submitted %}
-    <p>Grade(s) submitted.</p>
+    <p class="success">Grade(s) submitted.</p>
   {% endif %}
 
   <h2>Sections</h2>
 
-  <table class="data-table prof-top">
+  <table class="data-table">
     <tr class="reg-row">
       <th>Semester</th>
       <th>Course</th>
@@ -58,7 +58,7 @@
         </tr>
       {% endfor %}
     </table>
-    <input action="" type="submit" value="Submit" class="btn btn-info"/>
+    <input type="submit" value="Submit" class="btn btn-info"/>
   </form>
 
   <form action="{% url 'professor:sections' %}">
