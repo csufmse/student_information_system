@@ -1,6 +1,5 @@
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
-{% load bootstrap %}
 
 {% block content %}
 <h2>Student Schedule</h2>
@@ -16,7 +15,7 @@
       <th>Grade</th>
     </tr>
     <tr class="reg-row">
-    {% for ssect in sections %}
+    {% for ssect in ssects %}
       <td>{{ssect.section.course.name}}</td>
       <td>{{ssect.section.number}}</td>
       <td>{{ssect.section.professor.name}}</td>

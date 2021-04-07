@@ -66,8 +66,6 @@
   </form>
 
   <script>
-    const handler = insertScrollableDivs(applyHandlers=true);
-    handler();
     addClickHandlers("{% url 'professor:student' studentid=1234599 %}", "student_row");
   </script>
 {% endblock content %}
