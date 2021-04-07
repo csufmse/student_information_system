@@ -38,11 +38,20 @@ def students_in_section(request, sectionid):
     ssects = SectionStudent.objects.filter(section=section)
     if request.method == "POST":
         for student in section.students.all():
-            if request.POST.get(str(student)):
+            if request.POST.get(str(student.pk)):
                 ssect = ssects.get(student=student)
-                ssect.grade = request.POST.get(str(student))
+                ssect.grade = request.POST.get(str(student.pk))
                 ssect.save()
                 data['grade_submitted'] = {True}
 
     data.update({'grades': SectionStudent.GRADES, 'section': section, 'ssects': ssects})
     return render(request, 'professor/students.html', data)
+
+
+@role_login_required(AccessRoles.PROFESSOR_ROLE)
+def student(request, student):
+    stud = Student.objects.get(pk=student)
+    ssects = stud.sectionstudent_set.all()
+    data = {'student': stud, 'ssects': ssects}
+    return render(request, 'professor/student.html', data)
+    
