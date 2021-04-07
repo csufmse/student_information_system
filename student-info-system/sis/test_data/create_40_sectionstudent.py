@@ -14,20 +14,15 @@ from datetime import datetime
 def createData():
     to_generate = 1000
 
-    statuses = (SectionStudent.REGISTERED, SectionStudent.AWAITING_GRADE, SectionStudent.GRADED,
-                SectionStudent.DROP_REQUESTED, SectionStudent.DROPPED)
-
-    grades = (0, 1, 2, 3, 4)
-    # no grade inflation here :-/
-    choices((0, 1, 2, 3, 4), weights=[2, 2, 4, 4, 5], k=14)
-
-    letter = ('F', 'D', 'C', 'B', 'A')
-    sections = list(Section.objects.all())
+    letter = ('F','D','C','B','A')
 
     error_count = 0
-    now = datetime.now()
 
+    i = 0
     for sem in Semester.objects.all():
+        if i > to_generate:
+            break
+
         semstuds = SemesterStudent.objects.filter(semester=sem)
         if semstuds.count() == 0:
             print(f'WARNING: No students attend {sem}')
@@ -35,14 +30,48 @@ def createData():
 
         number_attended = randrange(1,6)
         sections = list(Section.objects.filter(semester=sem))
-        for semstud in semstuds:
-            shuffle(sections)
 
-            for sec in sections[0:number_attended]:
+        for semstud in semstuds:
+
+            def weight(aSection):
+                if aSection.course.major == semstud.student.major:
+                    aWeight = 2.5
+                else:
+                    aWeight = 1
+                return aWeight
+
+            prereqs_met = [aSec for aSec in sections if aSec.course.prerequisites_met(semstud.student)]
+
+            if len(prereqs_met) == 0:
+                print(f'ERROR: Student {semstud.student} meets the prereqs for NO classes in semester {sem}')
+                continue
+            elif len(prereqs_met) < number_attended:
+                print(f'WARNING: Student {semstud.student} wants to attend {number_attended} ' +
+                      f'courses but only meets the prereqs for {len(prereqs_met)}.')
+                number_attended = len(prereqs_met)
+
+            # bias towards courses in their major
+            weights = map((lambda sec: 2.5 if sec.course.major == semstud.student.major else 1),
+                          prereqs_met)
+
+            attending = []
+            while len(attending) < number_attended:
+                aSec = choices(prereqs_met, weights=weights, k=1)
+                if aSec not in attending:
+                    attending.append(aSec)
+
+            for sec in attending:
                 ss = SectionStudent(section=sec, student=semstud.student)
-                if sec.status == Section.CLOSED:
-                    continue
-                elif sec.status == Section.OPEN:
+
+                if sec.status == Section.REG_CLOSED:
+                    if random() < 0.05:
+                        if random() < 0.75:
+                            ss.status = SectionStudent.DROPPED
+                        else:
+                            ss.status = SectionStudent.DROP_REQUESTED
+                    else:
+                        ss.status = SectionStudent.REGISTERED
+                elif sec.status == Section.REG_OPEN:
                     if random() < 0.1:
                         if random() < 0.75:
                             ss.status = SectionStudent.DROPPED
@@ -51,36 +80,38 @@ def createData():
                     else:
                         ss.status = SectionStudent.REGISTERED
                 elif sec.status == Section.IN_PROGRESS:
-                    ss.status = SectionStudent.AWAITING_GRADE
+                    ss.status = SectionStudent.IN_PROGRESS
                 elif sec.status == Section.GRADING:
-                    ss.status = SectionStudent.AWAITING_GRADE
+                    if random() < 0.3:
+                        ss.status = SectionStudent.AWAITING_GRADE
+                    else:
+                        ss.status = SectionStudent.GRADED
+                        g = choices((0, 1, 2, 3, 4), weights=[2, 1, 3, 4, 5], k=1)[0]
+                        ss.grade = g
                 elif sec.status == Section.GRADED:
                     ss.status = SectionStudent.GRADED
-                    g = choices(grades, weights=[2, 2, 4, 4, 5], k=1)[0]
-                    ltr = letter[g]
+                    g = choices((0, 1, 2, 3, 4), weights=[2, 1, 3, 4, 5], k=1)[0]
                     ss.grade = g
                 elif sec.status == Section.CANCELLED:
                     ss.status = SectionStudent.DROPPED
-        st = choice(semstuds).student
 
-        stat = choices(statuses, weights=[20, 3, 50, 3, 1], k=1)[0]
-        g = None
-        ltr = '-'
-        if stat == 'Graded':
-            g = choices(grades, weights=[2, 2, 4, 4, 5], k=1)[0]
-            ltr = letter[g]
+                if ss.grade is None:
+                    ltr = '-'
+                else:
+                    ltr = letter[ss.grade]
 
-        try:
-            ss.save()
-        except Exception:
-            error_count = error_count + 1
-            print(
-                f'ERROR: {i} Unable to put {st} in {sec} [sec={sec.id}, ' +
-                f'stud={st.profile.user.id}, status={stat}, grade={g}]')
-            i = i - 1
-        else:
-            print('{} Added {:20} to {} {:15} ({:14},{})'.format(i, str(st), str(sec.semester),
-                                                                 str(sec), stat, ltr))
+                try:
+                    ss.save()
+                except Exception:
+                    error_count = error_count + 1
+                    print(
+                        f'ERROR: {i} Unable to put {semstud.student} in {sec} [sec={sec.id}, ' +
+                        f'stud={semstud.student.profile.user.id}, status={ss.status}, grade={ltr}]')
+                    i = i - 1
+                else:
+                    print('{} Added {:20} to {} {:15} ({:14},{})'.format(i, str(semstud.student), str(sec.semester),
+                                                                         str(sec), ss.status, ltr))
+                i = i + 1
     if error_count:
         print(f'ERROR: {error_count} errors occurred')
 

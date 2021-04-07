@@ -8,6 +8,7 @@ from django.db.models.functions import Concat, Cast
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from phone_field import PhoneField
+from datetime import timedelta, datetime
 
 
 class UpperField(models.CharField):
@@ -321,6 +322,11 @@ class Course(models.Model):
         max_num = max_dict['number__max']
         return max_num
 
+    def prerequisites_met(self, student):
+        remaining = self.prereqs.exclude(Exists(student.sectionstudent_set.filter(
+            section__course=OuterRef('pk'), grade__gt=0.0)))
+        return remaining.count() == 0
+
     def prerequisites_met_list(self, student):
         return self.prereqs.annotate(met=Exists(
             student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)))
@@ -399,6 +405,31 @@ class Semester(models.Model):
         return User.annotated().filter(
             profile__student__semesterstudent__semester=self.id).distinct()
 
+    def registration_open(self, date=None):
+        if date is None:
+            date = datetime.now()
+        return self.date_registration_opens <= date <= self.date_registration_closes
+
+    def in_session(self, date=None):
+        if date is None:
+            date = datetime.now()
+        return self.date_started <= date <= self.date_ended
+
+    def preparing_grades(self, date=None):
+        if date is None:
+            date = datetime.now()
+        return self.date_ended <= date <= self.date_ended + timedelta(days=14)
+
+    def finalized(self, date=None):
+        if date is None:
+            date = datetime.now()
+        return self.date_ended + timedelta(days=14) <= date
+
+    def drop_possible(self, date=None):
+        if date is None:
+            date = datetime.now()
+        return self.date_registration_opens <= date <= self.date_last_drop
+
     @property
     def name(self):
         return str(self.session) + "-" + str(self.year)
@@ -470,12 +501,14 @@ class SectionStudent(models.Model):
     )
 
     REGISTERED = 'Registered'
+    IN_PROGRESS = 'In Progress'
     AWAITING_GRADE = 'Done'
     GRADED = 'Graded'
     DROP_REQUESTED = 'Drop Requested'
     DROPPED = 'Dropped'
     STATUSES = (
         (REGISTERED, REGISTERED),
+        (IN_PROGRESS, IN_PROGRESS),
         (AWAITING_GRADE, AWAITING_GRADE),
         (GRADED, GRADED),
         (DROP_REQUESTED, DROP_REQUESTED),
@@ -524,15 +557,15 @@ class Section(models.Model):
                                       symmetrical=False,
                                       related_name='section_students')
 
-    CLOSED = 'Closed'
-    OPEN = 'Open'
+    REG_CLOSED = 'Closed'
+    REG_OPEN = 'Open'
     IN_PROGRESS = 'In Progress'
     GRADING = 'Grading'
     GRADED = 'Graded'
     CANCELLED = 'Cancelled'
     STATUSES = (
-        (CLOSED, CLOSED),
-        (OPEN, OPEN),
+        (REG_CLOSED, REG_CLOSED),
+        (REG_OPEN, REG_OPEN),
         (IN_PROGRESS, IN_PROGRESS),
         (GRADING, GRADING),
         (GRADED, GRADED),
