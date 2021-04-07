@@ -20,10 +20,11 @@ def createData():
             print(f'Creating {year} {session}...')
             Semester.objects.create(year=year,
                                     date_registration_opens=next - timedelta(days=60),
+                                    date_registration_closes=next - timedelta(days=7),
                                     date_started=next,
                                     date_last_drop=next + timedelta(days=14),
                                     date_ended=next + timedelta(weeks=11),
-                                    semester=session)
+                                    session=session)
             next = next + timedelta(days=90)
 
 

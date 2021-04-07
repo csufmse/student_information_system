@@ -7,8 +7,8 @@
 <dl class="dl-horizontal">
   <dt>Major</dt>
   <dd>{{ major.abbreviation }}</dd>
-  <dt>Name</dt>
-  <dd>{{ major.name }}</dd>
+  <dt>Title</dt>
+  <dd>{{ major.title }}</dd>
   <dt>Description</dt>
   <dd>{{ major.description }}</dd>
 </dl>
@@ -20,7 +20,7 @@
                 {% bootstrap_form profs_filter.form layout='inline' %}
                 <button class="btn btn-primary">Filter</button>
                 {% if profs_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' abbreviation=major.abbreviation %}">Clear</a>
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' majorid=major.id %}">Clear</a>
                 {% endif %}
             </form>
         {% endif %}
@@ -36,7 +36,7 @@
                 {% bootstrap_form required_filter.form layout='inline' %}
                 <button class="btn btn-primary">Filter</button>
                 {% if required_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' abbreviation=major.abbreviation %}">Clear</a>
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' majorid=major.id %}">Clear</a>
                 {% endif %}
             </form>
         {% endif %}
@@ -52,7 +52,7 @@
                 {% bootstrap_form offered_filter.form layout='inline' %}
                 <button class="btn btn-primary">Filter</button>
                 {% if offered_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' abbreviation=major.abbreviation %}">Clear</a>
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' majorid=major.id %}">Clear</a>
                 {% endif %}
             </form>
         {% endif %}
@@ -68,7 +68,7 @@
                 {% bootstrap_form students_filter.form layout='inline' %}
                 <button class="btn btn-primary">Filter</button>
                 {% if students_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' abbreviation=major.abbreviation %}">Clear</a>
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' majorid=major.id %}">Clear</a>
                 {% endif %}
             </form>
         {% endif %}
@@ -91,7 +91,7 @@
     />
     </div>
 <script>
-addButtonClickHandler('editm', '{% url 'schooladmin:major_edit' major.abbreviation %}');
+addButtonClickHandler('editm', '{% url 'schooladmin:major_edit' major.id %}');
 addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "user_row");
 addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
 </script>

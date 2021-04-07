@@ -12,7 +12,7 @@ from django.db import connection
 
 from django.contrib.auth.models import User
 
-from sis.models import Major, Semester, SemesterStudent, Student
+from sis.models import Major, Semester, SemesterStudent, Student, Profile
 
 to_generate = 1000
 
@@ -439,6 +439,7 @@ specs = (
 def createData():
     error_count = 0
     line = 1
+    majors = Major.objects.all()
     for (u, f, l, e) in specs[:to_generate]:
         usr = User(username=u, first_name=f, last_name=l, email=e)
         if set_pass:
@@ -446,13 +447,16 @@ def createData():
 
         try:
             usr.save()
+            profile = usr.profile
+            profile.role = Profile.ACCESS_STUDENT
+            profile.save()
         except Exception:
             print(f'ERROR: Unable to create Student(User) {line} {u} ({f} {l})')
             error_count = error_count + 1
             continue
         else:
-            m = choice(Major.objects.all())
-            s = Student(user=usr, major=m)
+            m = choice(majors)
+            s = Student(profile=profile, major=m)
 
             try:
                 s.save()
@@ -471,10 +475,11 @@ def createData():
 
 def cleanData():
     list = []
-    for ad in Student.objects.all():
-        list.append(str(ad.user_id))
+    for ad in Profile.objects.filter(role=Profile.ACCESS_STUDENT):
+        list.append(str(ad.user.id))
     with connection.cursor() as cursor:
         cursor.execute("DELETE FROM sis_student")
+        cursor.execute("DELETE FROM sis_profile WHERE user_id in (" + (','.join(list)) + ')')
         cursor.execute('DELETE FROM auth_user WHERE id IN (' + (','.join(list)) + ')')
 
 
