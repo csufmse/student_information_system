@@ -33,11 +33,16 @@ def sections(request):
 
 @role_login_required(Profile.ACCESS_PROFESSOR)
 def students_in_section(request, sectionid):
-    data = {'section': Section.objects.get(id=sectionid)}
-    data.update(
-        filtered_table(name='students',
-                       qs=Section.objects.get(id=sectionid).students.all(),
-                       filter=StudentFilter,
-                       table=StudentsTable,
-                       request=request))
+    data = {}
+    section = Section.objects.get(id=sectionid)
+    ssects = SectionStudent.objects.filter(section=section)
+    if request.method == "POST":
+        for student in section.students.all():
+            if request.POST.get(str(student)):
+                ssect = ssects.get(student=student)
+                ssect.grade = request.POST.get(str(student))
+                ssect.save()
+                data['grade_submitted'] = {True}
+
+    data.update({'grades': SectionStudent.GRADES, 'section': section, 'ssects': ssects})
     return render(request, 'professor/students.html', data)
