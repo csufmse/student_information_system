@@ -12,25 +12,25 @@
   <dt>Email</dt>
   <dd>{{ user.email }}</dd>
   <dt>User Type</dt>
-  <dd>{{ user.access_role }}</dd>
-{%  if user.access_role == 'Student' %}
+  <dd>{{ user.profile.rolename }}</dd>
+{%  if user.profile.role == 'S' %}
   <dt>Student Major</dt>
-  <dd>{{ user.student.major.abbreviation }}: {{ user.student.major.name }}</dd>
+  <dd><a href="{% url 'schooladmin:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
   <dt>Class Level</dt>
-  <dd>{{ user.student.class_level }}</dd>
+  <dd>{{ user.profile.student.class_level }}</dd>
   <dt>GPA</dt>
-  <dd>{{ user.student.gpa|floatformat:2 }}</dd>
+  <dd>{{ user.profile.student.gpa|floatformat:2 }}</dd>
   <dt>Credits Earned</dt>
-  <dd>{{ user.student.credits_earned }}</dd>
-{% elif user.access_role == 'Professor' %}
+  <dd>{{ user.profile.student.credits_earned }}</dd>
+{% elif user.profile.role == 'P' %}
   <dt>Teaching Department</dt>
-  <dd>{{ user.professor.major.abbreviation }}:{{ user.professor.major.name }}</dd>
+  <dd><a href="{% url 'schooladmin:major' majorid=user.profile.professor.major.id %}">{{ user.profile.professor.major.abbreviation }}: {{  user.profile.professor.major.name }}</a></dd>
 {%  endif %}
   <dt>Enabled?</dt>
   <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
 </dl>
 
-    {%  if user.access_role == 'Student' %}
+    {%  if user.profile.role == 'S' %}
         <h3>Semesters Attended:</h3>
         <div id="Semesters" class="data-table-alt">
             {% render_table semesters 'django_tables2/bootstrap.html' %}

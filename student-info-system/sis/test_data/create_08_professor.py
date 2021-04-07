@@ -12,7 +12,7 @@ from random import shuffle, choice
 from django.contrib.auth.models import User
 from django.db import connection
 
-from sis.models import Major, Professor, Semester
+from sis.models import Major, Professor, Semester, Profile
 
 specs = (
     ('rexifer', 'Tyrannobarkus', 'Rex', 'rexipoo@x.com'),
@@ -8279,6 +8279,9 @@ def createData():
 
         try:
             usr.save()
+            profile = usr.profile
+            profile.role = Profile.ACCESS_PROFESSOR
+            profile.save()
         except Exception:
             print(f'ERROR: Unable to save professor(User) {u} ({f} {l})')
             error_count = error_count + 1
@@ -8290,7 +8293,7 @@ def createData():
             else:
                 m = choice(majors)
 
-            p = Professor(user=usr, major=m)
+            p = Professor(profile=profile, major=m)
             try:
                 p.save()
             except Exception:
@@ -8308,10 +8311,11 @@ def createData():
 
 def cleanData():
     list = []
-    for ad in Professor.objects.all():
-        list.append(str(ad.user_id))
+    for ad in Profile.objects.filter(role=Profile.ACCESS_PROFESSOR):
+        list.append(str(ad.user.id))
     with connection.cursor() as cursor:
         cursor.execute("DELETE FROM sis_professor")
+        cursor.execute("DELETE FROM sis_profile WHERE user_id in (" + (','.join(list)) + ')')
         cursor.execute('DELETE FROM auth_user WHERE id IN (' + (','.join(list)) + ')')
 
 

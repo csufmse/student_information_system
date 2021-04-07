@@ -4,7 +4,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, Student, TranscriptRequest, AccessRoles, ClassLevel)
+                        Semester, Student, ClassLevel, Profile)
 
 from sis.tests.utils import (createAdmin, createStudent, createProfessor, createCourse)
 
@@ -13,7 +13,7 @@ class StudentTestCase_Basic(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        m = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         StudentTestCase_Basic.major = m
 
         StudentTestCase_Basic.stud = createStudent(major=m, username='testUser')
@@ -29,10 +29,11 @@ class StudentTestCase_Basic(TestCase):
 
         StudentTestCase_Basic.semester = Semester.objects.create(
             date_registration_opens=datetime.now(),
+            date_registration_closes=datetime.now(),
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
             date_ended=datetime.now(),
-            semester=Semester.FALL,
+            session=Semester.FALL,
             year=2000)
 
     def test_class_level(self):
@@ -76,13 +77,13 @@ class StudentTestCase_History(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        m = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         StudentTestCase_History.major = m
 
         StudentTestCase_History.stud = createStudent(major=m, username='testUser')
         p = createProfessor(major=m, username='tprof1')
 
-        m_eng = Major.objects.create(abbreviation="ENGL", name="English")
+        m_eng = Major.objects.create(abbreviation="ENGL", title="English")
 
         StudentTestCase_History.c1 = Course.objects.create(major=m,
                                                            catalog_number='101',
@@ -122,10 +123,11 @@ class StudentTestCase_History(TestCase):
 
         StudentTestCase_History.semester = Semester.objects.create(
             date_registration_opens=datetime.now(),
+            date_registration_closes=datetime.now(),
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
             date_ended=datetime.now(),
-            semester=Semester.FALL,
+            session=Semester.FALL,
             year=2000)
 
         StudentTestCase_History.stud.semesters.add(StudentTestCase_History.semester)
@@ -174,7 +176,7 @@ class StudentTestCase_History(TestCase):
         # e2: a prereq of c2
 
     def test_gpa(self):
-        student = (User.objects.get(username="testUser")).student
+        student = (User.objects.get(username="testUser")).profile.student
         self.assertEqual(student.gpa(), (3 * 3.0 + 0 * 2.0 + 2 * 3.0) / (3.0 + 2.0 + 3.0))
 
     def test_semesters(self):
@@ -238,13 +240,10 @@ class StudentTestCase_History(TestCase):
 
 class ProfessorTestCase(TestCase):
 
-    def setUp(self):
-        User.objects.create(username="prof", first_name="First", last_name="Last")
-
     def test_professor_name(self):
-        user = User.objects.get(username="prof")
-        professor = Professor.objects.create(user=user)
-        self.assertEqual(professor.name, "First Last")
+        u1 = createProfessor(username='prof', first='First', last='Last')
+        self.assertEqual(u1.name, "First Last")
+        u1.delete()
 
 
 class Professor_teaching_test(TestCase):
@@ -252,7 +251,7 @@ class Professor_teaching_test(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(Professor_teaching_test, cls).setUpTestData()
-        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
 
         Professor_teaching_test.professor = createProfessor(major, "test")
 
@@ -263,10 +262,11 @@ class Professor_teaching_test(TestCase):
 
         Professor_teaching_test.semester = Semester.objects.create(
             date_registration_opens=datetime.now(),
+            date_registration_closes=datetime.now(),
             date_started=datetime.now(),
             date_last_drop=datetime.now(),
             date_ended=datetime.now(),
-            semester=Semester.FALL,
+            session=Semester.FALL,
             year=2000)
 
     def test_no_teaching(self):
@@ -276,6 +276,7 @@ class Professor_teaching_test(TestCase):
         s = Section.objects.create(course=Professor_teaching_test.course,
                                    professor=Professor_teaching_test.professor,
                                    semester=Professor_teaching_test.semester,
+                                   location="somewhere",
                                    number=1,
                                    hours="MW 1200-1400")
         teaching_sems = Professor_teaching_test.professor.semesters_teaching()
@@ -287,7 +288,7 @@ class Professor_teaching_test(TestCase):
 class CourseTestCase_Basic(TestCase):
 
     def setUp(self):
-        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         Course.objects.create(major=major,
                               catalog_number='101',
                               title="Intro To Test",
@@ -306,7 +307,7 @@ class CourseTestCase_deps(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        m = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         CourseTestCase_deps.major = m
 
         CourseTestCase_deps.courses = {}
@@ -367,7 +368,7 @@ class CourseMeetingPrereqsTest(TestCase):
     def setUpTestData(cls):
         KLASS = CourseMeetingPrereqsTest
         super(KLASS, cls).setUpTestData()
-        KLASS.m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        KLASS.m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         KLASS.c1 = Course.objects.create(major=KLASS.m1,
                                          catalog_number='300',
                                          title="Intro To Test",
@@ -378,10 +379,11 @@ class CourseMeetingPrereqsTest(TestCase):
                                          credits_earned=3.0)
         CoursePrerequisite.objects.create(course=KLASS.c2, prerequisite=KLASS.c1)
         KLASS.sem = Semester.objects.create(date_registration_opens=datetime.now(),
+                                            date_registration_closes=datetime.now(),
                                             date_started=datetime.now(),
                                             date_last_drop=datetime.now(),
                                             date_ended=datetime.now(),
-                                            semester=Semester.FALL,
+                                            session=Semester.FALL,
                                             year=2000)
         p = createProfessor(username='frodo', major=KLASS.m1)
         KLASS.sec1 = Section.objects.create(course=KLASS.c1,
@@ -432,22 +434,24 @@ class SectionTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(SectionTestCase, cls).setUpTestData()
-        user = User.objects.create(username="prof", first_name="First", last_name="Last")
-        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        user = createProfessor(username='test', first='First', last='Last')
+        professor = user.profile.professor
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         course = Course.objects.create(major=major,
                                        catalog_number='101',
                                        title="Intro To Test",
                                        credits_earned=3.0)
-        professor = Professor.objects.create(user=user)
         semester = Semester.objects.create(date_registration_opens=datetime.now(),
+                                           date_registration_closes=datetime.now(),
                                            date_started=datetime.now(),
                                            date_last_drop=datetime.now(),
                                            date_ended=datetime.now(),
-                                           semester=Semester.FALL,
+                                           session=Semester.FALL,
                                            year=2000)
         Section.objects.create(course=course,
                                professor=professor,
                                semester=semester,
+                               location="x",
                                number=1,
                                hours="MW 1200-1400")
 
@@ -473,7 +477,7 @@ class MajorTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(MajorTestCase, cls).setUpTestData()
-        MajorTestCase.m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        MajorTestCase.m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         MajorTestCase.c1 = Course.objects.create(major=MajorTestCase.m1,
                                                  catalog_number='400',
                                                  title="ZZZ Intro To Test",
@@ -492,12 +496,12 @@ class MajorTestCase(TestCase):
         MajorTestCase.m1.save()
 
     def test_major_abbrev(self):
-        m = Major.objects.get(name='Computer Science')
+        m = Major.objects.get(title='Computer Science')
         self.assertEqual(m.abbreviation, "CPSC")
 
     def test_major_name(self):
         m = Major.objects.get(abbreviation='CPSC')
-        self.assertEqual(m.name, "Computer Science")
+        self.assertEqual(m.title, "Computer Science")
 
     def test_required_order(self):
         m = Major.objects.get(abbreviation='CPSC')
@@ -521,10 +525,11 @@ class MajorTestCase(TestCase):
         s = createStudent(username='frodo', major=m1)
 
         sem = Semester.objects.create(date_registration_opens=datetime.now(),
+                                      date_registration_closes=datetime.now(),
                                       date_started=datetime.now(),
                                       date_last_drop=datetime.now(),
                                       date_ended=datetime.now(),
-                                      semester=Semester.FALL,
+                                      session=Semester.FALL,
                                       year=2000)
         sec1 = Section.objects.create(course=MajorTestCase.c1, semester=sem, professor=p)
 
@@ -593,10 +598,11 @@ class Semester_tests(TestCase):
 
     def test_order_fields(self):
         s1 = Semester.objects.create(date_registration_opens=datetime.now(),
+                                     date_registration_closes=datetime.now(),
                                      date_started=datetime.now(),
                                      date_last_drop=datetime.now(),
                                      date_ended=datetime.now(),
-                                     semester=Semester.FALL,
+                                     session=Semester.FALL,
                                      year=2000)
         # forcing the fetch here lets the annotation generate the extra attributes
         s2 = Semester.objects.get(year=2000)
@@ -613,13 +619,14 @@ class SemesterProf_tests(TestCase):
         KLASS = SemesterProf_tests
         super(SemesterProf_tests, cls).setUpTestData()
         KLASS.sem = Semester.objects.create(date_registration_opens=datetime.now(),
+                                            date_registration_closes=datetime.now(),
                                             date_started=datetime.now(),
                                             date_last_drop=datetime.now(),
                                             date_ended=datetime.now(),
-                                            semester=Semester.FALL,
+                                            session=Semester.FALL,
                                             year=2000)
 
-        KLASS.m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        KLASS.m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
         KLASS.p1 = createProfessor(username='frodo', major=KLASS.m1)
         KLASS.p2 = createProfessor(username='bilbo', major=KLASS.m1)
         KLASS.courses = []

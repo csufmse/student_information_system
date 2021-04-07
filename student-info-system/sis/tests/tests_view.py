@@ -1,9 +1,10 @@
 from django.test import TestCase
 
 from django.contrib.auth.models import User
-from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section,
-                        SectionStudent, Semester, SemesterStudent, Student, TranscriptRequest,
-                        UpperField)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
+                        Semester, SemesterStudent, Student, UpperField)
+
+from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
 
 
 class ViewsAccess(TestCase):
@@ -11,13 +12,10 @@ class ViewsAccess(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(ViewsAccess, cls).setUpTestData()
-        m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")
-        ViewsAccess.u1 = User.objects.create_user(username='u1', password='hello')
-        Admin.objects.create(user=ViewsAccess.u1)
-        ViewsAccess.u2 = User.objects.create_user(username='u2', password='hello')
-        Professor.objects.create(user=ViewsAccess.u2, major=m1)
-        ViewsAccess.u3 = User.objects.create_user(username='u3', password='hello')
-        Student.objects.create(user=ViewsAccess.u3, major=m1)
+        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ViewsAccess.u1 = createAdmin(username='u1', password='hello')
+        ViewsAccess.u2 = createProfessor(username='u2', major=m1, password='hello')
+        ViewsAccess.u3 = createStudent(username='u3', major=m1, password='hello')
 
     def test_home_view_redirects_for_admin(self):
         login = self.client.login(username='u1', password='hello')
@@ -49,9 +47,8 @@ class ViewsUseTemplate(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(ViewsUseTemplate, cls).setUpTestData()
-        m1 = Major.objects.create(abbreviation="CPSC", name="Computer Science")
-        ViewsAccess.u = User.objects.create_user(username='u', password='hello')
-        Student.objects.create(user=ViewsAccess.u, major=m1)
+        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ViewsUseTemplate.u = createUser(username='u', password='hello', major=m1)
 
     def access_denied(self):
         login = self.client.login(username='u', password='hello')

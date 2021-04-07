@@ -6,28 +6,28 @@ from django.shortcuts import redirect, render
 
 from schooladmin.filters import SectionFilter
 from sis.authentication_helpers import role_login_required
-from sis.models import (Course, Section, Semester, SectionStudent, AccessRoles, SemesterStudent)
+from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
 from sis.utils import filtered_table
 
 
-@role_login_required(AccessRoles.STUDENT_ROLE)
+@role_login_required(Profile.ACCESS_STUDENT)
 def index(request):
     return render(request, 'student/home_student.html')
 
 
-@role_login_required(AccessRoles.STUDENT_ROLE)
+@role_login_required(Profile.ACCESS_STUDENT)
 def current_schedule_view(request):
     context = {
-        'my_sections': request.user.student.sectionstudent_set.all,
-        'name': request.user.student.name
+        'my_sections': request.user.profile.student.sectionstudent_set.all,
+        'name': request.user.profile.student.name
     }
     return render(request, 'student/current_schedule.html', context)
 
 
-@role_login_required(AccessRoles.STUDENT_ROLE)
+@role_login_required(Profile.ACCESS_STUDENT)
 def registration_view(request):
     has_filter = None
-    student = request.user.student
+    student = request.user.profile.student
     # If the student has to register for semesters first, do this:
     # semester_list = student.semesters.order_by('-date_started')
     # if semester_list.count() == 0:
@@ -35,7 +35,7 @@ def registration_view(request):
     # If the student can register for anything open, do this:
     semester_list = Semester.objects.filter(
         date_registration_opens__lte=date.today(),
-        date_ended__gte=date.today()).order_by('-date_started')
+        date_registration_closes__gte=date.today()).order_by('-date_started')
     context = {'student': student, 'semesters': semester_list}
 
     if request.method == 'POST':
@@ -74,22 +74,26 @@ def registration_view(request):
             # return redirect('student:registration')
 
     else:
-        the_sem = semester_list[0]
-        context['semester'] = the_sem.id
-        the_sections = the_sem.section_set.exclude(students=student)
-        filt = SectionFilter(request.GET, queryset=the_sections)
-        has_filter = any(field in request.GET for field in set(filt.get_fields()))
-        context['sections'] = filt.qs
-        context['any_sections'] = the_sections.count() != 0
+        if len(semester_list) > 0:
+            the_sem = semester_list[0]
+            context['semester'] = the_sem.id
+            the_sections = the_sem.section_set.exclude(students=student)
+            filt = SectionFilter(request.GET, queryset=the_sections)
+            has_filter = any(field in request.GET for field in set(filt.get_fields()))
+            context['sections'] = filt.qs
+            context['any_sections'] = the_sections.count() != 0
+        else:
+            context['any_sections'] = 0
 
     if has_filter is not None:
         context['has_filter'] = has_filter
         context['filter'] = filt
     # signal template that this entry is a different course from last section
     last_course = None
-    for sect in context['sections']:
-        sect.new_course = sect.course != last_course
-        if sect.new_course:
-            last_course = sect.course
+    if 'sections' in context:
+        for sect in context['sections']:
+            sect.new_course = sect.course != last_course
+            if sect.new_course:
+                last_course = sect.course
 
     return render(request, 'student/registration.html', context)

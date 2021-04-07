@@ -10,19 +10,6 @@ from django.dispatch import receiver
 from phone_field import PhoneField
 
 
-class AccessRoles:
-    ADMIN_ROLE = 'Admin'
-    PROFESSOR_ROLE = 'Professor'
-    STUDENT_ROLE = 'Student'
-    UNKNOWN_ROLE = 'Unknown'
-
-    ROLES = (
-        (ADMIN_ROLE, ADMIN_ROLE),
-        (PROFESSOR_ROLE, PROFESSOR_ROLE),
-        (STUDENT_ROLE, STUDENT_ROLE),
-    )
-
-
 class UpperField(models.CharField):
     """
     a subclass that returns the upper-cased version of its text. Effect is user cannot
@@ -36,11 +23,40 @@ class UpperField(models.CharField):
         return str(value).upper()
 
 
-class Admin(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+class Profile(models.Model):
+    ACCESS_ADMIN = 'A'
+    ACCESS_PROFESSOR = 'P'
+    ACCESS_STUDENT = 'S'
+    ROLES = ((ACCESS_ADMIN, 'Admin'), (ACCESS_PROFESSOR, 'Professor'), (ACCESS_STUDENT,
+                                                                        'Student'))
 
-    class Meta:
-        ordering = ['user__username']
+    @classmethod
+    def rolename_for(cls, aRole):
+        return [item for item in Profile.ROLES if item[0] == aRole][0][1]
+
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    role = models.CharField(max_length=1, choices=ROLES, default=ACCESS_STUDENT)
+    bio = models.CharField(max_length=256, blank=True)
+
+    def has_student(self):
+        has = False
+        try:
+            has = (self.student is not None)
+        except Student.DoesNotExist:
+            pass
+        return has
+
+    def has_professor(self):
+        has = False
+        try:
+            has = (self.professor is not None)
+        except Professor.DoesNotExist:
+            pass
+        return has
+
+    @property
+    def rolename(self):
+        return Profile.rolename_for(self.role)
 
     @property
     def username(self):
@@ -55,7 +71,13 @@ class Admin(models.Model):
         return self.user.last_name + ', ' + self.user.first_name
 
     def __str__(self):
-        return self.name
+        return f'{self.role} {self.user.username}'
+
+    class Meta:
+        ordering = ['user__username']
+
+
+User.profile = property(lambda u: Profile.objects.get_or_create(user=u)[0])
 
 
 class ClassLevel:
@@ -92,8 +114,7 @@ class ClassLevel:
 
 
 class Student(models.Model):
-
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
     major = models.ForeignKey('Major', on_delete=models.CASCADE, blank=True, null=True)
     semesters = models.ManyToManyField('Semester',
                                        through='SemesterStudent',
@@ -101,7 +122,17 @@ class Student(models.Model):
                                        related_name='semester_students')
 
     class Meta:
-        ordering = ['user__username']
+        ordering = ['profile__user__username']
+
+    @property
+    def name(self):
+        return f'{self.profile.user.first_name} {self.profile.user.last_name}'
+
+    def __str__(self):
+        return self.name
+
+    class Meta:
+        ordering = ['profile__user__username']
 
     def course_history(self, graded=False, passed=False, required=False, prereqs_for=None):
         hist = self.sectionstudent_set.all()
@@ -131,6 +162,11 @@ class Student(models.Model):
 
         return major_required
 
+    def requirements_met_list(self, major=None):
+        if major is None:
+            major = self.major
+        return major.requirements_met_list(self)
+
     def prerequisites_met_list(self, course):
         return course.prerequisites_met_list(self)
 
@@ -159,45 +195,31 @@ class Student(models.Model):
         level = ClassLevel.level(creds)
         return level
 
-    @property
-    def name(self):
-        return self.user.first_name + ' ' + self.user.last_name
-
-    @property
-    def name_sort(self):
-        return self.user.last_name + ', ' + self.user.first_name
-
-    def __str__(self):
-        return self.name
-
 
 class Professor(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE, primary_key=True)
+    profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
+
     # Professor's department
     major = models.ForeignKey('Major', on_delete=models.CASCADE, blank=True, null=True)
 
     class Meta:
-        ordering = ['user__username']
+        ordering = ['profile__user__username']
 
     @property
     def name(self):
-        return self.user.first_name + ' ' + self.user.last_name
-
-    @property
-    def name_sort(self):
-        return self.user.last_name + ', ' + self.user.first_name
-
-    def __str__(self):
-        return self.name
+        return self.profile.name
 
     def semesters_teaching(self):
         return Semester.objects.filter(
             section__semester__in=Subquery(self.section_set.values('semester__id'))).distinct()
 
+    def __str__(self):
+        return self.name
+
 
 class Major(models.Model):
-    abbreviation = UpperField('Abbreviation', max_length=6, primary_key=True)
-    name = models.CharField('Name', max_length=256)
+    abbreviation = UpperField('Abbreviation', max_length=6)
+    title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
     professors = models.ManyToManyField(Professor,
                                         symmetrical=False,
@@ -215,21 +237,14 @@ class Major(models.Model):
     class Meta:
         ordering = ['abbreviation']
 
+    @property
+    def name(self):
+        return self.title
+
+    name.fget.short_description = 'Major Title'
+
     def __str__(self):
         return self.abbreviation
-
-
-class TranscriptRequest(models.Model):
-    student = models.ForeignKey(Student, on_delete=models.CASCADE)
-    date_requested = models.DateField('Date Requested')
-    date_fulfilled = models.DateField('Date Fulfilled', null=True, blank=True)
-
-    class Meta:
-        unique_together = (('student', 'date_requested'),)
-        ordering = ['student']
-
-    def __str__(self):
-        return self.student.name + '@' + str(self.date_requested)
 
 
 class Course(models.Model):
@@ -248,7 +263,7 @@ class Course(models.Model):
     def major_name(self):
         return self.major.name
 
-    major_name.fget.short_description = 'Major Name'
+    major_name.fget.short_description = 'Major Title'
 
     @property
     def name(self):
@@ -330,10 +345,10 @@ class SemesterManager(models.Manager):
     def get_queryset(self):
         """Overrides the models.Manager method"""
         qs = super(SemesterManager, self).get_queryset().annotate(
-            session_order=Case(When(Q(semester='FA'), then=0),
-                               When(Q(semester='WI'), then=1),
-                               When(Q(semester='SP'), then=2),
-                               When(Q(semester='SU'), then=3),
+            session_order=Case(When(Q(session='FA'), then=0),
+                               When(Q(session='WI'), then=1),
+                               When(Q(session='SP'), then=2),
+                               When(Q(session='SU'), then=3),
                                default=None,
                                output_field=IntegerField()),
             semester_order=Concat(Cast('year', CharField()),
@@ -362,11 +377,12 @@ class Semester(models.Model):
             return sname[0]
 
     date_registration_opens = models.DateField('Registration Opens')
+    date_registration_closes = models.DateField('Registration Closes')
     date_started = models.DateField('Classes Start')
     date_last_drop = models.DateField('Last Drop')
     date_ended = models.DateField('Classes End')
 
-    semester = models.CharField('semester', choices=SESSIONS, default=FALL, max_length=6)
+    session = models.CharField('semester', choices=SESSIONS, default=FALL, max_length=6)
     year = models.IntegerField('year',
                                default=2000,
                                validators=[MinValueValidator(1900),
@@ -374,24 +390,25 @@ class Semester(models.Model):
 
     @property
     def session_name(self):
-        return Semester.name_for_session(self.semester)
+        return Semester.name_for_session(self.session)
 
     def professors_teaching(self):
-        return User.annotated().filter(professor__section__semester=self.id).distinct()
+        return User.annotated().filter(profile__professor__section__semester=self.id).distinct()
 
     def students_attending(self):
-        return User.annotated().filter(student__semesterstudent__semester=self.id).distinct()
+        return User.annotated().filter(
+            profile__student__semesterstudent__semester=self.id).distinct()
 
     @property
     def name(self):
-        return str(self.semester) + "-" + str(self.year)
+        return str(self.session) + "-" + str(self.year)
 
     def __str__(self):
         return self.name
 
     class Meta:
-        unique_together = (('semester', 'year'),)
-        ordering = ['date_registration_opens']
+        unique_together = (('session', 'year'),)
+        ordering = ['date_started']
 
 
 class SemesterStudent(models.Model):
@@ -457,14 +474,12 @@ class SectionStudent(models.Model):
     GRADED = 'Graded'
     DROP_REQUESTED = 'Drop Requested'
     DROPPED = 'Dropped'
-    WAITLISTED = 'Waitlisted'
     STATUSES = (
         (REGISTERED, REGISTERED),
         (AWAITING_GRADE, AWAITING_GRADE),
         (GRADED, GRADED),
         (DROP_REQUESTED, DROP_REQUESTED),
         (DROPPED, DROPPED),
-        (WAITLISTED, WAITLISTED),
     )
     status = models.CharField(
         'Student Status',
@@ -501,6 +516,7 @@ class Section(models.Model):
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
     number = models.IntegerField('Section Number', default=1, validators=[MinValueValidator(1)])
     capacity = models.IntegerField('Capacity', default=0, validators=[MinValueValidator(1)])
+    location = models.CharField('Location', max_length=256)
     hours = models.CharField('Hours', max_length=256)
 
     students = models.ManyToManyField(Student,
@@ -536,6 +552,8 @@ class Section(models.Model):
     @property
     def name(self):
         return self.course_name + '-' + str(self.number)
+
+    name.fget.short_description = 'Section'
 
     @property
     def course_title(self):
@@ -576,27 +594,79 @@ class Section(models.Model):
     def __str__(self):
         return self.name
 
+    # the prof may have updated them; we may have changed professors...whyever
+    def refresh_reference_items(self):
+        for item in self.sectionreferenceitem_set.all():
+            item.delete()
+        if self.professor is not None:
+            ix = 1
+            for item in self.professor.referenceitem_set.filter(course=self.course):
+                SectionReferenceItem.objects.create(item=item, section=self, index=ix)
+                ix = ix + 1
+
+
+class ReferenceItem(models.Model):
+    REQUIRED = 'req'
+    OPTIONAL = 'opt'
+    RECOMMENDED = 'rec'
+    SYLLABUS = 'syl'
+    ASSIGNMENT = 'ass'
+    TYPES = ((REQUIRED, 'Required'), (OPTIONAL, 'Optional'), (RECOMMENDED, 'Recommended'),
+             (SYLLABUS, 'Syllabus'), (ASSIGNMENT, 'Assignment'))
+
+    course = models.ForeignKey(Course, on_delete=models.CASCADE)
+    professor = models.ForeignKey(Professor, on_delete=models.CASCADE)
+    title = models.CharField('Title', max_length=256)
+    description = models.CharField('Description', blank=True, null=True, max_length=256)
+    link = models.CharField('Link', blank=True, null=True, max_length=256)
+    edition = models.CharField('Edition', blank=True, null=True, max_length=256)
+    type = models.CharField(
+        'Type',
+        choices=TYPES,
+        default=REQUIRED,
+        max_length=3,
+    )
+
+    class Meta:
+        unique_together = (('course', 'professor', 'title'),)
+
+    @property
+    def name(self):
+        return f'{self.course}:{self.professor}/{self.title}'
+
+    def __str__(self):
+        return self.name
+
+
+class SectionReferenceItem(models.Model):
+    section = models.ForeignKey(Section, on_delete=models.CASCADE, null=True)
+    item = models.ForeignKey(ReferenceItem, on_delete=models.CASCADE)
+    index = models.IntegerField(verbose_name="#", default=1)
+
+    class Meta:
+        unique_together = (('section', 'item'), ('section', 'index'))
+
+    @property
+    def name(self):
+        return f'{self.section}:{self.item}'
+
+    def __str__(self):
+        return self.name
+
 
 # making it so users know about roles, but without overhead of subclassing
 
 
 def access_role(self):
-    if Admin.objects.filter(user_id=self.id).count() > 0:
-        return AccessRoles.ADMIN_ROLE
-    elif Professor.objects.filter(user_id=self.id).count() > 0:
-        return AccessRoles.PROFESSOR_ROLE
-    elif Student.objects.filter(user_id=self.id).count() > 0:
-        return AccessRoles.STUDENT_ROLE
-    else:
-        return AccessRoles.UNKNOWN_ROLE
+    return self.profile.rolename
 
 
 def name(self):
-    return self.first_name + ' ' + self.last_name
+    return self.profile.name
 
 
 def student_gpa(self):
-    return self.student.gpa()
+    return self.profile.student.gpa()
 
 
 User.add_to_class('student_gpa', student_gpa)
@@ -609,16 +679,10 @@ User.add_to_class('name', name)
 # Extend User to return annotated User objects
 def uannotated(cls):
     return User.objects.annotate(
-        access_role=Case(
-            When(admin__user__isnull=False, then=Value(AccessRoles.ADMIN_ROLE)),
-            When(professor__user__isnull=False, then=Value(AccessRoles.PROFESSOR_ROLE)),
-            When(student__user__isnull=False, then=Value(AccessRoles.STUDENT_ROLE)),
-            default=Value(AccessRoles.UNKNOWN_ROLE),
-            output_field=models.CharField(),
-        ),
+        role=F('profile__role',),
         name=Concat(F("first_name"), Value(' '), F("last_name")),
         name_sort=Concat(F("last_name"), Value(', '), F("first_name")),
-    ).exclude(access_role=AccessRoles.UNKNOWN_ROLE)
+    )
 
 
 User.annotated = classmethod(uannotated)

@@ -3,69 +3,66 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section,
-                        SectionStudent, Semester, SemesterStudent, Student, TranscriptRequest,
-                        UpperField)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
+                        Semester, SemesterStudent, Student, UpperField)
+
+from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
 
 
 class AdminSectionViewsTest(TestCase):
 
     def setUp(self):
-        # Create two users
-        test_user1 = User.objects.create_user(username='testuser1', password='1X<23fwd+tuK')
-        test_user1.save()
-        admin = Admin.objects.create(user=test_user1)
-        admin.save()
+        test_user1 = createAdmin(username='testuser1')
 
     @classmethod
     def setUpTestData(self):
-        user_p = User.objects.create(username="prof", first_name="First", last_name="Last")
-        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        professor = createProfessor(username="prof", major=major)
         course = Course.objects.create(major=major,
                                        catalog_number='101',
                                        title="Intro To Test",
                                        credits_earned=3.0)
-        professor = Professor.objects.create(user=user_p, major=major)
         semester = Semester.objects.create(date_registration_opens=datetime.now(),
+                                           date_registration_closes=datetime.now(),
                                            date_started=datetime.now(),
                                            date_last_drop=datetime.now(),
                                            date_ended=datetime.now(),
-                                           semester=Semester.FALL,
+                                           session=Semester.FALL,
                                            year=2000)
         section = Section.objects.create(course=course,
                                          professor=professor,
+                                         location="somewhere",
                                          semester=semester,
                                          number=1,
                                          hours="MW 1200-1400")
-        user_s = User.objects.create(username="stud", first_name="First", last_name="Last")
-        self.student = Student.objects.create(user=user_s, major=major)
+        self.student = createStudent(username='stud', major=major)
         SectionStudent.objects.create(student=self.student, section=section)
 
     # list views
     def test_sections_view_exists(self):
-        login = self.client.login(username='testuser1', password='1X<23fwd+tuK')
+        login = self.client.login(username='testuser1', password='testuser11')
         response = self.client.get('/schooladmin/sections')
         self.assertEqual(response.status_code, 200)
 
     # single-object views
     def test_section_view_exists(self):
-        login = self.client.login(username='testuser1', password='1X<23fwd+tuK')
+        login = self.client.login(username='testuser1', password='testuser11')
         response = self.client.get('/schooladmin/section/1')
         self.assertEqual(response.status_code, 200)
 
     # edit views
     def test_edit_section_view_exists(self):
-        login = self.client.login(username='testuser1', password='1X<23fwd+tuK')
+        login = self.client.login(username='testuser1', password='testuser11')
         response = self.client.get('/schooladmin/section/1/edit')
         self.assertEqual(response.status_code, 200)
 
     # create views
     def test_new_section_view_exists(self):
-        login = self.client.login(username='testuser1', password='1X<23fwd+tuK')
+        login = self.client.login(username='testuser1', password='testuser11')
         response = self.client.get('/schooladmin/section_new')
         self.assertEqual(response.status_code, 200)
 
     def test_section_new_from_section_view_exists(self):
-        login = self.client.login(username='testuser1', password='1X<23fwd+tuK')
+        login = self.client.login(username='testuser1', password='testuser11')
         response = self.client.get('/schooladmin/section/1/new_from_section')
         self.assertEqual(response.status_code, 200)
