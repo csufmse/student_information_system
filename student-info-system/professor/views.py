@@ -48,9 +48,9 @@ def students_in_section(request, sectionid):
     return render(request, 'professor/students.html', data)
 
 
-@role_login_required(AccessRoles.PROFESSOR_ROLE)
-def student(request, student):
-    stud = Student.objects.get(pk=student)
+@role_login_required(Profile.ACCESS_PROFESSOR)
+def student(request, studentid):
+    stud = Student.objects.get(pk=studentid)
     ssects = stud.sectionstudent_set.all()
     data = {'student': stud, 'ssects': ssects}
     return render(request, 'professor/student.html', data)
