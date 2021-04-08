@@ -16,7 +16,9 @@ from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, S
 from sis.utils import filtered_table
 
 from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFilter,
-                      SemesterFilter, UserFilter, StudentFilter, ItemFilter, SectionItemFilter)
+                      SemesterFilter, UserFilter, FullSentMessageFilter,
+                      FullReceivedMessageFilter, SentMessageFilter, ReceivedMessageFilter,
+                      StudentFilter, ItemFilter, SectionItemFilter)
 from .forms import (
     CourseCreationForm,
     CourseEditForm,
@@ -40,7 +42,8 @@ from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable, Semes
                      FullUsersTable, StudentHistoryTable, StudentInMajorTable,
                      StudentInSectionTable, SemestersSummaryTable, SectionForClassTable,
                      CoursesForMajorTable, MajorCoursesMetTable, StudentsTable,
-                     ProfReferenceItemsTable, SectionReferenceItemsTable)
+                     ProfReferenceItemsTable, SectionReferenceItemsTable, MessageSentTable,
+                     MessageReceivedTable)
 
 
 @role_login_required(Profile.ACCESS_ADMIN)
@@ -101,11 +104,29 @@ def user(request, userid):
     elif the_user.profile.role == Profile.ACCESS_PROFESSOR:
         return professor(request, userid)
 
-    formdata = {
+    data = {
         'user': the_user,
     }
+    data.update(
+        filtered_table(
+            name='received',
+            qs=the_user.profile.sent_to.all(),
+            filter=FullReceivedMessageFilter,
+            table=MessageReceivedTable,
+            request=request,
+            wrap_list=False,
+        ))
+    data.update(
+        filtered_table(
+            name='sent',
+            qs=the_user.profile.sent_by.all(),
+            filter=FullSentMessageFilter,
+            table=MessageSentTable,
+            request=request,
+            wrap_list=False,
+        ))
 
-    return render(request, 'schooladmin/user.html', formdata)
+    return render(request, 'schooladmin/user.html', data)
 
 
 @role_login_required(Profile.ACCESS_ADMIN)
@@ -165,6 +186,24 @@ def student(request, userid):
             table=MajorCoursesMetTable,
             request=request,
         ))
+    data.update(
+        filtered_table(
+            name='received',
+            qs=the_user.profile.sent_to.filter(time_archived__isnull=True),
+            filter=ReceivedMessageFilter,
+            table=MessageReceivedTable,
+            request=request,
+            wrap_list=False,
+        ))
+    data.update(
+        filtered_table(
+            name='sent',
+            qs=the_user.profile.sent_by.filter(time_archived__isnull=True),
+            filter=SentMessageFilter,
+            table=MessageSentTable,
+            request=request,
+            wrap_list=False,
+        ))
 
     return render(request, 'schooladmin/student.html', data)
 
@@ -216,6 +255,24 @@ def professor(request, userid):
             filter=ItemFilter,
             table=ProfReferenceItemsTable,
             request=request,
+        ))
+    data.update(
+        filtered_table(
+            name='received',
+            qs=the_user.profile.sent_to.filter(time_archived__isnull=True),
+            filter=ReceivedMessageFilter,
+            table=MessageReceivedTable,
+            request=request,
+            wrap_list=False,
+        ))
+    data.update(
+        filtered_table(
+            name='sent',
+            qs=the_user.profile.sent_by.filter(time_archived__isnull=True),
+            filter=SentMessageFilter,
+            table=MessageSentTable,
+            request=request,
+            wrap_list=False,
         ))
 
     return render(request, 'schooladmin/professor.html', data)
