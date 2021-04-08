@@ -452,14 +452,12 @@ class SectionStudent(models.Model):
     section = models.ForeignKey('Section', on_delete=models.CASCADE, null=True)
     student = models.ForeignKey('Student', on_delete=models.CASCADE, null=True, blank=True)
 
-    GRADE_NG = 5
     GRADE_A = 4
     GRADE_B = 3
     GRADE_C = 2
     GRADE_D = 1
     GRADE_F = 0
     GRADES = (
-        (GRADE_NG, 'None'),
         (GRADE_A, 'A'),
         (GRADE_B, 'B'),
         (GRADE_C, 'C'),
@@ -468,7 +466,7 @@ class SectionStudent(models.Model):
     )
     grade = models.SmallIntegerField(
         choices=GRADES,
-        default=GRADE_NG,
+        default=None,
         blank=True,
         null=True,
     )
