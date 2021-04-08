@@ -7,7 +7,7 @@ sys.path.append(".")  # noqa
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  # noqa
 django.setup()  # noqa
 
-from random import choice
+from random import choice, sample
 from django.db import connection
 
 from django.contrib.auth.models import User
@@ -433,14 +433,14 @@ specs = (
 
 
 def createData():
-    to_generate = min(200,len(specs))
+    to_generate = min(200, len(specs))
 
     set_pass = True
 
     error_count = 0
     line = 1
     majors = Major.objects.all()
-    for (u, f, l, e) in sample(specs,to_generate):
+    for (u, f, l, e) in sample(specs, to_generate):
         usr = User(username=u, first_name=f, last_name=l, email=e)
         if set_pass:
             usr.set_password(u + '1')

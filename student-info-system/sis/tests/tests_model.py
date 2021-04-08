@@ -87,33 +87,33 @@ class StudentTestCase_History(TestCase):
         m_eng = Major.objects.create(abbreviation="ENGL", title="English")
 
         KLASS.c1 = Course.objects.create(major=m,
-                                                           catalog_number='101',
-                                                           title="required by major",
-                                                           credits_earned=3.0)
+                                         catalog_number='101',
+                                         title="required by major",
+                                         credits_earned=3.0)
         KLASS.c2 = Course.objects.create(major=m,
-                                                           catalog_number='102',
-                                                           title="required by major",
-                                                           credits_earned=2.0)
+                                         catalog_number='102',
+                                         title="required by major",
+                                         credits_earned=2.0)
         KLASS.c3 = Course.objects.create(major=m,
-                                                           catalog_number='103',
-                                                           title="required by major",
-                                                           credits_earned=6.0)
+                                         catalog_number='103',
+                                         title="required by major",
+                                         credits_earned=6.0)
         KLASS.c4 = Course.objects.create(major=m,
-                                                           catalog_number='104',
-                                                           title="not required by major",
-                                                           credits_earned=2.0)
+                                         catalog_number='104',
+                                         title="not required by major",
+                                         credits_earned=2.0)
         KLASS.c5 = Course.objects.create(major=m,
-                                                           catalog_number='105',
-                                                           title="not required by major",
-                                                           credits_earned=3.0)
+                                         catalog_number='105',
+                                         title="not required by major",
+                                         credits_earned=3.0)
         KLASS.e1 = Course.objects.create(major=m_eng,
-                                                           catalog_number='218',
-                                                           title="required by CPSC 104",
-                                                           credits_earned=3.0)
+                                         catalog_number='218',
+                                         title="required by CPSC 104",
+                                         credits_earned=3.0)
         KLASS.e2 = Course.objects.create(major=m_eng,
-                                                           catalog_number='300',
-                                                           title="required by CPSC 102",
-                                                           credits_earned=3.0)
+                                         catalog_number='300',
+                                         title="required by CPSC 102",
+                                         credits_earned=3.0)
 
         # set up required by major
         m.courses_required.add(KLASS.c1, KLASS.c2, KLASS.c3)
@@ -123,47 +123,39 @@ class StudentTestCase_History(TestCase):
         CoursePrerequisite.objects.create(course=KLASS.c2, prerequisite=KLASS.e2)
         CoursePrerequisite.objects.create(course=KLASS.c4, prerequisite=KLASS.e1)
         CoursePrerequisite.objects.create(course=KLASS.c4, prerequisite=KLASS.c1)
+        CoursePrerequisite.objects.create(course=KLASS.c5, prerequisite=KLASS.c1)
 
-        KLASS.semester = Semester.objects.create(
-            date_registration_opens=datetime.now(),
-            date_registration_closes=datetime.now(),
-            date_started=datetime.now(),
-            date_last_drop=datetime.now(),
-            date_ended=datetime.now(),
-            session=Semester.FALL,
-            year=2000)
+        KLASS.semester = Semester.objects.create(date_registration_opens=datetime.now(),
+                                                 date_registration_closes=datetime.now(),
+                                                 date_started=datetime.now(),
+                                                 date_last_drop=datetime.now(),
+                                                 date_ended=datetime.now(),
+                                                 session=Semester.FALL,
+                                                 year=2000)
 
         KLASS.stud.semesters.add(KLASS.semester)
         KLASS.stud.save()
 
-        KLASS.sec1 = Section.objects.create( course=KLASS.c1,
-            semester=KLASS.semester,
-            professor=p)
-        KLASS.sec2 = Section.objects.create( course=KLASS.c2,
-            semester=KLASS.semester,
-            professor=p)
-        KLASS.sec3 = Section.objects.create( course=KLASS.c3,
-            semester=KLASS.semester,
-            professor=p)
-        KLASS.sec4 = Section.objects.create( course=KLASS.e2,
-            semester=KLASS.semester,
-            professor=p)
+        KLASS.sec1 = Section.objects.create(course=KLASS.c1, semester=KLASS.semester, professor=p)
+        KLASS.sec2 = Section.objects.create(course=KLASS.c2, semester=KLASS.semester, professor=p)
+        KLASS.sec3 = Section.objects.create(course=KLASS.c3, semester=KLASS.semester, professor=p)
+        KLASS.sec4 = Section.objects.create(course=KLASS.e2, semester=KLASS.semester, professor=p)
 
-        KLASS.studsec1 = SectionStudent.objects.create( section=KLASS.sec1,
-            student=KLASS.stud,
-            status=SectionStudent.GRADED,
-            grade=SectionStudent.GRADE_B)
-        KLASS.studsec2 = SectionStudent.objects.create( section=KLASS.sec2,
-            student=KLASS.stud,
-            status=SectionStudent.GRADED,
-            grade=SectionStudent.GRADE_F)
-        KLASS.studsec3 = SectionStudent.objects.create( section=KLASS.sec3,
-            student=KLASS.stud,
-            status=SectionStudent.DROPPED)
-        KLASS.studsec4 = SectionStudent.objects.create( section=KLASS.sec4,
-            student=KLASS.stud,
-            status=SectionStudent.GRADED,
-            grade=SectionStudent.GRADE_C)
+        KLASS.studsec1 = SectionStudent.objects.create(section=KLASS.sec1,
+                                                       student=KLASS.stud,
+                                                       status=SectionStudent.GRADED,
+                                                       grade=SectionStudent.GRADE_B)
+        KLASS.studsec2 = SectionStudent.objects.create(section=KLASS.sec2,
+                                                       student=KLASS.stud,
+                                                       status=SectionStudent.GRADED,
+                                                       grade=SectionStudent.GRADE_F)
+        KLASS.studsec3 = SectionStudent.objects.create(section=KLASS.sec3,
+                                                       student=KLASS.stud,
+                                                       status=SectionStudent.DROPPED)
+        KLASS.studsec4 = SectionStudent.objects.create(section=KLASS.sec4,
+                                                       student=KLASS.stud,
+                                                       status=SectionStudent.GRADED,
+                                                       grade=SectionStudent.GRADE_C)
         # c1: required, taken, passed (B),
         # c2: required, taken failed, requires e2 (taken)
         # c3: required, (DROPPED)
@@ -214,28 +206,45 @@ class StudentTestCase_History(TestCase):
 
     def test_history_prereqs_not_fulfilled(self):
         student = StudentTestCase_History.stud
+        # c4 has two prereqs: c1 (taken) and e1 (not taken). So the HISTORY
+        # shows unly c1
         history = student.course_history(prereqs_for=StudentTestCase_History.c4)
         self.assertEqual(history.count(), 1)
-        self.assertEqual(history[0].section.course, StudentTestCase_History.e1)
+        self.assertEqual(history[0].section.course, StudentTestCase_History.c1)
+
+    def test_prereqs_not_fulfilled(self):
+        student = StudentTestCase_History.stud
+        # c4 has two prereqs: c1 (taken) and e1 (not taken). So the DETAIL
+        # shows both c1 (met) and e1 (not met)
+        history = student.course_prerequisites_detail(StudentTestCase_History.c4)
+        self.assertEqual(history.count(), 2)
+        self.assertEqual(history[0], StudentTestCase_History.c1)
+        self.assertEqual(history[0].met, True)
+        self.assertEqual(history[1], StudentTestCase_History.e1)
+        self.assertEqual(history[1].met, False)
 
     def test_history_prereqs_fulfilled(self):
         student = StudentTestCase_History.stud
+        # this shows the history for prereqs for the given course, passed or not
         history = student.course_history(prereqs_for=StudentTestCase_History.c2)
         self.assertEqual(history.count(), 1)
         self.assertEqual(history[0].section, StudentTestCase_History.sec4)
 
     def test_course_prereqs_notfulfilled(self):
         student = StudentTestCase_History.stud
+        # c4 is not OK because it requires c1 (met) and e1 (not met)
         met = StudentTestCase_History.c4.prerequisites_met(student=student)
         self.assertFalse(met)
 
     def test_course_no_prereqs(self):
         student = StudentTestCase_History.stud
+        # e1 has no prereqs, so "we've met them"
         met = StudentTestCase_History.e1.prerequisites_met(student=student)
         self.assertTrue(met)
 
     def test_course_prereqs_met(self):
         student = StudentTestCase_History.stud
+        # c5 has a prereq of c1, which has been met
         met = StudentTestCase_History.c5.prerequisites_met(student=student)
         self.assertTrue(met)
 
@@ -408,11 +417,11 @@ class CourseMeetingPrereqsTest(TestCase):
 
     def test_courseprereqs_none(self):
         KLASS = CourseMeetingPrereqsTest
-        self.assertEqual(len(KLASS.c1.prerequisites_met_list(student=KLASS.stud)), 0)
+        self.assertEqual(len(KLASS.c1.prerequisites_detail(student=KLASS.stud)), 0)
 
     def test_courseprereqs_notmet(self):
         KLASS = CourseMeetingPrereqsTest
-        pr = KLASS.c2.prerequisites_met_list(student=KLASS.stud)
+        pr = KLASS.c2.prerequisites_detail(student=KLASS.stud)
         self.assertEqual(len(pr), 1)
         self.assertEqual(pr[0].name, KLASS.c1.name)
         self.assertFalse(pr[0].met)
@@ -423,7 +432,7 @@ class CourseMeetingPrereqsTest(TestCase):
         secstud.status = SectionStudent.GRADED
         secstud.grade = SectionStudent.GRADE_F
         secstud.save()
-        pr = KLASS.c2.prerequisites_met_list(student=KLASS.stud)
+        pr = KLASS.c2.prerequisites_detail(student=KLASS.stud)
         self.assertEqual(len(pr), 1)
         self.assertEqual(pr[0].name, KLASS.c1.name)
         self.assertFalse(pr[0].met)
@@ -435,7 +444,7 @@ class CourseMeetingPrereqsTest(TestCase):
         secstud.status = SectionStudent.GRADED
         secstud.grade = SectionStudent.GRADE_A
         secstud.save()
-        pr = KLASS.c2.prerequisites_met_list(student=KLASS.stud)
+        pr = KLASS.c2.prerequisites_detail(student=KLASS.stud)
         self.assertEqual(len(pr), 1)
         self.assertEqual(pr[0].name, KLASS.c1.name)
         self.assertTrue(pr[0].met)

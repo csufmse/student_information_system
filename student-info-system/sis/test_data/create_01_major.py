@@ -196,7 +196,7 @@ def createData():
 
     error_count = 0
 
-    for (a, t, d) in sample(specs,k=to_generate):
+    for (a, t, d) in sample(specs, k=to_generate):
         m = Major(abbreviation=a, title=t, description=d)
         try:
             m.save()

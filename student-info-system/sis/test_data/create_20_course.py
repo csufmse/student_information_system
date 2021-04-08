@@ -253,7 +253,7 @@ def randobj(objs):
 
 
 def createData():
-    to_generate = min(300,len(specs))
+    to_generate = min(300, len(specs))
 
     error_count = 0
     for (cn, t, d, cr) in specs[:to_generate]:

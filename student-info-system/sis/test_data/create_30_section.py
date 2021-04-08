@@ -20,6 +20,7 @@ durations = (30,) * 7 + (60,) * 6 + (90,) * 3 + (180,) * 3
 
 days = ('M', 'T', 'W', 'Th', 'F', 'Sa', 'Su')
 
+
 def choose_days():
     d = ''
     max = 1 << len(days)

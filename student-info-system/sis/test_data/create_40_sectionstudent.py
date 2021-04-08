@@ -10,10 +10,11 @@ django.setup()  # noqa
 from sis.models import Section, SectionStudent, SemesterStudent, Student, Semester
 from django.db import connection
 
-def createData():
-    to_generate = 4*SemesterStudent.objects.all().count()
 
-    letter = ('F','D','C','B','A')
+def createData():
+    to_generate = 4 * SemesterStudent.objects.all().count()
+
+    letter = ('F', 'D', 'C', 'B', 'A')
 
     error_count = 0
 
@@ -27,19 +28,26 @@ def createData():
             print(f'WARNING: No students attend {sem}')
             continue
 
-        number_attended = randrange(1,6)
+        number_attended = randrange(1, 6)
         sections = list(Section.objects.filter(semester=sem))
 
         for semstud in semstuds:
 
-            prereqs_met = [aSec for aSec in sections if aSec.course.prerequisites_met(semstud.student)]
+            prereqs_met = [
+                aSec for aSec in sections if aSec.course.prerequisites_met(semstud.student)
+            ]
 
             if len(prereqs_met) < len(sections):
-                print(f'student {semstud.student}, {semstud.semester.name_sort}, {len(sections)-len(prereqs_met)} ' +
-                      'eliminated')
+                print(
+                    f'student {semstud.student}, {semstud.semester.name_sort}, ' +
+                    f'{len(sections)-len(prereqs_met)} '
+                    + 'eliminated')
 
             if len(prereqs_met) == 0:
-                print(f'ERROR: Student {semstud.student} meets the prereqs for NO classes in semester {sem}')
+                print(
+                    f'ERROR: Student {semstud.student} meets the prereqs for NO ' +
+                    f'classes in semester {sem}'
+                )
                 continue
             elif len(prereqs_met) < number_attended:
                 print(f'WARNING: Student {semstud.student} wants to attend {number_attended} ' +
@@ -47,8 +55,9 @@ def createData():
                 number_attended = len(prereqs_met)
 
             # bias towards courses in their major
-            weights = list(map((lambda sec: 2.5 if sec.course.major == semstud.student.major else 1),
-                          prereqs_met))
+            weights = list(
+                map((lambda sec: 2.5 if sec.course.major == semstud.student.major else 1),
+                    prereqs_met))
 
             attending = []
             while len(attending) < number_attended:
@@ -102,12 +111,14 @@ def createData():
                     error_count = error_count + 1
                     print(
                         f'ERROR: {i} Unable to put {semstud.student} in {sec} [sec={sec.id}, ' +
-                        f'stud={semstud.student.profile.user.id}, status={ss.status}, grade={ltr}]')
+                        f'stud={semstud.student.profile.user.id}, ' +
+                        f'status={ss.status}, grade={ltr}]'
+                    )
                     print(f'attending = {attending}')
                     i = i - 1
                 else:
-                    print('{} Added {:20} to {} {:15} ({:14},{})'.format(i, str(semstud.student), str(sec.semester),
-                                                                         str(sec), ss.status, ltr))
+                    print('{} Added {:20} to {} {:15} ({:14},{})'.format(
+                        i, str(semstud.student), str(sec.semester), str(sec), ss.status, ltr))
                 i = i + 1
     if error_count:
         print(f'ERROR: {error_count} errors occurred')

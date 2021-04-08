@@ -169,8 +169,8 @@ class Student(models.Model):
             major = self.major
         return major.requirements_met_list(self)
 
-    def prerequisites_met_list(self, course):
-        return course.prerequisites_met_list(self)
+    def course_prerequisites_detail(self, course):
+        return course.prerequisites_detail(self)
 
     def credits_earned(self):
         completed = self.course_history(passed=True).aggregate(
@@ -324,11 +324,12 @@ class Course(models.Model):
         return max_num
 
     def prerequisites_met(self, student):
-        remaining = self.prereqs.exclude(Exists(student.sectionstudent_set.filter(
-            section__course=OuterRef('pk'), grade__gt=0.0)))
+        remaining = self.prereqs.exclude(
+            Exists(
+                student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)))
         return remaining.count() == 0
 
-    def prerequisites_met_list(self, student):
+    def prerequisites_detail(self, student):
         return self.prereqs.annotate(met=Exists(
             student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)))
 
@@ -437,7 +438,8 @@ class Semester(models.Model):
 
     @property
     def name_sort(self):
-        return str(self.year) + '-' + str(Semester.SESSIONS_ORDER.index(self.session)) + self.session
+        return str(self.year) + '-' + str(Semester.SESSIONS_ORDER.index(
+            self.session)) + self.session
 
     def __str__(self):
         return self.name
