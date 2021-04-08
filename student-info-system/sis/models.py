@@ -35,8 +35,7 @@ class Profile(models.Model):
     # the Django siteadmin)
     ACCESS_NONE = '-'
     DB_ROLES = ((ACCESS_ADMIN, 'Admin'), (ACCESS_PROFESSOR, 'Professor'),
-                (ACCESS_STUDENT, 'Student'),
-                (ACCESS_NONE,'NO ACCESS'))
+                (ACCESS_STUDENT, 'Student'), (ACCESS_NONE, 'NO ACCESS'))
 
     @classmethod
     def rolename_for(cls, aRole):
