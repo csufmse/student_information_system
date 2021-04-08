@@ -12,7 +12,7 @@ from django.db import connection
 
 from sis.models import Course, CoursePrerequisite
 
-percent_that_have_prereq = 0.6
+percent_that_have_prereq = 0.5
 max_num_prereqs = 3
 
 

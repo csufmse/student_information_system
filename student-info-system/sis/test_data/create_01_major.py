@@ -9,6 +9,7 @@ django.setup()  # noqa
 
 from sis.models import Major, Semester
 from django.db import connection
+from random import sample
 
 specs = (
     ('GA', 'General Agriculture', 'Agriculture & Natural Resources'),
@@ -191,11 +192,11 @@ specs = (
 
 
 def createData():
-    to_generate = 50
+    to_generate = 25
 
     error_count = 0
 
-    for (a, t, d) in specs[:to_generate]:
+    for (a, t, d) in sample(specs, k=to_generate):
         m = Major(abbreviation=a, title=t, description=d)
         try:
             m.save()

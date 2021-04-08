@@ -9,7 +9,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from phone_field import PhoneField
 from django.utils import timezone
-from datetime import datetime
+from datetime import timedelta, datetime
 
 
 class UpperField(models.CharField):
@@ -169,8 +169,8 @@ class Student(models.Model):
             major = self.major
         return major.requirements_met_list(self)
 
-    def prerequisites_met_list(self, course):
-        return course.prerequisites_met_list(self)
+    def course_prerequisites_detail(self, course):
+        return course.prerequisites_detail(self)
 
     def credits_earned(self):
         completed = self.course_history(passed=True).aggregate(
@@ -323,7 +323,13 @@ class Course(models.Model):
         max_num = max_dict['number__max']
         return max_num
 
-    def prerequisites_met_list(self, student):
+    def prerequisites_met(self, student):
+        remaining = self.prereqs.exclude(
+            Exists(
+                student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)))
+        return remaining.count() == 0
+
+    def prerequisites_detail(self, student):
         return self.prereqs.annotate(met=Exists(
             student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)))
 
@@ -401,9 +407,39 @@ class Semester(models.Model):
         return User.annotated().filter(
             profile__student__semesterstudent__semester=self.id).distinct()
 
+    def registration_open(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_registration_opens <= when <= self.date_registration_closes
+
+    def in_session(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_started <= when <= self.date_ended
+
+    def preparing_grades(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_ended <= when <= self.date_ended + timedelta(days=14)
+
+    def finalized(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_ended + timedelta(days=14) <= when
+
+    def drop_possible(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_registration_opens <= when <= self.date_last_drop
+
     @property
     def name(self):
         return str(self.session) + "-" + str(self.year)
+
+    @property
+    def name_sort(self):
+        return str(self.year) + '-' + str(Semester.SESSIONS_ORDER.index(
+            self.session)) + self.session
 
     def __str__(self):
         return self.name
@@ -472,12 +508,14 @@ class SectionStudent(models.Model):
     )
 
     REGISTERED = 'Registered'
+    IN_PROGRESS = 'In Progress'
     AWAITING_GRADE = 'Done'
     GRADED = 'Graded'
     DROP_REQUESTED = 'Drop Requested'
     DROPPED = 'Dropped'
     STATUSES = (
         (REGISTERED, REGISTERED),
+        (IN_PROGRESS, IN_PROGRESS),
         (AWAITING_GRADE, AWAITING_GRADE),
         (GRADED, GRADED),
         (DROP_REQUESTED, DROP_REQUESTED),
@@ -526,15 +564,15 @@ class Section(models.Model):
                                       symmetrical=False,
                                       related_name='section_students')
 
-    CLOSED = 'Closed'
-    OPEN = 'Open'
+    REG_CLOSED = 'Closed'
+    REG_OPEN = 'Open'
     IN_PROGRESS = 'In Progress'
     GRADING = 'Grading'
     GRADED = 'Graded'
     CANCELLED = 'Cancelled'
     STATUSES = (
-        (CLOSED, CLOSED),
-        (OPEN, OPEN),
+        (REG_CLOSED, REG_CLOSED),
+        (REG_OPEN, REG_OPEN),
         (IN_PROGRESS, IN_PROGRESS),
         (GRADING, GRADING),
         (GRADED, GRADED),
@@ -543,7 +581,7 @@ class Section(models.Model):
     status = models.CharField(
         'Section Status',
         choices=STATUSES,
-        default=CLOSED,
+        default=REG_CLOSED,
         max_length=20,
     )
 

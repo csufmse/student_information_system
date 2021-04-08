@@ -14,8 +14,6 @@ from random import randint
 from sis.models import Course, Major, Semester
 from django.db import connection
 
-to_generate = 150
-
 specs = (
     ('101', 'Underwater Basketweaving', 'The Career, The Myth', '5.0'),
     ('151', 'The Bandicoot', 'The Bandicoot but more so', '5.0'),
@@ -255,6 +253,8 @@ def randobj(objs):
 
 
 def createData():
+    to_generate = min(300, len(specs))
+
     error_count = 0
     for (cn, t, d, cr) in specs[:to_generate]:
         m = randobj(Major)

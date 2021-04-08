@@ -24,7 +24,7 @@ def sections(request):
     if the_prof is None:
         return HttpResponse("No such professor")
 
-    sections_qs = Section.objects.filter(professor=the_prof).exclude(status=Section.CLOSED)
+    sections_qs = Section.objects.filter(professor=the_prof).exclude(status=Section.REG_CLOSED)
     sections_table = SectionsTable(sections_qs)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
 
