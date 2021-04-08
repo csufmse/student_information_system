@@ -16,6 +16,7 @@ from sis.test_data import create_27_reference_items
 from sis.test_data import create_30_section
 from sis.test_data import create_32_sectionreferenceitem
 from sis.test_data import create_40_sectionstudent
+from sis.test_data import create_50_message
 
 modules = [
     (
@@ -69,6 +70,10 @@ modules = [
     (
         40,
         create_40_sectionstudent,
+    ),
+    (
+        50,
+        create_50_message,
     ),
 ]
 

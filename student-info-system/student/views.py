@@ -74,22 +74,26 @@ def registration_view(request):
             # return redirect('student:registration')
 
     else:
-        the_sem = semester_list[0]
-        context['semester'] = the_sem.id
-        the_sections = the_sem.section_set.exclude(students=student)
-        filt = SectionFilter(request.GET, queryset=the_sections)
-        has_filter = any(field in request.GET for field in set(filt.get_fields()))
-        context['sections'] = filt.qs
-        context['any_sections'] = the_sections.count() != 0
+        if len(semester_list) > 0:
+            the_sem = semester_list[0]
+            context['semester'] = the_sem.id
+            the_sections = the_sem.section_set.exclude(students=student)
+            filt = SectionFilter(request.GET, queryset=the_sections)
+            has_filter = any(field in request.GET for field in set(filt.get_fields()))
+            context['sections'] = filt.qs
+            context['any_sections'] = the_sections.count() != 0
+        else:
+            context['any_sections'] = 0
 
     if has_filter is not None:
         context['has_filter'] = has_filter
         context['filter'] = filt
     # signal template that this entry is a different course from last section
     last_course = None
-    for sect in context['sections']:
-        sect.new_course = sect.course != last_course
-        if sect.new_course:
-            last_course = sect.course
+    if 'sections' in context:
+        for sect in context['sections']:
+            sect.new_course = sect.course != last_course
+            if sect.new_course:
+                last_course = sect.course
 
     return render(request, 'student/registration.html', context)
