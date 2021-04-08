@@ -16,6 +16,7 @@
       <th>Location</th>
       <th>Status</th>
       <th>Grade</th>
+      <th>Email Professor</th>
     </tr>
     <tr class="heading_row">
     {% for ssect in my_sections %}
@@ -26,6 +27,10 @@
       <td>{{ssect.section.location}}</td>
       <td>{{ssect.status}}</td>
       <td>{{ssect.letter_grade}}</td>
+      <td>{% if ssect.section.professor.profile.user.email %}
+        <a href="mailto:{{ssect.section.professor.profile.user.email}}">Email</a>
+        {% else %}None{% endif %}
+      </td>
     </tr>
     {% endfor %}
     </table>
