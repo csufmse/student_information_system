@@ -43,7 +43,6 @@ def students_in_section(request, sectionid):
                 ssect.grade = request.POST.get(str(student.pk))
                 ssect.save()
                 data['grade_submitted'] = {True}
-
     data.update({'grades': SectionStudent.GRADES, 'section': section, 'ssects': ssects})
     return render(request, 'professor/students.html', data)
 
