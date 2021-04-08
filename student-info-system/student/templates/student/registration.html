@@ -45,12 +45,18 @@
           <th>{{s.course.title}}</th>
           <th>{{s.course.credits_earned}}</th>
           <th>{{s.course.description}}</th>
-          <th>{% for prereq in s.course.prereqs.all %}<p>{{prereq}}</p>{% endfor %}</th>
+          <th>{% if s.course.prereqs.all %}
+                {% for prereq in s.course.prereqs.all %}<p>{{prereq}}</p>{% endfor %}
+              {% else %}
+                <p>None</p>
+              {% endif %}
+          </th>
             <tr id="childRow" class="heading_row">
               <td>Section Number</td>
               <td>Professor</td>
               <td>Schedule</td>
               <td>Open Seats</td>
+              <td>Location</td>
               <td>Select</td>
             </tr>
         {% endif %}
@@ -59,6 +65,7 @@
           <td>{{s.professor_name}}</td>
           <td>{{s.hours}}</td>
           <td>{{s.seats_remaining}} / {{ s.capacity }}</td>
+          <td>{{s.location}}</td>
           <td>
             {% if s.seats_remaining <= 0 %}<span class="waitlist_notif">WAITLIST?</span>{% endif %}
               <input type="radio" name="{{s.course.id}}" value="{{s.id}}" {% if s.is_selected  %}SELECTED{% endif %}/>
