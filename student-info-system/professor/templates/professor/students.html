@@ -52,8 +52,7 @@
           <td>{{ssect.letter_grade}}</td>
           <td><select name="{{ssect.student.pk}}">
             {% for id, value in grades %}
-              <option value="{{id}}"
-                  {% if ssect.letter_grade == value %}SELECTED{% endif %}>{{value}}</option>
+              <option value="{{value}}">{{id}}</option>
             {% endfor %}
             </select>
           </td>
