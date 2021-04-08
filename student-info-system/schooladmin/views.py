@@ -970,3 +970,11 @@ def sectionstudent(request, id):
     the_sectionstud = qs.get()
 
     return HttpResponse('not implemented yet')
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def transcript(request, userid):
+    student = Student.objects.get(profile__user__id=userid)
+    ssects = student.section_set.all()
+    
+
