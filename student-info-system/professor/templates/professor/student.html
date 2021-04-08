@@ -1,33 +1,32 @@
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
-{% load render_table from django_tables2 %}
-{% load bootstrap3 %}
 
 {% block content %}
-  {% if not my_sections %}
-     <p>No registered sections</p>
-  {% else %}
-    <table class="data-table">
-    <tr class="reg-row">
+<h2>Student Schedule</h2>
+<h3>{{student.name}}</h3>
+<div class="data-table-alt scrollify-me">
+  <table class="">
+    <tr class="heading-row">
       <th>Course Name</th>
       <th>Section Number</th>
       <th>Professor</th>
-      <th>Hours</th>
-      <th>Location</th>
+      <th>Schedule</th>
       <th>Status</th>
       <th>Grade</th>
     </tr>
-    <tr class="heading_row">
-    {% for ssect in my_sections %}
+    <tr class="reg-row">
+    {% for ssect in ssects %}
       <td>{{ssect.section.course.name}}</td>
       <td>{{ssect.section.number}}</td>
       <td>{{ssect.section.professor.name}}</td>
       <td>{{ssect.section.hours}}</td>
-      <td>{{ssect.section.location}}</td>
       <td>{{ssect.status}}</td>
       <td>{{ssect.letter_grade}}</td>
     </tr>
     {% endfor %}
-    </table>
-  {% endif %}
-{% endblock %}
+  </table>
+</div>
+<form>
+  <input class="btn btn-info" onclick="window.history.go(-1)" type="back" value="Back"/>
+</form>
+{% endblock content %}

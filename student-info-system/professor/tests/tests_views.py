@@ -5,6 +5,7 @@ from django.test import TestCase
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Profile, Section,
                         SectionStudent, Semester, SemesterStudent, Student, UpperField)
+from sis.tests.utils import *
 
 
 class ProfessorSectionViewsTest(TestCase):
@@ -12,17 +13,9 @@ class ProfessorSectionViewsTest(TestCase):
     @classmethod
     def setUpTestData(self):
         major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
-        u1 = User.objects.create_user(username='u1',
-                                      first_name='p',
-                                      last_name='rof',
-                                      password='hello')
-        profile = Profile.objects.create(user=u1, role='P')
-        prof = Professor.objects.create(profile=profile, major=major)
-
-        course = Course.objects.create(major=major,
-                                       catalog_number='101',
-                                       title="Intro To Test",
-                                       credits_earned=3.0)
+        prof = createProfessor(username='u1', password='hello', major=major)
+        stud = createStudent(username='u2', password='hello', major=major)
+        course = createCourse(major=major, num='101')
         semester = Semester.objects.create(date_registration_opens=datetime.now(),
                                            date_started=datetime.now(),
                                            date_registration_closes=datetime.now(),
@@ -42,28 +35,20 @@ class ProfessorSectionViewsTest(TestCase):
         response = self.client.get('/professor/sections')
         self.assertEqual(response.status_code, 200)
 
+    def test_student_view_exists(self):
+        login = self.client.login(username='u1', password='hello')
+        response = self.client.get('/professor/section/students/1/student')
+        self.assertEqual(response.status_code, 200)
+
 
 class ProfessorStudentsInSectionViewsTest(TestCase):
 
     @classmethod
     def setUpTestData(self):
         major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
-        u1 = User.objects.create_user(username='u1',
-                                      first_name='p',
-                                      last_name='rof',
-                                      password='hello')
-        u2 = User.objects.create_user(username='u2',
-                                      first_name='s',
-                                      last_name='tud',
-                                      password='hello')
-        pprofile = Profile.objects.create(user=u1, role='P')
-        sprofile = Profile.objects.create(user=u2, role='S')
-        prof = Professor.objects.create(profile=pprofile, major=major)
-        stud = Student.objects.create(profile=sprofile, major=major)
-        course = Course.objects.create(major=major,
-                                       catalog_number='101',
-                                       title="Intro To Test",
-                                       credits_earned=3.0)
+        prof = createProfessor(username='u1', password='hello', major=major)
+        stud = createStudent(username='u2', password='hello', major=major)
+        course = createCourse(major=major, num='101')
         semester = Semester.objects.create(date_registration_opens=datetime.now(),
                                            date_started=datetime.now(),
                                            date_registration_closes=datetime.now(),

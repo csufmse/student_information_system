@@ -10,4 +10,5 @@ urlpatterns = [
     path('section/<int:sectionid>/students',
          views.students_in_section,
          name='students_in_section'),
+    path('section/students/<int:studentid>/student', views.student, name='student'),
 ]
