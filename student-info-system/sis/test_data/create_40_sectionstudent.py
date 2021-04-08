@@ -9,17 +9,16 @@ django.setup()  # noqa
 
 from sis.models import Section, SectionStudent, SemesterStudent, Student, Semester
 from django.db import connection
-from datetime import datetime
 
 def createData():
-    to_generate = 1000
+    to_generate = 4*SemesterStudent.objects.all().count()
 
     letter = ('F','D','C','B','A')
 
     error_count = 0
 
     i = 0
-    for sem in Semester.objects.all():
+    for sem in Semester.objects.order_by('-date_started').all():
         if i > to_generate:
             break
 
@@ -33,14 +32,11 @@ def createData():
 
         for semstud in semstuds:
 
-            def weight(aSection):
-                if aSection.course.major == semstud.student.major:
-                    aWeight = 2.5
-                else:
-                    aWeight = 1
-                return aWeight
-
             prereqs_met = [aSec for aSec in sections if aSec.course.prerequisites_met(semstud.student)]
+
+            if len(prereqs_met) < len(sections):
+                print(f'student {semstud.student}, {semstud.semester.name_sort}, {len(sections)-len(prereqs_met)} ' +
+                      'eliminated')
 
             if len(prereqs_met) == 0:
                 print(f'ERROR: Student {semstud.student} meets the prereqs for NO classes in semester {sem}')
@@ -51,13 +47,13 @@ def createData():
                 number_attended = len(prereqs_met)
 
             # bias towards courses in their major
-            weights = map((lambda sec: 2.5 if sec.course.major == semstud.student.major else 1),
-                          prereqs_met)
+            weights = list(map((lambda sec: 2.5 if sec.course.major == semstud.student.major else 1),
+                          prereqs_met))
 
             attending = []
             while len(attending) < number_attended:
-                aSec = choices(prereqs_met, weights=weights, k=1)
-                if aSec not in attending:
+                aSec = choices(prereqs_met, weights=weights, k=1)[0]
+                if not (aSec in attending):
                     attending.append(aSec)
 
             for sec in attending:
@@ -86,11 +82,11 @@ def createData():
                         ss.status = SectionStudent.AWAITING_GRADE
                     else:
                         ss.status = SectionStudent.GRADED
-                        g = choices((0, 1, 2, 3, 4), weights=[2, 1, 3, 4, 5], k=1)[0]
+                        g = choices((0, 1, 2, 3, 4), weights=[1, 1, 3, 4, 5], k=1)[0]
                         ss.grade = g
                 elif sec.status == Section.GRADED:
                     ss.status = SectionStudent.GRADED
-                    g = choices((0, 1, 2, 3, 4), weights=[2, 1, 3, 4, 5], k=1)[0]
+                    g = choices((0, 1, 2, 3, 4), weights=[1, 1, 3, 4, 5], k=1)[0]
                     ss.grade = g
                 elif sec.status == Section.CANCELLED:
                     ss.status = SectionStudent.DROPPED
@@ -107,6 +103,7 @@ def createData():
                     print(
                         f'ERROR: {i} Unable to put {semstud.student} in {sec} [sec={sec.id}, ' +
                         f'stud={semstud.student.profile.user.id}, status={ss.status}, grade={ltr}]')
+                    print(f'attending = {attending}')
                     i = i - 1
                 else:
                     print('{} Added {:20} to {} {:15} ({:14},{})'.format(i, str(semstud.student), str(sec.semester),

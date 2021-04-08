@@ -14,10 +14,6 @@ from django.contrib.auth.models import User
 
 from sis.models import Major, Semester, SemesterStudent, Student, Profile
 
-to_generate = 1000
-
-set_pass = True
-
 specs = (
     ('tsowell', 'Thomas', 'Sowell', 'tsowell@x.com'),
     ('edouglas', 'Ellia', 'Douglas', 'e.douglas@x.com'),
@@ -437,10 +433,14 @@ specs = (
 
 
 def createData():
+    to_generate = min(200,len(specs))
+
+    set_pass = True
+
     error_count = 0
     line = 1
     majors = Major.objects.all()
-    for (u, f, l, e) in specs[:to_generate]:
+    for (u, f, l, e) in sample(specs,to_generate):
         usr = User(username=u, first_name=f, last_name=l, email=e)
         if set_pass:
             usr.set_password(u + '1')

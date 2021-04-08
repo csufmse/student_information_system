@@ -8259,12 +8259,13 @@ specs = (
 
 
 def createData():
-    to_generate = 75
 
     set_pass = True
 
     majors = list(Major.objects.all())
     shuffle(majors)
+
+    to_generate = len(majors)*4
 
     if to_generate < len(majors):
         print(f'ERROR - fewer professors being generated ({to_generate}) ' +

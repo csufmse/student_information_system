@@ -3,7 +3,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section,
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section,
                         SectionStudent, Semester, SemesterStudent, Student, TranscriptRequest,
                         UpperField)
 

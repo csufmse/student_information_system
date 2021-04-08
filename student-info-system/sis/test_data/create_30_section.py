@@ -1,6 +1,6 @@
 import os
 import sys
-from random import randint, choice, shuffle
+from random import randint, choice, shuffle, random
 from datetime import datetime
 
 import django
@@ -92,7 +92,7 @@ def createData():
             stat = Section.IN_PROGRESS
         elif sem.preparing_grades():
             stat = Section.GRADING
-        else
+        else:
             stat = Section.GRADED
 
         number_of_sections = Section.objects.filter(course=c, semester=sem).count()

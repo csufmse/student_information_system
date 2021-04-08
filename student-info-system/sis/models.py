@@ -405,34 +405,38 @@ class Semester(models.Model):
         return User.annotated().filter(
             profile__student__semesterstudent__semester=self.id).distinct()
 
-    def registration_open(self, date=None):
-        if date is None:
-            date = datetime.now()
-        return self.date_registration_opens <= date <= self.date_registration_closes
+    def registration_open(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_registration_opens <= when <= self.date_registration_closes
 
-    def in_session(self, date=None):
-        if date is None:
-            date = datetime.now()
-        return self.date_started <= date <= self.date_ended
+    def in_session(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_started <= when <= self.date_ended
 
-    def preparing_grades(self, date=None):
-        if date is None:
-            date = datetime.now()
-        return self.date_ended <= date <= self.date_ended + timedelta(days=14)
+    def preparing_grades(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_ended <= when <= self.date_ended + timedelta(days=14)
 
-    def finalized(self, date=None):
-        if date is None:
-            date = datetime.now()
-        return self.date_ended + timedelta(days=14) <= date
+    def finalized(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_ended + timedelta(days=14) <= when
 
-    def drop_possible(self, date=None):
-        if date is None:
-            date = datetime.now()
-        return self.date_registration_opens <= date <= self.date_last_drop
+    def drop_possible(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_registration_opens <= when <= self.date_last_drop
 
     @property
     def name(self):
         return str(self.session) + "-" + str(self.year)
+
+    @property
+    def name_sort(self):
+        return str(self.year) + '-' + str(Semester.SESSIONS_ORDER.index(self.session)) + self.session
 
     def __str__(self):
         return self.name
@@ -574,7 +578,7 @@ class Section(models.Model):
     status = models.CharField(
         'Section Status',
         choices=STATUSES,
-        default=CLOSED,
+        default=REG_CLOSED,
         max_length=20,
     )
 

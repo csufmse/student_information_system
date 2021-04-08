@@ -7,7 +7,7 @@ sys.path.append(".")  # noqa
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  # noqa
 django.setup()  # noqa
 
-from random import randint, choice
+from random import randint, choices
 from django.db import connection
 
 from sis.models import Course, Major
@@ -22,9 +22,13 @@ def createData():
     for m in Major.objects.all():
         to_add = randint(3, 9)
         added = {}
+
+        # bias towards courses in their major
+        weights = list(map((lambda course: 5 if course.major == m else 1), courses))
+
         for i in range(to_add):
             while True:
-                c = choice(courses)
+                c = choices(courses, weights=weights, k=1)[0]
                 if c.id not in added:
                     break
             added[c.id] = True
