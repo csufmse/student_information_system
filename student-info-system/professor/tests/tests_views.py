@@ -16,9 +16,11 @@ class ProfessorSectionViewsTest(TestCase):
                                       first_name='p',
                                       last_name='rof',
                                       password='hello')
+        u2 = User.objects.create_user(username='u2', first_name='s', password='hello')
         profile = Profile.objects.create(user=u1, role='P')
+        sprofile = Profile.objects.create(user=u2, role='S')
         prof = Professor.objects.create(profile=profile, major=major)
-
+        stud = Student.objects.create(profile=sprofile, major=major)
         course = Course.objects.create(major=major,
                                        catalog_number='101',
                                        title="Intro To Test",
@@ -40,6 +42,11 @@ class ProfessorSectionViewsTest(TestCase):
     def test_sections_view_exists(self):
         login = self.client.login(username='u1', password='hello')
         response = self.client.get('/professor/sections')
+        self.assertEqual(response.status_code, 200)
+
+    def test_student_view_exists(self):
+        login = self.client.login(username='u1', password='hello')
+        response = self.client.get('/professor/section/students/1/student')
         self.assertEqual(response.status_code, 200)
 
 
