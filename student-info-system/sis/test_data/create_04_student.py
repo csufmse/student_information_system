@@ -460,7 +460,7 @@ def createData():
 
             set_choice_attr(profile, 'demo_age', Profile.AGE, (3, 10, 5, 1, 1, 1, 1, 1, 3))
             set_choice_attr(profile, 'demo_race', Profile.RACE, (10, 1, 5, 3, 1, 5))
-            set_choice_attr(profile, 'demo_gender', Profile.GENDER, (7, 8, 1, 1, 3))
+            set_choice_attr(profile, 'demo_gender', Profile.GENDER, (7, 8, 1, 1, 1, 3))
             set_choice_attr(profile, 'demo_employment', Profile.WORK_STATUS, (5, 3, 2, 1, 2, 3))
             set_choice_attr(profile, 'demo_income', Profile.ANNUAL_HOUSEHOLD_INCOME,
                             (1, 2, 5, 3, 4))

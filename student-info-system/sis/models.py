@@ -179,23 +179,25 @@ class Profile(models.Model):
         ('demo_citizenship', 'CITIZENSHIP', 'Citizenship'),
     )
     # END DEMO_DATA
-
     """
         for a set of Profiles, return a dict of dicts.
         Outer dict has key "count", and then each of the demographic labels
         ("Citizenship", Marital Status, etc).
-        Each of those has a dict of keys (each value for label) whose value is the 
+        Each of those has a dict of keys (each value for label) whose value is the
         count within the set.
-        Note that empty values will be removed, so the count(label) may be 
+        Note that empty values will be removed, so the count(label) may be
         less than count(qs)
     """
+
     @classmethod
-    def demographics_for(cls,queryset=None):
+    def demographics_for(cls, queryset=None):
         if queryset is None:
             queryset = Profile.objects
-        data = { 'count': queryset.count(), }
+        data = {
+            'count': queryset.count(),
+        }
         for attr in Profile.DEMO_ATTRIBUTE_MAP:
-            (model_col,choices,label) = attr
+            (model_col, choices, label) = attr
             data[label] = {}
             for val in queryset.values(model_col).annotate(total=Count('id')).order_by(model_col):
                 data[label][val[model_col]] = val['total']

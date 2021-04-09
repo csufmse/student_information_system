@@ -982,11 +982,11 @@ def sectionstudent(request, id):
 
 @role_login_required(Profile.ACCESS_ADMIN)
 def demographics(request):
-    students = Profile.demographics_for( Profile.objects.filter(role=Profile.ACCESS_STUDENT) )
-    professors = Profile.demographics_for( Profile.objects.filter(role=Profile.ACCESS_PROFESSOR) )
+    students = Profile.demographics_for(Profile.objects.filter(role=Profile.ACCESS_STUDENT))
+    professors = Profile.demographics_for(Profile.objects.filter(role=Profile.ACCESS_PROFESSOR))
 
     # FORMAT RESULTS
-    stud_form = [{'key':'Total Students','data':'','total':students['count']}]
+    stud_form = [{'key': 'Total Students', 'data': '', 'total': students['count']}]
     del students['count']
     for attr in Profile.DEMO_ATTRIBUTE_MAP:
         attrdata = students[attr[2]]
@@ -998,7 +998,7 @@ def demographics(request):
         line = line[2:]
         stud_form.append({'key': attr[2], 'data': line, 'total': total})
 
-    prof_form = [{'key':'Total Professors','data':'','total':professors['count']}]
+    prof_form = [{'key': 'Total Professors', 'data': '', 'total': professors['count']}]
     del professors['count']
     for attr in Profile.DEMO_ATTRIBUTE_MAP:
         attrdata = professors[attr[2]]
