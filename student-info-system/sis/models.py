@@ -56,6 +56,119 @@ class Profile(models.Model):
             pass
         return has
 
+    # DEMOGRAPHIC DATA
+    AGE = (
+        ('Under 18', 'Under 18'),
+        ('18-21', '18-21'),
+        ('22-25', '22-25'),
+        ('26-30', '26-30'),
+        ('31-40', '31-40'),
+        ('41-54', '41-54'),
+        ('55-64', '55-64'),
+        ('65 or over', '65 or over'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_age = models.CharField(verbose_name="Age Group", max_length=20, blank=True, choices=AGE)
+    RACE = (
+        ('White/Caucasian', 'White/Caucasian'),
+        ('Native Hawaiian or Pacific Islander', 'Native Hawaiian or Pacific Islander'),
+        ('Hispanic', 'Hispanic'),
+        ('Black', 'Black'),
+        ('American Indian/Alaska Native', 'American Indian/Alaska Native'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_race = models.CharField(max_length=40, blank=True, choices=RACE)
+    GENDER = (
+        ('Male', 'Male'),
+        ('Female', 'Female'),
+        ('Trans', 'Trans'),
+        ('Other', 'Other'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_gender = models.CharField(max_length=20, blank=True, choices=GENDER)
+    WORK_STATUS = (
+        ('Full Time Student', 'Full Time Student'),
+        ('Part Time', 'Part Time'),
+        ('Full Time', 'Full Time'),
+        ('Unemployed/Seeking', 'Unemployed/Seeking'),
+        ('Retired', 'Retired'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_employment = models.CharField(max_length=20, blank=True, choices=WORK_STATUS)
+    ANNUAL_HOUSEHOLD_INCOME = (
+        ('Under $40K', 'Under $40K'),
+        ('$40K-$80K', '$40K-$80K'),
+        ('$80K-$150K', '$80K-$150K'),
+        ('$150K+', '$150K+'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_income = models.CharField(max_length=20, blank=True, choices=ANNUAL_HOUSEHOLD_INCOME)
+    HIGHEST_FAMILY_EDUCATION = (
+        ('partial High School', 'partial High School'),
+        ('High School Diploma', 'High School Diploma'),
+        ('college without degree awarded', 'college without degree awarded'),
+        ('Associates', 'Associates'),
+        ('College Bachelors', 'College Bachelors'),
+        ('Masters', 'Masters'),
+        ('Doctorate', 'Doctorate'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_education = models.CharField(max_length=35, blank=True, choices=HIGHEST_FAMILY_EDUCATION)
+    ORIENTATION = (
+        ('Heterosexual', 'Heterosexual'),
+        ('Lesbian/Gay', 'Lesbian/Gay'),
+        ('Bisexual', 'Bisexual'),
+        ('Other', 'Other'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_orientation = models.CharField(max_length=20, blank=True, choices=ORIENTATION)
+    MARITAL_STATUS = (
+        ('Single', 'Single'),
+        ('Married', 'Married'),
+        ('Divorced', 'Divorced'),
+        ('Widowed', 'Widowed'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_marital = models.CharField(max_length=20, blank=True, choices=MARITAL_STATUS)
+    DISABILITY = (
+        ('None', 'None'),
+        ('Physical', 'Physical'),
+        ('Emotional', 'Emotional'),
+        ('Mental', 'Mental'),
+        ('Other', 'Other'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_disability = models.CharField(max_length=20, blank=True, choices=DISABILITY)
+    VETERAN_STATUS = (
+        ('None', 'None'),
+        ('Veteran', 'Veteran'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_veteran = models.CharField(max_length=20, blank=True, choices=VETERAN_STATUS)
+    CITIZENSHIP = (
+        ('United States', 'United States'),
+        ('US Permanent Resident', 'US Permanent Resident'),
+        ('Visa', 'Visa'),
+        ('Other', 'Other'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_citizenship = models.CharField(max_length=25, blank=True, choices=CITIZENSHIP)
+
+    DEMO_ATTRIBUTE_MAP = (
+        ('demo_age', 'AGE', 'Age Group'),
+        ('demo_race', 'RACE', 'Race Group'),
+        ('demo_gender', 'GENDER', 'Gender'),
+        ('demo_employment', 'WORK_STATUS', 'Employment Status'),
+        ('demo_income', 'ANNUAL_HOUSEHOLD_INCOME', 'Annual Household Income Segment'),
+        ('demo_education', 'HIGHEST_FAMILY_EDUCATION', 'Highest Education in Family'),
+        ('demo_orientation', 'ORIENTATION', 'Sexual Orientation'),
+        ('demo_marital', 'MARITAL_STATUS', 'Marital Status'),
+        ('demo_disability', 'DISABILITY', 'Disability Area'),
+        ('demo_veteran', 'VETERAN_STATUS', 'Veteran Status'),
+        ('demo_citizenship', 'CITIZENSHIP', 'Citizenship'),
+    )
+    # END DEMO_DATA
+
     @property
     def rolename(self):
         return Profile.rolename_for(self.role)

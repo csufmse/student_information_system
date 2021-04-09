@@ -22,6 +22,7 @@ from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFi
 from .forms import (
     CourseCreationForm,
     CourseEditForm,
+    DemographicForm,
     UserCreationForm,
     MajorCreationForm,
     MajorEditForm,
@@ -377,9 +378,14 @@ def user_edit(request, userid):
         user_form = UserEditForm(request.POST, instance=the_user, prefix='u')
         profile = the_user.profile
         profile_form = ProfileEditForm(request.POST, instance=profile, prefix='p')
-        if user_form.is_valid() and profile_form.is_valid():
+        demo_form = DemographicForm(
+            request.POST,
+            instance=profile,
+        )
+        if user_form.is_valid() and profile_form.is_valid() and demo_form.is_valid():
             the_new_user = user_form.save()
             the_profile = profile_form.save()
+            demo_form.save()
 
             message = "User has been updated. "
 
@@ -425,6 +431,7 @@ def user_edit(request, userid):
         user_form = UserEditForm(instance=the_user, prefix='u')
         profile = the_user.profile
         profile_form = ProfileEditForm(instance=profile, prefix='p')
+        demo_form = DemographicForm(instance=profile,)
         try:
             stud = profile.student
             student_form = StudentEditForm(instance=stud)
@@ -443,6 +450,7 @@ def user_edit(request, userid):
             'original_role': the_user.profile.role,
             'user_form': user_form,
             'profile_form': profile_form,
+            'demo_form': demo_form,
             'student_form': student_form,
             'professor_form': professor_form,
         })
@@ -970,3 +978,57 @@ def sectionstudent(request, id):
     the_sectionstud = qs.get()
 
     return HttpResponse('not implemented yet')
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def demographics(request):
+    students = {}
+    professors = {}
+    for attr in Profile.DEMO_ATTRIBUTE_MAP:
+        students[attr[1]] = {}
+        professors[attr[1]] = {}
+        for lab in getattr(Profile, attr[1]):
+            students[attr[1]][lab[0]] = 0
+            professors[attr[1]][lab[0]] = 0
+
+    # TALLY DATA
+    # the slow dumb Python way...
+    for stud in Profile.objects.filter(role=Profile.ACCESS_STUDENT):
+        for attr in Profile.DEMO_ATTRIBUTE_MAP:
+            val = getattr(stud, attr[0])
+            if val != '' and val is not None:
+                students[attr[1]][val] += 1
+
+    for prof in Profile.objects.filter(role=Profile.ACCESS_PROFESSOR):
+        for attr in Profile.DEMO_ATTRIBUTE_MAP:
+            val = getattr(prof, attr[0])
+            if val != '' and val is not None:
+                professors[attr[1]][val] += 1
+
+    # FORMAT RESULTS
+    stud_form = []
+    for attr in Profile.DEMO_ATTRIBUTE_MAP:
+        attrdata = students[attr[1]]
+        total = 0
+        line = ''
+        for item in attrdata.items():
+            line += f', {item[0]} = {item[1]}'
+            total += item[1]
+        line = line[2:]
+        stud_form.append({'key': attr[2], 'data': line, 'total': total})
+
+    prof_form = []
+    for attr in Profile.DEMO_ATTRIBUTE_MAP:
+        attrdata = professors[attr[1]]
+        total = 0
+        line = ''
+        for item in attrdata.items():
+            line += f', {item[0]} = {item[1]}'
+            total += item[1]
+        line = line[2:]
+        prof_form.append({'key': attr[2], 'data': line, 'total': total})
+
+    return render(request, 'schooladmin/demographics.html', {
+        'students': stud_form,
+        'professors': prof_form,
+    })

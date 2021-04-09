@@ -13,6 +13,7 @@
   <button class="tablinks">Semesters</button>
   <button class="tablinks">Courses</button>
   <button class="tablinks">Sections</button>
+  <button class="tablinks">Demographics</button>
 </div>
 
 <span height="400" width="300">
@@ -27,6 +28,8 @@
 <iframe id="Courses" class="tabcontent" title="Courses" src="{% url 'schooladmin:courses' %}"
     ></iframe>
 <iframe id="Sections" class="tabcontent" title="Sections" src="{% url 'schooladmin:sections' %}"
+    ></iframe>
+<iframe id="Demographics" class="tabcontent" title="Demographics" src="{% url 'schooladmin:demographics' %}"
     ></iframe>
 </span>
 {% endblock %}

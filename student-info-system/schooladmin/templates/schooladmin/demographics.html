@@ -1,0 +1,40 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+{% block content %}
+<h3>Demographic Summary</h3>
+
+    <h3>Students</h3>
+<table>
+    <tr>
+        <th>Demographic Dimension</th>
+        <th>Values Distribution</th>
+        <th>Total Samples</th>
+    </tr>
+    {%  for attr in students %}
+    <tr>
+        <td>{{ attr.key }}</td>
+        <td>{{ attr.data }}</td>
+        <td>{{ attr.total }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+<h3>Professors</h3>
+<table>
+    <tr>
+        <th>Demographic Dimension</th>
+        <th>Values Distribution</th>
+        <th>Total Samples</th>
+    </tr>
+    {%  for attr in professors %}
+    <tr>
+        <td>{{ attr.key }}</td>
+        <td>{{ attr.data }}</td>
+        <td>{{ attr.total }}</td>
+    </tr>
+    {% endfor %}
+</table>
+
+{% endblock content %}

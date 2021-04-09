@@ -13,40 +13,35 @@
   <dd>{{ user.email }}</dd>
   <dt>User Type</dt>
   <dd>{{ user.profile.rolename }}</dd>
-{%  if user.profile.role == 'S' %}
-  <dt>Student Major</dt>
-  <dd><a href="{% url 'schooladmin:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
-  <dt>Class Level</dt>
-  <dd>{{ user.profile.student.class_level }}</dd>
-  <dt>GPA</dt>
-  <dd>{{ user.profile.student.gpa|floatformat:2 }}</dd>
-  <dt>Credits Earned</dt>
-  <dd>{{ user.profile.student.credits_earned }}</dd>
-{% elif user.profile.role == 'P' %}
-  <dt>Teaching Department</dt>
-  <dd><a href="{% url 'schooladmin:major' majorid=user.profile.professor.major.id %}">{{ user.profile.professor.major.abbreviation }}: {{  user.profile.professor.major.name }}</a></dd>
-{%  endif %}
   <dt>Enabled?</dt>
   <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
 </dl>
+    <h3>Demographic Data</h3>
+<dl class="dl-horizontal">
+  <dt>Age</dt>
+  <dd>{{ user.profile.demo_age }}</dd>
+  <dt>Race</dt>
+  <dd>{{ user.profile.demo_race }}</dd>
+  <dt>Gender</dt>
+  <dd>{{ user.profile.demo_gender }}</dd>
+  <dt>Employment Status</dt>
+  <dd>{{ user.profile.demo_employment }}</dd>
+  <dt>Annual Household Income</dt>
+  <dd>{{ user.profile.demo_income }}</dd>
+  <dt>Highest Level of Education in Family</dt>
+  <dd>{{ user.profile.demo_education }}</dd>
+  <dt>Orientation</dt>
+  <dd>{{ user.profile.demo_orientation }}</dd>
+  <dt>Marital Status</dt>
+  <dd>{{ user.profile.demo_marital }}</dd>
+  <dt>Disability</dt>
+  <dd>{{ user.profile.demo_disability }}</dd>
+  <dt>Veteran Status</dt>
+  <dd>{{ user.profile.demo_veteran }}</dd>
+  <dt>Citizenship</dt>
+  <dd>{{ user.profile.demo_citizenship }}</dd>
+</dl>
 
-    {%  if user.profile.role == 'S' %}
-        <h3>Semesters Attended:</h3>
-        <div id="Semesters" class="data-table-alt">
-            {% render_table semesters 'django_tables2/bootstrap.html' %}
-        </div>
-
-        <h3>Course History:</h3>
-        <div id="CourseHistory" class="data-table-alt">
-            {% render_table course_history 'django_tables2/bootstrap.html' %}
-        </div>
-
-        <h3>Remaining Required Courses:</h3>
-        <div id="CourseHistory" class="data-table-alt">
-            {% render_table remaining_required 'django_tables2/bootstrap.html' %}
-        </div>
-    {% endif %}
-    
         <h3>Received Messages:</h3>
     <div id="received">
         {% if received_filter %}
