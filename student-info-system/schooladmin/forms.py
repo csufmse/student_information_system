@@ -2,6 +2,7 @@ from datetime import date
 from django import forms
 from django.contrib.auth.forms import UserCreationForm as DjangoUserCreationForm
 from django.contrib.auth.models import User
+from django.db.models import Q
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
                         Profile, Semester, Student, UpperField, ReferenceItem, Profile)
@@ -26,17 +27,20 @@ class MajorCreationForm(forms.ModelForm):
     description = forms.CharField(max_length=256,
                                   required=False,
                                   widget=forms.Textarea(attrs={'rows': 3}))
+    contact = forms.ModelChoiceField(queryset=Profile.staff())
 
     class Meta:
         model = Major
-        fields = ('abbreviation', 'title', 'description')
+        fields = ('abbreviation', 'title', 'description', 'contact')
 
 
 class MajorEditForm(forms.ModelForm):
-    name = forms.CharField(max_length=256)
+    abbreviation = UpperFormField(max_length=6, help_text='Abbreviation')
+    title = forms.CharField(max_length=256)
     description = forms.CharField(max_length=256,
                                   required=False,
                                   widget=forms.Textarea(attrs={'rows': 3}))
+    contact = forms.ModelChoiceField(queryset=Profile.staff())
     courses_required = CourseChoiceField(queryset=Course.objects.all().order_by(
         'major', 'catalog_number'),
                                          widget=forms.CheckboxSelectMultiple,
@@ -44,7 +48,17 @@ class MajorEditForm(forms.ModelForm):
 
     class Meta:
         model = Major
-        fields = ('name', 'description', 'courses_required')
+        fields = ('abbreviation', 'title', 'description', 'contact', 'courses_required')
+
+    def __init__(self, *args, **kwargs):
+        super(MajorEditForm, self).__init__(*args, **kwargs)
+        # we defer loading of professors until we know what major is chosen
+        if kwargs['instance']:
+            the_major = kwargs['instance']
+            if the_major:
+                self.fields['contact'].queryset = Profile.objects.filter(
+                    Q(role=Profile.ACCESS_ADMIN) |
+                    (Q(role=Profile.ACCESS_PROFESSOR) & Q(professor__major=the_major)))
 
 
 class CourseCreationForm(forms.ModelForm):
