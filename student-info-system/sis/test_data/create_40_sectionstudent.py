@@ -37,9 +37,12 @@ def createData():
                 aSec for aSec in sections if aSec.course.prerequisites_met(semstud.student)
             ]
 
-            if len(prereqs_met) < len(sections):
-                print(f'student {semstud.student}, {semstud.semester.name_sort}, ' +
-                      f'{len(sections)-len(prereqs_met)} ' + 'eliminated')
+            # sort of interesting...
+            # if len(prereqs_met) < len(sections):
+            #     print(
+            #         f'student {semstud.student}, {semstud.semester.name_sort}, ' +
+            #         f'{len(sections)-len(prereqs_met)} '
+            #         + 'eliminated')
 
             if len(prereqs_met) == 0:
                 print(f'ERROR: Student {semstud.student} meets the prereqs for NO ' +
