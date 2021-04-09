@@ -12,7 +12,8 @@ class ViewsAccess(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(ViewsAccess, cls).setUpTestData()
-        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         ViewsAccess.u1 = createAdmin(username='u1', password='hello')
         ViewsAccess.u2 = createProfessor(username='u2', major=m1, password='hello')
         ViewsAccess.u3 = createStudent(username='u3', major=m1, password='hello')
@@ -47,7 +48,8 @@ class ViewsUseTemplate(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(ViewsUseTemplate, cls).setUpTestData()
-        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         ViewsUseTemplate.u = createUser(username='u', password='hello', major=m1)
 
     def access_denied(self):

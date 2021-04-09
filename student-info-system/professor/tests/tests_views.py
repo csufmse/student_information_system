@@ -12,7 +12,8 @@ class ProfessorSectionViewsTest(TestCase):
 
     @classmethod
     def setUpTestData(self):
-        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         prof = createProfessor(username='u1', password='hello', major=major)
         stud = createStudent(username='u2', password='hello', major=major)
         course = createCourse(major=major, num='101')
@@ -45,7 +46,8 @@ class ProfessorStudentsInSectionViewsTest(TestCase):
 
     @classmethod
     def setUpTestData(self):
-        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         prof = createProfessor(username='u1', password='hello', major=major)
         stud = createStudent(username='u2', password='hello', major=major)
         course = createCourse(major=major, num='101')

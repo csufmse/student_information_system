@@ -31,13 +31,23 @@ class Profile(models.Model):
     ACCESS_STUDENT = 'S'
     ROLES = ((ACCESS_ADMIN, 'Admin'), (ACCESS_PROFESSOR, 'Professor'), (ACCESS_STUDENT,
                                                                         'Student'))
+    # from a DB perspective, we may also have the "no access" role (i.e. 'admin' account --
+    # the Django siteadmin)
+    ACCESS_NONE = '-'
+    DB_ROLES = ((ACCESS_ADMIN, 'Admin'), (ACCESS_PROFESSOR, 'Professor'),
+                (ACCESS_STUDENT, 'Student'), (ACCESS_NONE, 'NO ACCESS'))
 
     @classmethod
     def rolename_for(cls, aRole):
         return [item for item in Profile.ROLES if item[0] == aRole][0][1]
 
+    @classmethod
+    def staff(cls):
+        return Profile.objects.filter(
+            Q(role=Profile.ACCESS_ADMIN) | Q(role=Profile.ACCESS_PROFESSOR))
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role = models.CharField(max_length=1, choices=ROLES, default=ACCESS_STUDENT)
+    role = models.CharField(max_length=1, choices=DB_ROLES, default=ACCESS_NONE)
     bio = models.CharField(max_length=256, blank=True)
 
     def has_student(self):
@@ -357,7 +367,7 @@ class Professor(models.Model):
 
 
 class Major(models.Model):
-    abbreviation = UpperField('Abbreviation', max_length=6)
+    abbreviation = UpperField('Abbreviation', max_length=6, unique=True)
     title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
     professors = models.ManyToManyField(Professor,
@@ -368,6 +378,7 @@ class Major(models.Model):
                                               blank=True,
                                               symmetrical=False,
                                               related_name="required_by")
+    contact = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
 
     def requirements_met_list(self, student):
         return self.courses_required.annotate(met=Exists(
@@ -907,7 +918,7 @@ User.add_to_class('name', name)
 
 # Extend User to return annotated User objects
 def uannotated(cls):
-    return User.objects.annotate(
+    return User.objects.exclude(profile__role=Profile.ACCESS_NONE).annotate(
         role=F('profile__role',),
         name=Concat(F("first_name"), Value(' '), F("last_name")),
         name_sort=Concat(F("last_name"), Value(', '), F("first_name")),

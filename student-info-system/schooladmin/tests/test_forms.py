@@ -13,8 +13,10 @@ class CourseCreation_formtest(TestCase):
 
     @classmethod
     def setUpTestData(self):
+        ad = createAdmin('foobar').profile
         CourseCreation_formtest.m = Major.objects.create(abbreviation='ABCD',
-                                                         title='The A, The B')
+                                                         title='The A, The B',
+                                                         contact=ad)
         CourseCreation_formtest.c1 = createCourse(CourseCreation_formtest.m, 101)
 
     def test_blank_data(self):
@@ -64,8 +66,13 @@ class CourseEdit_formtest(TestCase):
 
     @classmethod
     def setUpTestData(self):
-        CourseEdit_formtest.m = Major.objects.create(abbreviation='ABCD', title='The A, The B')
-        CourseEdit_formtest.m1 = Major.objects.create(abbreviation='ASDF', title='The A, The B')
+        ad = createAdmin('foobar').profile
+        CourseEdit_formtest.m = Major.objects.create(abbreviation='ABCD',
+                                                     title='The A, The B',
+                                                     contact=ad)
+        CourseEdit_formtest.m1 = Major.objects.create(abbreviation='ASDF',
+                                                      title='The A, The B',
+                                                      contact=ad)
         CourseEdit_formtest.c1 = createCourse(CourseEdit_formtest.m, 101)
 
     def test_valid_data(self):

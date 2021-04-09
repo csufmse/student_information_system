@@ -33,10 +33,9 @@ class Migration(migrations.Migration):
             name='Major',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('abbreviation', sis.models.UpperField(max_length=6, verbose_name='Abbreviation')),
+                ('abbreviation', sis.models.UpperField(max_length=6, unique=True, verbose_name='Abbreviation')),
                 ('title', models.CharField(max_length=256, verbose_name='Title')),
                 ('description', models.CharField(blank=True, max_length=256, verbose_name='Description')),
-                ('courses_required', models.ManyToManyField(blank=True, related_name='required_by', to='sis.Course')),
             ],
             options={
                 'ordering': ['abbreviation'],
@@ -197,6 +196,16 @@ class Migration(migrations.Migration):
             options={
                 'ordering': ['time_sent'],
             },
+        ),
+        migrations.AddField(
+            model_name='major',
+            name='contact',
+            field=models.ForeignKey(null=True, on_delete=django.db.models.deletion.SET_NULL, to='sis.profile'),
+        ),
+        migrations.AddField(
+            model_name='major',
+            name='courses_required',
+            field=models.ManyToManyField(blank=True, related_name='required_by', to='sis.Course'),
         ),
         migrations.AddField(
             model_name='major',

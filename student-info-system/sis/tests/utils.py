@@ -16,6 +16,7 @@ def createAdmin(username=None, first=None, last=None, password=None):
     profile = user.profile
     profile.role = Profile.ACCESS_ADMIN
     profile.save()
+    return user
 
 
 def createProfessor(major=None, username=None, first=None, last=None, password=None):

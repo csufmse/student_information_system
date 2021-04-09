@@ -13,7 +13,8 @@ class StudentTestCase_Basic(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        m = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        m = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         StudentTestCase_Basic.major = m
 
         StudentTestCase_Basic.stud = createStudent(major=m, username='testUser')
@@ -78,13 +79,14 @@ class StudentTestCase_History(TestCase):
     @classmethod
     def setUpTestData(cls):
         KLASS = StudentTestCase_History
-        m = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        m = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         KLASS.major = m
 
         KLASS.stud = createStudent(major=m, username='testUser')
         p = createProfessor(major=m, username='tprof1')
 
-        m_eng = Major.objects.create(abbreviation="ENGL", title="English")
+        m_eng = Major.objects.create(abbreviation="ENGL", title="English", contact=ad)
 
         KLASS.c1 = Course.objects.create(major=m,
                                          catalog_number='101',
@@ -273,7 +275,8 @@ class Professor_teaching_test(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(Professor_teaching_test, cls).setUpTestData()
-        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
 
         Professor_teaching_test.professor = createProfessor(major, "test")
 
@@ -310,7 +313,8 @@ class Professor_teaching_test(TestCase):
 class CourseTestCase_Basic(TestCase):
 
     def setUp(self):
-        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         Course.objects.create(major=major,
                               catalog_number='101',
                               title="Intro To Test",
@@ -329,7 +333,8 @@ class CourseTestCase_deps(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        m = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        m = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         CourseTestCase_deps.major = m
 
         CourseTestCase_deps.courses = {}
@@ -390,7 +395,8 @@ class CourseMeetingPrereqsTest(TestCase):
     def setUpTestData(cls):
         KLASS = CourseMeetingPrereqsTest
         super(KLASS, cls).setUpTestData()
-        KLASS.m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        KLASS.m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         KLASS.c1 = Course.objects.create(major=KLASS.m1,
                                          catalog_number='300',
                                          title="Intro To Test",
@@ -458,7 +464,9 @@ class SectionTestCase(TestCase):
         super(SectionTestCase, cls).setUpTestData()
         user = createProfessor(username='test', first='First', last='Last')
         professor = user.profile.professor
-        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        major = Major.objects.create(abbreviation="CPSC",
+                                     title="Computer Science",
+                                     contact=user.profile)
         course = Course.objects.create(major=major,
                                        catalog_number='101',
                                        title="Intro To Test",
@@ -499,7 +507,10 @@ class MajorTestCase(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(MajorTestCase, cls).setUpTestData()
-        MajorTestCase.m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        MajorTestCase.m1 = Major.objects.create(abbreviation="CPSC",
+                                                title="Computer Science",
+                                                contact=ad)
         MajorTestCase.c1 = Course.objects.create(major=MajorTestCase.m1,
                                                  catalog_number='400',
                                                  title="ZZZ Intro To Test",
@@ -643,6 +654,7 @@ class SemesterProf_tests(TestCase):
     def setUpTestData(cls):
         KLASS = SemesterProf_tests
         super(SemesterProf_tests, cls).setUpTestData()
+        ad = createAdmin('foobar').profile
         KLASS.sem = Semester.objects.create(date_registration_opens=datetime.now(),
                                             date_registration_closes=datetime.now(),
                                             date_started=datetime.now(),
@@ -651,7 +663,7 @@ class SemesterProf_tests(TestCase):
                                             session=Semester.FALL,
                                             year=2000)
 
-        KLASS.m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        KLASS.m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         KLASS.p1 = createProfessor(username='frodo', major=KLASS.m1)
         KLASS.p2 = createProfessor(username='bilbo', major=KLASS.m1)
         KLASS.courses = []
@@ -703,3 +715,23 @@ class SemesterProf_tests(TestCase):
         self.assertEqual(len(KLASS.sem.professors_teaching()), 2)
         s1.delete()
         s2.delete()
+
+
+class ProfileTest_Basic(TestCase):
+
+    def test_admin_role(self):
+        usr = User.objects.create(username='foo')
+        prof = usr.profile
+        self.assertEqual(prof.role, Profile.ACCESS_NONE)
+        prof.delete()
+        usr.delete()
+
+    def test_admin_excluded(self):
+        usr = User.objects.create(username='foo')
+        prof = usr.profile
+        users = Profile.objects.all()
+        self.assertEqual(users.count(), 1)
+        users_ann = User.annotated()
+        self.assertEqual(users_ann.count(), 0)
+        prof.delete()
+        usr.delete()
