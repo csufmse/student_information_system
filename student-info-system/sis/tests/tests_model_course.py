@@ -10,7 +10,8 @@ from sis.tests.utils import (createStudent, createProfessor, createAdmin, create
 class CourseTestCase_Basic(TestCase):
 
     def setUp(self):
-        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         Course.objects.create(major=major,
                               catalog_number='101',
                               title="Intro To Test",
@@ -37,7 +38,8 @@ class CourseTestCase_deps(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        m = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        m = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         CourseTestCase_deps.major = m
 
         CourseTestCase_deps.courses = {}
@@ -96,8 +98,11 @@ class CourseTestCase_edit(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        m = Major.objects.create(abbreviation="CPSC", title="Computer Science")
-        CourseTestCase_edit.m1 = Major.objects.create(abbreviation='XYAZ', title='Bananas')
+        ad = createAdmin('foobar').profile
+        m = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
+        CourseTestCase_edit.m1 = Major.objects.create(abbreviation='XYAZ',
+                                                      title='Bananas',
+                                                      contact=ad)
         CourseTestCase_edit.major = m
 
         CourseTestCase_edit.courses = {}

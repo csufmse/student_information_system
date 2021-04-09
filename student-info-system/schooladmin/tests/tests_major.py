@@ -15,10 +15,16 @@ class AdminMajorViewsTest(TestCase):
     def setUpTestData(cls):
         super(AdminMajorViewsTest, cls).setUpTestData()
         AdminMajorViewsTest.test_user1 = createAdmin(username='testuser1')
-        AdminMajorViewsTest.m1 = Major.objects.create(abbreviation="CPSC",
-                                                      title="Computer Science")
-        AdminMajorViewsTest.m2 = Major.objects.create(abbreviation="ENGL", title="English")
-        AdminMajorViewsTest.m3 = Major.objects.create(abbreviation="LIT", title="Literature")
+        AdminMajorViewsTest.m1 = Major.objects.create(
+            abbreviation="CPSC",
+            title="Computer Science",
+            contact=AdminMajorViewsTest.test_user1.profile)
+        AdminMajorViewsTest.m2 = Major.objects.create(
+            abbreviation="ENGL", title="English", contact=AdminMajorViewsTest.test_user1.profile)
+        AdminMajorViewsTest.m3 = Major.objects.create(
+            abbreviation="LIT",
+            title="Literature",
+            contact=AdminMajorViewsTest.test_user1.profile)
         AdminMajorViewsTest.c1 = Course.objects.create(major=AdminMajorViewsTest.m1,
                                                        catalog_number='101',
                                                        title="Intro To Test",
