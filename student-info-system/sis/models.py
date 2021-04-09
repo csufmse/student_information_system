@@ -31,6 +31,11 @@ class Profile(models.Model):
     ACCESS_STUDENT = 'S'
     ROLES = ((ACCESS_ADMIN, 'Admin'), (ACCESS_PROFESSOR, 'Professor'), (ACCESS_STUDENT,
                                                                         'Student'))
+    # from a DB perspective, we may also have the "no access" role (i.e. 'admin' account --
+    # the Django siteadmin)
+    ACCESS_NONE = '-'
+    DB_ROLES = ((ACCESS_ADMIN, 'Admin'), (ACCESS_PROFESSOR, 'Professor'),
+                (ACCESS_STUDENT, 'Student'), (ACCESS_NONE, 'NO ACCESS'))
 
     @classmethod
     def rolename_for(cls, aRole):
@@ -42,7 +47,7 @@ class Profile(models.Model):
             Q(role=Profile.ACCESS_ADMIN) | Q(role=Profile.ACCESS_PROFESSOR))
 
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role = models.CharField(max_length=1, choices=ROLES, default=ACCESS_STUDENT)
+    role = models.CharField(max_length=1, choices=DB_ROLES, default=ACCESS_NONE)
     bio = models.CharField(max_length=256, blank=True)
 
     def has_student(self):
@@ -776,7 +781,7 @@ User.add_to_class('name', name)
 
 # Extend User to return annotated User objects
 def uannotated(cls):
-    return User.objects.annotate(
+    return User.objects.exclude(profile__role=Profile.ACCESS_NONE).annotate(
         role=F('profile__role',),
         name=Concat(F("first_name"), Value(' '), F("last_name")),
         name_sort=Concat(F("last_name"), Value(', '), F("first_name")),
