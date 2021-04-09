@@ -9,6 +9,7 @@
     {% csrf_token %}
       <table>{{ user_form.as_table }}</table>
       <table>{{ profile_form.as_table }}</table>
+      <table id="demo_table">{{ demo_form.as_table }}</table>
       <table id="student_table">{{ student_form.as_table }}</table>
       <table id="professor_table">{{ professor_form.as_table }}</table>
     <input
