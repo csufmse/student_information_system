@@ -14,7 +14,8 @@ class AdminViewsAccess(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(AdminViewsAccess, cls).setUpTestData()
-        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         AdminViewsAccess.u1 = createAdmin(username='u1', password='hello')
         AdminViewsAccess.u2 = createProfessor(username='u2', password='hello', major=m1)
         AdminViewsAccess.u3 = createStudent(username='u3', password='hello', major=m1)

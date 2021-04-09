@@ -38,16 +38,12 @@ def createData():
             ]
 
             if len(prereqs_met) < len(sections):
-                print(
-                    f'student {semstud.student}, {semstud.semester.name_sort}, ' +
-                    f'{len(sections)-len(prereqs_met)} '
-                    + 'eliminated')
+                print(f'student {semstud.student}, {semstud.semester.name_sort}, ' +
+                      f'{len(sections)-len(prereqs_met)} ' + 'eliminated')
 
             if len(prereqs_met) == 0:
-                print(
-                    f'ERROR: Student {semstud.student} meets the prereqs for NO ' +
-                    f'classes in semester {sem}'
-                )
+                print(f'ERROR: Student {semstud.student} meets the prereqs for NO ' +
+                      f'classes in semester {sem}')
                 continue
             elif len(prereqs_met) < number_attended:
                 print(f'WARNING: Student {semstud.student} wants to attend {number_attended} ' +
@@ -109,11 +105,9 @@ def createData():
                     ss.save()
                 except Exception:
                     error_count = error_count + 1
-                    print(
-                        f'ERROR: {i} Unable to put {semstud.student} in {sec} [sec={sec.id}, ' +
-                        f'stud={semstud.student.profile.user.id}, ' +
-                        f'status={ss.status}, grade={ltr}]'
-                    )
+                    print(f'ERROR: {i} Unable to put {semstud.student} in {sec} [sec={sec.id}, ' +
+                          f'stud={semstud.student.profile.user.id}, ' +
+                          f'status={ss.status}, grade={ltr}]')
                     print(f'attending = {attending}')
                     i = i - 1
                 else:

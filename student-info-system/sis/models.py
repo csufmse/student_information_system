@@ -36,6 +36,11 @@ class Profile(models.Model):
     def rolename_for(cls, aRole):
         return [item for item in Profile.ROLES if item[0] == aRole][0][1]
 
+    @classmethod
+    def staff(cls):
+        return Profile.objects.filter(
+            Q(role=Profile.ACCESS_ADMIN) | Q(role=Profile.ACCESS_PROFESSOR))
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
     role = models.CharField(max_length=1, choices=ROLES, default=ACCESS_STUDENT)
     bio = models.CharField(max_length=256, blank=True)
@@ -220,7 +225,7 @@ class Professor(models.Model):
 
 
 class Major(models.Model):
-    abbreviation = UpperField('Abbreviation', max_length=6)
+    abbreviation = UpperField('Abbreviation', max_length=6, unique=True)
     title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
     professors = models.ManyToManyField(Professor,
@@ -231,6 +236,7 @@ class Major(models.Model):
                                               blank=True,
                                               symmetrical=False,
                                               related_name="required_by")
+    contact = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
 
     def requirements_met_list(self, student):
         return self.courses_required.annotate(met=Exists(

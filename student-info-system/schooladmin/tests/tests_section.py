@@ -16,7 +16,8 @@ class AdminSectionViewsTest(TestCase):
 
     @classmethod
     def setUpTestData(self):
-        major = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         professor = createProfessor(username="prof", major=major)
         course = Course.objects.create(major=major,
                                        catalog_number='101',
