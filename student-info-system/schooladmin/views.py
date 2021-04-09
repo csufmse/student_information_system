@@ -975,6 +975,16 @@ def sectionstudent(request, id):
 @role_login_required(Profile.ACCESS_ADMIN)
 def transcript(request, userid):
     student = Student.objects.get(profile__user__id=userid)
-    ssects = student.section_set.all()
-    
-
+    data = {'student': student}
+    ssects = student.sectionstudent_set.all().order_by('section__semester')
+    if len(ssects):
+        ssects_by_sem = [[ssects[0]]]
+        i = 0
+        for ssect in ssects:
+            if ssect.section.semester == ssects_by_sem[i][0].section.semester:
+                ssects_by_sem[i].append(ssect)
+            else:
+                i += 1
+                ssects_by_sem.insert(i, [ssect])
+        data['ssects_by_sem'] = ssects_by_sem
+    return render(request, 'schooladmin/transcript.html', data)

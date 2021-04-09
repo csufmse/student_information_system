@@ -124,6 +124,24 @@
     font-style: italic;
 }
 
+
+/* Transcript table */
+.transcript_table {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
+}
+
+.transcript_table td, .transcript_table th {
+    padding: 6px;
+}
+
+.sem_head {
+    background: #f2f2f2;
+    padding: 10px;
+}
+
+
 /* SELECT/PULLDOWNS */
 .role_sel, .course_sel, .major_sel, .role_sel, .session_sel, .semester_sel, .user_sel {
     font-family: Arial, Helvetica, sans-serif;
