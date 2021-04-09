@@ -11,6 +11,8 @@
   <dd>{{ major.title }}</dd>
   <dt>Description</dt>
   <dd>{{ major.description }}</dd>
+  <dt>Contact</dt>
+  <dd><a href="{% url 'schooladmin:user' userid=major.contact.user.id %}">{{ major.contact }}</a></dd>
 </dl>
 
          <h3>Professors:</h3>
