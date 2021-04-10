@@ -258,7 +258,7 @@ def section(request, sectionid):
 @role_login_required(Profile.ACCESS_STUDENT)
 def secitems(request):
     the_user = request.user
-    the_semester = Semester.objects.get(session='SP', year=2021)  # Semester.current_semester()
+    the_semester = Semester.current_semester()
     data = {
         'user': the_user,
         'semester': the_semester,
