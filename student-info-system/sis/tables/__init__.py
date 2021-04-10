@@ -47,3 +47,4 @@ class NameColumn(ClassyColumn):
 
 class AbilityColumn(tables.BooleanColumn):
     header = "Enabled?"
+

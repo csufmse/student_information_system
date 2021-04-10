@@ -6,10 +6,7 @@ from sis.authentication_helpers import role_login_required
 from sis.models import Professor, Section, Semester, Student, Profile, SectionStudent
 from sis.utils import filtered_table
 
-from schooladmin.tables import SectionsTable, StudentInSectionTable
-from schooladmin.filters import StudentFilter
-
-from .tables import StudentsTable
+from sis.tables.sections import ProfSectionsTable
 
 
 @role_login_required(Profile.ACCESS_PROFESSOR)
@@ -20,12 +17,8 @@ def index(request):
 @role_login_required(Profile.ACCESS_PROFESSOR)
 def sections(request):
     the_prof = request.user.profile.professor
-
-    if the_prof is None:
-        return HttpResponse("No such professor")
-
     sections_qs = Section.objects.filter(professor=the_prof).exclude(status=Section.REG_CLOSED)
-    sections_table = SectionsTable(sections_qs)
+    sections_table = ProfSectionsTable(sections_qs)
     RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
 
     return render(request, 'professor/sections.html', {'sections': sections_table})

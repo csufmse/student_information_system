@@ -39,13 +39,16 @@ from .forms import (
     StudentCreationForm,
     ProfessorCreationForm,
 )
-from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable, SemestersTable,
-                     FullUsersTable, StudentHistoryTable, StudentInMajorTable,
-                     StudentInSectionTable, SemestersSummaryTable, SectionForClassTable,
-                     CoursesForMajorTable, MajorCoursesMetTable, StudentsTable,
-                     ProfReferenceItemsTable, SectionReferenceItemsTable, MessageSentTable,
-                     MessageReceivedTable)
 
+from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
+from sis.tables.majors import MajorsTable
+from sis.tables.messages import MessageSentTable, MessageReceivedTable
+from sis.tables.referenceitems import ProfReferenceItemsTable
+from sis.tables.sectionreferenceitems import SectionReferenceItemsTable
+from sis.tables.sections import SectionForClassTable, SectionsTable
+from sis.tables.sectionstudents import StudentHistoryTable, SectionStudentsTable, StudentInSectionTable
+from sis.tables.semesters import SemestersSummaryTable, SemestersTable
+from sis.tables.users import UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable
 
 @role_login_required(Profile.ACCESS_ADMIN)
 def index(request):
