@@ -29,9 +29,11 @@ def index(request):
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def current_schedule_view(request):
+    current_semester = Semester.current_semester()
     context = {
-        'my_sections': request.user.profile.student.sectionstudent_set.all,
-        'name': request.user.profile.student.name
+        'my_sections': request.user.profile.student.sectionstudent_set.filter(section__semester=current_semester),
+        'name': request.user.profile.student.name,
+        'semester': current_semester,
     }
     return render(request, 'student/current_schedule.html', context)
 

@@ -534,6 +534,25 @@ class Semester(models.Model):
         if sname is not None and len(sname):
             return sname[0]
 
+    """
+    if available, return semester that's in session. Otherwise return the one we're registering
+    """
+    @classmethod
+    def current_semester(cls, at=None):
+        if at is None:
+            at = datetime.now()
+        try:
+           sem = Semester.objects.get(date_started__lte=at,date_ended__gte=at)
+        except self.model.DoesNotExist:
+           sem = None
+
+        if sem is None:
+            try:
+                sem = Semester.objects.get(date_registration_opens__lte=at, date_registration_closes__gte=at)
+            except self.model.DoesNotExist:
+                sem = None
+        return sem
+
     date_registration_opens = models.DateField('Registration Opens')
     date_registration_closes = models.DateField('Registration Closes')
     date_started = models.DateField('Classes Start')
