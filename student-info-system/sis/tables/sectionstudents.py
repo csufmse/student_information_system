@@ -3,6 +3,7 @@ import django_tables2 as tables
 from sis.models import SectionStudent
 from sis.tables import *
 
+
 # for when the student is known
 class StudentHistoryTable(tables.Table):
     semester = ClassyColumn(verbose_name='Semester',
@@ -102,5 +103,3 @@ class StudentInSectionTable(tables.Table):
             'data-id': lambda record: record.student.profile.user.pk
         }
         attrs = {"class": 'sectionstudent_table'}
-
-

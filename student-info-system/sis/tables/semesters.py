@@ -3,6 +3,7 @@ import django_tables2 as tables
 from sis.models import Semester
 from sis.tables import *
 
+
 class SemestersTable(tables.Table):
     semester = ClassyColumn(verbose_name='Semester',
                             css_class_base='semester',
@@ -46,5 +47,3 @@ class SemestersSummaryTable(tables.Table):
         )
         attrs = {"class": 'semester_table'}
         row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}
-
-

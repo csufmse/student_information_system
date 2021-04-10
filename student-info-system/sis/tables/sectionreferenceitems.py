@@ -3,6 +3,7 @@ import django_tables2 as tables
 from sis.models import SectionReferenceItem
 from sis.tables import *
 
+
 class SectionReferenceItemsTable(tables.Table):
     index = ClassyColumn(verbose_name="#", css_class_base='item_index')
     type = ClassyColumn(verbose_name='Type', css_class_base='item_type', accessor='item__type')

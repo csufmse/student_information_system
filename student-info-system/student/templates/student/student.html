@@ -114,7 +114,7 @@
                 {% bootstrap_form sent_filter.form layout='inline' %}
                 <button class="btn btn-primary">Filter</button>
                 {% if sent_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
+                    <a  class="btn btn-success" href="{%  url 'student:user' userid=user.id %}">Clear</a>
                 {% endif %}
             </form>
         {% endif %}
@@ -132,7 +132,7 @@
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
-    <input id="passchg"
+    <input id="change_password"
         action="action"
            class="btn btn-info"
         value="Change Password"
@@ -145,7 +145,7 @@
 
   </form>
 <script>
-addButtonClickHandler('passchg', "{% url 'student:change_password' %}");
+addButtonClickHandler('change_password', "{% url 'student:change_password' %}");
 addButtonClickHandler('edit_user', "{% url 'student:profile_edit' %}");
 addClickHandlers("{% url 'student:semester' semester_id=1234599 %}", "semester_row");
 addClickHandlers("{% url 'student:course' courseid=1234599 %}", "course_row");

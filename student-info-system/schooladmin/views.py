@@ -3,8 +3,8 @@ from datetime import date
 from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.forms import AdminPasswordChangeForm
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.forms.models import model_to_dict
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.html import format_html
@@ -22,23 +22,20 @@ from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFi
 from .forms import (
     CourseCreationForm,
     CourseEditForm,
-    DemographicForm,
-    UserCreationForm,
     MajorCreationForm,
     MajorEditForm,
     SectionCreationForm,
     SectionEditForm,
     SemesterCreationForm,
-    UserEditForm,
     SemesterEditForm,
-    ReferenceItemCreationForm,
-    ProfileCreationForm,
-    ProfileEditForm,
-    StudentEditForm,
     ProfessorEditForm,
-    StudentCreationForm,
     ProfessorCreationForm,
 )
+
+from sis.forms.profile import DemographicForm, ProfileCreationForm, ProfileEditForm
+from sis.forms.user import UserCreationForm, UserEditForm
+from sis.forms.student import StudentEditForm, StudentCreationForm
+from sis.forms.referenceitem import ReferenceItemCreationForm
 
 from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
 from sis.tables.majors import MajorsTable
@@ -46,9 +43,11 @@ from sis.tables.messages import MessageSentTable, MessageReceivedTable
 from sis.tables.referenceitems import ProfReferenceItemsTable
 from sis.tables.sectionreferenceitems import SectionReferenceItemsTable
 from sis.tables.sections import SectionForClassTable, SectionsTable
-from sis.tables.sectionstudents import StudentHistoryTable, SectionStudentsTable, StudentInSectionTable
+from sis.tables.sectionstudents import (StudentHistoryTable, SectionStudentsTable,
+                                        StudentInSectionTable)
 from sis.tables.semesters import SemestersSummaryTable, SemestersTable
 from sis.tables.users import UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable
+
 
 @role_login_required(Profile.ACCESS_ADMIN)
 def index(request):
@@ -534,8 +533,11 @@ def majors(request):
         ))
 
 
-@role_login_required(Profile.ACCESS_ADMIN)
+@login_required
 def major(request, majorid):
+    include_students = request.user.profile.role in (Profile.ACCESS_ADMIN,
+                                                     Profile.ACCESS_PROFESSOR)
+
     qs = Major.objects.filter(id=majorid)
     if qs.count() < 1:
         return HttpResponse("No such major", reason="Invalid Data", status=404)
@@ -543,6 +545,7 @@ def major(request, majorid):
 
     data = {
         'major': the_major,
+        'permit_edit': request.user.profile.role == Profile.ACCESS_ADMIN,
     }
     data.update(
         filtered_table(
@@ -571,14 +574,15 @@ def major(request, majorid):
             request=request,
         ))
 
-    data.update(
-        filtered_table(
-            name='students',
-            qs=User.annotated().filter(profile__student__major=the_major),
-            filter=UserFilter,
-            table=StudentInMajorTable,
-            request=request,
-        ))
+    if include_students:
+        data.update(
+            filtered_table(
+                name='students',
+                qs=User.annotated().filter(profile__student__major=the_major),
+                filter=UserFilter,
+                table=StudentInMajorTable,
+                request=request,
+            ))
 
     return render(request, 'schooladmin/major.html', data)
 
@@ -1018,6 +1022,7 @@ def demographics(request):
         'professors': prof_form,
     })
 
+
 @role_login_required(Profile.ACCESS_ADMIN)
 def profile(request):
     the_user = request.user
@@ -1054,4 +1059,4 @@ def profile(request):
 
 @role_login_required(Profile.ACCESS_ADMIN)
 def profile_edit(request):
-    return HttpResponse("not implemented")
+    return user_edit(request, request.user.id)

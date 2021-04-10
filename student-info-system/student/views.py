@@ -1,15 +1,14 @@
 from datetime import date
 
-from django.db.models import Q
+from django.contrib import messages
+from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
-from schooladmin.filters import (CourseFilter,
-                      SectionFilter,
-                      SectionStudentFilter,
-                      SemesterFilter,
-                      SentMessageFilter, ReceivedMessageFilter,
-                      StudentFilter)
+from schooladmin.views import major as admin_major
+from schooladmin.filters import (CourseFilter, SectionFilter, SectionStudentFilter,
+                                 SemesterFilter, SentMessageFilter, ReceivedMessageFilter,
+                                 StudentFilter)
 from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
 from sis.utils import filtered_table
@@ -18,6 +17,10 @@ from sis.tables.courses import CoursesTable, MajorCoursesMetTable
 from sis.tables.messages import MessageSentTable, MessageReceivedTable
 from sis.tables.sectionstudents import StudentHistoryTable
 from sis.tables.semesters import SemestersSummaryTable
+
+from sis.forms.profile import DemographicForm, UnprivProfileEditForm
+from sis.forms.user import UserEditForm
+
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def index(request):
@@ -107,6 +110,7 @@ def registration_view(request):
 
     return render(request, 'student/registration.html', context)
 
+
 @role_login_required(Profile.ACCESS_STUDENT)
 def profile(request):
     the_user = request.user
@@ -170,26 +174,63 @@ def profile(request):
 
     return render(request, 'student/student.html', data)
 
+
+@transaction.atomic
 @role_login_required(Profile.ACCESS_STUDENT)
 def profile_edit(request):
-    return HttpResponse("not implemented")
+    the_user = request.user
+    user_profile = the_user.profile
+    if request.method == 'POST':
+        user_form = UserEditForm(request.POST, instance=the_user, prefix='u')
+        profile_form = UnprivProfileEditForm(request.POST, instance=user_profile, prefix='p')
+        demo_form = DemographicForm(request.POST, instance=user_profile)
+        if user_form.is_valid() and profile_form.is_valid() and demo_form.is_valid():
+            user_form.save()
+            profile_form.save()
+            demo_form.save()
+            messages.success(request, "Profile has been updated.")
+            return profile(request)
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
+    else:
+        user_form = UserEditForm(instance=the_user, prefix='u')
+        profile_form = UnprivProfileEditForm(instance=user_profile, prefix='p')
+        demo_form = DemographicForm(instance=user_profile,)
 
-@role_login_required(Profile.ACCESS_STUDENT)
-def change_password(request):
-    return HttpResponse("not implemented")
+    return render(
+        request, 'student/student_edit.html', {
+            'user': the_user,
+            'user_form': user_form,
+            'profile_form': profile_form,
+            'demo_form': demo_form,
+        })
 
-@role_login_required(Profile.ACCESS_STUDENT)
-def course(request,courseid):
-    return HttpResponse("not implemented")
-
-@role_login_required(Profile.ACCESS_STUDENT)
-def sectionstudent(request,id):
-    return HttpResponse("not implemented")
-
-@role_login_required(Profile.ACCESS_STUDENT)
-def semester(request, semester_id):
-    return HttpResponse("not implemented")
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def major(request, majorid):
-    return HttpResponse("not implemented")
+    return admin_major(request, majorid)
+
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def change_password(request):
+    return HttpResponse("student:change_password not implemented")
+
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def course(request, courseid):
+    return HttpResponse("student:course not implemented")
+
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def sectionstudent(request, id):
+    return HttpResponse("student:sectionstudent not implemented")
+
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def semester(request, semester_id):
+    return HttpResponse("student:semester not implemented")
+
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def user(request, userid):
+    return HttpResponse("student:user not implemented")

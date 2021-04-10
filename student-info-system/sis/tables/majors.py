@@ -14,9 +14,5 @@ class MajorsTable(tables.Table):
         model = Major
         template_name = "django_tables2/bootstrap.html"
         fields = ('abbreviation', 'name', 'description', 'contact')
-        row_attrs = {
-            'class': 'major_row',
-            'data-id': lambda record: record.pk
-        }
+        row_attrs = {'class': 'major_row', 'data-id': lambda record: record.pk}
         attrs = {"class": 'major_table'}
-

@@ -3,6 +3,7 @@ import django_tables2 as tables
 from sis.models import User
 from sis.tables import *
 
+
 class FullUsersTable(tables.Table):
     name = NameColumn(css_class_base='user_name')
     username = ClassyColumn(css_class_base='username')
@@ -33,26 +34,22 @@ class FullUsersTable(tables.Table):
     )
 
     class Meta:
-        model = User
         attrs = {"class": 'fulluser_table'}
         fields = ('username', 'name', 'student_major', 'student_gpa', 'credits_earned',
                   'class_level', 'professor_department', 'access_role', 'is_active')
         row_attrs = {'class': 'user_row', 'data-id': lambda record: record.pk}
         template_name = "django_tables2/bootstrap.html"
 
+
 class UsersTable(FullUsersTable):
     name = NameColumn(css_class_base='user_name')
     username = ClassyColumn(css_class_base='username')
 
     class Meta:
-        model = User
         attrs = {"class": 'user_table'}
-        exclude = ('student_major', 'student_gpa', 'credits_earned',
-                  'class_level', 'professor_department', 'access_role', 'is_active')
-        row_attrs = {
-            'class': 'user_row',
-            'data-id': lambda record: record.pk
-        }
+        exclude = ('student_major', 'student_gpa', 'credits_earned', 'class_level',
+                   'professor_department', 'access_role', 'is_active')
+        row_attrs = {'class': 'user_row', 'data-id': lambda record: record.pk}
         template_name = "django_tables2/bootstrap.html"
 
 
@@ -80,14 +77,10 @@ class StudentsTable(tables.Table):
     )
 
     class Meta:
-        model = User
         attrs = {"class": 'students_table'}
         fields = ('username', 'name', 'student_major', 'student_gpa', 'credits_earned',
                   'class_level', 'is_active')
-        row_attrs = {
-            'class': 'user_row',
-            'data-id': lambda record: record.pk
-        }
+        row_attrs = {'class': 'user_row', 'data-id': lambda record: record.pk}
         template_name = "django_tables2/bootstrap.html"
 
 
@@ -110,13 +103,7 @@ class StudentInMajorTable(tables.Table):
     )
 
     class Meta:
-        model = User
         attrs = {"class": 'studentmajor_table'}
         fields = ('username', 'name', 'gpa', 'credits_earned', 'class_level')
-        row_attrs = {
-            'class': 'user_row',
-            'data-id': lambda record: record.pk
-        }
+        row_attrs = {'class': 'user_row', 'data-id': lambda record: record.pk}
         template_name = "django_tables2/bootstrap.html"
-
-

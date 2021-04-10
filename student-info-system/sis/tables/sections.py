@@ -24,22 +24,17 @@ class SectionsTable(tables.Table):
         template_name = "django_tables2/bootstrap.html"
         fields = ('semester', 'course', 'number', 'status', 'course_title', 'hours', 'location',
                   'professor', 'capacity', 'seats_remaining')
-        row_attrs = {
-            'class': 'section_row',
-            'data-id': lambda record: record.pk
-        }
+        row_attrs = {'class': 'section_row', 'data-id': lambda record: record.pk}
         attrs = {"class": 'section_table'}
 
 
 class ProfSectionsTable(SectionsTable):
+
     class Meta:
         model = Section
         template_name = "django_tables2/bootstrap.html"
-        exclude = ( 'status', 'course_title', 'professor', 'seats_remaining')
-        row_attrs = {
-            'class': 'srow',
-            'data-id': lambda record: record.pk
-        }
+        exclude = ('status', 'course_title', 'professor', 'seats_remaining')
+        row_attrs = {'class': 'srow', 'data-id': lambda record: record.pk}
 
 
 # for when Class is known
@@ -63,5 +58,3 @@ class SectionForClassTable(tables.Table):
                   'seats_remaining')
         row_attrs = {'class': 'section_row', 'data-id': lambda record: record.pk}
         attrs = {"class": 'section_table'}
-
-

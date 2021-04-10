@@ -3,6 +3,7 @@ import django_tables2 as tables
 from sis.models import ReferenceItem
 from sis.tables import *
 
+
 class ProfReferenceItemsTable(tables.Table):
     course = ClassyColumn(css_class_base='course', accessor='course__name')
     type = ClassyColumn(verbose_name='Type', css_class_base='item_type')

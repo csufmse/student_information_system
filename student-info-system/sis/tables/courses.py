@@ -46,5 +46,3 @@ class MajorCoursesMetTable(tables.Table):
         fields = ('major', 'catalog_number', 'title', 'credits_earned', 'met')
         row_attrs = {'class': 'course_row', 'data-id': lambda record: record.pk}
         attrs = {"class": 'majorcourse_table'}
-
-

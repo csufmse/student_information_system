@@ -63,22 +63,23 @@
         </div>
     </div>
 
+    {%  if students_table %}
         <h3>Students with Major:</h3>
-    <div id="students">
-        {% if students_filter %}
-            <form id="students_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form students_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if students_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:major' majorid=major.id %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table students_table 'django_tables2/bootstrap.html' %}
+        <div id="students">
+            {% if students_filter %}
+                <form id="students_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                    {% bootstrap_form students_filter.form layout='inline' %}
+                    <button class="btn btn-primary">Filter</button>
+                    {% if students_has_filter %}
+                        <a  class="btn btn-success" href="{%  url 'schooladmin:major' majorid=major.id %}">Clear</a>
+                    {% endif %}
+                </form>
+            {% endif %}
+            <div class="data-table-alt">
+                {% render_table students_table 'django_tables2/bootstrap.html' %}
+            </div>
         </div>
-    </div>
-
+    {% endif %}
     <div>
     <input
         action="action"
@@ -86,15 +87,17 @@
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
-     <input id="editm"
+    {%  if permit_edit %}
+     <input id="edit_major"
         action="action"
            class="btn btn-info"
         value="Edit Major"
     />
+    {% endif %}
     </div>
 <script>
-addButtonClickHandler('editm', '{% url 'schooladmin:major_edit' major.id %}');
-addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "user_row");
-addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
+{% if permit_edit %}addButtonClickHandler('edit_major', '{% url 'schooladmin:major_edit' major.id %}');{% endif %}
+addClickHandlers("{% url 'student:user' userid=1234599 %}", "user_row");
+addClickHandlers("{% url 'student:course' courseid=1234599 %}", "course_row");
 </script>
 {% endblock %}

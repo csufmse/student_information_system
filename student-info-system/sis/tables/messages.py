@@ -3,6 +3,7 @@ import django_tables2 as tables
 from sis.models import Message
 from sis.tables import *
 
+
 def classes_for(record):
     cl = 'message_row'
     if record.unread:
@@ -11,6 +12,7 @@ def classes_for(record):
         cl += ' archived'
 
     return cl
+
 
 class MessageTable(tables.Table):
     recipient = ClassyColumn(verbose_name="To", css_class_base='message_addr')
@@ -49,6 +51,7 @@ class MessageTable(tables.Table):
             'data-id': lambda record: record.pk
         }
         attrs = {"class": 'message_table'}
+
 
 class MessageReceivedTable(MessageTable):
 
