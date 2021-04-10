@@ -2,7 +2,7 @@
 {% load static %}
 {% load bootstrap3 %}
 {% load render_table from django_tables2 %}
-{%  load user_demographics %}
+{% load user_demographics %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -12,15 +12,11 @@
   <dd>{{ user.username }}</dd>
   <dt>Email</dt>
   <dd>{{ user.email }}</dd>
-  <dt>User Type</dt>
-  <dd>{{ user.profile.rolename }}</dd>
-  <dt>Enabled?</dt>
-  <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
   <dt>Bio</dt>
   <dd>{{ user.profile.bio }}</dd>
 </dl>
     <h3>Demographic Data</h3>
-    {% demographic_details user.profile %}
+    {%  demographic_details user.profile %}
 
         <h3>Received Messages:</h3>
     <div id="received">
@@ -57,7 +53,7 @@
   <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
-    <input
+    <input id="go_back"
         action="action"
            class="btn btn-info"
         onclick="window.history.go(-1); return false;"
@@ -68,51 +64,17 @@
            class="btn btn-info"
         value="Change Password"
     />
-      {% if user.is_active %}
-    <input id="disbutton" name="disbutton"
-           class="btn btn-primary"
-           action="action"
-        value="Disable User"
-    />
-    {% else %}
-    <input id="enabutton" name="enabutton"
-        action="action"
-           class="btn btn-primary"
-        value="Enable User"
-   />
-   {% endif %}
-     <input id="editu"
+     <input id="edit_profile"
         action="action"
            class="btn btn-info"
-        value="Edit User"
+        value="Edit Profile"
     />
 
   </form>
 <script>
-function confirmit(evt) {
-    var btntitle = evt.target.value;
-    var answer = window.confirm("Are you sure you want to "+btntitle+
-                    '\n user "{{ user.username }}" ({{ user.get_full_name }})?');
-    if (answer) {
-        this.form.submit();
-        return true;
-    }
-    return false;
-}
-var btn = document.getElementById("disbutton");
-if ( btn ) {
-    btn.addEventListener("click", confirmit);
-}
-btn = document.getElementById("enabutton");
-if ( btn ) {
-    btn.addEventListener("click", confirmit);
-}
 stylizeRange({field:'time_sent',name:'Sent',prefix:'received',width:'100px'});
 stylizeRange({field:'time_sent',name:'Received',prefix:'sent',width:'100px'});
 addButtonClickHandler('passchg', "{% url 'schooladmin:change_password' user.id %}");
-addButtonClickHandler('editu', "{% url 'schooladmin:user_edit' user.id %}");
-addClickHandlers("{% url 'schooladmin:semester' semester_id=1234599 %}", "semester_row");
-addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
-addClickHandlers("{% url 'schooladmin:sectionstudent' id=1234599 %}", "sectionstudent_row");
+addButtonClickHandler('edit_profile', "{% url 'schooladmin:user_edit' user.id %}");
 </script>
 {% endblock %}

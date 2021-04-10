@@ -14,22 +14,25 @@
   <button class="tablinks">Courses</button>
   <button class="tablinks">Sections</button>
   <button class="tablinks">Demographics</button>
+  <button class="tablinks">Profile</button>
 </div>
 
 <span height="400" width="300">
 <iframe id="Users" class="tabcontent samplecontentblock" title="Admin Users" src="{% url 'schooladmin:users' %}"
     ></iframe>
-<iframe id="Students" class="tabcontent" title="Students" src="{% url 'schooladmin:students' %}"
+<iframe id="Students" class="tabcontent" title="Students" loading="lazy" src="{% url 'schooladmin:students' %}"
     ></iframe>
-<iframe id="Majors" class="tabcontent" title="Majors" src="{% url 'schooladmin:majors' %}"
+<iframe id="Majors" class="tabcontent" title="Majors" loading="lazy" src="{% url 'schooladmin:majors' %}"
     ></iframe>
-<iframe id="Semesters" class="tabcontent" title="Semesters" src="{% url 'schooladmin:semesters' %}"
+<iframe id="Semesters" class="tabcontent" title="Semesters" loading="lazy" src="{% url 'schooladmin:semesters' %}"
     ></iframe>
-<iframe id="Courses" class="tabcontent" title="Courses" src="{% url 'schooladmin:courses' %}"
+<iframe id="Courses" class="tabcontent" title="Courses" loading="lazy" src="{% url 'schooladmin:courses' %}"
     ></iframe>
-<iframe id="Sections" class="tabcontent" title="Sections" src="{% url 'schooladmin:sections' %}"
+<iframe id="Sections" class="tabcontent" title="Sections" loading="lazy" src="{% url 'schooladmin:sections' %}"
     ></iframe>
-<iframe id="Demographics" class="tabcontent" title="Demographics" src="{% url 'schooladmin:demographics' %}"
+<iframe id="Demographics" class="tabcontent" title="Demographics" loading="lazy" src="{% url 'schooladmin:demographics' %}"
+    ></iframe>
+<iframe id="Profile" class="tabcontent" title="Profile" loading="lazy" src="{% url 'schooladmin:profile' %}"
     ></iframe>
 </span>
 {% endblock %}

@@ -1014,3 +1014,41 @@ def demographics(request):
         'students': stud_form,
         'professors': prof_form,
     })
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def profile(request):
+    the_user = request.user
+
+    # if the_user.profile.role == Profile.ACCESS_STUDENT:
+    #     return student(request, the_user.id)
+    # elif the_user.profile.role == Profile.ACCESS_PROFESSOR:
+    #     return professor(request, the_user.id)
+
+    data = {
+        'user': the_user,
+    }
+    data.update(
+        filtered_table(
+            name='received',
+            qs=the_user.profile.sent_to.all(),
+            filter=FullReceivedMessageFilter,
+            table=MessageReceivedTable,
+            request=request,
+            wrap_list=False,
+        ))
+    data.update(
+        filtered_table(
+            name='sent',
+            qs=the_user.profile.sent_by.all(),
+            filter=FullSentMessageFilter,
+            table=MessageSentTable,
+            request=request,
+            wrap_list=False,
+        ))
+
+    return render(request, 'profile.html', data)
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def profile_edit(request):
+    return HttpResponse("not implemented")
