@@ -4,11 +4,20 @@ from django.db.models import Q
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
-from schooladmin.filters import SectionFilter
+from schooladmin.filters import (CourseFilter,
+                      SectionFilter,
+                      SectionStudentFilter,
+                      SemesterFilter,
+                      SentMessageFilter, ReceivedMessageFilter,
+                      StudentFilter)
 from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
 from sis.utils import filtered_table
 
+from sis.tables.courses import CoursesTable, MajorCoursesMetTable
+from sis.tables.messages import MessageSentTable, MessageReceivedTable
+from sis.tables.sectionstudents import StudentHistoryTable
+from sis.tables.semesters import SemestersSummaryTable
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def index(request):
@@ -97,3 +106,90 @@ def registration_view(request):
                 last_course = sect.course
 
     return render(request, 'student/registration.html', context)
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def profile(request):
+    the_user = request.user
+
+    data = {
+        'user': the_user,
+    }
+    data.update(
+        filtered_table(
+            name='semesters',
+            qs=the_user.profile.student.semesters.all(),
+            filter=SemesterFilter,
+            table=SemestersSummaryTable,
+            request=request,
+            wrap_list=False,
+        ))
+
+    data.update(
+        filtered_table(
+            name='history',
+            qs=the_user.profile.student.course_history(),
+            filter=SectionStudentFilter,
+            table=StudentHistoryTable,
+            request=request,
+        ))
+
+    data.update(
+        filtered_table(
+            name='remaining',
+            qs=the_user.profile.student.remaining_required_courses(),
+            filter=CourseFilter,
+            table=CoursesTable,
+            request=request,
+        ))
+    data.update(
+        filtered_table(
+            name='majorcourses',
+            qs=the_user.profile.student.requirements_met_list(),
+            filter=CourseFilter,
+            table=MajorCoursesMetTable,
+            request=request,
+        ))
+    data.update(
+        filtered_table(
+            name='received',
+            qs=the_user.profile.sent_to.filter(time_archived__isnull=True),
+            filter=ReceivedMessageFilter,
+            table=MessageReceivedTable,
+            request=request,
+            wrap_list=False,
+        ))
+    data.update(
+        filtered_table(
+            name='sent',
+            qs=the_user.profile.sent_by.filter(time_archived__isnull=True),
+            filter=SentMessageFilter,
+            table=MessageSentTable,
+            request=request,
+            wrap_list=False,
+        ))
+
+    return render(request, 'student/student.html', data)
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def profile_edit(request):
+    return HttpResponse("not implemented")
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def change_password(request):
+    return HttpResponse("not implemented")
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def course(request,courseid):
+    return HttpResponse("not implemented")
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def sectionstudent(request,id):
+    return HttpResponse("not implemented")
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def semester(request, semester_id):
+    return HttpResponse("not implemented")
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def major(request, majorid):
+    return HttpResponse("not implemented")
