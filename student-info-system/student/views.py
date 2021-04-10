@@ -15,8 +15,11 @@ from sis.utils import filtered_table
 
 from sis.tables.courses import CoursesTable, MajorCoursesMetTable
 from sis.tables.messages import MessageSentTable, MessageReceivedTable
+from sis.tables.sectionreferenceitems import SectionReferenceItemsTable
 from sis.tables.sectionstudents import StudentHistoryTable
 from sis.tables.semesters import SemestersSummaryTable
+
+from sis.filters.sectionreferenceitem import SectionItemFilter
 
 from sis.forms.profile import DemographicForm, UnprivProfileEditForm
 from sis.forms.user import UserEditForm
@@ -31,9 +34,13 @@ def index(request):
 def current_schedule_view(request):
     current_semester = Semester.current_semester()
     context = {
-        'my_sections': request.user.profile.student.sectionstudent_set.filter(section__semester=current_semester),
-        'name': request.user.profile.student.name,
-        'semester': current_semester,
+        'my_sections':
+            request.user.profile.student.sectionstudent_set.filter(
+                section__semester=current_semester),
+        'name':
+            request.user.profile.student.name,
+        'semester':
+            current_semester,
     }
     return render(request, 'student/current_schedule.html', context)
 
@@ -236,3 +243,33 @@ def semester(request, semester_id):
 @role_login_required(Profile.ACCESS_STUDENT)
 def user(request, userid):
     return HttpResponse("student:user not implemented")
+
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def secitem(request, id):
+    return HttpResponse("student:secitem not implemented")
+
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def section(request, sectionid):
+    return HttpResponse("student:section not implemented")
+
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def secitems(request):
+    the_user = request.user
+    the_semester = Semester.objects.get(session='SP', year=2021)  # Semester.current_semester()
+    data = {
+        'user': the_user,
+        'semester': the_semester,
+    }
+    data.update(
+        filtered_table(
+            name='secitem',
+            qs=the_user.profile.student.section_reference_items_for(the_semester),
+            filter=SectionItemFilter,
+            table=SectionReferenceItemsTable,
+            request=request,
+        ))
+
+    return render(request, 'student/items.html', data)

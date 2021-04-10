@@ -13,6 +13,9 @@ urlpatterns = [
     path('course/<int:courseid>', views.course, name='course'),
     path('user/<int:userid>', views.user, name='user'),
     path('sectionstudent/<int:id>', views.sectionstudent, name='sectionstudent'),
+    path('section/<int:sectionid>', views.section, name='section'),
     path('semester/<int:semester_id>', views.semester, name='semester'),
+    path('secitems', views.secitems, name='secitems'),
+    path('secitem/<int:id>', views.secitem, name='secitem'),
     path('major/<int:majorid>', views.major, name='major'),
 ]

@@ -18,7 +18,10 @@ from sis.utils import filtered_table
 from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFilter,
                       SemesterFilter, UserFilter, FullSentMessageFilter,
                       FullReceivedMessageFilter, SentMessageFilter, ReceivedMessageFilter,
-                      StudentFilter, ItemFilter, SectionItemFilter)
+                      StudentFilter, ItemFilter)
+
+from sis.filters.sectionreferenceitem import SectionItemFilter
+
 from .forms import (
     CourseCreationForm,
     CourseEditForm,
@@ -41,7 +44,7 @@ from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesM
 from sis.tables.majors import MajorsTable
 from sis.tables.messages import MessageSentTable, MessageReceivedTable
 from sis.tables.referenceitems import ProfReferenceItemsTable
-from sis.tables.sectionreferenceitems import SectionReferenceItemsTable
+from sis.tables.sectionreferenceitems import ReferenceItemsForSectionTable
 from sis.tables.sections import SectionForClassTable, SectionsTable
 from sis.tables.sectionstudents import (StudentHistoryTable, SectionStudentsTable,
                                         StudentInSectionTable)
@@ -855,7 +858,7 @@ def section(request, sectionid):
             name='secitem',
             qs=the_section.sectionreferenceitem_set,
             filter=SectionItemFilter,
-            table=SectionReferenceItemsTable,
+            table=ReferenceItemsForSectionTable,
             request=request,
         ))
 
