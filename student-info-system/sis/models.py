@@ -207,13 +207,11 @@ class Profile(models.Model):
 
     def unread_messages(self):
         normal_unread_count = self.sent_to.filter(time_read__isnull=True,
-                                                                  high_priority=False).count()
+                                                  high_priority=False).count()
         priority_unread_count = self.sent_to.filter(time_read__isnull=True,
-                                                                    high_priority=True).count()
+                                                    high_priority=True).count()
         total = normal_unread_count + priority_unread_count
-        return {'normal': normal_unread_count,
-                'priority': priority_unread_count,
-                'total': total}
+        return {'normal': normal_unread_count, 'priority': priority_unread_count, 'total': total}
 
     @property
     def rolename(self):
@@ -364,14 +362,32 @@ class Student(models.Model):
                 self.sectionstudent_set.filter(section__semester=semester,
                                                section=OuterRef('section'))))
 
-    def request_major_change(self,major,reason):
+    def request_major_change(self, major=None, reason=None):
         mesg = Message.objects.create(
             sender=self.profile,
             recipient=major.contact,
-            subject='Request: Change Major to '+major.abbreviation,
-            body= f'Current Major: {self.major}\nReason:\n"{reason}',
+            subject='Request: Change Major to ' + major.abbreviation,
+            body=f'Current Major: {self.major}\nReason:\n"{reason}',
         )
         return mesg
+
+    def request_drop(self, sectionstudent=None, reason=None):
+        mesg = Message.objects.create(
+            sender=self.profile,
+            recipient=sectionstudent.section.course.major.contact,
+            subject='Request: Drop Section ' + sectionstudent.section.name,
+            body=f'Reason:\n"{reason}',
+        )
+        info_mesg = Message.objects.create(
+            sender=self.profile,
+            recipient=sectionstudent.section.professor.profile,
+            subject='FYI: Drop of ' + sectionstudent.section.name + ' requested',
+            body=f'Reason:\n"{reason}',
+        )
+        return mesg
+
+    def droppable_classes(self, semester=None):
+        return self.sectionstudent_set.filter(section__semester=semester)
 
 
 class Professor(models.Model):
@@ -410,9 +426,13 @@ class Major(models.Model):
     contact = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
 
     def requirements_met_list(self, student):
-        return self.courses_required.annotate(met=Exists(
-            student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)),
-        grade=Max(student.sectionstudent_set.filter(section__course=OuterRef('pk')).values('grade'), output_field=CharField()),)
+        return self.courses_required.annotate(
+            met=Exists(
+                student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)),
+            grade=Max(
+                student.sectionstudent_set.filter(section__course=OuterRef('pk')).values('grade'),
+                output_field=CharField()),
+        )
 
     class Meta:
         ordering = ['abbreviation']
@@ -701,7 +721,7 @@ class SectionStudent(models.Model):
     )
 
     @classmethod
-    def letter_grade_for(cls,grade):
+    def letter_grade_for(cls, grade):
         return dict(SectionStudent.GRADES).get(grade)
 
     grade = models.SmallIntegerField(

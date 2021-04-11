@@ -10,8 +10,7 @@ class StudentHistoryTable(tables.Table):
                             css_class_base='semester',
                             accessor='section__semester__name')
     section = ClassyColumn(css_class_base='section_name', accessor='section__name')
-    major = ClassyColumn(accessor='section__course__major',
-                         css_class_base='major')
+    major = ClassyColumn(accessor='section__course__major', css_class_base='major')
     title = ClassyColumn(accessor='section__course__title', css_class_base='coursetitle')
     credits_earned = ClassyColumn(
         verbose_name='Credits',
@@ -27,13 +26,14 @@ class StudentHistoryTable(tables.Table):
                                 accessor='grade',
                                 css_class_base='lettergrade')
     professor = ClassyColumn(accessor='section__professor',
-                             order_by=("section__professor__profile__user__last_name", "section__professor__profile__user__first_name"),
+                             order_by=("section__professor__profile__user__last_name",
+                                       "section__professor__profile__user__first_name"),
                              css_class_base='username')
 
     class Meta:
         model = SectionStudent
-        fields = ('semester', 'major', 'section', 'title', 'professor', 'credits_earned', 'status',
-                  'letter_grade')
+        fields = ('semester', 'major', 'section', 'title', 'professor', 'credits_earned',
+                  'status', 'letter_grade')
         template_name = "django_tables2/bootstrap.html"
         row_attrs = {
             'class': 'sectionstudent_row',

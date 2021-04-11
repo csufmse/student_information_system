@@ -4,6 +4,7 @@ from sis.models import Major, Profile, Course
 
 from sis.forms.utils import *
 
+
 class MajorCreationForm(forms.ModelForm):
     abbreviation = UpperFormField(max_length=6, help_text='Abbreviation')
     title = forms.CharField(max_length=256)
@@ -43,19 +44,17 @@ class MajorEditForm(forms.ModelForm):
                     Q(role=Profile.ACCESS_ADMIN) |
                     (Q(role=Profile.ACCESS_PROFESSOR) & Q(professor__major=the_major)))
 
+
 class MajorSelectForm(forms.Form):
     major = forms.ModelChoiceField(queryset=Major.objects.all())
 
     class Meta:
         fields = ('major')
 
+
 class MajorChangeForm(forms.Form):
     major = forms.ModelChoiceField(queryset=Major.objects.all())
-    reason = forms.CharField(required=False,
-                             widget=forms.Textarea(attrs={'rows': 3}))
+    reason = forms.CharField(required=False, widget=forms.Textarea(attrs={'rows': 3}))
 
     class Meta:
-        fields = ('major','reason')
-
-
-
+        fields = ('major', 'reason')

@@ -15,10 +15,9 @@ from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, S
                         SectionStudent, Profile)
 from sis.utils import filtered_table
 
-from .filters import (MajorFilter, SectionFilter,
-                      SemesterFilter, UserFilter, FullSentMessageFilter,
-                      FullReceivedMessageFilter, SentMessageFilter, ReceivedMessageFilter,
-                      StudentFilter, ItemFilter)
+from .filters import (MajorFilter, SectionFilter, SemesterFilter, UserFilter,
+                      FullSentMessageFilter, FullReceivedMessageFilter, SentMessageFilter,
+                      ReceivedMessageFilter, StudentFilter, ItemFilter)
 
 from sis.filters.course import CourseFilter
 from sis.filters.sectionreferenceitem import SectionItemFilter
@@ -27,8 +26,6 @@ from sis.filters.sectionstudent import SectionStudentFilter
 from .forms import (
     CourseCreationForm,
     CourseEditForm,
-    SectionCreationForm,
-    SectionEditForm,
     SemesterCreationForm,
     SemesterEditForm,
     ProfessorEditForm,
@@ -38,6 +35,7 @@ from .forms import (
 from sis.forms.major import MajorCreationForm, MajorEditForm
 from sis.forms.profile import DemographicForm, ProfileCreationForm, ProfileEditForm
 from sis.forms.referenceitem import ReferenceItemCreationForm
+from sis.forms.section import SectionCreationForm, SectionEditForm
 from sis.forms.student import StudentEditForm, StudentCreationForm
 from sis.forms.user import UserCreationForm, UserEditForm
 
@@ -55,8 +53,7 @@ from sis.tables.users import UsersTable, FullUsersTable, StudentsTable, StudentI
 
 @role_login_required(Profile.ACCESS_ADMIN)
 def index(request):
-    return render(request, 'schooladmin/home_admin.html',
-                  request.user.profile.unread_messages())
+    return render(request, 'schooladmin/home_admin.html', request.user.profile.unread_messages())
 
 
 # USERS

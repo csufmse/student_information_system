@@ -1,10 +1,10 @@
 from django.db.models import Value
 from django.db.models.functions import Concat
-from django_filters import (CharFilter, FilterSet,
-                            ModelChoiceFilter, ChoiceFilter, RangeFilter)
+from django_filters import (CharFilter, FilterSet, ModelChoiceFilter, ChoiceFilter, RangeFilter)
 
 from sis.models import (Course, CoursePrerequisite, Major, Message, Professor, Section, Semester,
                         Student, SectionStudent, Profile)
+
 
 class CourseFilter(FilterSet):
     major = ModelChoiceFilter(queryset=Major.objects, field_name='major', label='Major')
@@ -100,13 +100,16 @@ class RequirementsCourseFilter(FilterSet):
     class Meta:
         model = Course
         fields = [
-            'major', 'catalog_number', 'title', 'prereqs', 'is_prereq',
-            'credits_earned','met',
+            'major',
+            'catalog_number',
+            'title',
+            'prereqs',
+            'is_prereq',
+            'credits_earned',
+            'met',
         ]
 
     def __init__(self, *args, **kwargs):
         super(RequirementsCourseFilter, self).__init__(*args, **kwargs)
         self.filters['met'].extra.update({'empty_label': 'Met?'})
         self.filters['major'].extra.update({'empty_label': 'Major...'})
-
-

@@ -2,6 +2,7 @@ from django_filters import (CharFilter, ChoiceFilter, FilterSet, ModelChoiceFilt
 
 from sis.models import (SectionStudent, Section, Semester, Major)
 
+
 class SectionStudentFilter(FilterSet):
     semester = CharFilter(label='Semester', method='filter_semester')
 
@@ -33,7 +34,9 @@ class SectionStudentFilter(FilterSet):
 
 class StudentHistoryFilter(FilterSet):
     semester = CharFilter(label='Semester', method='filter_semester')
-    major = ModelChoiceFilter(queryset=Major.objects, field_name='section__course__major', label='Major')
+    major = ModelChoiceFilter(queryset=Major.objects,
+                              field_name='section__course__major',
+                              label='Major')
 
     def filter_semester(self, queryset, name, value):
         return queryset.annotate(slug=Concat('section__semester__session',

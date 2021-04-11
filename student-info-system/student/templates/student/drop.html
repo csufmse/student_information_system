@@ -1,0 +1,38 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+
+{% block content %}
+<dl class="dl-horizontal">
+  <dt>Name</dt>
+  <dd>{{ user.name }}</dd>
+  <dt>Account Id</dt>
+  <dd>{{ user.username }}</dd>
+</dl>
+    <h3>Drop Request</h3>
+
+    {%  if count %}
+        <div>I'd like to drop section {{ ssect.section }}:</div>
+        <form id="drop_request" action="" method="post" class="form form-inline" autocomplete="off">
+            {% csrf_token %}
+            {% bootstrap_form drop_form layout='row' %}
+            <button class="btn btn-primary">Submit Request</button>
+        </form>
+    <div>(this will submit a request to the administrator {{ ssect.section.course.major }}, and cc professor {{ ssect.section.professor }})</div>
+    {%  else %}
+        <h2>No droppable sections.</h2>
+    {% endif %}
+ <form method="post">
+    {% csrf_token %}
+     <input type="hidden" name="userid" value="{{ user.id }}"/>
+    <input
+        action="action"
+           class="btn btn-info"
+        onclick="window.history.go(-1); return false;"
+        value="Back"
+    />
+
+  </form>
+<script>
+</script>
+{% endblock %}

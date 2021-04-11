@@ -6,10 +6,8 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse
 
 from schooladmin.views import major as admin_major
-from schooladmin.filters import (SectionFilter,
-                                 SemesterFilter,
-                                 SentMessageFilter, ReceivedMessageFilter,
-                                 StudentFilter)
+from schooladmin.filters import (SectionFilter, SemesterFilter, SentMessageFilter,
+                                 ReceivedMessageFilter, StudentFilter)
 
 from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
@@ -27,13 +25,13 @@ from sis.filters.sectionstudent import StudentHistoryFilter
 
 from sis.forms.major import MajorSelectForm, MajorChangeForm
 from sis.forms.profile import DemographicForm, UnprivProfileEditForm
+from sis.forms.sectionstudent import DropRequestForm
 from sis.forms.user import UserEditForm
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def index(request):
-    return render(request, 'student/home_student.html',
-                  request.user.profile.unread_messages())
+    return render(request, 'student/home_student.html', request.user.profile.unread_messages())
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
@@ -172,6 +170,7 @@ def profile(request):
 
     return render(request, 'student/student.html', data)
 
+
 @role_login_required(Profile.ACCESS_STUDENT)
 def history(request):
     the_user = request.user
@@ -263,6 +262,38 @@ def section(request, sectionid):
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
+def drop(request, id):
+    the_user = request.user
+    ssect = SectionStudent.objects.get(id=id)
+
+    if request.method == 'POST':
+        drop_form = DropRequestForm(request.POST,
+                                    sectionstudent_qs=the_user.profile.student.droppable_classes(
+                                        semester=ssect.section.semester))
+        if drop_form.is_valid():
+            the_ssect = drop_form.cleaned_data.get('student_section')
+            reason = drop_form.cleaned_data.get('reason')
+            mesg = the_user.profile.student.request_drop(sectionstudent=the_ssect, reason=reason)
+            as_str = mesg.time_sent.strftime('%m/%d/%Y, %H:%M:%S')
+            messages.success(request, f'Request submitted at {as_str}.')
+            return redirect(reverse('student:profile'))
+        else:
+            messages.error(request, "Something went wrong.")
+
+    droppable = the_user.profile.student.droppable_classes(semester=ssect.section.semester)
+    data = {
+        'user': the_user,
+        'count': droppable.count(),
+        'drop_form': DropRequestForm(
+            request.GET,
+            initial={},
+            sectionstudent_qs=droppable,
+        ),
+    }
+    return render(request, 'student/drop.html', data)
+
+
+@role_login_required(Profile.ACCESS_STUDENT)
 def secitems(request):
     the_user = request.user
     the_semester = Semester.current_semester()
@@ -281,6 +312,7 @@ def secitems(request):
 
     return render(request, 'student/items.html', data)
 
+
 @role_login_required(Profile.ACCESS_STUDENT)
 def test_majors(request):
     the_user = request.user
@@ -291,9 +323,11 @@ def test_majors(request):
         if major_form.is_valid():
             the_major = major_form.cleaned_data.get('major')
         else:
-            messages.error(request,"Something went wrong")
+            messages.error(request, "Something went wrong")
     else:
-        major_form = MajorSelectForm(initial={'major':the_major,})
+        major_form = MajorSelectForm(initial={
+            'major': the_major,
+        })
 
     data = {
         'user': the_user,
@@ -309,8 +343,8 @@ def test_majors(request):
             request=request,
         ))
 
-    return render(
-        request, 'student/test_majors.html', data)
+    return render(request, 'student/test_majors.html', data)
+
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def request_major_change(request):
@@ -318,21 +352,23 @@ def request_major_change(request):
 
     if request.method == 'POST':
         major_form = MajorSelectForm(request.POST)
-        if major_form.is_valid() and major_form.cleaned_data.get('major') != the_user.profile.student.major:
+        if major_form.is_valid(
+        ) and major_form.cleaned_data.get('major') != the_user.profile.student.major:
             the_major = major_form.cleaned_data.get('major')
             reason = major_form.cleaned_data.get('reason')
-            mesg = the_user.profile.student.request_major_change(major=the_major,
-                                                                 reason=reason)
+            mesg = the_user.profile.student.request_major_change(major=the_major, reason=reason)
             as_str = mesg.time_sent.strftime('%m/%d/%Y, %H:%M:%S')
-            messages.success(request,f'Request submitted at {as_str}.')
+            messages.success(request, f'Request submitted at {as_str}.')
             return redirect(reverse('student:profile'))
         else:
-            messages.error(request,"Please select a major other than your current one.")
+            messages.error(request, "Please select a major other than your current one.")
 
     the_major = the_user.profile.student.major
     data = {
         'user': the_user,
         'major': the_major,
-        'major_form': MajorChangeForm(initial={'major':the_major,}),
+        'major_form': MajorChangeForm(initial={
+            'major': the_major,
+        }),
     }
     return render(request, 'student/change_major.html', data)

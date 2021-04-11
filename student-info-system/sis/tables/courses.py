@@ -43,6 +43,7 @@ class MajorCoursesMetTable(tables.Table):
                                 accessor='grade',
                                 css_class_base='lettergrade',
                                 order_by=('grade'))
+
     def render_letter_grade(self, value):
         return SectionStudent.letter_grade_for(value)
 
