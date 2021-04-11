@@ -267,35 +267,6 @@ class SectionFilter(FilterSet):
         fields = ['semester', 'course_descr', 'professor', 'hours', 'location', 'status']
 
 
-class SectionStudentFilter(FilterSet):
-    semester = CharFilter(Semester.objects, label='Semester', method='filter_semester')
-
-    def filter_semester(self, queryset, name, value):
-        return queryset.annotate(slug=Concat('section__semester__session',
-                                             Value('-'),
-                                             'section__semester__year',
-                                             output_field=CharField())).filter(
-                                                 slug__icontains=value)
-
-    sec_status = ChoiceFilter(choices=Section.STATUSES,
-                              field_name='section__status',
-                              label="Section Status")
-    student_status = ChoiceFilter(choices=SectionStudent.STATUSES,
-                                  field_name='status',
-                                  label="Student Status")
-    grade = ChoiceFilter(choices=SectionStudent.GRADES, field_name='grade', label="Grade")
-
-    def __init__(self, *args, **kwargs):
-        super(SectionStudentFilter, self).__init__(*args, **kwargs)
-        self.filters['sec_status'].extra.update({'empty_label': 'Any Section Status'})
-        self.filters['student_status'].extra.update({'empty_label': 'Any Student Status'})
-        self.filters['grade'].extra.update({'empty_label': 'Any Grade'})
-
-    class Meta:
-        model = SectionStudent
-        fields = ['semester', 'sec_status', 'student_status', 'grade']
-
-
 class ItemFilter(FilterSet):
     course = CharFilter(Course.objects, label='Course Info', method='filter_course')
 

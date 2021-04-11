@@ -18,4 +18,5 @@ urlpatterns = [
     path('secitems', views.secitems, name='secitems'),
     path('secitem/<int:id>', views.secitem, name='secitem'),
     path('major/<int:majorid>', views.major, name='major'),
+    path('history', views.history, name='history'),
 ]

@@ -6,20 +6,14 @@
 
 {% block content %}
 <dl class="dl-horizontal">
-  <dt>Student</dt>
+  <dt>Name</dt>
   <dd>{{ user.name }}</dd>
-  <dt>Username</dt>
+  <dt>Account Id</dt>
   <dd>{{ user.username }}</dd>
   <dt>Email</dt>
   <dd>{{ user.email }}</dd>
-  <dt>Student Major</dt>
+  <dt>Major</dt>
   <dd><a href="{% url 'student:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
-  <dt>Class Level</dt>
-  <dd>{{ user.profile.student.class_level }}</dd>
-  <dt>GPA</dt>
-  <dd>{{ user.profile.student.gpa|floatformat:2 }}</dd>
-  <dt>Credits Earned</dt>
-  <dd>{{ user.profile.student.credits_earned }}</dd>
   <dt>Bio</dt>
   <dd>{{  user.profile.bio }}</dd>
 </dl>
@@ -39,23 +33,6 @@
         {% endif %}
         <div class="data-table-alt">
             {% render_table semesters_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
-
-    <h3>Course History:</h3>
-    <i>(completed sections)</i>
-    <div id="history">
-        {% if history_filter %}
-            <form id="history_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form history_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if history_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table history_table 'django_tables2/bootstrap.html' %}
         </div>
     </div>
 
@@ -149,6 +126,5 @@ addButtonClickHandler('change_password', "{% url 'student:change_password' %}");
 addButtonClickHandler('edit_user', "{% url 'student:profile_edit' %}");
 addClickHandlers("{% url 'student:semester' semester_id=1234599 %}", "semester_row");
 addClickHandlers("{% url 'student:course' courseid=1234599 %}", "course_row");
-addClickHandlers("{% url 'student:sectionstudent' id=1234599 %}", "sectionstudent_row");
 </script>
 {% endblock %}

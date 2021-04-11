@@ -15,12 +15,13 @@ from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, S
                         SectionStudent, Profile)
 from sis.utils import filtered_table
 
-from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFilter,
+from .filters import (CourseFilter, MajorFilter, SectionFilter,
                       SemesterFilter, UserFilter, FullSentMessageFilter,
                       FullReceivedMessageFilter, SentMessageFilter, ReceivedMessageFilter,
                       StudentFilter, ItemFilter)
 
 from sis.filters.sectionreferenceitem import SectionItemFilter
+from sis.filters.sectionstudent import SectionStudentFilter
 
 from .forms import (
     CourseCreationForm,

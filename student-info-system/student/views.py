@@ -6,7 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
 from schooladmin.views import major as admin_major
-from schooladmin.filters import (CourseFilter, SectionFilter, SectionStudentFilter,
+from schooladmin.filters import (CourseFilter, SectionFilter,
                                  SemesterFilter, SentMessageFilter, ReceivedMessageFilter,
                                  StudentFilter)
 from sis.authentication_helpers import role_login_required
@@ -20,6 +20,7 @@ from sis.tables.sectionstudents import StudentHistoryTable
 from sis.tables.semesters import SemestersSummaryTable
 
 from sis.filters.sectionreferenceitem import SectionItemFilter
+from sis.filters.sectionstudent import StudentHistoryFilter
 
 from sis.forms.profile import DemographicForm, UnprivProfileEditForm
 from sis.forms.user import UserEditForm
@@ -139,15 +140,6 @@ def profile(request):
 
     data.update(
         filtered_table(
-            name='history',
-            qs=the_user.profile.student.course_history(),
-            filter=SectionStudentFilter,
-            table=StudentHistoryTable,
-            request=request,
-        ))
-
-    data.update(
-        filtered_table(
             name='remaining',
             qs=the_user.profile.student.remaining_required_courses(),
             filter=CourseFilter,
@@ -182,6 +174,24 @@ def profile(request):
         ))
 
     return render(request, 'student/student.html', data)
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def history(request):
+    the_user = request.user
+    data = {
+        'user': the_user,
+    }
+    data.update(
+        filtered_table(
+            name='history',
+            qs=the_user.profile.student.course_history(),
+            filter=StudentHistoryFilter,
+            table=StudentHistoryTable,
+            request=request,
+            wrap_list=False,
+        ))
+
+    return render(request, 'student/history.html', data)
 
 
 @transaction.atomic
