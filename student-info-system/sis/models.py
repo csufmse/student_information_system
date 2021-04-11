@@ -205,6 +205,16 @@ class Profile(models.Model):
                 del data[label]['']
         return data
 
+    def unread_messages(self):
+        normal_unread_count = self.sent_to.filter(time_read__isnull=True,
+                                                                  high_priority=False).count()
+        priority_unread_count = self.sent_to.filter(time_read__isnull=True,
+                                                                    high_priority=True).count()
+        total = normal_unread_count + priority_unread_count
+        return {'normal': normal_unread_count,
+                'priority': priority_unread_count,
+                'total': total}
+
     @property
     def rolename(self):
         return Profile.rolename_for(self.role)
@@ -353,6 +363,15 @@ class Student(models.Model):
             Exists(
                 self.sectionstudent_set.filter(section__semester=semester,
                                                section=OuterRef('section'))))
+
+    def request_major_change(self,major,reason):
+        mesg = Message.objects.create(
+            sender=self.profile,
+            recipient=major.contact,
+            subject='Request: Change Major to '+major.abbreviation,
+            body= f'Current Major: {self.major}\nReason:\n"{reason}',
+        )
+        return mesg
 
 
 class Professor(models.Model):

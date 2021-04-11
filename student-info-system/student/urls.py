@@ -20,4 +20,5 @@ urlpatterns = [
     path('major/<int:majorid>', views.major, name='major'),
     path('history', views.history, name='history'),
     path('test_majors', views.test_majors, name='test_majors'),
+    path('request_major_change', views.request_major_change, name='request_major_change'),
 ]

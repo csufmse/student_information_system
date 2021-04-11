@@ -55,7 +55,8 @@ from sis.tables.users import UsersTable, FullUsersTable, StudentsTable, StudentI
 
 @role_login_required(Profile.ACCESS_ADMIN)
 def index(request):
-    return render(request, 'schooladmin/home_admin.html')
+    return render(request, 'schooladmin/home_admin.html',
+                  request.user.profile.unread_messages())
 
 
 # USERS

@@ -1,9 +1,9 @@
-from datetime import date
+from datetime import date, datetime
 
 from django.contrib import messages
 from django.db import transaction
 from django.http import HttpResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import redirect, render, reverse
 
 from schooladmin.views import major as admin_major
 from schooladmin.filters import (SectionFilter,
@@ -25,14 +25,15 @@ from sis.filters.course import RequirementsCourseFilter
 from sis.filters.sectionreferenceitem import SectionItemFilter
 from sis.filters.sectionstudent import StudentHistoryFilter
 
-from sis.forms.major import MajorSelectForm
+from sis.forms.major import MajorSelectForm, MajorChangeForm
 from sis.forms.profile import DemographicForm, UnprivProfileEditForm
 from sis.forms.user import UserEditForm
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def index(request):
-    return render(request, 'student/home_student.html')
+    return render(request, 'student/home_student.html',
+                  request.user.profile.unread_messages())
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
@@ -310,3 +311,28 @@ def test_majors(request):
 
     return render(
         request, 'student/test_majors.html', data)
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def request_major_change(request):
+    the_user = request.user
+
+    if request.method == 'POST':
+        major_form = MajorSelectForm(request.POST)
+        if major_form.is_valid() and major_form.cleaned_data.get('major') != the_user.profile.student.major:
+            the_major = major_form.cleaned_data.get('major')
+            reason = major_form.cleaned_data.get('reason')
+            mesg = the_user.profile.student.request_major_change(major=the_major,
+                                                                 reason=reason)
+            as_str = mesg.time_sent.strftime('%m/%d/%Y, %H:%M:%S')
+            messages.success(request,f'Request submitted at {as_str}.')
+            return redirect(reverse('student:profile'))
+        else:
+            messages.error(request,"Please select a major other than your current one.")
+
+    the_major = the_user.profile.student.major
+    data = {
+        'user': the_user,
+        'major': the_major,
+        'major_form': MajorChangeForm(initial={'major':the_major,}),
+    }
+    return render(request, 'student/change_major.html', data)

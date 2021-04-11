@@ -49,5 +49,13 @@ class MajorSelectForm(forms.Form):
     class Meta:
         fields = ('major')
 
+class MajorChangeForm(forms.Form):
+    major = forms.ModelChoiceField(queryset=Major.objects.all())
+    reason = forms.CharField(required=False,
+                             widget=forms.Textarea(attrs={'rows': 3}))
+
+    class Meta:
+        fields = ('major','reason')
+
 
 
