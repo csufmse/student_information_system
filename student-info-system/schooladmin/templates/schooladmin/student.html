@@ -24,6 +24,8 @@
   <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
   <dt>Bio</dt>
   <dd>{{  user.profile.bio }}</dd>
+  <dt>Transcript<dt>
+  <dd><a href="{% url 'schooladmin:transcript' userid=user.id %}">Generate</a>
 </dl>
     <h3>Demographic Data</h3>
     {%  demographic_details user.profile %}

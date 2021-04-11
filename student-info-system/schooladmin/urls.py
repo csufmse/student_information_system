@@ -48,6 +48,7 @@ urlpatterns = [
          name='semester_section_new'),
     path('semester/<int:semester_id>/edit', views.semester_edit, name='semester_edit'),
     path('semester/<int:semester_id>', views.semester, name='semester'),
+    path('student/<int:userid>/transcript', views.transcript, name='transcript'),
     path('demographics', views.demographics, name='demographics'),
     path('profile/edit', views.profile_edit, name='profile_edit'),
     path('profile', views.profile, name='profile'),
