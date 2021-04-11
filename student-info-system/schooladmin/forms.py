@@ -42,10 +42,6 @@ class CourseEditForm(forms.ModelForm):
                                 widget=forms.CheckboxSelectMultiple,
                                 required=False)
 
-    # courses_required = CourseChoiceField(queryset=Course.objects.all(),
-    #                                      widget=forms.CheckboxSelectMultiple,
-    #                                      required=False)
-
     class Meta:
         model = Course
         fields = ('major', 'catalog_number', 'title', 'description', 'credits_earned', 'prereqs')

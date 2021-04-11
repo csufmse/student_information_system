@@ -281,14 +281,16 @@ def drop(request, id):
             messages.error(request, "Something went wrong.")
 
     droppable = the_user.profile.student.droppable_classes(semester=ssect.section.semester)
+    drop_form = DropRequestForm(
+        initial={
+            'student_section': ssect,
+        },
+        sectionstudent_qs=droppable,
+    )
     data = {
         'user': the_user,
         'count': droppable.count(),
-        'drop_form': DropRequestForm(
-            request.GET,
-            initial={},
-            sectionstudent_qs=droppable,
-        ),
+        'drop_form': drop_form,
     }
     return render(request, 'student/drop.html', data)
 

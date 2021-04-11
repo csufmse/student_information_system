@@ -13,12 +13,12 @@
 
     {%  if count %}
         <div>I'd like to drop section {{ ssect.section }}:</div>
-        <form id="drop_request" action="" method="post" class="form form-inline" autocomplete="off">
+        <form id="drop_form" action="" method="post" class="form form-inline" autocomplete="off">
             {% csrf_token %}
             {% bootstrap_form drop_form layout='row' %}
             <button class="btn btn-primary">Submit Request</button>
         </form>
-    <div>(this will submit a request to the administrator {{ ssect.section.course.major }}, and cc professor {{ ssect.section.professor }})</div>
+        <div>(this will submit a request to the administrator {{ ssect.section.course.major }}, and cc professor {{ ssect.section.professor }})</div>
     {%  else %}
         <h2>No droppable sections.</h2>
     {% endif %}
