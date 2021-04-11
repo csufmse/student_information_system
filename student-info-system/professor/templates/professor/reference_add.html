@@ -1,0 +1,10 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+
+{% block content %}
+<form method='post'>
+  {{form}}
+  <a href='{% url 'professor:add_reference' %}' class='btn btn-info'>
+    Add</a>
+</form>
+{% endblock content %}
