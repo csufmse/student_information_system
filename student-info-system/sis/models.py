@@ -346,6 +346,14 @@ class Student(models.Model):
         level = ClassLevel.level(creds)
         return level
 
+    def section_reference_items_for(self, semester=None):
+        if semester is None:
+            semester = Semester.current_semester()
+        return SectionReferenceItem.objects.filter(
+            Exists(
+                self.sectionstudent_set.filter(section__semester=semester,
+                                               section=OuterRef('section'))))
+
 
 class Professor(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
@@ -533,6 +541,27 @@ class Semester(models.Model):
         sname = [seas[1] for seas in Semester.SESSIONS if seas[0] == abbrev]
         if sname is not None and len(sname):
             return sname[0]
+
+    """
+    if available, return semester that's in session. Otherwise return the one we're registering
+    """
+
+    @classmethod
+    def current_semester(cls, at=None):
+        if at is None:
+            at = datetime.now()
+        try:
+            sem = Semester.objects.get(date_started__lte=at, date_ended__gte=at)
+        except self.model.DoesNotExist:
+            sem = None
+
+        if sem is None:
+            try:
+                sem = Semester.objects.get(date_registration_opens__lte=at,
+                                           date_registration_closes__gte=at)
+            except self.model.DoesNotExist:
+                sem = None
+        return sem
 
     date_registration_opens = models.DateField('Registration Opens')
     date_registration_closes = models.DateField('Registration Closes')

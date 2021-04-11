@@ -13,19 +13,17 @@
   <dt>Email</dt>
   <dd>{{ user.email }}</dd>
   <dt>Student Major</dt>
-  <dd><a href="{% url 'schooladmin:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
+  <dd><a href="{% url 'student:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
   <dt>Class Level</dt>
   <dd>{{ user.profile.student.class_level }}</dd>
   <dt>GPA</dt>
   <dd>{{ user.profile.student.gpa|floatformat:2 }}</dd>
   <dt>Credits Earned</dt>
   <dd>{{ user.profile.student.credits_earned }}</dd>
-  <dt>Enabled?</dt>
-  <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
   <dt>Bio</dt>
   <dd>{{  user.profile.bio }}</dd>
 </dl>
-    <h3>Demographic Data</h3>
+    <h3>Personal Profile</h3>
     {%  demographic_details user.profile %}
 
     <h3>Semesters Attended:</h3>
@@ -116,7 +114,7 @@
                 {% bootstrap_form sent_filter.form layout='inline' %}
                 <button class="btn btn-primary">Filter</button>
                 {% if sent_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
+                    <a  class="btn btn-success" href="{%  url 'student:user' userid=user.id %}">Clear</a>
                 {% endif %}
             </form>
         {% endif %}
@@ -134,53 +132,23 @@
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
-    <input id="passchg"
+    <input id="change_password"
         action="action"
            class="btn btn-info"
         value="Change Password"
     />
-      {% if user.is_active %}
-    <input id="disbutton" name="disbutton"
-           class="btn btn-primary"
-           action="action"
-        value="Disable Student"
-    />
-    {% else %}
-    <input id="enabutton" name="enabutton"
-        action="action"
-           class="btn btn-primary"
-        value="Enable Student"
-   />
-   {% endif %}
-     <input id="editu"
+     <input id="edit_user"
         action="action"
            class="btn btn-info"
-        value="Edit Student"
+        value="Edit Profile"
     />
 
   </form>
 <script>
-function confirmit(evt) {
-    var btntitle = evt.target.value;
-    var answer = window.confirm("Are you sure you want to "+btntitle+' \n"{{ user.username }}" ({{ user.get_full_name  }})');
-    if (answer) {
-        this.form.submit();
-        return true;
-    }
-    return false;
-}
-var btn = document.getElementById("disbutton");
-if ( btn ) {
-    btn.addEventListener("click", confirmit);
-}
-btn = document.getElementById("enabutton");
-if ( btn ) {
-    btn.addEventListener("click", confirmit);
-}
-addButtonClickHandler('passchg', "{% url 'schooladmin:change_password' user.id %}");
-addButtonClickHandler('editu', "{% url 'schooladmin:user_edit' user.id %}");
-addClickHandlers("{% url 'schooladmin:semester' semester_id=1234599 %}", "semester_row");
-addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
-addClickHandlers("{% url 'schooladmin:sectionstudent' id=1234599 %}", "sectionstudent_row");
+addButtonClickHandler('change_password', "{% url 'student:change_password' %}");
+addButtonClickHandler('edit_user', "{% url 'student:profile_edit' %}");
+addClickHandlers("{% url 'student:semester' semester_id=1234599 %}", "semester_row");
+addClickHandlers("{% url 'student:course' courseid=1234599 %}", "course_row");
+addClickHandlers("{% url 'student:sectionstudent' id=1234599 %}", "sectionstudent_row");
 </script>
 {% endblock %}

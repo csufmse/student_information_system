@@ -1,0 +1,39 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% load render_table from django_tables2 %}
+
+{% block content %}
+<dl class="dl-horizontal">
+<h3>Reference Items for:</h3>
+  <dt>Semester</dt>
+    <dd><a href="{% url 'schooladmin:semester' semester_id=semester.id %}">{{ semester }}</a></dd>
+</dl>
+
+<div id="items">
+    {% if secitem_filter %}
+        <form id="secitem_filter" action="" method="get" class="form form-inline" autocomplete="off">
+            {% bootstrap_form secitem_filter.form layout='inline' %}
+            <button class="btn btn-primary">Filter</button>
+            {% if secitem_has_filter %}
+                <a  class="btn btn-success" href="{%  url 'student:secitems' %}">Clear</a>
+            {% endif %}
+        </form>
+    {% endif %}
+    <div class="data-table">
+        {% render_table secitem_table 'django_tables2/bootstrap.html' %}
+    </div>
+</div>
+<div>
+    <input
+        action="action"
+           class="btn btn-info"
+        onclick="window.history.go(-1); return false;"
+        value="Back"
+    />
+
+<script>
+addClickHandlers("{% url 'student:secitem' id=1234599 %}", "secitem_row");
+stylizeRange({field:'index',min_label:'From #',max_label:'To #',prefix:"secitem"});
+</script>
+{% endblock %}

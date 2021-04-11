@@ -2,6 +2,7 @@
 {% load static %}
 {% load bootstrap3 %}
 {% load render_table from django_tables2 %}
+{%  load user_demographics %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -19,30 +20,8 @@
   <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
 </dl>
     <h3>Demographic Data</h3>
-<dl class="dl-horizontal">
-  <dt>Age</dt>
-  <dd>{{ user.profile.demo_age }}</dd>
-  <dt>Race</dt>
-  <dd>{{ user.profile.demo_race }}</dd>
-  <dt>Gender</dt>
-  <dd>{{ user.profile.demo_gender }}</dd>
-  <dt>Employment Status</dt>
-  <dd>{{ user.profile.demo_employment }}</dd>
-  <dt>Annual Household Income</dt>
-  <dd>{{ user.profile.demo_income }}</dd>
-  <dt>Highest Level of Education in Family</dt>
-  <dd>{{ user.profile.demo_education }}</dd>
-  <dt>Orientation</dt>
-  <dd>{{ user.profile.demo_orientation }}</dd>
-  <dt>Marital Status</dt>
-  <dd>{{ user.profile.demo_marital }}</dd>
-  <dt>Disability</dt>
-  <dd>{{ user.profile.demo_disability }}</dd>
-  <dt>Veteran Status</dt>
-  <dd>{{ user.profile.demo_veteran }}</dd>
-  <dt>Citizenship</dt>
-  <dd>{{ user.profile.demo_citizenship }}</dd>
-</dl>
+    {%  demographic_details user.profile %}
+
         <h3>Received Messages:</h3>
     <div id="received">
         {% if received_filter %}

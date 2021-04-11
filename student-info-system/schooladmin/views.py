@@ -3,8 +3,8 @@ from datetime import date
 from django.db import transaction
 from django.contrib import messages
 from django.contrib.auth.forms import AdminPasswordChangeForm
+from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
-from django.forms.models import model_to_dict
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.html import format_html
@@ -18,33 +18,38 @@ from sis.utils import filtered_table
 from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFilter,
                       SemesterFilter, UserFilter, FullSentMessageFilter,
                       FullReceivedMessageFilter, SentMessageFilter, ReceivedMessageFilter,
-                      StudentFilter, ItemFilter, SectionItemFilter)
+                      StudentFilter, ItemFilter)
+
+from sis.filters.sectionreferenceitem import SectionItemFilter
+
 from .forms import (
     CourseCreationForm,
     CourseEditForm,
-    DemographicForm,
-    UserCreationForm,
     MajorCreationForm,
     MajorEditForm,
     SectionCreationForm,
     SectionEditForm,
     SemesterCreationForm,
-    UserEditForm,
     SemesterEditForm,
-    ReferenceItemCreationForm,
-    ProfileCreationForm,
-    ProfileEditForm,
-    StudentEditForm,
     ProfessorEditForm,
-    StudentCreationForm,
     ProfessorCreationForm,
 )
-from .tables import (UsersTable, CoursesTable, MajorsTable, SectionsTable, SemestersTable,
-                     FullUsersTable, StudentHistoryTable, StudentInMajorTable,
-                     StudentInSectionTable, SemestersSummaryTable, SectionForClassTable,
-                     CoursesForMajorTable, MajorCoursesMetTable, StudentsTable,
-                     ProfReferenceItemsTable, SectionReferenceItemsTable, MessageSentTable,
-                     MessageReceivedTable)
+
+from sis.forms.profile import DemographicForm, ProfileCreationForm, ProfileEditForm
+from sis.forms.user import UserCreationForm, UserEditForm
+from sis.forms.student import StudentEditForm, StudentCreationForm
+from sis.forms.referenceitem import ReferenceItemCreationForm
+
+from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
+from sis.tables.majors import MajorsTable
+from sis.tables.messages import MessageSentTable, MessageReceivedTable
+from sis.tables.referenceitems import ProfReferenceItemsTable
+from sis.tables.sectionreferenceitems import ReferenceItemsForSectionTable
+from sis.tables.sections import SectionForClassTable, SectionsTable
+from sis.tables.sectionstudents import (StudentHistoryTable, SectionStudentsTable,
+                                        StudentInSectionTable)
+from sis.tables.semesters import SemestersSummaryTable, SemestersTable
+from sis.tables.users import UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable
 
 
 @role_login_required(Profile.ACCESS_ADMIN)
@@ -531,8 +536,11 @@ def majors(request):
         ))
 
 
-@role_login_required(Profile.ACCESS_ADMIN)
+@login_required
 def major(request, majorid):
+    include_students = request.user.profile.role in (Profile.ACCESS_ADMIN,
+                                                     Profile.ACCESS_PROFESSOR)
+
     qs = Major.objects.filter(id=majorid)
     if qs.count() < 1:
         return HttpResponse("No such major", reason="Invalid Data", status=404)
@@ -540,6 +548,7 @@ def major(request, majorid):
 
     data = {
         'major': the_major,
+        'permit_edit': request.user.profile.role == Profile.ACCESS_ADMIN,
     }
     data.update(
         filtered_table(
@@ -568,14 +577,15 @@ def major(request, majorid):
             request=request,
         ))
 
-    data.update(
-        filtered_table(
-            name='students',
-            qs=User.annotated().filter(profile__student__major=the_major),
-            filter=UserFilter,
-            table=StudentInMajorTable,
-            request=request,
-        ))
+    if include_students:
+        data.update(
+            filtered_table(
+                name='students',
+                qs=User.annotated().filter(profile__student__major=the_major),
+                filter=UserFilter,
+                table=StudentInMajorTable,
+                request=request,
+            ))
 
     return render(request, 'schooladmin/major.html', data)
 
@@ -848,7 +858,7 @@ def section(request, sectionid):
             name='secitem',
             qs=the_section.sectionreferenceitem_set,
             filter=SectionItemFilter,
-            table=SectionReferenceItemsTable,
+            table=ReferenceItemsForSectionTable,
             request=request,
         ))
 
@@ -1014,3 +1024,37 @@ def demographics(request):
         'students': stud_form,
         'professors': prof_form,
     })
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def profile(request):
+    the_user = request.user
+
+    data = {
+        'user': the_user,
+    }
+    data.update(
+        filtered_table(
+            name='received',
+            qs=the_user.profile.sent_to.all(),
+            filter=FullReceivedMessageFilter,
+            table=MessageReceivedTable,
+            request=request,
+            wrap_list=False,
+        ))
+    data.update(
+        filtered_table(
+            name='sent',
+            qs=the_user.profile.sent_by.all(),
+            filter=FullSentMessageFilter,
+            table=MessageSentTable,
+            request=request,
+            wrap_list=False,
+        ))
+
+    return render(request, 'profile.html', data)
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def profile_edit(request):
+    return user_edit(request, request.user.id)
