@@ -1030,11 +1030,6 @@ def demographics(request):
 def profile(request):
     the_user = request.user
 
-    # if the_user.profile.role == Profile.ACCESS_STUDENT:
-    #     return student(request, the_user.id)
-    # elif the_user.profile.role == Profile.ACCESS_PROFESSOR:
-    #     return professor(request, the_user.id)
-
     data = {
         'user': the_user,
     }
