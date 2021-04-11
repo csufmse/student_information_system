@@ -6,9 +6,11 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render
 
 from schooladmin.views import major as admin_major
-from schooladmin.filters import (CourseFilter, SectionFilter,
-                                 SemesterFilter, SentMessageFilter, ReceivedMessageFilter,
+from schooladmin.filters import (SectionFilter,
+                                 SemesterFilter,
+                                 SentMessageFilter, ReceivedMessageFilter,
                                  StudentFilter)
+
 from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
 from sis.utils import filtered_table
@@ -19,9 +21,11 @@ from sis.tables.sectionreferenceitems import SectionReferenceItemsTable
 from sis.tables.sectionstudents import StudentHistoryTable
 from sis.tables.semesters import SemestersSummaryTable
 
+from sis.filters.course import RequirementsCourseFilter
 from sis.filters.sectionreferenceitem import SectionItemFilter
 from sis.filters.sectionstudent import StudentHistoryFilter
 
+from sis.forms.major import MajorSelectForm
 from sis.forms.profile import DemographicForm, UnprivProfileEditForm
 from sis.forms.user import UserEditForm
 
@@ -140,17 +144,9 @@ def profile(request):
 
     data.update(
         filtered_table(
-            name='remaining',
-            qs=the_user.profile.student.remaining_required_courses(),
-            filter=CourseFilter,
-            table=CoursesTable,
-            request=request,
-        ))
-    data.update(
-        filtered_table(
             name='majorcourses',
             qs=the_user.profile.student.requirements_met_list(),
-            filter=CourseFilter,
+            filter=RequirementsCourseFilter,
             table=MajorCoursesMetTable,
             request=request,
         ))
@@ -283,3 +279,34 @@ def secitems(request):
         ))
 
     return render(request, 'student/items.html', data)
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def test_majors(request):
+    the_user = request.user
+    the_major = the_user.profile.student.major
+
+    if request.method == 'POST':
+        major_form = MajorSelectForm(request.POST)
+        if major_form.is_valid():
+            the_major = major_form.cleaned_data.get('major')
+        else:
+            messages.error(request,"Something went wrong")
+    else:
+        major_form = MajorSelectForm(initial={'major':the_major,})
+
+    data = {
+        'user': the_user,
+        'major': the_major,
+        'major_form': major_form,
+    }
+    data.update(
+        filtered_table(
+            name='majorcourses',
+            qs=the_user.profile.student.requirements_met_list(major=the_major),
+            filter=RequirementsCourseFilter,
+            table=MajorCoursesMetTable,
+            request=request,
+        ))
+
+    return render(
+        request, 'student/test_majors.html', data)

@@ -150,65 +150,6 @@ class MajorFilter(FilterSet):
             self.filters['abbreviation'].extra.update({'empty_label': 'Any Major/Department...'})
 
 
-class CourseFilter(FilterSet):
-    major = ModelChoiceFilter(queryset=Major.objects, field_name='major__id', label='Major')
-
-    catalog_number = RangeFilter(field_name='catalog_number')
-    title = CharFilter(field_name='title', label='Title contains', lookup_expr='icontains')
-    description = CharFilter(field_name='description',
-                             label='Description contains',
-                             lookup_expr='icontains')
-
-    credits_earned = RangeFilter(label='Credits')
-
-    # need filters for...
-    prereqs = CharFilter(
-        Course.objects,
-        label='Has Prereq',
-        method='filter_requires_course',
-        distinct=True,
-    )
-
-    is_prereq = CharFilter(CoursePrerequisite.objects,
-                           label='Is Prereq for',
-                           method='filter_required_by')
-
-    # return queryset.annotate(slug=Concat('prereqs__prerequisite__major__abbreviation',
-    #                                      Value('-'),
-    #                                      'prereqs__prerequisite__catalog_number',
-    #                                      Value(' '),
-    #                                      'prereqs__prerequisite__title')
-
-    def filter_requires_course(self, queryset, name, value):
-        return queryset.annotate(slug=Concat(
-            'prereqs__major__abbreviation',
-            Value('-'),
-            'prereqs__catalog_number',
-            Value(' '),
-            'prereqs__title',
-        )).filter(slug__icontains=value)
-
-    def filter_required_by(self, queryset, name, value):
-        return queryset.annotate(slug=Concat(
-            'a_prerequisite__course__major__abbreviation',
-            Value('-'),
-            'a_prerequisite__course__catalog_number',
-            Value(' '),
-            'a_prerequisite__course__title',
-        )).filter(slug__icontains=value)
-
-    class Meta:
-        model = Course
-        fields = [
-            'major', 'catalog_number', 'title', 'description', 'prereqs', 'is_prereq',
-            'credits_earned'
-        ]
-
-    def __init__(self, *args, **kwargs):
-        super(CourseFilter, self).__init__(*args, **kwargs)
-        self.filters['major'].extra.update({'empty_label': 'Major...'})
-
-
 class SemesterFilter(FilterSet):
     session = ChoiceFilter(label="Session", choices=Semester.SESSIONS, field_name='session')
     year = RangeFilter(field_name='year')

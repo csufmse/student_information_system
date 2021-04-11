@@ -36,23 +36,7 @@
         </div>
     </div>
 
-    <h3>Remaining Required Courses:</h3>
-    <div id="remainingCourse">
-        {% if remaining_filter %}
-            <form id="remaining_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form remaining_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if remaining_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'student:profile' %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table remaining_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
-
-    <h3>Major Required Courses:</h3>
+    <h3>Required Courses for {{ user.profile.student.major.abbreviation }}:</h3>
     <div id="majorCourses">
         {% if majorcourses_filter %}
             <form id="majorcourses_filter" action="" method="get" class="form form-inline" autocomplete="off">
@@ -69,7 +53,7 @@
         <input id="test_majors"
         action="action"
            class="btn btn-info"
-        value="Explore Another Major"
+        value="Explore Another Major..."
     />
     </div>
 
@@ -128,9 +112,12 @@
 
   </form>
 <script>
+addButtonClickHandler('test_majors', "{% url 'student:test_majors' %}");
 addButtonClickHandler('change_password', "{% url 'student:change_password' %}");
 addButtonClickHandler('edit_user', "{% url 'student:profile_edit' %}");
 addClickHandlers("{% url 'student:semester' semester_id=1234599 %}", "semester_row");
 addClickHandlers("{% url 'student:course' courseid=1234599 %}", "course_row");
+stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'majorcourses'});
+stylizeRange({field:'credits_earned',name:'Cred',prefix:'majorcourses'});
 </script>
 {% endblock %}

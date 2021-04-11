@@ -15,19 +15,18 @@ from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, S
                         SectionStudent, Profile)
 from sis.utils import filtered_table
 
-from .filters import (CourseFilter, MajorFilter, SectionFilter,
+from .filters import (MajorFilter, SectionFilter,
                       SemesterFilter, UserFilter, FullSentMessageFilter,
                       FullReceivedMessageFilter, SentMessageFilter, ReceivedMessageFilter,
                       StudentFilter, ItemFilter)
 
+from sis.filters.course import CourseFilter
 from sis.filters.sectionreferenceitem import SectionItemFilter
 from sis.filters.sectionstudent import SectionStudentFilter
 
 from .forms import (
     CourseCreationForm,
     CourseEditForm,
-    MajorCreationForm,
-    MajorEditForm,
     SectionCreationForm,
     SectionEditForm,
     SemesterCreationForm,
@@ -36,10 +35,11 @@ from .forms import (
     ProfessorCreationForm,
 )
 
+from sis.forms.major import MajorCreationForm, MajorEditForm
 from sis.forms.profile import DemographicForm, ProfileCreationForm, ProfileEditForm
-from sis.forms.user import UserCreationForm, UserEditForm
-from sis.forms.student import StudentEditForm, StudentCreationForm
 from sis.forms.referenceitem import ReferenceItemCreationForm
+from sis.forms.student import StudentEditForm, StudentCreationForm
+from sis.forms.user import UserCreationForm, UserEditForm
 
 from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
 from sis.tables.majors import MajorsTable

@@ -1,0 +1,56 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% load render_table from django_tables2 %}
+{%  load user_demographics %}
+
+{% block content %}
+<dl class="dl-horizontal">
+  <dt>Name</dt>
+  <dd>{{ user.name }}</dd>
+  <dt>Account Id</dt>
+  <dd>{{ user.username }}</dd>
+</dl>
+    <h3>What if I had a different major?</h3>
+
+    <form id="major_select" action="" method="post" class="form form-inline" autocomplete="off">
+        {% csrf_token %}
+        {% bootstrap_form major_form layout='inline' %}
+        <button id="test_majors" class="btn btn-primary">Show</button>
+    </form>
+
+    <h3>Courses for {{ major.abbreviation }}:</h3>
+    <div id="majorCourses">
+        {% if majorcourses_filter %}
+            <form id="majorcourses_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form majorcourses_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if majorcourses_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'student:test_majors' %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table majorcourses_table 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+
+
+ <form method="post">
+    {% csrf_token %}
+     <input type="hidden" name="userid" value="{{ user.id }}"/>
+    <input
+        action="action"
+           class="btn btn-info"
+        onclick="window.history.go(-1); return false;"
+        value="Back"
+    />
+
+  </form>
+<script>
+stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'majorcourses'});
+stylizeRange({field:'credits_earned',name:'Cred',prefix:'majorcourses'});
+addButtonClickHandler('test_majors', "{% url 'student:test_majors' %}");
+addClickHandlers("{% url 'student:course' courseid=1234599 %}", "course_row");
+</script>
+{% endblock %}

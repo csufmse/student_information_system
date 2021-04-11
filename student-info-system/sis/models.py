@@ -392,7 +392,8 @@ class Major(models.Model):
 
     def requirements_met_list(self, student):
         return self.courses_required.annotate(met=Exists(
-            student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)))
+            student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)),
+        grade=Max(student.sectionstudent_set.filter(section__course=OuterRef('pk')).values('grade'), output_field=CharField()),)
 
     class Meta:
         ordering = ['abbreviation']
@@ -679,6 +680,11 @@ class SectionStudent(models.Model):
         (GRADE_D, 'D'),
         (GRADE_F, 'F'),
     )
+
+    @classmethod
+    def letter_grade_for(cls,grade):
+        return dict(SectionStudent.GRADES).get(grade)
+
     grade = models.SmallIntegerField(
         choices=GRADES,
         default=None,
