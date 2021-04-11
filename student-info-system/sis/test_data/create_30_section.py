@@ -1,6 +1,7 @@
 import os
 import sys
-from random import randint, choice, shuffle
+from random import randint, choice, shuffle, random
+from datetime import datetime
 
 import django
 
@@ -11,20 +12,13 @@ django.setup()  # noqa
 from sis.models import Course, Major, Professor, Section, Semester
 from django.db import connection
 
-to_generate = 500
+to_generate = 1000
 
 capacities = (10,) * 3 + (30,) * 11 + (100,) * 3
 
 durations = (30,) * 7 + (60,) * 6 + (90,) * 3 + (180,) * 3
 
 days = ('M', 'T', 'W', 'Th', 'F', 'Sa', 'Su')
-
-statuses = (Section.CLOSED,) * 3 + \
-            (Section.OPEN,) * 10 + \
-            (Section.IN_PROGRESS,) * 10 + \
-            (Section.GRADING,) * 5 + \
-            (Section.GRADED,) * 30 + \
-            (Section.CANCELLED,) * 3
 
 
 def choose_days():
@@ -64,6 +58,7 @@ def createData():
     # sem_count = 1
     sem_count = len(Semester.objects.all())
 
+    now = datetime.now()
     semesters = Semester.objects.order_by('-date_started')[0:sem_count]
 
     error_count = 0
@@ -81,11 +76,25 @@ def createData():
             continue
 
         p = choice(ps)
-        sem = choice(semesters)
         d = choose_days()
         h = choose_hours()
         cap = choice(capacities)
-        stat = choice(statuses)
+
+        sem = choice(semesters)
+
+        if sem.registration_open():
+            if random() < 0.1:
+                stat = Section.REG_CLOSED
+            elif random() < 0.1:
+                stat = Section.CANCELLED
+            else:
+                stat = Section.REG_OPEN
+        elif sem.in_session():
+            stat = Section.IN_PROGRESS
+        elif sem.preparing_grades():
+            stat = Section.GRADING
+        else:
+            stat = Section.GRADED
 
         number_of_sections = Section.objects.filter(course=c, semester=sem).count()
         n = number_of_sections + 1

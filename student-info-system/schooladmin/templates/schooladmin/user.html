@@ -2,6 +2,7 @@
 {% load static %}
 {% load bootstrap3 %}
 {% load render_table from django_tables2 %}
+{%  load user_demographics %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -13,40 +14,14 @@
   <dd>{{ user.email }}</dd>
   <dt>User Type</dt>
   <dd>{{ user.profile.rolename }}</dd>
-{%  if user.profile.role == 'S' %}
-  <dt>Student Major</dt>
-  <dd><a href="{% url 'schooladmin:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
-  <dt>Class Level</dt>
-  <dd>{{ user.profile.student.class_level }}</dd>
-  <dt>GPA</dt>
-  <dd>{{ user.profile.student.gpa|floatformat:2 }}</dd>
-  <dt>Credits Earned</dt>
-  <dd>{{ user.profile.student.credits_earned }}</dd>
-{% elif user.profile.role == 'P' %}
-  <dt>Teaching Department</dt>
-  <dd><a href="{% url 'schooladmin:major' majorid=user.profile.professor.major.id %}">{{ user.profile.professor.major.abbreviation }}: {{  user.profile.professor.major.name }}</a></dd>
-{%  endif %}
   <dt>Enabled?</dt>
   <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
+  <dt>Bio</dt>
+  <dd>{{ user.profile.bio }}</dd>
 </dl>
+    <h3>Demographic Data</h3>
+    {% demographic_details user.profile %}
 
-    {%  if user.profile.role == 'S' %}
-        <h3>Semesters Attended:</h3>
-        <div id="Semesters" class="data-table-alt">
-            {% render_table semesters 'django_tables2/bootstrap.html' %}
-        </div>
-
-        <h3>Course History:</h3>
-        <div id="CourseHistory" class="data-table-alt">
-            {% render_table course_history 'django_tables2/bootstrap.html' %}
-        </div>
-
-        <h3>Remaining Required Courses:</h3>
-        <div id="CourseHistory" class="data-table-alt">
-            {% render_table remaining_required 'django_tables2/bootstrap.html' %}
-        </div>
-    {% endif %}
-    
         <h3>Received Messages:</h3>
     <div id="received">
         {% if received_filter %}

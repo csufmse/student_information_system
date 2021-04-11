@@ -3,8 +3,8 @@ import getopt
 
 sys.path.append(".")  # noqa
 
-from sis.test_data import create_01_major
-from sis.test_data import create_02_admin
+from sis.test_data import create_02_major
+from sis.test_data import create_01_admin
 from sis.test_data import create_03_semester
 from sis.test_data import create_04_student
 from sis.test_data import create_06_semesterstudent
@@ -21,11 +21,11 @@ from sis.test_data import create_50_message
 modules = [
     (
         1,
-        create_01_major,
+        create_01_admin,
     ),
     (
         2,
-        create_02_admin,
+        create_02_major,
     ),
     (
         3,

@@ -7,8 +7,10 @@ sys.path.append(".")  # noqa
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  # noqa
 django.setup()  # noqa
 
-from sis.models import Major, Semester
+from sis.models import Major, Semester, Profile
 from django.db import connection
+from random import sample, choice
+from django.db.models import Q
 
 specs = (
     ('GA', 'General Agriculture', 'Agriculture & Natural Resources'),
@@ -191,19 +193,22 @@ specs = (
 
 
 def createData():
-    to_generate = 50
+    to_generate = 25
 
+    admins = list(
+        Profile.objects.filter(Q(role=Profile.ACCESS_ADMIN) | Q(role=Profile.ACCESS_PROFESSOR)))
     error_count = 0
 
-    for (a, t, d) in specs[:to_generate]:
-        m = Major(abbreviation=a, title=t, description=d)
+    for (a, t, d) in sample(specs, k=to_generate):
+        anAdmin = choice(admins)
+        m = Major(abbreviation=a, title=t, description=d, contact=anAdmin)
         try:
             m.save()
         except Exception:
-            print(f'ERROR: Unable to save major {a} {t}')
+            print(f'ERROR: Unable to save major {a} {t} (contact: ' + f'{anAdmin.user.username})')
             error_count = error_count + 1
         else:
-            print(f'create major {a} {t} {d}')
+            print(f'create major {a} {t} {d} (contact: {anAdmin.user.username})')
 
     if error_count:
         print(f'ERROR: {error_count} errors occurred')

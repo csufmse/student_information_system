@@ -12,7 +12,8 @@ class ViewsAccess(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(ViewsAccess, cls).setUpTestData()
-        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         ViewsAccess.u1 = createAdmin(username='u1', password='hello')
         ViewsAccess.u2 = createProfessor(username='u2', password='hello', major=m1)
         ViewsAccess.u3 = createStudent(username='u3', password='hello', major=m1)
@@ -48,7 +49,8 @@ class ViewsUseTemplate(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(ViewsUseTemplate, cls).setUpTestData()
-        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science")
+        ad = createAdmin('foobar').profile
+        m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         ViewsAccess.u = createStudent(username='u', password='hello', major=m1)
 
     def current_schedule(self):

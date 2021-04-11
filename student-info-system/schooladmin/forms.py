@@ -1,23 +1,11 @@
 from datetime import date
 from django import forms
-from django.contrib.auth.forms import UserCreationForm as DjangoUserCreationForm
-from django.contrib.auth.models import User
+from django.db.models import Q
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Profile, Semester, Student, UpperField, ReferenceItem, Profile)
+                        Profile, Semester, UpperField, ReferenceItem)
 
-
-class UpperFormField(forms.CharField):
-
-    def clean(self, value):
-        supa_clean = super().clean(value)
-        return str(supa_clean).upper()
-
-
-class CourseChoiceField(forms.ModelMultipleChoiceField):
-
-    def label_from_instance(self, obj):
-        return f'{obj.name}: {obj.title}'
+from sis.forms.utils import *
 
 
 class MajorCreationForm(forms.ModelForm):
@@ -26,17 +14,20 @@ class MajorCreationForm(forms.ModelForm):
     description = forms.CharField(max_length=256,
                                   required=False,
                                   widget=forms.Textarea(attrs={'rows': 3}))
+    contact = forms.ModelChoiceField(queryset=Profile.staff())
 
     class Meta:
         model = Major
-        fields = ('abbreviation', 'title', 'description')
+        fields = ('abbreviation', 'title', 'description', 'contact')
 
 
 class MajorEditForm(forms.ModelForm):
-    name = forms.CharField(max_length=256)
+    abbreviation = UpperFormField(max_length=6, help_text='Abbreviation')
+    title = forms.CharField(max_length=256)
     description = forms.CharField(max_length=256,
                                   required=False,
                                   widget=forms.Textarea(attrs={'rows': 3}))
+    contact = forms.ModelChoiceField(queryset=Profile.staff())
     courses_required = CourseChoiceField(queryset=Course.objects.all().order_by(
         'major', 'catalog_number'),
                                          widget=forms.CheckboxSelectMultiple,
@@ -44,7 +35,17 @@ class MajorEditForm(forms.ModelForm):
 
     class Meta:
         model = Major
-        fields = ('name', 'description', 'courses_required')
+        fields = ('abbreviation', 'title', 'description', 'contact', 'courses_required')
+
+    def __init__(self, *args, **kwargs):
+        super(MajorEditForm, self).__init__(*args, **kwargs)
+        # we defer loading of professors until we know what major is chosen
+        if kwargs['instance']:
+            the_major = kwargs['instance']
+            if the_major:
+                self.fields['contact'].queryset = Profile.objects.filter(
+                    Q(role=Profile.ACCESS_ADMIN) |
+                    (Q(role=Profile.ACCESS_PROFESSOR) & Q(professor__major=the_major)))
 
 
 class CourseCreationForm(forms.ModelForm):
@@ -151,95 +152,16 @@ class SemesterEditForm(forms.ModelForm):
                   'date_last_drop', 'date_ended')
 
 
-class UserCreationForm(DjangoUserCreationForm):
-    first_name = forms.CharField(max_length=30, required=True, help_text='Required.')
-    last_name = forms.CharField(max_length=30, required=True, help_text='Required.')
-    email = forms.EmailField(max_length=254, help_text='Required. Enter a valid email address.')
-
-    class Meta:
-        model = User
-        fields = ('username', 'first_name', 'last_name', 'email', 'password1', 'password2')
-
-
-class ProfileCreationForm(forms.ModelForm):
-    role = forms.ChoiceField(choices=Profile.ROLES,
-                             required=True,
-                             help_text='Select type of user')
-    role.widget.attrs.update({'class': 'role_sel selectpicker'})
-
-    bio = forms.CharField(max_length=256,
-                          required=False,
-                          widget=forms.Textarea(attrs={'rows': 3}))
-
-    class Meta:
-        model = Profile
-        fields = ('role', 'bio')
-
-
-class StudentCreationForm(forms.ModelForm):
-    prefix = 's'
-    major = forms.ModelChoiceField(queryset=None, required=False)
-
-    def __init__(self, *args, **kwargs):
-        super(StudentCreationForm, self).__init__(*args, **kwargs)
-        major = self.fields['major']
-        major.widget.attrs.update({'class': 'major_sel selectpicker'})
-        major.queryset = Major.objects.all()
-
-    class Meta:
-        model = Student
-        fields = ('major',)
-
-
 class ProfessorCreationForm(forms.ModelForm):
     prefix = 'r'
-    major = forms.ModelChoiceField(queryset=None, required=False)
-
-    def __init__(self, *args, **kwargs):
-        super(ProfessorCreationForm, self).__init__(*args, **kwargs)
-        major = self.fields['major']
-        major.widget.attrs.update({'class': 'major_sel selectpicker'})
-        major.queryset = Major.objects.all()
+    major = forms.ModelChoiceField(queryset=Major.objects.all(), required=False)
 
     class Meta:
         model = Professor
         fields = ('major',)
 
-
-class UserEditForm(forms.ModelForm):
-    first_name = forms.CharField(max_length=30, required=True, help_text='Required.')
-    last_name = forms.CharField(max_length=30, required=True, help_text='Required.')
-    email = forms.EmailField(max_length=254, help_text='Required. Enter a valid email address.')
-
-    class Meta:
-        model = User
-        fields = ('first_name', 'last_name', 'email')
-
-
-class ProfileEditForm(forms.ModelForm):
-    role = forms.ChoiceField(choices=Profile.ROLES,
-                             required=True,
-                             help_text='Select type of user')
-    role.widget.attrs.update({'class': 'role_sel selectpicker'})
-    bio = forms.CharField(max_length=256,
-                          required=False,
-                          widget=forms.Textarea(attrs={'rows': 3}))
-
-    class Meta:
-        model = Profile
-        fields = ('role', 'bio')
-
-
-class StudentEditForm(forms.ModelForm):
-    prefix = 's'
-    major = forms.ModelChoiceField(queryset=Major.objects.all(), required=False)
-
-    class Meta:
-        model = Student
-        fields = ('major',)
-
     def __init__(self, *args, **kwargs):
-        super(StudentEditForm, self).__init__(*args, **kwargs)
+        super(ProfessorCreationForm, self).__init__(*args, **kwargs)
         major = self.fields['major']
         major.widget.attrs.update({'class': 'major_sel selectpicker'})
 
@@ -305,35 +227,3 @@ class SectionEditForm(forms.ModelForm):
             if major:
                 self.fields['professor'].queryset = Professor.objects.filter(
                     profile__user__is_active=True, major=major)
-
-
-class ReferenceItemCreationForm(forms.ModelForm):
-    type = forms.ChoiceField(choices=ReferenceItem.TYPES)
-    type.widget.attrs.update({'class': 'type_sel selectpicker'})
-
-    course = forms.ModelChoiceField(queryset=Course.objects.all())
-    course.widget.attrs.update({'class': 'course_sel selectpicker'})
-
-    title = forms.CharField(max_length=256)
-    description = forms.CharField(max_length=256,
-                                  widget=forms.Textarea(attrs={'rows': 3}),
-                                  required=False)
-    link = forms.CharField(max_length=256, required=False)
-    edition = forms.CharField(max_length=256, required=False)
-
-    class Meta:
-        model = ReferenceItem
-        fields = ('type', 'course', 'title', 'description', 'link', 'edition')
-
-    def __init__(self, *args, **kwargs):
-        super(ReferenceItemCreationForm, self).__init__(*args, **kwargs)
-
-        # we defer loading of courses until we know what major is chosen
-        if 'initial' in kwargs:
-            major = kwargs['initial']['professor'].major
-            if major:
-                self.fields['course'].queryset = Course.objects.filter(major=major)
-        elif 'instance' in kwargs:
-            major = kwargs['instance'].professor.major
-            if major:
-                self.fields['course'].queryset = Course.objects.filter(major=major)

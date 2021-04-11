@@ -2,6 +2,7 @@
 {% load static %}
 {% load bootstrap3 %}
 {% load render_table from django_tables2 %}
+{%  load user_demographics %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -26,6 +27,8 @@
   <dt>Transcript<dt>
   <dd><a href="{% url 'schooladmin:transcript' userid=user.id %}">Generate</a>
 </dl>
+    <h3>Demographic Data</h3>
+    {%  demographic_details user.profile %}
 
     <h3>Semesters Attended:</h3>
     <div id="Semesters">

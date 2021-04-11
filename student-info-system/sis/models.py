@@ -1,7 +1,7 @@
 from django.contrib.auth.models import User, AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models import Case, ExpressionWrapper, F, Q, Sum, Max, Subquery, Value, When
+from django.db.models import Case, ExpressionWrapper, F, Q, Sum, Max, Subquery, Value, When, Count
 from django.db.models.fields import (CharField, DateField, DecimalField, FloatField, IntegerField)
 from django.db.models import Exists, OuterRef
 from django.db.models.functions import Concat, Cast
@@ -9,7 +9,7 @@ from django.db.models.signals import post_save
 from django.dispatch import receiver
 from phone_field import PhoneField
 from django.utils import timezone
-from datetime import datetime
+from datetime import timedelta, datetime
 
 
 class UpperField(models.CharField):
@@ -31,13 +31,23 @@ class Profile(models.Model):
     ACCESS_STUDENT = 'S'
     ROLES = ((ACCESS_ADMIN, 'Admin'), (ACCESS_PROFESSOR, 'Professor'), (ACCESS_STUDENT,
                                                                         'Student'))
+    # from a DB perspective, we may also have the "no access" role (i.e. 'admin' account --
+    # the Django siteadmin)
+    ACCESS_NONE = '-'
+    DB_ROLES = ((ACCESS_ADMIN, 'Admin'), (ACCESS_PROFESSOR, 'Professor'),
+                (ACCESS_STUDENT, 'Student'), (ACCESS_NONE, 'NO ACCESS'))
 
     @classmethod
     def rolename_for(cls, aRole):
         return [item for item in Profile.ROLES if item[0] == aRole][0][1]
 
+    @classmethod
+    def staff(cls):
+        return Profile.objects.filter(
+            Q(role=Profile.ACCESS_ADMIN) | Q(role=Profile.ACCESS_PROFESSOR))
+
     user = models.OneToOneField(User, on_delete=models.CASCADE)
-    role = models.CharField(max_length=1, choices=ROLES, default=ACCESS_STUDENT)
+    role = models.CharField(max_length=1, choices=DB_ROLES, default=ACCESS_NONE)
     bio = models.CharField(max_length=256, blank=True)
 
     def has_student(self):
@@ -55,6 +65,145 @@ class Profile(models.Model):
         except Professor.DoesNotExist:
             pass
         return has
+
+    # DEMOGRAPHIC DATA
+    AGE = (
+        ('Under 18', 'Under 18'),
+        ('18-21', '18-21'),
+        ('22-25', '22-25'),
+        ('26-30', '26-30'),
+        ('31-40', '31-40'),
+        ('41-54', '41-54'),
+        ('55-64', '55-64'),
+        ('65 or over', '65 or over'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_age = models.CharField(verbose_name="Age Group", max_length=20, blank=True, choices=AGE)
+    RACE = (
+        ('White/Caucasian', 'White/Caucasian'),
+        ('Native Hawaiian or Pacific Islander', 'Native Hawaiian or Pacific Islander'),
+        ('Hispanic', 'Hispanic'),
+        ('Black', 'Black'),
+        ('American Indian/Alaska Native', 'American Indian/Alaska Native'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_race = models.CharField(max_length=40, blank=True, choices=RACE)
+    GENDER = (
+        ('Male', 'Male'),
+        ('Female', 'Female'),
+        ('Trans', 'Trans'),
+        ('Non-Binary', 'Non-Binary'),
+        ('Other', 'Other'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_gender = models.CharField(max_length=20, blank=True, choices=GENDER)
+    WORK_STATUS = (
+        ('Full Time Student', 'Full Time Student'),
+        ('Part Time', 'Part Time'),
+        ('Full Time', 'Full Time'),
+        ('Unemployed/Seeking', 'Unemployed/Seeking'),
+        ('Retired', 'Retired'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_employment = models.CharField(max_length=20, blank=True, choices=WORK_STATUS)
+    ANNUAL_HOUSEHOLD_INCOME = (
+        ('Under $40K', 'Under $40K'),
+        ('$40K-$80K', '$40K-$80K'),
+        ('$80K-$150K', '$80K-$150K'),
+        ('$150K+', '$150K+'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_income = models.CharField(max_length=20, blank=True, choices=ANNUAL_HOUSEHOLD_INCOME)
+    HIGHEST_FAMILY_EDUCATION = (
+        ('partial High School', 'partial High School'),
+        ('High School Diploma', 'High School Diploma'),
+        ('college without degree awarded', 'college without degree awarded'),
+        ('Associates', 'Associates'),
+        ('College Bachelors', 'College Bachelors'),
+        ('Masters', 'Masters'),
+        ('Doctorate', 'Doctorate'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_education = models.CharField(max_length=35, blank=True, choices=HIGHEST_FAMILY_EDUCATION)
+    ORIENTATION = (
+        ('Heterosexual', 'Heterosexual'),
+        ('Lesbian/Gay', 'Lesbian/Gay'),
+        ('Bisexual', 'Bisexual'),
+        ('Other', 'Other'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_orientation = models.CharField(max_length=20, blank=True, choices=ORIENTATION)
+    MARITAL_STATUS = (
+        ('Single', 'Single'),
+        ('Married', 'Married'),
+        ('Divorced', 'Divorced'),
+        ('Widowed', 'Widowed'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_marital = models.CharField(max_length=20, blank=True, choices=MARITAL_STATUS)
+    DISABILITY = (
+        ('None', 'None'),
+        ('Physical', 'Physical'),
+        ('Emotional', 'Emotional'),
+        ('Mental', 'Mental'),
+        ('Other', 'Other'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_disability = models.CharField(max_length=20, blank=True, choices=DISABILITY)
+    VETERAN_STATUS = (
+        ('None', 'None'),
+        ('Veteran', 'Veteran'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_veteran = models.CharField(max_length=20, blank=True, choices=VETERAN_STATUS)
+    CITIZENSHIP = (
+        ('United States', 'United States'),
+        ('US Permanent Resident', 'US Permanent Resident'),
+        ('Visa', 'Visa'),
+        ('Other', 'Other'),
+        ('Decline to State', 'Decline to State'),
+    )
+    demo_citizenship = models.CharField(max_length=25, blank=True, choices=CITIZENSHIP)
+
+    DEMO_ATTRIBUTE_MAP = (
+        ('demo_age', 'AGE', 'Age Group'),
+        ('demo_race', 'RACE', 'Race Group'),
+        ('demo_gender', 'GENDER', 'Gender'),
+        ('demo_employment', 'WORK_STATUS', 'Employment Status'),
+        ('demo_income', 'ANNUAL_HOUSEHOLD_INCOME', 'Annual Household Income Segment'),
+        ('demo_education', 'HIGHEST_FAMILY_EDUCATION', 'Highest Education in Family'),
+        ('demo_orientation', 'ORIENTATION', 'Sexual Orientation'),
+        ('demo_marital', 'MARITAL_STATUS', 'Marital Status'),
+        ('demo_disability', 'DISABILITY', 'Disability Area'),
+        ('demo_veteran', 'VETERAN_STATUS', 'Veteran Status'),
+        ('demo_citizenship', 'CITIZENSHIP', 'Citizenship'),
+    )
+    # END DEMO_DATA
+    """
+        for a set of Profiles, return a dict of dicts.
+        Outer dict has key "count", and then each of the demographic labels
+        ("Citizenship", Marital Status, etc).
+        Each of those has a dict of keys (each value for label) whose value is the
+        count within the set.
+        Note that empty values will be removed, so the count(label) may be
+        less than count(qs)
+    """
+
+    @classmethod
+    def demographics_for(cls, queryset=None):
+        if queryset is None:
+            queryset = Profile.objects
+        data = {
+            'count': queryset.count(),
+        }
+        for attr in Profile.DEMO_ATTRIBUTE_MAP:
+            (model_col, choices, label) = attr
+            data[label] = {}
+            for val in queryset.values(model_col).annotate(total=Count('id')).order_by(model_col):
+                data[label][val[model_col]] = val['total']
+            if '' in data[label]:
+                del data[label]['']
+        return data
 
     @property
     def rolename(self):
@@ -169,8 +318,8 @@ class Student(models.Model):
             major = self.major
         return major.requirements_met_list(self)
 
-    def prerequisites_met_list(self, course):
-        return course.prerequisites_met_list(self)
+    def course_prerequisites_detail(self, course):
+        return course.prerequisites_detail(self)
 
     def credits_earned(self):
         completed = self.course_history(passed=True).aggregate(
@@ -197,6 +346,14 @@ class Student(models.Model):
         level = ClassLevel.level(creds)
         return level
 
+    def section_reference_items_for(self, semester=None):
+        if semester is None:
+            semester = Semester.current_semester()
+        return SectionReferenceItem.objects.filter(
+            Exists(
+                self.sectionstudent_set.filter(section__semester=semester,
+                                               section=OuterRef('section'))))
+
 
 class Professor(models.Model):
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
@@ -220,7 +377,7 @@ class Professor(models.Model):
 
 
 class Major(models.Model):
-    abbreviation = UpperField('Abbreviation', max_length=6)
+    abbreviation = UpperField('Abbreviation', max_length=6, unique=True)
     title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
     professors = models.ManyToManyField(Professor,
@@ -231,6 +388,7 @@ class Major(models.Model):
                                               blank=True,
                                               symmetrical=False,
                                               related_name="required_by")
+    contact = models.ForeignKey(Profile, on_delete=models.SET_NULL, null=True)
 
     def requirements_met_list(self, student):
         return self.courses_required.annotate(met=Exists(
@@ -323,7 +481,13 @@ class Course(models.Model):
         max_num = max_dict['number__max']
         return max_num
 
-    def prerequisites_met_list(self, student):
+    def prerequisites_met(self, student):
+        remaining = self.prereqs.exclude(
+            Exists(
+                student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)))
+        return remaining.count() == 0
+
+    def prerequisites_detail(self, student):
         return self.prereqs.annotate(met=Exists(
             student.sectionstudent_set.filter(section__course=OuterRef('pk'), grade__gt=0.0)))
 
@@ -378,6 +542,27 @@ class Semester(models.Model):
         if sname is not None and len(sname):
             return sname[0]
 
+    """
+    if available, return semester that's in session. Otherwise return the one we're registering
+    """
+
+    @classmethod
+    def current_semester(cls, at=None):
+        if at is None:
+            at = datetime.now()
+        try:
+            sem = Semester.objects.get(date_started__lte=at, date_ended__gte=at)
+        except self.model.DoesNotExist:
+            sem = None
+
+        if sem is None:
+            try:
+                sem = Semester.objects.get(date_registration_opens__lte=at,
+                                           date_registration_closes__gte=at)
+            except self.model.DoesNotExist:
+                sem = None
+        return sem
+
     date_registration_opens = models.DateField('Registration Opens')
     date_registration_closes = models.DateField('Registration Closes')
     date_started = models.DateField('Classes Start')
@@ -401,9 +586,39 @@ class Semester(models.Model):
         return User.annotated().filter(
             profile__student__semesterstudent__semester=self.id).distinct()
 
+    def registration_open(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_registration_opens <= when <= self.date_registration_closes
+
+    def in_session(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_started <= when <= self.date_ended
+
+    def preparing_grades(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_ended <= when <= self.date_ended + timedelta(days=14)
+
+    def finalized(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_ended + timedelta(days=14) <= when
+
+    def drop_possible(self, when=None):
+        if when is None:
+            when = datetime.now().date()
+        return self.date_registration_opens <= when <= self.date_last_drop
+
     @property
     def name(self):
         return str(self.session) + "-" + str(self.year)
+
+    @property
+    def name_sort(self):
+        return str(self.year) + '-' + str(Semester.SESSIONS_ORDER.index(
+            self.session)) + self.session
 
     def __str__(self):
         return self.name
@@ -472,12 +687,14 @@ class SectionStudent(models.Model):
     )
 
     REGISTERED = 'Registered'
+    IN_PROGRESS = 'In Progress'
     AWAITING_GRADE = 'Done'
     GRADED = 'Graded'
     DROP_REQUESTED = 'Drop Requested'
     DROPPED = 'Dropped'
     STATUSES = (
         (REGISTERED, REGISTERED),
+        (IN_PROGRESS, IN_PROGRESS),
         (AWAITING_GRADE, AWAITING_GRADE),
         (GRADED, GRADED),
         (DROP_REQUESTED, DROP_REQUESTED),
@@ -526,15 +743,15 @@ class Section(models.Model):
                                       symmetrical=False,
                                       related_name='section_students')
 
-    CLOSED = 'Closed'
-    OPEN = 'Open'
+    REG_CLOSED = 'Closed'
+    REG_OPEN = 'Open'
     IN_PROGRESS = 'In Progress'
     GRADING = 'Grading'
     GRADED = 'Graded'
     CANCELLED = 'Cancelled'
     STATUSES = (
-        (CLOSED, CLOSED),
-        (OPEN, OPEN),
+        (REG_CLOSED, REG_CLOSED),
+        (REG_OPEN, REG_OPEN),
         (IN_PROGRESS, IN_PROGRESS),
         (GRADING, GRADING),
         (GRADED, GRADED),
@@ -543,7 +760,7 @@ class Section(models.Model):
     status = models.CharField(
         'Section Status',
         choices=STATUSES,
-        default=CLOSED,
+        default=REG_CLOSED,
         max_length=20,
     )
 
@@ -732,7 +949,7 @@ User.add_to_class('name', name)
 
 # Extend User to return annotated User objects
 def uannotated(cls):
-    return User.objects.annotate(
+    return User.objects.exclude(profile__role=Profile.ACCESS_NONE).annotate(
         role=F('profile__role',),
         name=Concat(F("first_name"), Value(' '), F("last_name")),
         name_sort=Concat(F("last_name"), Value(', '), F("first_name")),

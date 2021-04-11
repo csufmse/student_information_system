@@ -7,16 +7,12 @@ sys.path.append(".")  # noqa
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  # noqa
 django.setup()  # noqa
 
-from random import choice
+from random import choice, sample, choices
 from django.db import connection
 
 from django.contrib.auth.models import User
 
 from sis.models import Major, Semester, SemesterStudent, Student, Profile
-
-to_generate = 1000
-
-set_pass = True
 
 specs = (
     ('tsowell', 'Thomas', 'Sowell', 'tsowell@x.com'),
@@ -436,11 +432,23 @@ specs = (
 )
 
 
+def set_choice_attr(instance, attribute_name, options, weights):
+    if len(options) != len(weights):
+        print(f'{attribute_name}: {len(options)} {len(weights)}')
+        raise Exception()
+    aChoice = choices(options, weights=weights)[0][0]
+    setattr(instance, attribute_name, aChoice)
+
+
 def createData():
+    to_generate = min(200, len(specs))
+
+    set_pass = True
+
     error_count = 0
     line = 1
     majors = Major.objects.all()
-    for (u, f, l, e) in specs[:to_generate]:
+    for (u, f, l, e) in sample(specs, to_generate):
         usr = User(username=u, first_name=f, last_name=l, email=e)
         if set_pass:
             usr.set_password(u + '1')
@@ -449,6 +457,21 @@ def createData():
             usr.save()
             profile = usr.profile
             profile.role = Profile.ACCESS_STUDENT
+
+            set_choice_attr(profile, 'demo_age', Profile.AGE, (3, 10, 5, 1, 1, 1, 1, 1, 3))
+            set_choice_attr(profile, 'demo_race', Profile.RACE, (10, 1, 5, 3, 1, 5))
+            set_choice_attr(profile, 'demo_gender', Profile.GENDER, (7, 8, 1, 1, 1, 3))
+            set_choice_attr(profile, 'demo_employment', Profile.WORK_STATUS, (5, 3, 2, 1, 2, 3))
+            set_choice_attr(profile, 'demo_income', Profile.ANNUAL_HOUSEHOLD_INCOME,
+                            (1, 2, 5, 3, 4))
+            set_choice_attr(profile, 'demo_education', Profile.HIGHEST_FAMILY_EDUCATION,
+                            (3, 3, 3, 2, 5, 3, 2, 3))
+            set_choice_attr(profile, 'demo_orientation', Profile.ORIENTATION, (95, 6, 2, 1, 10))
+            set_choice_attr(profile, 'demo_marital', Profile.MARITAL_STATUS, (10, 4, 3, 1, 4))
+            set_choice_attr(profile, 'demo_disability', Profile.DISABILITY, (10, 4, 2, 2, 3, 6))
+            set_choice_attr(profile, 'demo_veteran', Profile.VETERAN_STATUS, (8, 2, 4))
+            set_choice_attr(profile, 'demo_citizenship', Profile.CITIZENSHIP, (10, 6, 4, 4, 6))
+
             profile.save()
         except Exception:
             print(f'ERROR: Unable to create Student(User) {line} {u} ({f} {l})')
