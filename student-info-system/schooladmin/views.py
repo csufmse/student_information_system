@@ -45,6 +45,24 @@ def filtered_table(name=None,
     RequestConfig(request, paginate={"per_page": page_size, "page": 1}).configure(tab)
     return {name + '_table': tab, name + '_filter': filt, name + '_has_filter': has_filter}
 
+def filtered_table2(name=None,
+                   qs=None,
+                   filter=None,
+                   table=None,
+                   request=None,
+                   page_size=25,
+                   wrap_list=True):
+    filter = filter(request.GET, queryset=qs, prefix=name)
+    # weird "{name}" thing is because the HTML field has the prefix but the Filter does
+    # NOT have it in the field names
+    has_filter = any(f'{name}-{field}' in request.GET for field in set(filter.get_fields()))
+    table_source = filter.qs
+    if wrap_list:
+        table_source = list(table_source)
+    tab = table(table_source, prefix=name + "-")
+    RequestConfig(request, paginate={"per_page": page_size, "page": 1}).configure(tab)
+    return { name: { 'name': name, 'table': tab, 'filter': filter, 'has_filter': has_filter} }
+
 
 @role_login_required(AccessRoles.ADMIN_ROLE)
 def index(request):
@@ -542,7 +560,7 @@ def course_section_new(request, courseid):
 def semesters(request):
     return render(
         request, 'schooladmin/semesters.html',
-        filtered_table(
+        filtered_table2(
             name='semesters',
             qs=Semester.objects.all(),
             filter=SemesterFilter,
