@@ -10,6 +10,6 @@
   <script>
     const handler = insertScrollableDivs(applyHandlers=true);
     handler();
-    addClickHandlers("{% url 'professor:students_in_section' sectionid=1234599 %}", "section_row");
+    addClickHandlers("{% url 'professor:section' sectionid=1234599 %}", "section_row");
   </script>
 {% endblock content %}

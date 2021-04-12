@@ -1,3 +1,5 @@
+from datetime import timedelta, datetime
+
 from django.contrib.auth.models import User, AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -7,9 +9,10 @@ from django.db.models import Exists, OuterRef
 from django.db.models.functions import Concat, Cast
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from phone_field import PhoneField
 from django.utils import timezone
-from datetime import timedelta, datetime
+
+from isbn_field import ISBNField
+from phone_field import PhoneField
 
 
 class UpperField(models.CharField):
@@ -913,6 +916,7 @@ class ReferenceItem(models.Model):
         default=REQUIRED,
         max_length=3,
     )
+    isbn = ISBNField(blank=True)
 
     class Meta:
         unique_together = (('course', 'professor', 'title'),)

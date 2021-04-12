@@ -34,7 +34,7 @@ class ProfSectionsTable(SectionsTable):
         model = Section
         template_name = "django_tables2/bootstrap.html"
         exclude = ('status', 'course_title', 'professor', 'seats_remaining')
-        row_attrs = {'class': 'srow', 'data-id': lambda record: record.pk}
+        row_attrs = {'class': 'section_row', 'data-id': lambda record: record.pk}
 
 
 # for when Class is known

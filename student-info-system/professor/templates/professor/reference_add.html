@@ -1,0 +1,17 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+
+{% block content %}
+<form method='post'>
+  {% csrf_token %}
+  <table>{{form.as_table}}</table>
+  <input id='submitme' name='submitme' value="Add" class='btn btn-info'>
+</form>
+
+<script>
+document.getElementById("submitme").addEventListener("click", function () {
+    this.form.submit();
+    return true;
+    });
+</script>
+{% endblock content %}

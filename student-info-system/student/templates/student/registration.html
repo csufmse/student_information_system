@@ -11,7 +11,7 @@
         <p>Registration complete.</p>
     {% endif %}
     {% if filter %}
-      <form id="myfilt" action="" method="get" class="form form in-line" autocomplete="off">
+      <form id="myfilt" action="" method="get" class="form form-inline" autocomplete="off">
         {% csrf_token %}
         {% bootstrap_form filter.form layout='inline' %}
         <button class="btn btn-primary">Filter</button>
@@ -28,6 +28,7 @@
       <option value="{{sem.id}}" {% if semester == sem.id %}SELECTED{% endif %}>{{ sem.name }}</option>
     {% endfor %}
     </select>
+    <input type="submit" id="register" name="register" value="Switch Semester" class="btn btn-primary">
 
     <table class="data-table">
       <tr class="reg-row">
@@ -75,7 +76,7 @@
       {% endfor %}
     </table>
   {% endif %}
-  <input type="submit" id="register" name="register" value="Register">
+  <input type="submit" id="register" name="register" value="Register" class="btn btn-primary">
   </form>
 {% endblock content %}
     
