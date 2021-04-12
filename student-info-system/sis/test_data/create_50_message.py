@@ -78,10 +78,8 @@ def createData():
                 reason = get_sentence()
                 mesg = student.request_drop(sectionstudent=aSect, reason=reason, when=when)
                 as_str = mesg.time_sent.strftime('%m/%d/%Y, %H:%M:%S')
-                print(
-                    f'DropReq: {as_str} {student} requests drop of {aSect.section} ' +
-                    f'(semester {aSemester}, sent to {mesg.recipient})'
-                )
+                print(f'DropReq: {as_str} {student} requests drop of {aSect.section} ' +
+                      f'(semester {aSemester}, sent to {mesg.recipient})')
 
             # yo be on AP
             if random() < 0.2:
