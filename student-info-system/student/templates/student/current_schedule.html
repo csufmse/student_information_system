@@ -38,11 +38,11 @@
      {%  if semester.drop_possible %}
         <td class="drop_cell">
         {%  if ssect.droppable %}
-            &nbsp;
-        {% else %}
             <input id="drop_request-{{ ssect.id }}"
                 action="action" class="btn btn-info" value="Request Drop"
                 onclick='window.location.href="{% url 'student:drop' id=ssect.id %}";' />
+        {% else %}
+            &nbsp;
         {% endif %}</td>
      {% endif %}
    </tr>
