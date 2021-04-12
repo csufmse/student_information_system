@@ -24,6 +24,7 @@ class MessageTable(tables.Table):
                                      css_class_base='message_date',
                                      format='Y-m-d H:i')
     subject = ClassyColumn(verbose_name="Subject", css_class_base='message_subject')
+    message_type = ClassyColumn(verbose_name="Type", css_class_base='message_type')
     high_priority = ClassyColumn(verbose_name="Priority", css_class_base='message_priority')
 
     def render_high_priority(self, value):
@@ -45,7 +46,8 @@ class MessageTable(tables.Table):
     class Meta:
         model = Message
         template_name = "django_tables2/bootstrap.html"
-        fields = ('unread', 'high_priority', 'time_sent', 'recipient', 'sender', 'subject')
+        fields = ('unread', 'high_priority', 'time_sent', 'message_type', 'recipient', 'sender',
+                  'subject')
         row_attrs = {
             'class': (lambda record: 'message_row unread' if record.unread else 'message_row'),
             'data-id': lambda record: record.pk

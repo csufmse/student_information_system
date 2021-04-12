@@ -108,4 +108,22 @@ function insertScrollableDivs(applyHandlers=false) {
     return 0;
 }
 
-
+/* given a table of (say) messages, lay in a click handler that loads an iframe with
+** the result of a URL. Used for reading messages.
+ */
+function addDetailClickHander({ table_parent='', template='', row_class='', iframe_id='', mark_read=true }) {
+    const iframe = document.getElementById(iframe_id);
+    const outer = document.getElementById(table_parent);
+    for (const row of outer.getElementsByClassName(row_class)) {
+        var id = row.getAttribute('data-id');
+        let url = template.replace(/1234599/, id.toString());
+        row.addEventListener("click", function() {
+            iframe.src = url;
+            if ( mark_read ) {
+                row.classList.remove("unread");
+                const unread = row.getElementsByClassName('message_unread_cell')[0];
+                unread.innerHTML = '';
+            }
+        }, false);
+    }
+}

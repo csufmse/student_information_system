@@ -2,12 +2,31 @@
 {% load static %}
 {% load bootstrap3 %}
 
+{% block logged-in %}
+<div>
+<span>
+  <dl class="dl-horizontal">
+    <dt>Name</dt>
+    <dd>{{ user.get_full_name }}</dd>
+    <dt>Account Id</dt>
+    <dd>{{ user.username }}</dd>
+    {% if total %}<dt>Unread Messages</dt>
+    <dd><b>{{ normal }} normal message{{ normal|pluralize }}, {{ priority }} priority message{{ priority|pluralize }}</b></dd>{% endif %}
+  </dl>
+  <a
+     class="btn btn-primary"
+     href="{% url 'logout' %}">Log Out</a>
+</span>
+</div>
+{% endblock logged-in %}
+
 {% block content %}
 <div class="tab">
   <button class="tablinks" id="defaultOpen">Current Schedule</button>
   <button class="tablinks">Registration</button>
   <button class="tablinks">References</button>
-  <button class="tablinks">Profile</button>
+  <button class="tablinks">My History</button>
+  <button class="tablinks">My Profile</button>
 </div>
 
 <span height="400" width="300">
@@ -17,7 +36,9 @@
     ></iframe>
   <iframe id="References" class="tabcontent" loading="lazy" title="References" src="{% url 'student:secitems' %}"
     ></iframe>
-  <iframe id="Profile" class="tabcontent" loading="lazy" title="Profile" src="{% url 'student:profile' %}"
+  <iframe id="My History" class="tabcontent" loading="lazy" title="My History" src="{% url 'student:history' %}"
+    ></iframe>
+  <iframe id="My Profile" class="tabcontent" loading="lazy" title="My Profile" src="{% url 'student:profile' %}"
     ></iframe>
 </span>
 {% endblock content %}

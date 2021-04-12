@@ -11,7 +11,8 @@ from sis.tables.sections import ProfSectionsTable
 
 @role_login_required(Profile.ACCESS_PROFESSOR)
 def index(request):
-    return render(request, 'professor/home_professor.html')
+    return render(request, 'professor/home_professor.html',
+                  request.user.profile.unread_messages())
 
 
 @role_login_required(Profile.ACCESS_PROFESSOR)

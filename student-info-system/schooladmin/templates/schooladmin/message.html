@@ -1,0 +1,23 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+
+{% block content %}
+    <div><span class="message_header">From:</span>
+        <span class="message_header_value">{{ message.sender.user.get_full_name }}</span></div>
+    <div><span class="message_header">To:</span>
+        <span class="message_header_value">{{ message.recipient.user.get_full_name }}</span></div>
+    <div><span class="message_header">Date Sent:</span>
+        <span class="message_header_value">{{ message.time_sent }}</span></div>
+    <div><span class="message_header">Priority:</span>
+        <span class="message_header_value">{%  if message.high_priority %}High{%  else %}Normal{% endif %}</span></div>
+    {% if show_read %}<div><span class="message_header">Read At:</span>
+        <span class="message_header_value">
+            {% if message_read %}{{ message.time_read }}{% else %}(Unread){% endif %}
+        </span></div>{% endif %}
+    {% if show_type %}<div><span class="message_header">Type:</span>
+        <span class="message_header_value">{{ message.message_type }}</span></div>{% endif %}
+    <div><span class="message_header">Subject:</span>
+        <span class="message_header_value">{{ message.subject }}</span></div>
+    <div id="body" class="message_body">{{ message.body }}</div>
+{% endblock %}
