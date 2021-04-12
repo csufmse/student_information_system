@@ -1135,7 +1135,7 @@ User.add_to_class('name', name)
 
 # Extend User to return annotated User objects
 def uannotated(cls):
-    return User.objects.exclude(username='admin').annotate(
+    return User.objects.exclude(profile__role=Profile.ACCESS_NONE).annotate(
         role=F('profile__role',),
         name=Concat(F("first_name"), Value(' '), F("last_name")),
         name_sort=Concat(F("last_name"), Value(', '), F("first_name")),

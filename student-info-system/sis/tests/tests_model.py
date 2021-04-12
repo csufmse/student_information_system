@@ -727,12 +727,12 @@ class ProfileTest_Basic(TestCase):
         usr.delete()
 
     def test_admin_excluded(self):
-        if False:
-            usr = User.objects.create(username='foo')
-            prof = usr.profile
-            users = Profile.objects.all()
-            self.assertEqual(users.count(), 1)
-            users_ann = User.annotated()
-            self.assertEqual(users_ann.count(), 0)
-            prof.delete()
-            usr.delete()
+        usr = User.objects.create(username='foo')
+        prof = usr.profile
+        self.assertEqual(prof.role, Profile.ACCESS_NONE)
+        users = Profile.objects.all()
+        self.assertEqual(users.count(), 1)
+        users_ann = User.annotated()
+        self.assertEqual(users_ann.count(), 0)
+        prof.delete()
+        usr.delete()
