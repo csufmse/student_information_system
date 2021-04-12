@@ -1,6 +1,4 @@
-from datetime import date
 from django import forms
-from django.db.models import Q
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
                         Profile, Semester, UpperField, ReferenceItem)

@@ -1070,7 +1070,7 @@ def profile(request):
             wrap_list=False,
         ))
 
-    return render(request, 'profile.html', data)
+    return render(request, 'schooladmin/profile.html', data)
 
 
 @role_login_required(Profile.ACCESS_ADMIN)
