@@ -1,6 +1,7 @@
 from datetime import datetime
 
 from django.contrib.auth.models import User
+from django.db.models import Q
 from django.test import TestCase
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
