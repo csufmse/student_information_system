@@ -1,0 +1,42 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+
+{% block content %}
+<h2>Transcript</h2>
+
+<p>Student: {{student.name}}</p>
+<table class="transcript_table">
+  <col>
+  <colgroup span="5"></colgroup>
+{% for sem in ssects_by_sem %}
+    <tr>
+      <th colspan="5" scope="colgroup" class="sem_head">
+            {{sem.0.section.semester.session_name}} {{sem.0.section.semester.year}}
+      </th>
+    </tr>
+    <tr>
+      <th scope="col">Course</th>
+      <th scope="col">Course Title</th>
+      <th scope="col">Grade</th>
+      <th scope="col">Date Started</th>
+      <th scope="col">Date Ended</th>
+    </tr>
+  {% for ssect in sem %}
+    <tr>
+      <td>{{ssect.section.course_name}}</td>
+      <td>{{ssect.section.course_title}}</td>
+      <td>{{ssect.letter_grade}}</td>
+      <td>{{ssect.section.semester.date_started}}</td>
+      <td>{{ssect.section.semester.date_ended}}</td>
+    </tr>
+  {% endfor %}
+{% comment %}
+  Add this in if we get gpa in semesters
+  <tr>
+    <td>GPA: {{semester gpa here}}</td>
+  </tr>
+{% endcomment %}
+{% endfor %}
+</table>
+<p>Cummulative GPA: {{student.gpa|floatformat:2}}</p>
+{% endblock content %}
