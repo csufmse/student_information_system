@@ -32,7 +32,7 @@ def createData():
               f'{semesters[start].year} ' +
               f'to {semesters[stop].session_name}-{semesters[stop].year}')
         for sem in semesters[start:stop]:
-            if sem.semester == Semester.SUMMER and random() > prob_of_summer:
+            if sem.session == Semester.SUMMER and random() > prob_of_summer:
                 continue
 
             sems = SemesterStudent(student=stud, semester=sem)

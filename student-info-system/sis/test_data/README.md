@@ -1,24 +1,50 @@
 # Random Test Data
 
 These scripts create plausible test data. 
-All database constraints are honored, but some application constraints may not be.
+All database constraints are honored, but some application constraints may not be (but not intentionally).
 
 ## Full Rebuild Process
 
 ```bash
 cd student_information_system
 rm db.sqlite3
+rm sis/migrations/0*
 python manage.py makemigrations
 python manage.py migrate
-python manage.py createsuperuser
-# admin with pass admin1, please!
-python sis/test_data/01_major.py
-# ... and so on, by number
+python manage.py createsuperuser --username admin --email admin@x.com
+# pass admin1, please!
+python sis/test_data/ --create
+# this will execute them all
 ```
 
-***You must run them in ASCENDING order only. You have been warned.***
+***You must run them in ASCENDING order only, which the script does. You have been warned.***
 
-You need not run them all though. 
+You need not run them all, though. 
+
+The script ```sis/test_data/__main__.py``` keeps you somewhat honest. 
+It'll create in ascending order, and delete in descending order.
+
+What are the options for arguments/parameters?
+```
+python sis/test_data/ -h
+```
+
+What are the options for types of data?
+```
+python sis/test_data/ --list
+```
+
+Delete major prerequisites?
+```
+python sis/test_data/ --delete --only 22
+```
+
+
+Delete courses (and on), then re-create?
+```
+python sis/test_data/ --delete --start 20
+python sis/test_data/ --create --start 20
+```
 
 ### Not SQLite?
 
@@ -27,17 +53,19 @@ So I **think** (have not tested) you can do the following to clear the db:
 
 ```SQL
 DELETE FROM auth_user;
+DELETE FROM sis_profile;
 DELETE FROM sis_student;
 DELETE FROM sis_professor;
 DELETE FROM sis_admin;
 DELETE FROM sis_major;
 DELETE FROM sis_semester;
 DELETE FROM sis_course;
+DELETE FROM sis_message;
 ```
 
 The models specify constraints so all the join-tables will be cleared by these.
 
-### User accounts (Admin, Professor, Student) have passwords set by default
+### User accounts (Professor, Student) have passwords set by default
 
 And they're really dumb passwords. If you want to NOT set passwords,
 go into ```01_admin.py```, ```04_student.py```, and ```08_professor.py``` and
@@ -51,80 +79,27 @@ Obviously this is much more secure.
 
 Pick an ```Admin```, and go to ```/siteadmin```, ```User``` table. 
 Enable *Staff* status and *Superuser* status. This makes it a user
-with which you can hit both ```/schooladming``` and ```/siteadmin```.
+with which you can hit both ```/schooladmin``` and ```/siteadmin```.
 
-Personally, I use Hades.
+**That said** I haven't used the Admin site for weeks, 
+and I don't want to. Any data created there may not honor the app constraints. Use the ```/schooladmin```.
 
-## Partial, or adding data
 
-You can run the following only once:
-* major
-* admin
-* semester 
-You can tweak things, and perhaps rerun to get more data:
-* student (this also creates semester students)
-* professor
-* course
+Personally, I use ```hades```.
 
-You can tweak and run to get more (easily):
-* transcript_request
-* major prerequisites
-* course prerequisites
-* section
-* section students
-
-The "only once" scripts have hard-coded data. The other ones either 
-take from a list (Student, Prof, Course), or generate random data (no hard-coded lists).
-
-## Clearing some data out
-
-Assuming you're messing around in your dev area and are in a hurry, 
-you can delete some of the data by hand without rebuilding everything.
-
-**Do a clean run of data and test before you check anything in!**
-
-Say you want to reset the sections:
-```bash
-sqlite3 db.sqlite3
-delete from sis_section;
-# you must then delete the other data (since sqlite3 does not cascade
-delete from sis_sectionstudent;
-```
-Then you can run the ```section``` and ```sectionstudent``` scripts.
 
 ### Minor Note
 
 the "User" table is ```auth_user```.
 
 ## Application constraints NOT honored
-* ```Section``` may be added to "old" ```Semester``` even with statuses 
-like ```Open```.
-  * Properly, old semester sectionn should all be closed, etc.
-* Section status ```Grading``` and ```Graded``` are not at all correct.
-  * they do not reflect all SectionStudents, etc.
-    
-* transcript requests honor the semesters a student is present, but
-  * there may be multiple beyond reason
-    
 * there are some majors with no professors, so those classes cannot be taught.
 
-## So what's that weird list stuff?
+## So what's that weird weight stuff?
 
 (mostly in Section and SectionStudent)
 
-```python
-statuses = (SectionStudent.REGISTERED,) * 20 + \
-        (SectionStudent.AWAITING_GRADE) * 3 + \
-        (SectionStudent.GRADED,) * 50 + \
-        (SectionStudent.DROP_REQUESTED,) * 3 + \
-        (SectionStudent.DROPPED,) * 1
-
-# no grade inflation here :-/
-grades = (0,) * 2 + (1,) * 2 + (2,) * 4 + (3,) * 4 + (4,) * 5
-
-```
-This is used to simulate a rondel with different probabilities. Feel free to
-adjust the multipliers to get the composition you want. 
-
-The latter example biases towards As and Bs.
+We have some biases.
+1. students prefer to take Major course
+2. we get more As than Fs.
 

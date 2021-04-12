@@ -5,7 +5,7 @@
 
 {% block content %}
 <div>
-<button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
+  <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
     <div id="Students">
         {% if students_filter %}
             <form id="students_filter" action="" method="get" class="form form-inline" autocomplete="off">
@@ -21,9 +21,9 @@
         </div>
     </div>
 </div>
-<script>
-const handler = insertScrollableDivs(applyHandlers=true);
-handler();
-addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "user_row");
-</script>
+  <script>
+    const handler = insertScrollableDivs(applyHandlers=true);
+    handler();
+    addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "user_row");
+  </script>
 {% endblock content %}

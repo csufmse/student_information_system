@@ -11,19 +11,37 @@
   <dt>Section Number</dt>
   <dd>{{ section.number }}</dd>
   <dt>Major</dt>
-    <dd><a href="{% url 'schooladmin:major' abbreviation=section.course.major %}">{{ section.course.major }}: {{  section.course.major.name }}</a></dd>
+    <dd><a href="{% url 'schooladmin:major' majorid=section.course.major.id %}">{{ section.course.major }}: {{  section.course.major.name }}</a></dd>
   <dt>Semester</dt>
     <dd><a href="{% url 'schooladmin:semester' semester_id=section.semester.id %}">{{ section.semester }}</a></dd>
   <dt>Professor</dt>
-    <dd><a href="{% url 'schooladmin:user' userid=section.professor.user.id %}">{{ section.professor }}</a></dd>
+    <dd><a href="{% url 'schooladmin:user' userid=section.professor.profile.user.id %}">{{ section.professor.profile.name }}</a></dd>
   <dt>Hours</dt>
   <dd>{{ section.hours }}</dd>
+  <dt>Location</dt>
+  <dd>{{ section.location }}</dd>
   <dt>Capacity</dt>
   <dd>{{ section.capacity }} ({{ section.seats_remaining }} remaining)</dd>
   <dt>Status</dt>
   <dd>{{ section.status }}</dd>
 </dl>
 
+        <h3>Reference Items:</h3>
+    <div id="items">
+        {% if secitem_filter %}
+            <form id="secitem_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form secitem_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if secitem_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:section' sectionid=section.id %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table">
+            {% render_table secitem_table 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+    
         <h3>Students:</h3>
     <div id="Students">
         {% if secstud_filter %}
@@ -55,6 +73,11 @@
            class="btn btn-info"
         value="New Section of this Class"
     />
+     <input id="refresh_items"
+        action="action"
+           class="btn btn-info"
+        value="Refresh Reference Items for Section"
+    />
      <input id="edit_section"
         action="action"
            class="btn btn-info"
@@ -70,7 +93,9 @@
 <script>
 addButtonClickHandler('new_section', '{% url 'schooladmin:section_new_from_section' sectionid=section.id %}');
 addButtonClickHandler('edit_section', '{% url 'schooladmin:section_edit' sectionid=section.id %}');
+addButtonClickHandler('refresh_items', '{% url 'schooladmin:section_refreshitems' sectionid=section.id %}');
 addButtonClickHandler('manage_students', '{% url 'schooladmin:section_students_manage' sectionid=section.id %}');
 addClickHandlers("{% url 'schooladmin:sectionstudent' id=1234599 %}", "sectionstudent_row");
+stylizeRange({field:'index',min_label:'From #',max_label:'To #',prefix:"secitem"});
 </script>
 {% endblock %}

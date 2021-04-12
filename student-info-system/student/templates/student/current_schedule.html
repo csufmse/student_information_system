@@ -4,6 +4,7 @@
 {% load bootstrap3 %}
 
 {% block content %}
+    <h3>Current Semester: {{ semester }}</h3>
   {% if not my_sections %}
      <p>No registered sections</p>
   {% else %}
@@ -12,8 +13,14 @@
       <th>Course Name</th>
       <th>Section Number</th>
       <th>Professor</th>
-      <th>Schedule</th>
+      <th>Hours</th>
+      <th>Location</th>
       <th>Status</th>
+      <th>Grade</th>
+      <th>Email Professor</th>
+    {%  if semester.drop_possible %}
+        <th>Request</th>
+    {% endif %}
     </tr>
     <tr class="heading_row">
     {% for ssect in my_sections %}
@@ -21,8 +28,21 @@
       <td>{{ssect.section.number}}</td>
       <td>{{ssect.section.professor.name}}</td>
       <td>{{ssect.section.hours}}</td>
+      <td>{{ssect.section.location}}</td>
       <td>{{ssect.status}}</td>
-    </tr>
+      <td>{{ssect.letter_grade}}</td>
+      <td>{% if ssect.section.professor.profile.user.email %}
+        <a href="mailto:{{ssect.section.professor.profile.user.email}}">Email</a>
+        {% else %}None{% endif %}
+      </td>
+     {%  if semester.drop_possible %}
+        <td>
+            <input id="drop_request-{{ ssect.id }}"
+                action="action" class="btn btn-info" value="Request Drop"
+                onclick='window.location.href="{% url 'student:drop' id=ssect.id %}";' />
+        </td>
+     {% endif %}
+   </tr>
     {% endfor %}
     </table>
   {% endif %}

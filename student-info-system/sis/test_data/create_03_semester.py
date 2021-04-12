@@ -7,7 +7,7 @@ sys.path.append(".")  # noqa
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  # noqa
 django.setup()  # noqa
 
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
 from django.db import connection
 
 from sis.models import Semester
@@ -20,11 +20,17 @@ def createData():
             print(f'Creating {year} {session}...')
             Semester.objects.create(year=year,
                                     date_registration_opens=next - timedelta(days=60),
+                                    date_registration_closes=next - timedelta(days=7),
                                     date_started=next,
                                     date_last_drop=next + timedelta(days=14),
                                     date_ended=next + timedelta(weeks=11),
-                                    semester=session)
+                                    session=session)
             next = next + timedelta(days=90)
+
+    # make sure we have at least one semester open for registration
+    last_sem = Semester.objects.order_by('-date_started')[0]
+    last_sem.date_registration_opens = datetime.now() - timedelta(days=1)
+    last_sem.save()
 
 
 def cleanData():

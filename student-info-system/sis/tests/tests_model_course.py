@@ -2,7 +2,7 @@ from django.test import TestCase
 from datetime import datetime
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, Student, TranscriptRequest, AccessRoles, ClassLevel)
+                        Semester, Student, ClassLevel)
 
 from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
 
@@ -10,15 +10,16 @@ from sis.tests.utils import (createStudent, createProfessor, createAdmin, create
 class CourseTestCase_Basic(TestCase):
 
     def setUp(self):
-        major = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        ad = createAdmin('foobar').profile
+        major = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         Course.objects.create(major=major,
                               catalog_number='101',
                               title="Intro To Test",
                               credits_earned=3.0)
 
-    def test_course_major_name(self):
+    def test_course_major_title(self):
         course = Course.objects.get(title="Intro To Test")
-        self.assertEqual(course.major_name, "Computer Science")
+        self.assertEqual(course.major.title, "Computer Science")
 
     def test_course_name(self):
         course = Course.objects.get(title="Intro To Test")
@@ -37,7 +38,8 @@ class CourseTestCase_deps(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
+        ad = createAdmin('foobar').profile
+        m = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         CourseTestCase_deps.major = m
 
         CourseTestCase_deps.courses = {}
@@ -96,8 +98,11 @@ class CourseTestCase_edit(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        m = Major.objects.create(abbreviation="CPSC", name="Computer Science")
-        CourseTestCase_edit.m1 = Major.objects.create(abbreviation='XYAZ', name='Bananas')
+        ad = createAdmin('foobar').profile
+        m = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
+        CourseTestCase_edit.m1 = Major.objects.create(abbreviation='XYAZ',
+                                                      title='Bananas',
+                                                      contact=ad)
         CourseTestCase_edit.major = m
 
         CourseTestCase_edit.courses = {}
@@ -138,7 +143,7 @@ class CourseTestCase_edit(TestCase):
 
     def test_edit_major(self):
         c = CourseTestCase_edit.courses[1]
-        self.assertEqual(c.major_name, 'Computer Science')
+        self.assertEqual(c.major.title, 'Computer Science')
         c.major = CourseTestCase_edit.m1
         c.save()
         c1 = Course.objects.get(id=1)

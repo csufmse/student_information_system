@@ -2,7 +2,7 @@ from django.test import TestCase
 from datetime import datetime
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, Student, TranscriptRequest, AccessRoles, ClassLevel)
+                        Semester, Student, ClassLevel)
 
 from schooladmin.forms import (CourseEditForm, CourseCreationForm)
 
@@ -13,7 +13,10 @@ class CourseCreation_formtest(TestCase):
 
     @classmethod
     def setUpTestData(self):
-        CourseCreation_formtest.m = Major.objects.create(abbreviation='ABCD', name='The A, The B')
+        ad = createAdmin('foobar').profile
+        CourseCreation_formtest.m = Major.objects.create(abbreviation='ABCD',
+                                                         title='The A, The B',
+                                                         contact=ad)
         CourseCreation_formtest.c1 = createCourse(CourseCreation_formtest.m, 101)
 
     def test_blank_data(self):
@@ -29,7 +32,7 @@ class CourseCreation_formtest(TestCase):
 
     def test_valid_data(self):
         form = CourseCreationForm({
-            'major': 'ABCD',
+            'major': CourseCreation_formtest.m.id,
             'title': 'the titlicious',
             'catalog_number': '102',
             'description': 'descr',
@@ -46,7 +49,7 @@ class CourseCreation_formtest(TestCase):
 
     def test_long_catnumber(self):
         form = CourseCreationForm({
-            'major': 'ABCD',
+            'major': CourseCreation_formtest.m.id,
             'title': 'the titlicious',
             'catalog_number': '999999999999999999999999999999',
             'description': 'descr',
@@ -63,14 +66,19 @@ class CourseEdit_formtest(TestCase):
 
     @classmethod
     def setUpTestData(self):
-        CourseEdit_formtest.m = Major.objects.create(abbreviation='ABCD', name='The A, The B')
-        CourseEdit_formtest.m1 = Major.objects.create(abbreviation='ASDF', name='The A, The B')
+        ad = createAdmin('foobar').profile
+        CourseEdit_formtest.m = Major.objects.create(abbreviation='ABCD',
+                                                     title='The A, The B',
+                                                     contact=ad)
+        CourseEdit_formtest.m1 = Major.objects.create(abbreviation='ASDF',
+                                                      title='The A, The B',
+                                                      contact=ad)
         CourseEdit_formtest.c1 = createCourse(CourseEdit_formtest.m, 101)
 
     def test_valid_data(self):
         form = CourseEditForm(
             {
-                'major': 'ASDF',
+                'major': CourseEdit_formtest.m1.id,
                 'title': 'the titlicious',
                 'catalog_number': '102',
                 'description': 'descr',
@@ -90,7 +98,7 @@ class CourseEdit_formtest(TestCase):
     def test_null_catnumber(self):
         form = CourseEditForm(
             {
-                'major': 'ASDF',
+                'major': CourseEdit_formtest.m1.id,
                 'title': 'the titlicious',
                 'catalog_number': '',
                 'description': 'descr',
@@ -106,7 +114,7 @@ class CourseEdit_formtest(TestCase):
     def test_long_catnumber(self):
         form = CourseEditForm(
             {
-                'major': 'ASDF',
+                'major': CourseEdit_formtest.m1.id,
                 'title': 'the titlicious',
                 'catalog_number': '123451234512345123451234512345',
                 'description': 'descr',

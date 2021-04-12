@@ -3,22 +3,23 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from django.test import TestCase
 
-from sis.models import (Admin, Course, CoursePrerequisite, Major, Professor, Section,
-                        SectionStudent, Semester, SemesterStudent, Student, TranscriptRequest,
-                        UpperField)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
+                        Semester, SemesterStudent, Student, UpperField)
+
+from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
 
 
 class AdminSemesterViewsExist(TestCase):
 
     @classmethod
     def setUpTestData(self):
-        test_user1 = User.objects.create_user(username='u1', password='hello')
-        admin = Admin.objects.create(user=test_user1)
+        test_user1 = createAdmin(username='u1', password='hello')
         semester = Semester.objects.create(date_registration_opens=datetime.now(),
+                                           date_registration_closes=datetime.now(),
                                            date_started=datetime.now(),
                                            date_last_drop=datetime.now(),
                                            date_ended=datetime.now(),
-                                           semester=Semester.FALL,
+                                           session=Semester.FALL,
                                            year=2000)
 
     # list view
@@ -56,13 +57,13 @@ class AdminSemesterViewsTemplate(TestCase):
 
     @classmethod
     def setUpTestData(self):
-        test_user1 = User.objects.create_user(username='u1', password='hello')
-        admin = Admin.objects.create(user=test_user1)
+        test_user1 = createAdmin(username='u1', password='hello')
         semester = Semester.objects.create(date_registration_opens=datetime.now(),
+                                           date_registration_closes=datetime.now(),
                                            date_started=datetime.now(),
                                            date_last_drop=datetime.now(),
                                            date_ended=datetime.now(),
-                                           semester=Semester.FALL,
+                                           session=Semester.FALL,
                                            year=2000)
 
     # list view

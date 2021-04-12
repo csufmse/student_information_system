@@ -24,6 +24,6 @@
 <script>
 const handler = insertScrollableDivs(applyHandlers=true);
 handler();
-addClickHandlers("{% url 'schooladmin:major' abbreviation=1234599 %}", "major_row");
+addClickHandlers("{% url 'schooladmin:major' majorid=1234599 %}", "major_row");
 </script>
 {% endblock content %}

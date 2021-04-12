@@ -1,0 +1,101 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+
+{% block content %}
+  {% if grade_submitted %}
+    <p class="success">Grade(s) submitted.</p>
+  {% endif %}
+
+  <h2>Section</h2>
+
+  <table class="data-table">
+    <tr class="reg-row">
+      <th>Semester</th>
+      <th>Course</th>
+      <th>Number</th>
+      <th>Course Title</th>
+      <th>Capacity</th>
+      <th>Openings</th>
+    </tr>
+    <tr class="reg-row">
+      <td>{{section.semester_name}}</td>
+      <td>{{section.course_name}}</td>
+      <td>{{section.name}}</td>
+      <td>{{section.course_title}}</td>
+      <td>{{section.capacity}}</td>
+      <td>{{section.seats_remaining}}</td>
+    </tr>
+  </table>
+
+  <h2>References</h2>
+  {% if references %}
+    <table class="data-table">
+      <tr class="reg-row">
+        <th>Title</th>
+        <th>Description</th>
+        <th>Link</th>
+        <th>Edition</th>
+        <th>Type</th>
+        <th>ISBN</th>
+      </tr>
+    {% for reference in references %}
+      <tr class="data-table">
+        <td>{{reference.item.title}}</td>
+        <td>{{reference.item.description}}</td>
+        <td>{{reference.item.link}}</td>
+        <td>{{reference.item.edition}}</td>
+        <td>{{reference.item.get_type_display}}</td>
+        <td>{{reference.item.isbn}}</td>
+      </tr>
+    {% endfor %}
+    </table>
+    {% endif %}
+    <a href="{% url 'professor:add_reference' section.id %}" class="btn btn-info">
+      Add Reference Item</a>
+
+  <h2>Students</h2>
+{% if ssects %}
+  <form action="{% url 'professor:section' section.id %}" method="post">
+  {% csrf_token %}
+    <table class="data-table-alt scrollify-me">
+      <tr class="heading-row">
+        <th>Name</th>
+        <th>Major</th>
+        <th>GPA</th>
+        <th>Credits</th>
+        <th>Class</th>
+        <th>Grade</th>
+        <th>Select</th>
+        <th>View</th>
+      </tr>
+      {% for ssect in ssects %}
+        <tr class="reg-row">
+          <td>{{ssect.student.name}}</td>
+          <td>{{ssect.student.major}}</td>
+          <td>{{ssect.student.gpa}}</td>
+          <td>{{ssect.student.credits_earned}}</td>
+          <td>{{ssect.student.class_level}}</td>
+          <td>{{ssect.letter_grade}}</td>
+          <td><select name="{{ssect.student.pk}}">
+            {% for id, value in grades %}
+              <option value="{{value}}">{{id}}</option>
+            {% endfor %}
+            </select>
+          </td>
+          <td class="sched_sel btn-info btn" data-id="{{ssect.student.pk}}">Schedule</td>
+        </tr>
+      {% endfor %}
+    </table>
+    <input type="submit" value="Submit" class="btn btn-info"/>
+  </form>
+{% else %}
+  <p>No students in this section</p>
+{% endif %}
+  <form action="{% url 'professor:sections' %}">
+    <input type="submit" value="Back" class="btn btn-info"/>
+  </form>
+
+  <script>
+    addClickHandlers("{% url 'professor:student' studentid=1234599 %}", "sched_sel");
+  </script>
+{% endblock content %}
