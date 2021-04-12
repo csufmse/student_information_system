@@ -1,7 +1,7 @@
 from django import forms
 from django.db.models import Q
-from sis.models import Major, Profile, Course
 
+from sis.models import Major, Profile, Course
 from sis.forms.utils import *
 
 
