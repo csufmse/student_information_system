@@ -23,7 +23,7 @@
         <span class="message_header_value">{{ message.message_type }}</span></div>{% endif %}
     <div><span class="message_header">Subject:</span>
         <span class="message_header_value">{{ message.subject }}</span></div>
-    {% if show_read %}<div><span class="message_header">Handled:</span>
+    {% if show_handled %}<div><span class="message_header">Handled:</span>
         <span class="message_header_value">
             {% if message_handled %}{{ message.time_handled }}{% else %}(Not Handled){% endif %}
         </span></div>{% endif %}

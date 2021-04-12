@@ -1120,6 +1120,7 @@ def message(request, id):
     the_mess = Message.objects.get(id=id)
     is_recipient = the_mess.recipient == the_profile
     is_sender = the_mess.sender == the_profile
+    is_student = the_profile.role == Profile.ACCESS_STUDENT
 
     if the_mess is None:
         messages.error(request, 'Invalid message')
@@ -1173,6 +1174,8 @@ def message(request, id):
         the_mess.save()
 
     handled = the_mess.time_handled is not None
+    handleable_message = the_mess.message_type in (Message.DROP_REQUEST_TYPE,
+                                                   Message.MAJOR_CHANGE_TYPE)
     show_drop = is_recipient and the_mess.message_type == Message.DROP_REQUEST_TYPE \
         and not handled
     show_major = is_recipient and the_mess.message_type == Message.MAJOR_CHANGE_TYPE \
@@ -1187,7 +1190,7 @@ def message(request, id):
             'message_archived': the_mess.time_archived is not None,
             'message_read': the_mess.time_read is not None,
             'message_handled': handled,
-            'show_type': not (the_profile.role == Profile.ACCESS_STUDENT),
-            'show_handled': not (the_profile.role == Profile.ACCESS_STUDENT),
+            'show_type': not is_student,
+            'show_handled': handleable_message and not is_student,
             'show_read': True,
         })
