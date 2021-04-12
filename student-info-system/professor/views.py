@@ -62,8 +62,10 @@ def student(request, studentid):
 
 @role_login_required(Profile.ACCESS_PROFESSOR)
 def add_reference(request, sectionid):
+    data = {'sectionid': sectionid}
     if request.method == 'POST':
         form = ReferenceItemForm(request.POST)
+        data['form'] = form
         if form.is_valid():
             new_ref = form.save(commit=False)
             new_ref.professor = request.user.profile.professor
@@ -77,15 +79,16 @@ def add_reference(request, sectionid):
                 else:
                     messages.error(request,
                                    "There was a problem saving the new item to the database.")
-                return redirect('professor:add_reference', sectionid)
+                return render(request, 'professor/reference_add.html', data)
             section.refresh_reference_items()
             messages.success(request, "New reference item successfully created")
+            print(sectionid)
             return redirect('professor:section', sectionid)
         else:
             messages.error(request, "Please correct the error(s) below")
-            return redirect('professor:add_reference', sectionid)
+            return render(request, 'professor/reference_add.html', data)
     else:
         form = ReferenceItemForm()
 
-    data = {'form': form, 'sectionid': sectionid}
+    data['form'] = form
     return render(request, 'professor/reference_add.html', data)

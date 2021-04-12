@@ -9,5 +9,5 @@ urlpatterns = [
     path('sections', views.sections, name='sections'),
     path('sections/<int:sectionid>/section', views.section, name='section'),
     path('section/<int:studentid>/student', views.student, name='student'),
-    path('section/<int:sectionid>/add-reference', views.add_reference, name='add_reference'),
+    path('course/<int:sectionid>/add-reference', views.add_reference, name='add_reference'),
 ]
