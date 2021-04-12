@@ -1,0 +1,46 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+{% load render_table from django_tables2 %}
+{%  load user_demographics %}
+
+{% block content %}
+<dl class="dl-horizontal">
+  <dt>Class Level</dt>
+  <dd>{{ user.profile.student.class_level }}</dd>
+  <dt>GPA</dt>
+  <dd>{{ user.profile.student.gpa|floatformat:2 }}</dd>
+  <dt>Credits Earned</dt>
+  <dd>{{ user.profile.student.credits_earned }}</dd>
+</dl>
+    <h3>Course History:</h3>
+    <div id="history">
+        {% if history_filter %}
+            <form id="history_filter" action="" method="get" class="form form-inline" autocomplete="off">
+                {% bootstrap_form history_filter.form layout='inline' %}
+                <button class="btn btn-primary">Filter</button>
+                {% if history_has_filter %}
+                    <a  class="btn btn-success" href="{%  url 'student:history' %}">Clear</a>
+                {% endif %}
+            </form>
+        {% endif %}
+        <div class="data-table-alt">
+            {% render_table history_table 'django_tables2/bootstrap.html' %}
+        </div>
+    </div>
+
+ <form method="post">
+    {% csrf_token %}
+     <input type="hidden" name="userid" value="{{ user.id }}"/>
+    <input
+        action="action"
+           class="btn btn-info"
+        onclick="window.history.go(-1); return false;"
+        value="Back"
+    />
+
+  </form>
+<script>
+addClickHandlers("{% url 'student:sectionstudent' id=1234599 %}", "sectionstudent_row");
+</script>
+{% endblock %}

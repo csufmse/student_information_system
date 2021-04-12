@@ -18,6 +18,9 @@
       <th>Status</th>
       <th>Grade</th>
       <th>Email Professor</th>
+    {%  if semester.drop_possible %}
+        <th>Request</th>
+    {% endif %}
     </tr>
     <tr class="heading_row">
     {% for ssect in my_sections %}
@@ -32,7 +35,14 @@
         <a href="mailto:{{ssect.section.professor.profile.user.email}}">Email</a>
         {% else %}None{% endif %}
       </td>
-    </tr>
+     {%  if semester.drop_possible %}
+        <td>
+            <input id="drop_request-{{ ssect.id }}"
+                action="action" class="btn btn-info" value="Request Drop"
+                onclick='window.location.href="{% url 'student:drop' id=ssect.id %}";' />
+        </td>
+     {% endif %}
+   </tr>
     {% endfor %}
     </table>
   {% endif %}

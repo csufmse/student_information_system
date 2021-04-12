@@ -10,6 +10,8 @@
     <dd>{{ user.username }}</dd>
     <dt>User Role</dt>
     <dd>{{ user.access_role }}</dd>
+    {% if total %}<dt>Unread Messages</dt>
+    <dd><b>{{ normal }} normal message{{ normal|pluralize }}, {{ priority }} priority message{{ priority|pluralize }}</b></dd>{% endif %}
   </dl>
   <a
      class="btn btn-primary"

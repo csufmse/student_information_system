@@ -11,6 +11,7 @@ urlpatterns = [
     path('profile', views.profile, name='profile'),
     path('change_password', views.change_password, name='change_password'),
     path('course/<int:courseid>', views.course, name='course'),
+    path('drop/<int:id>', views.drop, name='drop'),
     path('user/<int:userid>', views.user, name='user'),
     path('sectionstudent/<int:id>', views.sectionstudent, name='sectionstudent'),
     path('section/<int:sectionid>', views.section, name='section'),
@@ -18,4 +19,7 @@ urlpatterns = [
     path('secitems', views.secitems, name='secitems'),
     path('secitem/<int:id>', views.secitem, name='secitem'),
     path('major/<int:majorid>', views.major, name='major'),
+    path('history', views.history, name='history'),
+    path('test_majors', views.test_majors, name='test_majors'),
+    path('request_major_change', views.request_major_change, name='request_major_change'),
 ]

@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 
 from django.db import transaction
 from django.contrib import messages
@@ -12,33 +12,33 @@ from django.urls import reverse
 
 from sis.authentication_helpers import role_login_required
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, Semester, Student,
-                        SectionStudent, Profile)
+                        SectionStudent, Profile, Message)
 from sis.utils import filtered_table
 
-from .filters import (CourseFilter, MajorFilter, SectionFilter, SectionStudentFilter,
-                      SemesterFilter, UserFilter, FullSentMessageFilter,
-                      FullReceivedMessageFilter, SentMessageFilter, ReceivedMessageFilter,
-                      StudentFilter, ItemFilter)
+from .filters import (MajorFilter, SectionFilter, SemesterFilter, UserFilter, StudentFilter,
+                      ItemFilter)
 
+from sis.filters.course import CourseFilter
+from sis.filters.message import (FullSentMessageFilter, FullReceivedMessageFilter,
+                                 SentMessageFilter, ReceivedMessageFilter)
 from sis.filters.sectionreferenceitem import SectionItemFilter
+from sis.filters.sectionstudent import SectionStudentFilter
 
 from .forms import (
     CourseCreationForm,
     CourseEditForm,
-    MajorCreationForm,
-    MajorEditForm,
-    SectionCreationForm,
-    SectionEditForm,
     SemesterCreationForm,
     SemesterEditForm,
     ProfessorEditForm,
     ProfessorCreationForm,
 )
 
+from sis.forms.major import MajorCreationForm, MajorEditForm
 from sis.forms.profile import DemographicForm, ProfileCreationForm, ProfileEditForm
-from sis.forms.user import UserCreationForm, UserEditForm
-from sis.forms.student import StudentEditForm, StudentCreationForm
 from sis.forms.referenceitem import ReferenceItemCreationForm
+from sis.forms.section import SectionCreationForm, SectionEditForm
+from sis.forms.student import StudentEditForm, StudentCreationForm
+from sis.forms.user import UserCreationForm, UserEditForm
 
 from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
 from sis.tables.majors import MajorsTable
@@ -54,7 +54,7 @@ from sis.tables.users import UsersTable, FullUsersTable, StudentsTable, StudentI
 
 @role_login_required(Profile.ACCESS_ADMIN)
 def index(request):
-    return render(request, 'schooladmin/home_admin.html')
+    return render(request, 'schooladmin/home_admin.html', request.user.profile.unread_messages())
 
 
 # USERS
@@ -1070,9 +1070,74 @@ def profile(request):
             wrap_list=False,
         ))
 
-    return render(request, 'profile.html', data)
+    return render(request, 'schooladmin/profile.html', data)
 
 
 @role_login_required(Profile.ACCESS_ADMIN)
 def profile_edit(request):
     return user_edit(request, request.user.id)
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def messages(request):
+    the_user = request.user
+
+    sentFilter = FullSentMessageFilter
+    receivedFilter = FullReceivedMessageFilter
+    if the_user.profile.role == Profile.ACCESS_STUDENT:
+        sentFilter = SentMessageFilter
+        receivedFilter = ReceivedMessageFilter
+
+    data = {
+        'user': the_user,
+    }
+    data.update(
+        filtered_table(
+            name='received',
+            qs=the_user.profile.sent_to.all(),
+            filter=receivedFilter,
+            table=MessageReceivedTable,
+            request=request,
+            wrap_list=False,
+        ))
+    data.update(
+        filtered_table(
+            name='sent',
+            qs=the_user.profile.sent_by.all(),
+            filter=sentFilter,
+            table=MessageSentTable,
+            request=request,
+            wrap_list=False,
+        ))
+
+    return render(request, 'schooladmin/messages.html', data)
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def message(request, id):
+    the_user = request.user
+    the_profile = the_user.profile
+    the_mess = Message.objects.get(id=id)
+
+    if the_mess is None or (the_mess.sender != the_profile and the_mess.recipient != the_profile):
+        messages.error(request, 'Invalid message')
+        return redirect('schooladmin:messages')
+
+    if request.method == 'POST':
+        # gonna be implementing "handle it" real soon...
+        messages.error(request, 'Something went wrong.')
+        return redirect('schooladmin:messages')
+
+    # mark our received messages read. Don't touch sent messages.
+    if the_mess.recipient == the_profile and the_mess.time_read is None:
+        the_mess.time_read = datetime.now()
+        the_mess.save()
+
+    return render(
+        request, 'schooladmin/message.html', {
+            'user': the_user,
+            'message': the_mess,
+            'message_read': the_mess.time_read is not None,
+            'show_type': not (the_profile.role == Profile.ACCESS_STUDENT),
+            'show_read': True,
+        })
