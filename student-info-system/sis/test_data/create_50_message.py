@@ -14,7 +14,7 @@ from datetime import datetime, timedelta
 from loremipsum import Generator
 from english_words import english_words_set
 
-from sis.models import Profile, Message, SemesterStudent, Student, Semester
+from sis.models import Profile, Message, Major, SemesterStudent, Student, Semester
 
 loremgen = Generator(dictionary=english_words_set)
 
@@ -43,15 +43,14 @@ def createData():
     error_count = 0
     student_profiles = Profile.objects.filter(role=Profile.ACCESS_STUDENT)
     admin_profiles = list(Profile.objects.filter(role=Profile.ACCESS_ADMIN))
+    majors = Major.objects.all()
 
-    midnight = datetime.min.time()
     for profile in student_profiles:
         if not profile.has_student():
             print(f'ERROR {profile.user.username} ({profile}) is a student but with no profile')
             continue
 
         student = profile.student
-        message_count = randrange(randrange(1, to_generate))
         semestersstuds = list(student.semesterstudent_set.all())
         shuffle(semestersstuds)
 
@@ -61,48 +60,37 @@ def createData():
         for ix in range(1, randrange(1, to_generate)):
             aSemester = choice(semestersstuds).semester
 
-            if random() < 0.4:
-                anAdmin = choice(admin_profiles)
+            # change yo major
+            if random() < 0.2:
                 when = rand_between(aSemester.date_started, aSemester.date_ended)
 
-                subject = get_sentence()
-                body = get_paragraph()
-                msg = Message.objects.create(sender=profile,
-                                             recipient=anAdmin,
-                                             time_sent=when,
-                                             subject=subject,
-                                             body=body)
-                print(f'From {msg}')
-                if random() < 0.9:
-                    msg.time_read = when + timedelta(days=random())
-                    msg.save()
+                reason = get_sentence()
+                to_major = choice(majors)
+                mesg = student.request_major_change(major=to_major, reason=reason, when=when)
+                as_str = mesg.time_sent.strftime('%m/%d/%Y, %H:%M:%S')
+                print(f'Change: {as_str} {student} to {to_major} (sent to {mesg.recipient})')
 
-                    if random() < 0.75:
-                        response_at = msg.time_read + timedelta(days=random() / 2)
-                        subject = get_sentence()
-                        body = get_paragraph()
-                        response = Message.objects.create(sender=anAdmin,
-                                                          recipient=profile,
-                                                          time_sent=response_at,
-                                                          subject="But " + subject,
-                                                          body=body,
-                                                          in_response_to=msg)
-                        print(f'   -> Resp {response}')
+            # drop yo class
+            if random() < 0.2:
+                when = rand_between(aSemester.date_started, aSemester.date_ended)
+                sectstuds = student.sectionstudent_set.filter(section__semester=aSemester).all()
+                aSect = choice(sectstuds)
+                reason = get_sentence()
+                mesg = student.request_drop(sectionstudent=aSect, reason=reason, when=when)
+                as_str = mesg.time_sent.strftime('%m/%d/%Y, %H:%M:%S')
+                print(
+                    f'DropReq: {as_str} {student} requests drop of {aSect.section} ' +
+                    f'(semester {aSemester}, sent to {mesg.recipient})'
+                )
 
-            if random() < 0.1:
+            # yo be on AP
+            if random() < 0.2:
                 anAdmin = choice(admin_profiles)
                 when = rand_between(aSemester.date_started, aSemester.date_ended)
-                body = get_paragraph()
-                msg = Message.objects.create(sender=anAdmin,
-                                             recipient=profile,
-                                             time_sent=when,
-                                             subject="You're in trouble",
-                                             body=body,
-                                             high_priority=True)
-                if random() < 0.3:
-                    msg.time_read = when + timedelta(days=random())
-                    msg.save()
-                print(f'Alert {msg}')
+                reason = get_sentence()
+                mesg = student.notify_probation(sender=anAdmin, body=reason, when=when)
+                as_str = mesg.time_sent.strftime('%m/%d/%Y, %H:%M:%S')
+                print(f'AP: {as_str} {student} is on AP (sent from {mesg.sender})')
 
     if error_count:
         print(f'ERROR: {error_count} errors occurred')

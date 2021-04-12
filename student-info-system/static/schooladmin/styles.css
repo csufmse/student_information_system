@@ -116,13 +116,24 @@
   width: 300px;
 }
 
-.unread {
-    font-weight: bold;
+
+/* Transcript table */
+.transcript_table {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 100%;
 }
 
-.archived {
-    font-style: italic;
+.transcript_table td, .transcript_table th {
+    padding: 6px;
 }
+
+.sem_head {
+    background: #f2f2f2;
+    padding: 10px;
+}
+
+
 
 /* SELECT/PULLDOWNS */
 .role_sel, .course_sel, .major_sel, .role_sel, .session_sel, .semester_sel, .user_sel {
@@ -145,6 +156,39 @@
     overflow:auto;
 }
 
+/* message display stuff */
+.unread {
+    font-weight: bold;
+}
+
+.archived {
+    font-style: italic;
+}
+
+.message_detail_div {
+  padding: 0px 24px;
+  /*border: 1px solid red;*/
+  width: 600px;
+  height: 400px;
+}
+
+.message_detail_iframe {
+  border: 0px;
+  width: 100%;
+  height: 100%;
+  border-left: none;
+  overflow: hidden;
+}
+
+.message_header {
+     font-style: italic;
+}
+
+.message_header_value {
+     font-weight: bold;
+    padding: 10px 4px;
+
+}
 /* This is the message at the top */
 .success {
     border-radius: 5px;
