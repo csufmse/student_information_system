@@ -19,7 +19,7 @@
       <th>Grade</th>
       <th>Email Professor</th>
     {%  if semester.drop_possible %}
-        <th>Request</th>
+        <th class="drop_col">Request</th>
     {% endif %}
     </tr>
     <tr class="heading_row">
@@ -36,11 +36,14 @@
         {% else %}None{% endif %}
       </td>
      {%  if semester.drop_possible %}
-        <td>
+        <td class="drop_cell">
+        {%  if ssect.droppable %}
+            &nbsp;
+        {% else %}
             <input id="drop_request-{{ ssect.id }}"
                 action="action" class="btn btn-info" value="Request Drop"
                 onclick='window.location.href="{% url 'student:drop' id=ssect.id %}";' />
-        </td>
+        {% endif %}</td>
      {% endif %}
    </tr>
     {% endfor %}

@@ -61,11 +61,12 @@ def createData():
             attending = []
             while len(attending) < number_attended:
                 aSec = choices(prereqs_met, weights=weights, k=1)[0]
-                if not (aSec in attending):
+                if aSec.seats_remaining and not (aSec in attending):
                     attending.append(aSec)
 
             for sec in attending:
-                ss = SectionStudent(section=sec, student=semstud.student)
+                # ignoring the fact that this may raise exceptions...
+                ss = sec.register(student=semstud.student)
 
                 if sec.status == Section.REG_CLOSED:
                     if random() < 0.05:
