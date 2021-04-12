@@ -5,7 +5,7 @@ from django.shortcuts import render, redirect
 from django_tables2 import RequestConfig
 
 from sis.authentication_helpers import role_login_required
-from sis.models import (Professor, Section, Semester, Student, Profile, SectionStudent,
+from sis.models import (Course, Professor, Section, Semester, Student, Profile, SectionStudent,
                         ReferenceItem, SectionReferenceItem)
 from sis.utils import filtered_table
 from sis.tables.sections import ProfSectionsTable
@@ -70,7 +70,8 @@ def add_reference(request, sectionid):
             new_ref = form.save(commit=False)
             new_ref.professor = request.user.profile.professor
             section = Section.objects.get(id=sectionid)
-            new_ref.course = section.course
+            course = Course.objects.get(id=section.course.id)
+            new_ref.course = course
             try:
                 new_ref.save()
             except IntegrityError as e:
@@ -80,9 +81,9 @@ def add_reference(request, sectionid):
                     messages.error(request,
                                    "There was a problem saving the new item to the database.")
                 return render(request, 'professor/reference_add.html', data)
-            section.refresh_reference_items()
+            for section in course.section_set.all():
+                section.refresh_reference_items()
             messages.success(request, "New reference item successfully created")
-            print(sectionid)
             return redirect('professor:section', sectionid)
         else:
             messages.error(request, "Please correct the error(s) below")
