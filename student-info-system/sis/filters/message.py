@@ -8,6 +8,7 @@ from sis.models import (Message, Profile)
 
 class FullMessageFilter(FilterSet):
     BOOLE_CHOICES = ((True, 'Only Archived'), (False, 'Only Not Archived'))
+    HANDLED_CHOICES = ((True, 'Only Handled'), (False, 'Only Unhandled'))
 
     time_sent = DateTimeFromToRangeFilter()
     sender = CharFilter(field_name='sender__user__name',
@@ -21,9 +22,8 @@ class FullMessageFilter(FilterSet):
     unread = ChoiceFilter(field_name='unread',
                           label='Read?',
                           choices=((True, 'Unread Only'), (False, 'Read Only')))
-    # archived = BooleanFilter(field_name='time_archived', label='Archived?',
-    #                                    lookup_expr='isnull', exclude=True,)
     archived = ChoiceFilter(field_name='archived', label='Archived?', choices=BOOLE_CHOICES)
+    handled = ChoiceFilter(field_name='handled', label='Handled?', choices=HANDLED_CHOICES)
     subject = CharFilter(field_name='subject', lookup_expr='icontains')
     high_priority = ChoiceFilter(label='High Pri?',
                                  choices=((True, 'High Pri'), (False, 'Normal')))
@@ -52,6 +52,7 @@ class FullMessageFilter(FilterSet):
         self.filters['high_priority'].extra.update({'empty_label': 'Any Pri'})
         self.filters['unread'].extra.update({'empty_label': 'Read/Unread'})
         self.filters['archived'].extra.update({'empty_label': 'Archived?'})
+        self.filters['handled'].extra.update({'empty_label': 'Handled?'})
 
     class Meta:
         fields = [
@@ -62,6 +63,7 @@ class FullMessageFilter(FilterSet):
             'unread',
             'high_priority',
             'archived',
+            'handled',
         ]
 
 

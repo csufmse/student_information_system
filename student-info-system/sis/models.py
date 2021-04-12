@@ -1,5 +1,6 @@
 from datetime import timedelta, datetime
 
+import pytz
 from django.contrib.auth.models import User, AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -366,12 +367,15 @@ class Student(models.Model):
                                                section=OuterRef('section'))))
 
     def request_major_change(self, major=None, reason=None, when=None):
+        if reason is None:
+            reason = "(none given)"
         mesg = Message.objects.create(
             sender=self.profile,
             recipient=major.contact,
             message_type=Message.MAJOR_CHANGE_TYPE,
             support_data={
                 'major': major.pk,
+                'student': self.pk,
             },
             time_sent=when,
             subject='Request: Change Major to ' + major.abbreviation,
@@ -379,13 +383,38 @@ class Student(models.Model):
         )
         return mesg
 
+    def major_change_approved(self, major=None, when=None, request_message=None):
+        mesg = Message.objects.create(
+            sender=major.contact,
+            recipient=self.profile,
+            message_type=Message.MAJOR_CHANGE_APPROVAL_TYPE,
+            in_response_to=request_message,
+            time_sent=when,
+            subject='Approved: Change Major to ' + major.abbreviation,
+            body=f'Previous Major: {self.major}',
+        )
+        info_mesg = Message.objects.create(
+            sender=major.contact,
+            recipient=self.major.contact,
+            in_response_to=request_message,
+            time_sent=when,
+            subject=f'FYI: Approved Major Change of {self.name} from {self.major} to {major}',
+        )
+        request_message.now_handled(status=True, when=when)
+        self.major = major
+        self.save()
+        return mesg
+
     def request_drop(self, sectionstudent=None, reason=None, when=None):
+        if reason is None:
+            reason = "(none given)"
         mesg = Message.objects.create(
             sender=self.profile,
             recipient=sectionstudent.section.course.major.contact,
             message_type=Message.DROP_REQUEST_TYPE,
             support_data={
                 'section': sectionstudent.pk,
+                'student': self.pk,
             },
             time_sent=when,
             subject='Request: Drop Section ' + sectionstudent.section.name,
@@ -395,9 +424,33 @@ class Student(models.Model):
             sender=self.profile,
             recipient=sectionstudent.section.professor.profile,
             time_sent=when,
-            subject='FYI: Drop of ' + sectionstudent.section.name + ' requested',
+            subject=f'FYI: Drop from {sectionstudent.section.name} requested',
             body=f'Reason:\n{reason}',
         )
+        sectionstudent.status = SectionStudent.DROP_REQUESTED
+        sectionstudent.save()
+        return mesg
+
+    def drop_approved(self, sectionstudent=None, when=None, request_message=None):
+        mesg = Message.objects.create(
+            sender=sectionstudent.section.course.major.contact,
+            recipient=self.profile,
+            message_type=Message.DROP_APPROVAL_TYPE,
+            in_response_to=request_message,
+            time_sent=when,
+            subject='Approved: Drop from Section ' + sectionstudent.section.name,
+            body='You\'ve been dropped from the section.',
+        )
+        info_mesg = Message.objects.create(
+            sender=sectionstudent.section.course.major.contact,
+            recipient=sectionstudent.section.professor.profile,
+            time_sent=when,
+            in_response_to=request_message,
+            subject=f'FYI: Drop of {sectionstudent.student.name} ' +
+                    f'from {sectionstudent.section.name} approved',
+        )
+        request_message.now_handled(status=True, when=when)
+        sectionstudent.drop()
         return mesg
 
     def notify_probation(self, sender=None, body=None, when=None):
@@ -405,7 +458,6 @@ class Student(models.Model):
             sender=sender,
             recipient=self.profile,
             message_type=Message.ACADEMIC_PROBATION_TYPE,
-            support_data={},
             time_sent=when,
             subject='Notification: You are on Academic Probation',
             body=body,
@@ -413,7 +465,8 @@ class Student(models.Model):
         return mesg
 
     def droppable_classes(self, semester=None):
-        return self.sectionstudent_set.filter(section__semester=semester)
+        return self.sectionstudent_set.filter(section__semester=semester).exclude(
+            status=SectionStudent.DROP_REQUESTED).exclude(status=SectionStudent.DROPPED)
 
 
 class Professor(models.Model):
@@ -799,6 +852,23 @@ class SectionStudent(models.Model):
     def __str__(self):
         return self.name
 
+    # drop this student from the section
+    def drop(self):
+        # section handles capacity automatically...
+        self.status = SectionStudent.DROPPED
+        self.save()
+
+    def droppable(self):
+        return self.status not in (SectionStudent.DROPPED, SectionStudent.DROP_REQUESTED)
+
+
+class NoSeatsRemaining(Exception):
+    pass
+
+
+class PrerequisitesNotMet(Exception):
+    pass
+
 
 class Section(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
@@ -894,6 +964,16 @@ class Section(models.Model):
                 SectionReferenceItem.objects.create(item=item, section=self, index=ix)
                 ix = ix + 1
 
+    def register(self, student=None, check_prerequisites=True):
+        if self.seats_remaining < 1:
+            raise NoSeatsRemaining()
+        if check_prerequisites and not self.course.prerequisites_met(student):
+            raise PrerequisitesNotMet()
+
+        return SectionStudent.objects.create(section=self,
+                                             student=student,
+                                             status=SectionStudent.REGISTERED)
+
 
 class ReferenceItem(models.Model):
     REQUIRED = 'req'
@@ -954,6 +1034,8 @@ class MessageManager(models.Manager):
                                      output_field=models.BooleanField()),
             archived=ExpressionWrapper(Q(time_archived__isnull=False),
                                        output_field=models.BooleanField()),
+            handled=ExpressionWrapper(Q(time_handled__isnull=False),
+                                      output_field=models.BooleanField()),
         )
         return qs
 
@@ -965,6 +1047,10 @@ class Message(models.Model):
     DROP_REQUEST_TYPE = 'droprequest'
     MAJOR_CHANGE_TYPE = 'majorchange'
     ACADEMIC_PROBATION_TYPE = 'probation'
+    DROP_APPROVAL_TYPE = 'dropapproved'
+    DROP_REJECTED_TYPE = 'droprejected'
+    MAJOR_CHANGE_APPROVAL_TYPE = 'majorapproved'
+    MAJOR_CHANGE_REJECTED_TYPE = 'majorrejected'
     TYPES = (
         (GENERIC_TYPE, GENERIC_TYPE),
         (ACADEMIC_PROBATION_TYPE, ACADEMIC_PROBATION_TYPE),
@@ -986,6 +1072,7 @@ class Message(models.Model):
     time_sent = models.DateTimeField(verbose_name="Sent at", editable=False)
     time_read = models.DateTimeField(verbose_name="Read at", null=True, blank=True)
     time_archived = models.DateTimeField(verbose_name='Archived at', null=True, blank=True)
+    time_handled = models.DateTimeField(verbose_name="Handled at", null=True, blank=True)
 
     # if a response message,...
     in_response_to = models.ForeignKey('self', null=True, blank=True, on_delete=models.SET_NULL)
@@ -994,7 +1081,7 @@ class Message(models.Model):
     body = models.TextField(null=True, blank=True)
     high_priority = models.BooleanField(default=False)
 
-    support_data = models.JSONField(max_length=1024, null=True, blank=True)
+    support_data = models.JSONField(max_length=1024, default=dict)
 
     class Meta:
         ordering = ['time_sent']
@@ -1010,6 +1097,22 @@ class Message(models.Model):
         if not self.id and self.time_sent is None:
             self.time_sent = timezone.now()
         return super(Message, self).save(*args, **kwargs)
+
+    # Mark the message as now handled
+    def now_handled(self, status=True, when=None):
+        if when is None:
+            when = datetime.now(pytz.utc)
+        if not status:
+            when = None
+        self.time_handled = when
+        self.save()
+
+    def aged_request(self, as_of=None):
+        if as_of is None:
+            as_of = datetime.now(pytz.utc)
+        return self.message_type in (
+            Message.DROP_REQUEST_TYPE, Message.MAJOR_CHANGE_TYPE
+        ) and self.time_handled is None and self.time_sent < as_of - timedelta(days=7)
 
 
 # making it so users know about roles, but without overhead of subclassing
