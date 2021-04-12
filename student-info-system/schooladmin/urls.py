@@ -49,6 +49,8 @@ urlpatterns = [
     path('semester/<int:semester_id>/edit', views.semester_edit, name='semester_edit'),
     path('semester/<int:semester_id>', views.semester, name='semester'),
     path('demographics', views.demographics, name='demographics'),
+    path('messages', views.messages, name='messages'),
+    path('message/<int:id>', views.message, name='message'),
     path('profile/edit', views.profile_edit, name='profile_edit'),
     path('profile', views.profile, name='profile'),
 ]

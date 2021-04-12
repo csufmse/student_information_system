@@ -362,27 +362,50 @@ class Student(models.Model):
                 self.sectionstudent_set.filter(section__semester=semester,
                                                section=OuterRef('section'))))
 
-    def request_major_change(self, major=None, reason=None):
+    def request_major_change(self, major=None, reason=None, when=None):
         mesg = Message.objects.create(
             sender=self.profile,
             recipient=major.contact,
+            message_type=Message.MAJOR_CHANGE_TYPE,
+            support_data={
+                'major': major.pk,
+            },
+            time_sent=when,
             subject='Request: Change Major to ' + major.abbreviation,
             body=f'Current Major: {self.major}\nReason:\n"{reason}',
         )
         return mesg
 
-    def request_drop(self, sectionstudent=None, reason=None):
+    def request_drop(self, sectionstudent=None, reason=None, when=None):
         mesg = Message.objects.create(
             sender=self.profile,
             recipient=sectionstudent.section.course.major.contact,
+            message_type=Message.DROP_REQUEST_TYPE,
+            support_data={
+                'section': sectionstudent.pk,
+            },
+            time_sent=when,
             subject='Request: Drop Section ' + sectionstudent.section.name,
-            body=f'Reason:\n"{reason}',
+            body=f'Reason:\n{reason}',
         )
         info_mesg = Message.objects.create(
             sender=self.profile,
             recipient=sectionstudent.section.professor.profile,
+            time_sent=when,
             subject='FYI: Drop of ' + sectionstudent.section.name + ' requested',
-            body=f'Reason:\n"{reason}',
+            body=f'Reason:\n{reason}',
+        )
+        return mesg
+
+    def notify_probation(self, sender=None, body=None, when=None):
+        mesg = Message.objects.create(
+            sender=sender,
+            recipient=self.profile,
+            message_type=Message.ACADEMIC_PROBATION_TYPE,
+            support_data={},
+            time_sent=when,
+            subject='Notification: You are on Academic Probation',
+            body=body,
         )
         return mesg
 
@@ -934,6 +957,19 @@ class MessageManager(models.Manager):
 class Message(models.Model):
     objects = MessageManager()
 
+    GENERIC_TYPE = 'generic'
+    DROP_REQUEST_TYPE = 'droprequest'
+    MAJOR_CHANGE_TYPE = 'majorchange'
+    ACADEMIC_PROBATION_TYPE = 'probation'
+    TYPES = (
+        (GENERIC_TYPE, GENERIC_TYPE),
+        (ACADEMIC_PROBATION_TYPE, ACADEMIC_PROBATION_TYPE),
+        (DROP_REQUEST_TYPE, DROP_REQUEST_TYPE),
+        (MAJOR_CHANGE_TYPE, MAJOR_CHANGE_TYPE),
+    )
+
+    message_type = models.CharField(choices=TYPES, default=GENERIC_TYPE, max_length=15)
+
     sender = models.ForeignKey(Profile,
                                on_delete=models.CASCADE,
                                verbose_name="Sender",
@@ -953,6 +989,8 @@ class Message(models.Model):
     subject = models.CharField(max_length=256)
     body = models.TextField(null=True, blank=True)
     high_priority = models.BooleanField(default=False)
+
+    support_data = models.JSONField(max_length=1024, null=True, blank=True)
 
     class Meta:
         ordering = ['time_sent']

@@ -14,7 +14,8 @@
   <button class="tablinks">Courses</button>
   <button class="tablinks">Sections</button>
   <button class="tablinks">Demographics</button>
-  <button class="tablinks">Profile</button>
+  <button class="tablinks">My Profile</button>
+  <button class="tablinks">My Messages</button>
 </div>
 
 <span height="400" width="300">
@@ -32,7 +33,9 @@
     ></iframe>
 <iframe id="Demographics" class="tabcontent" title="Demographics" loading="lazy" src="{% url 'schooladmin:demographics' %}"
     ></iframe>
-<iframe id="Profile" class="tabcontent" title="Profile" loading="lazy" src="{% url 'schooladmin:profile' %}"
+<iframe id="My Profile" class="tabcontent" title="My Profile" loading="lazy" src="{% url 'schooladmin:profile' %}"
+    ></iframe>
+<iframe id="My Messages" class="tabcontent" title="My Messages" loading="lazy" src="{% url 'schooladmin:messages' %}"
     ></iframe>
 </span>
 {% endblock %}

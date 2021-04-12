@@ -6,8 +6,7 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse
 
 from schooladmin.views import major as admin_major
-from schooladmin.filters import (SectionFilter, SemesterFilter, SentMessageFilter,
-                                 ReceivedMessageFilter, StudentFilter)
+from schooladmin.filters import (SectionFilter, SemesterFilter, StudentFilter)
 
 from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
@@ -20,6 +19,7 @@ from sis.tables.sectionstudents import StudentHistoryTable
 from sis.tables.semesters import SemestersSummaryTable
 
 from sis.filters.course import RequirementsCourseFilter
+from sis.filters.message import SentMessageFilter, ReceivedMessageFilter
 from sis.filters.sectionreferenceitem import SectionItemFilter
 from sis.filters.sectionstudent import StudentHistoryFilter
 
