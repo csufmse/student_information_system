@@ -1,10 +1,12 @@
 from django.contrib import messages
+from django.db import IntegrityError
 from django.http import HttpResponse
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django_tables2 import RequestConfig
 
 from sis.authentication_helpers import role_login_required
-from sis.models import (Professor, Section, Semester, Student, Profile, SectionStudent, ReferenceItem)
+from sis.models import (Professor, Section, Semester, Student, Profile, SectionStudent,
+                        ReferenceItem, SectionReferenceItem)
 from sis.utils import filtered_table
 from sis.tables.sections import ProfSectionsTable
 
@@ -31,6 +33,7 @@ def sections(request):
 def section(request, sectionid):
     data = {}
     section = Section.objects.get(id=sectionid)
+    references = section.sectionreferenceitem_set.all()
     ssects = SectionStudent.objects.filter(section=section)
     if request.method == "POST":
         for student in section.students.all():
@@ -40,7 +43,12 @@ def section(request, sectionid):
                 ssect.save()
                 data['grade_submitted'] = {True}
     grades = ((None, None), ('A', 4), ('B', 3), ('C', 2), ('D', 1), ('F', 1))
-    data.update({'grades': grades, 'section': section, 'ssects': ssects})
+    data.update({
+        'grades': grades,
+        'section': section,
+        'ssects': ssects,
+        'references': references
+    })
     return render(request, 'professor/section.html', data)
 
 
@@ -59,16 +67,25 @@ def add_reference(request, sectionid):
         if form.is_valid():
             new_ref = form.save(commit=False)
             new_ref.professor = request.user.profile.professor
-            new_ref.save()
             section = Section.objects.get(id=sectionid)
-            ref_sect = SectionReferenceItem.objects.create(section=section,
-                                                           item=new_ref)
-            ref_sect.save()
-            message.success(request, "New reference item successfully created")
+            new_ref.course = section.course
+            try:
+                new_ref.save()
+            except IntegrityError as e:
+                if 'UNIQUE constraint' in e.args[0]:
+                    messages.error(request, "That Reference Item already exists.")
+                else:
+                    messages.error(request,
+                                   "There was a problem saving the new item to the database.")
+                return redirect('professor:add_reference', sectionid)
+            section.refresh_reference_items()
+            messages.success(request, "New reference item successfully created")
+            return redirect('professor:section', sectionid)
         else:
-            message.error(request, "Please correct the error(s) below")
+            messages.error(request, "Please correct the error(s) below")
             return redirect('professor:add_reference', sectionid)
     else:
-        form = ReferenceItemform()
-        data = { 'form': form }
-    return render(request, 'professor/add-reference.html', data)
+        form = ReferenceItemForm()
+
+    data = {'form': form, 'sectionid': sectionid}
+    return render(request, 'professor/reference_add.html', data)

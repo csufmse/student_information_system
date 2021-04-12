@@ -3,8 +3,15 @@
 
 {% block content %}
 <form method='post'>
-  {{form}}
-  <a href='{% url 'professor:add_reference' %}' class='btn btn-info'>
-    Add</a>
+  {% csrf_token %}
+  <table>{{form.as_table}}</table>
+  <input id='submitme' name='submitme' value="Add" class='btn btn-info'>
 </form>
+
+<script>
+document.getElementById("submitme").addEventListener("click", function () {
+    this.form.submit();
+    return true;
+    });
+</script>
 {% endblock content %}

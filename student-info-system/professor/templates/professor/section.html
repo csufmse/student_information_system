@@ -36,25 +36,26 @@
         <th>Link</th>
         <th>Edition</th>
         <th>Type</th>
+        <th>ISBN</th>
       </tr>
     {% for reference in references %}
       <tr class="data-table">
-        <td>{{reference.title}}</td>
-        <td>{{reference.description}}</td>
-        <td>{{reference.link}}</td>
-        <td>{{reference.edition}}</td>
-        <td>{{reference.type}}</td>
-        <td>{{reference.isbn}}</td>
+        <td>{{reference.item.title}}</td>
+        <td>{{reference.item.description}}</td>
+        <td>{{reference.item.link}}</td>
+        <td>{{reference.item.edition}}</td>
+        <td>{{reference.item.get_type_display}}</td>
+        <td>{{reference.item.isbn}}</td>
       </tr>
     {% endfor %}
     </table>
     {% endif %}
-    <a href="{% url 'professor:add_reference' sectionid %}" class="btn btn-info">
+    <a href="{% url 'professor:add_reference' section.id %}" class="btn btn-info">
       Add Reference Item</a>
 
   <h2>Students</h2>
 {% if ssects %}
-  <form action="{% url 'professor:students_in_section' section.id %}" method="post">
+  <form action="{% url 'professor:section' section.id %}" method="post">
   {% csrf_token %}
     <table class="data-table-alt scrollify-me">
       <tr class="heading-row">
