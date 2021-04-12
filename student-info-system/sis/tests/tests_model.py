@@ -729,6 +729,7 @@ class ProfileTest_Basic(TestCase):
     def test_admin_excluded(self):
         usr = User.objects.create(username='foo')
         prof = usr.profile
+        self.assertEqual(prof.role, Profile.ACCESS_NONE)
         users = Profile.objects.all()
         self.assertEqual(users.count(), 1)
         users_ann = User.annotated()
