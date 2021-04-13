@@ -8,7 +8,7 @@ class SemestersTable(tables.Table):
     semester = ClassyColumn(verbose_name='Semester',
                             css_class_base='semester',
                             accessor='name',
-                            order_by=('year','session_order'))
+                            order_by=('year', 'session_order'))
     session = ClassyColumn(verbose_name='Session',
                            css_class_base='session',
                            accessor='session',
@@ -32,10 +32,17 @@ class SemestersTable(tables.Table):
 
 
 class SemestersSummaryTable(SemestersTable):
+
     class Meta:
         model = Semester
         template_name = "django_tables2/bootstrap.html"
-        exclude = ('date_registration_opens','id',
-                  'date_registration_closes', 'date_started', 'date_last_drop', 'date_ended',)
+        exclude = (
+            'date_registration_opens',
+            'id',
+            'date_registration_closes',
+            'date_started',
+            'date_last_drop',
+            'date_ended',
+        )
         attrs = {"class": 'semester_table'}
         row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}

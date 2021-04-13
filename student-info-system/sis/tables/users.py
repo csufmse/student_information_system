@@ -5,8 +5,11 @@ from sis.tables import *
 
 
 class FullUsersTable(tables.Table):
-    name = ClassyColumn(css_class_base='user_name', accessor='get_full_name',
-                order_by = ("last_name", "first_name"),)
+    name = ClassyColumn(
+        css_class_base='user_name',
+        accessor='get_full_name',
+        order_by=("last_name", "first_name"),
+    )
     username = ClassyColumn(css_class_base='username')
     student_major = ClassyColumn(verbose_name='Student Major',
                                  css_class_base='major',
@@ -43,8 +46,11 @@ class FullUsersTable(tables.Table):
 
 
 class UsersTable(FullUsersTable):
-    name = ClassyColumn(css_class_base='user_name', accessor='get_full_name',
-                order_by = ("last_name", "first_name"),)
+    name = ClassyColumn(
+        css_class_base='user_name',
+        accessor='get_full_name',
+        order_by=("last_name", "first_name"),
+    )
     username = ClassyColumn(css_class_base='username')
 
     class Meta:
@@ -56,8 +62,11 @@ class UsersTable(FullUsersTable):
 
 
 class StudentsTable(tables.Table):
-    name = ClassyColumn(css_class_base='user_name', accessor='get_full_name',
-                order_by = ("last_name", "first_name"),)
+    name = ClassyColumn(
+        css_class_base='user_name',
+        accessor='get_full_name',
+        order_by=("last_name", "first_name"),
+    )
     username = ClassyColumn(css_class_base='username')
     student_major = ClassyColumn(verbose_name='Student Major',
                                  css_class_base='major',
@@ -88,8 +97,11 @@ class StudentsTable(tables.Table):
 
 
 class StudentInMajorTable(tables.Table):
-    name = ClassyColumn(css_class_base='user_name', accessor='get_full_name',
-                order_by = ("last_name", "first_name"),)
+    name = ClassyColumn(
+        css_class_base='user_name',
+        accessor='get_full_name',
+        order_by=("last_name", "first_name"),
+    )
     username = ClassyColumn(css_class_base='username')
     is_active = AbilityColumn(null=False, attrs=field_css_classes('active'))
     class_level = ClassyColumn(verbose_name='Class',

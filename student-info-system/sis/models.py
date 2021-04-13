@@ -682,8 +682,7 @@ class Semester(models.Model):
         return User.objects.filter(profile__professor__section__semester=self.id).distinct()
 
     def students_attending(self):
-        return User.objects.filter(
-            profile__student__semesterstudent__semester=self.id).distinct()
+        return User.objects.filter(profile__student__semesterstudent__semester=self.id).distinct()
 
     def registration_open(self, when=None):
         if when is None:
@@ -904,7 +903,8 @@ class Section(models.Model):
 
     @property
     def course_descr(self):
-        return f'{self.course.major.abbreviation}-{self.course.catalog_number}: ' + f'{self.course.title}'
+        return f'{self.course.major.abbreviation}-{self.course.catalog_number}: ' +\
+               f'{self.course.title}'
 
     course_descr.fget.short_description = 'Course Description'
 
@@ -1094,5 +1094,3 @@ class Message(models.Model):
         return self.message_type in (
             Message.DROP_REQUEST_TYPE, Message.MAJOR_CHANGE_TYPE
         ) and self.time_handled is None and self.time_sent < as_of - timedelta(days=7)
-
-

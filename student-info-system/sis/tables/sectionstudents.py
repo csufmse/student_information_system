@@ -47,12 +47,14 @@ class SectionStudentsTable(tables.Table):
     semester = ClassyColumn(verbose_name='Semester',
                             css_class_base='semester',
                             accessor='name',
-                            order_by=('semester.year','semester.session_order'))
+                            order_by=('semester.year', 'semester.session_order'))
     course = ClassyColumn(accessor='course', css_class_base='course')
     username = ClassyColumn(accessor='student__profile__user__username',
                             css_class_base='username')
-    name = ClassyColumn(accessor='student__profile__name', css_class_base='user_name',
-                        order_by=('student__profile__user__last_name', 'student__profile__user__first_name'))
+    name = ClassyColumn(accessor='student__profile__name',
+                        css_class_base='user_name',
+                        order_by=('student__profile__user__last_name',
+                                  'student__profile__user__first_name'))
     major = ClassyColumn(accessor='student__profile__major__abbreviation', css_class_base='major')
     sec_status = ClassyColumn(
         verbose_name="Section Status",

@@ -352,8 +352,8 @@ def test_majors(request):
         'major_form': major_form,
     }
     candidate_remaining = the_user.profile.student.requirements_met_list(major=the_major)
-    stats = candidate_remaining.filter(met=False).aggregate(remaining_course_count=Count('id'),
-                                                  remaining_credit_count=Sum('credits_earned'))
+    stats = candidate_remaining.filter(met=False).aggregate(
+        remaining_course_count=Count('id'), remaining_credit_count=Sum('credits_earned'))
     data.update(stats)
 
     data.update(

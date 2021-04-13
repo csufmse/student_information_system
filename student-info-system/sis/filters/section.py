@@ -37,11 +37,13 @@ class SectionFilter(FilterSet):
                                                  slug__icontains=value)
 
     def filter_course(self, queryset, name, value):
-        return queryset.annotate(slug=Concat('course__major__abbreviation', Value('-'),
-                                            'course__catalog_number', Value(': '),
-                                            'course__title',
+        return queryset.annotate(slug=Concat('course__major__abbreviation',
+                                             Value('-'),
+                                             'course__catalog_number',
+                                             Value(': '),
+                                             'course__title',
                                              output_field=CharField())).filter(
-                                                slug__icontains=value)
+                                                 slug__icontains=value)
 
     def __init__(self, *args, **kwargs):
         super(SectionFilter, self).__init__(*args, **kwargs)
