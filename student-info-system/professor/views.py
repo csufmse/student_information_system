@@ -22,9 +22,8 @@ def index(request):
 @role_login_required(Profile.ACCESS_PROFESSOR)
 def sections(request):
     the_prof = request.user.profile.professor
-    sections_qs = Section.objects.filter(professor=the_prof).order_by('-semester')
+    sections_qs = Section.objects.filter(professor=the_prof)
     sections = {}
-    section_by_sem = {}
     # set up our sectons qs dictionary by semester
     for sect in sections_qs:
         if sect.semester.name not in sections.keys():
@@ -36,11 +35,20 @@ def sections(request):
         table = ProfSectionsTable(qs)
         RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
         sections[name].append(table)
-#    if request.method == 'POST':
-#        sem = request.POST.get('semester')
-#        sections[sem
 
-    return render(request, 'professor/sections.html', {'sections': sections})
+    if request.method == 'POST':
+        sem = request.POST.get('semester')
+        table = sections[sem][1]
+    else:
+        sem = Semester.current_semester().name
+        values = sections.get(sem)
+        if values is not None:
+            table = values[1]
+    print(table)
+    return render(request, 'professor/sections.html', {
+        'table': table,
+        'semesters': sections.keys()
+    })
 
 
 @role_login_required(Profile.ACCESS_PROFESSOR)
@@ -101,7 +109,8 @@ def add_reference(request, sectionid):
 
             # Specify all current and future sections by reg date or only current sections by reg date
             if request.POST.get('semester_future') == 'future':
-                sects_to_update = course.section_set.exclude(status__in=[Section.REG_CLOSED, Section.CANCELLED])
+                sects_to_update = course.section_set.exclude(
+                    status__in=[Section.REG_CLOSED, Section.CANCELLED])
             else:
                 sects_to_update = course.section_set.filter(status=Section.REG_OPEN)
 
