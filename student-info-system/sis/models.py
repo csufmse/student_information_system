@@ -2,6 +2,7 @@ from datetime import timedelta, datetime
 
 import pytz
 from django.contrib.auth.models import User, AbstractUser
+from django.core.exceptions import *
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Case, ExpressionWrapper, F, Q, Sum, Max, Subquery, Value, When, Count
@@ -671,14 +672,14 @@ class Semester(models.Model):
             at = datetime.now()
         try:
             sem = Semester.objects.get(date_started__lte=at, date_ended__gte=at)
-        except self.model.DoesNotExist:
+        except DoesNotExist:
             sem = None
 
         if sem is None:
             try:
                 sem = Semester.objects.get(date_registration_opens__lte=at,
                                            date_registration_closes__gte=at)
-            except self.model.DoesNotExist:
+            except DoesNotExist:
                 sem = None
         return sem
 
