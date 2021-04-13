@@ -1,7 +1,7 @@
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
 {% load bootstrap3 %}
-{% load render_table from django_tables2 %}
+{% load sis-filter %}
 {%  load user_demographics %}
 
 {% block content %}
@@ -31,101 +31,22 @@
     {%  demographic_details user.profile %}
 
     <h3>Semesters Attended:</h3>
-    <div id="Semesters">
-        {% if semesters_filter %}
-            <form id="semesters_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form semesters_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if semesters_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table semesters_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'semesters' %}
 
     <h3>Course History:</h3>
-    <i>(completed sections)</i>
-    <div id="history">
-        {% if history_filter %}
-            <form id="history_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form history_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if history_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table history_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'history' %}
 
     <h3>Remaining Required Courses:</h3>
-    <div id="remainingCourse">
-        {% if remaining_filter %}
-            <form id="remaining_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form remaining_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if remaining_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table remaining_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'remaining' %}
 
     <h3>Major Required Courses:</h3>
-    <div id="majorCourses">
-        {% if majorcourses_filter %}
-            <form id="majorcourses_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form majorcourses_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if majorcourses_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table majorcourses_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'majorcourses' %}
 
          <h3>Received Messages:</h3>
-    <div id="received">
-        {% if received_filter %}
-            <form id="received_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form received_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if received_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table received_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'received' %}
 
         <h3>Sent Messages:</h3>
-    <div id="sent">
-        {% if sent_filter %}
-            <form id="sent_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form sent_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if sent_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:user' userid=user.id %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table sent_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'sent' %}
 
  <form method="post">
     {% csrf_token %}
@@ -181,8 +102,5 @@ if ( btn ) {
 }
 addButtonClickHandler('passchg', "{% url 'schooladmin:change_password' user.id %}");
 addButtonClickHandler('editu', "{% url 'schooladmin:user_edit' user.id %}");
-addClickHandlers("{% url 'schooladmin:semester' semester_id=1234599 %}", "semester_row");
-addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
-addClickHandlers("{% url 'schooladmin:sectionstudent' id=1234599 %}", "sectionstudent_row");
 </script>
 {% endblock %}

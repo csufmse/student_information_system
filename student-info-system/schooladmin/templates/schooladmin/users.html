@@ -1,29 +1,15 @@
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
-{% load render_table from django_tables2 %}
+{% load sis-filter %}
 {% load bootstrap3 %}
 
 {% block content %}
 <div>
 <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
-    <div id="Users">
-        {% if users_filter %}
-            <form id="users_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form users_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if users_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:users' %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt scrollify-me">
-            {% render_table users_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'users' %}
 </div>
 <script>
 const handler = insertScrollableDivs(applyHandlers=true);
 handler();
-addClickHandlers("{% url 'schooladmin:user' userid=1234599 %}", "user_row");
 </script>
 {% endblock content %}

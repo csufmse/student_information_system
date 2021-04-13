@@ -2,13 +2,16 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
+from django.urls import reverse
+
 from django_tables2 import RequestConfig
 
 from sis.authentication_helpers import role_login_required
-from sis.models import (Course, Professor, Section, Semester, Student, Profile, SectionStudent,
+from sis.models import (Professor, Section, Semester, Student, Profile, SectionStudent,
                         ReferenceItem, SectionReferenceItem)
-from sis.utils import filtered_table
 from sis.tables.sections import ProfSectionsTable
+from sis.utils import filtered_table2, DUMMY_ID
+from sis.filters.section import SectionFilter
 
 from professor.forms import ReferenceItemForm
 

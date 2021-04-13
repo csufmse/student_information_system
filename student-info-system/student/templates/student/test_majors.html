@@ -1,7 +1,7 @@
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
 {% load bootstrap3 %}
-{% load render_table from django_tables2 %}
+{% load sis-filter %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -19,20 +19,7 @@
     </form>
 
     <h3>Courses for {{ major.abbreviation }}:</h3>
-    <div id="majorCourses">
-        {% if majorcourses_filter %}
-            <form id="majorcourses_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form majorcourses_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if majorcourses_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'student:test_majors' %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table majorcourses_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'majorcourses' %}
 
 
  <form method="post">
@@ -50,6 +37,5 @@
 stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'majorcourses'});
 stylizeRange({field:'credits_earned',name:'Cred',prefix:'majorcourses'});
 addButtonClickHandler('test_majors', "{% url 'student:test_majors' %}");
-addClickHandlers("{% url 'student:course' courseid=1234599 %}", "course_row");
 </script>
 {% endblock %}
