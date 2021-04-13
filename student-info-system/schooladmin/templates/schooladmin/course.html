@@ -1,7 +1,7 @@
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
 {% load bootstrap3 %}
-{% load render_table from django_tables2 %}
+{% load sis-filter %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -18,52 +18,13 @@
 </dl>
 
     <h3>Has Prerequisites:</h3>
-    <div id="Prereqs">
-        {% if prereqs_filter %}
-            <form id="prereqs_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form prereqs_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if prereqs_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:course' courseid=course.id %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table prereqs_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'prereqs' %}
 
     <h3>Is Prerequisite For:</h3>
-    <div id="IsPrereqFor">
-        {% if neededby_filter %}
-            <form id="neededby_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form neededby_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if neededby_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:course' courseid=course.id %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table neededby_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'neededby' %}
 
     <h3>Sections:</h3>
-    <div id="Sections">
-        {% if sections_filter %}
-            <form id="sections_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form sections_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if sections_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:sections' %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table sections_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'sections' %}
 
     <input
         action="action"
@@ -84,7 +45,5 @@
 <script>
 addButtonClickHandler('course_edit', "{% url 'schooladmin:course_edit' courseid=course.id %}");
 addButtonClickHandler('new_section', "{% url 'schooladmin:course_section_new' courseid=course.id %}");
-addClickHandlers("{% url 'schooladmin:course' courseid=1234599 %}", "course_row");
-addClickHandlers("{% url 'schooladmin:section' sectionid=1234599 %}", "section_row");
 </script>
 {% endblock %}

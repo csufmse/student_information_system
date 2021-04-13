@@ -6,10 +6,15 @@
         {% bootstrap_form form=filt.filter.form layout='inline' %}
         <button class="btn btn-primary">Filter</button>
         {% if filt.has_filter %}
-            <a class="btn btn-success" href="{% url destination %}">Clear</a>
+            <a class="btn btn-success" href="{{ filt.self_url }}">Clear</a>
         {% endif %}
     </form>
 {% endif %}
-<div class="data-table-alt">
+<div class="{{ filt.div_classes }}">
     {% render_table filt.table 'django_tables2/bootstrap.html' %}
 </div>
+{%  if filt.click_url %}
+    <script>
+        addClickHandlers("{{ filt.click_url }}", "{{ filt.row_class }}");
+    </script>
+{% endif %}

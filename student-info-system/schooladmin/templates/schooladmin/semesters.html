@@ -1,19 +1,17 @@
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
-{% load render_table from django_tables2 %}
 {% load sis-filter %}
 
 {% block content %}
 <div>
     <button class="btn btn-primary" onclick=location.href="{% url 'schooladmin:semester_new' %}">New Semester</button>
 <div id="Semesters">
-    {% sis_filter 'semesters' 'schooladmin:semesters' %}
+    {% sis_filter 'semesters' %}
 </div>
 
 </div>
 <script>
 insertScrollableDivs(applyHandlers=true);
 stylizeRange({field:'year',min_label:'From Year',max_label:'To Year',prefix:"semesters"});
-addClickHandlers("{% url 'schooladmin:semester' semester_id=1234599 %}", "semester_row");
 </script>
 {% endblock content %}

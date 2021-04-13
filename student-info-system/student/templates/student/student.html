@@ -1,7 +1,7 @@
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
 {% load bootstrap3 %}
-{% load render_table from django_tables2 %}
+{% load sis-filter %}
 {%  load user_demographics %}
 
 {% block content %}
@@ -21,74 +21,22 @@
     {%  demographic_details user.profile %}
 
     <h3>Semesters Attended:</h3>
-    <div id="Semesters">
-        {% if semesters_filter %}
-            <form id="semesters_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form semesters_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if semesters_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'student:profile' %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table semesters_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'semesters' %}
 
     <h3>Required Courses for {{ user.profile.student.major.abbreviation }}:</h3>
-    <div id="majorCourses">
-        {% if majorcourses_filter %}
-            <form id="majorcourses_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form majorcourses_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if majorcourses_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'student:profile' %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table majorcourses_table 'django_tables2/bootstrap.html' %}
-        </div>
-        <input id="test_majors"
+    {% sis_filter 'majorcourses' %}
+    <input id="test_majors"
         action="action"
            class="btn btn-info"
         value="Explore Another Major..."
     />
-    </div>
 
 
          <h3>Received Messages:</h3>
-    <div id="received">
-        {% if received_filter %}
-            <form id="received_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form received_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if received_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'student:profile' %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table received_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'received' %}
 
         <h3>Sent Messages:</h3>
-    <div id="sent">
-        {% if sent_filter %}
-            <form id="sent_filter" action="" method="get" class="form form-inline" autocomplete="off">
-                {% bootstrap_form sent_filter.form layout='inline' %}
-                <button class="btn btn-primary">Filter</button>
-                {% if sent_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'student:user' userid=user.id %}">Clear</a>
-                {% endif %}
-            </form>
-        {% endif %}
-        <div class="data-table-alt">
-            {% render_table sent_table 'django_tables2/bootstrap.html' %}
-        </div>
-    </div>
+    {% sis_filter 'sent' %}
 
  <form method="post">
     {% csrf_token %}
@@ -121,8 +69,6 @@ addButtonClickHandler('test_majors', "{% url 'student:test_majors' %}");
 addButtonClickHandler('change_password', "{% url 'student:change_password' %}");
 addButtonClickHandler('request_major_change', "{% url 'student:request_major_change' %}");
 addButtonClickHandler('edit_user', "{% url 'student:profile_edit' %}");
-addClickHandlers("{% url 'student:semester' semester_id=1234599 %}", "semester_row");
-addClickHandlers("{% url 'student:course' courseid=1234599 %}", "course_row");
 stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'majorcourses'});
 stylizeRange({field:'credits_earned',name:'Cred',prefix:'majorcourses'});
 </script>

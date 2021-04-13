@@ -2,13 +2,18 @@ from django.contrib import messages
 from django.db import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import render, redirect
-from django_tables2 import RequestConfig
+from django.urls import reverse
 
 from sis.authentication_helpers import role_login_required
+
 from sis.models import (Professor, Section, Semester, Student, Profile, SectionStudent,
                         ReferenceItem, SectionReferenceItem)
-from sis.utils import filtered_table
+
 from sis.tables.sections import ProfSectionsTable
+
+from sis.utils import filtered_table2, DUMMY_ID
+
+from sis.filters.section import SectionFilter
 
 from professor.forms import ReferenceItemForm
 
@@ -22,11 +27,22 @@ def index(request):
 @role_login_required(Profile.ACCESS_PROFESSOR)
 def sections(request):
     the_prof = request.user.profile.professor
-    sections_qs = Section.objects.filter(professor=the_prof).exclude(status=Section.REG_CLOSED)
-    sections_table = ProfSectionsTable(sections_qs)
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
 
-    return render(request, 'professor/sections.html', {'sections': sections_table})
+    data = {
+        'user': request.user,
+    }
+    data.update(
+        filtered_table2(
+            name='sections',
+            qs=the_prof.section_set.exclude(status=Section.REG_CLOSED),
+            filter=SectionFilter,
+            table=ProfSectionsTable,
+            request=request,
+            self_url=reverse('professor:sections'),
+            click_url=reverse('professor:section', args=[DUMMY_ID]),
+        ))
+
+    return render(request, 'professor/sections.html', data)
 
 
 @role_login_required(Profile.ACCESS_PROFESSOR)
