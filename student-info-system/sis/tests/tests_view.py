@@ -1,10 +1,9 @@
 from django.test import TestCase
 
-from django.contrib.auth.models import User
-from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, SemesterStudent, Student, UpperField)
+from sis.models import (
+    Major,)
 
-from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
+from sis.tests.utils import *
 
 
 class ViewsAccess(TestCase):
@@ -14,22 +13,22 @@ class ViewsAccess(TestCase):
         super(ViewsAccess, cls).setUpTestData()
         ad = createAdmin('foobar').profile
         m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
-        ViewsAccess.u1 = createAdmin(username='u1', password='hello')
-        ViewsAccess.u2 = createProfessor(username='u2', major=m1, password='hello')
-        ViewsAccess.u3 = createStudent(username='u3', major=m1, password='hello')
+        createAdmin(username='u1', password='hello')
+        createProfessor(username='u2', major=m1, password='hello')
+        createStudent(username='u3', major=m1, password='hello')
 
     def test_home_view_redirects_for_admin(self):
-        login = self.client.login(username='u1', password='hello')
+        self.client.login(username='u1', password='hello')
         response = self.client.get('/')
         self.assertEqual(response.status_code, 302)
 
     def test_home_view_redirects_for_prof(self):
-        login = self.client.login(username='u2', password='hello')
+        self.client.login(username='u2', password='hello')
         response = self.client.get('/')
         self.assertEqual(response.status_code, 302)
 
     def test_home_view_redirects_for_stud(self):
-        login = self.client.login(username='u3', password='hello')
+        self.client.login(username='u3', password='hello')
         response = self.client.get('/')
         self.assertEqual(response.status_code, 302)
 
@@ -50,9 +49,9 @@ class ViewsUseTemplate(TestCase):
         super(ViewsUseTemplate, cls).setUpTestData()
         ad = createAdmin('foobar').profile
         m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
-        ViewsUseTemplate.u = createUser(username='u', password='hello', major=m1)
+        createUser(username='u', password='hello', major=m1)
 
     def access_denied(self):
-        login = self.client.login(username='u', password='hello')
+        self.client.login(username='u', password='hello')
         response = self.client.get('/access_denied')
         self.assertTemplateUsed(response, 'sis/access_denied.html')

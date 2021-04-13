@@ -1,6 +1,9 @@
-from sis.models import (Student, Professor, Course, Major, Profile)
-from django.contrib.auth.models import User
 from decimal import Decimal
+from datetime import datetime, timedelta
+
+from django.contrib.auth.models import User
+
+from sis.models import (Student, Professor, Course, Major, Profile, Semester)
 
 
 def createAdmin(username=None, first=None, last=None, password=None):
@@ -59,3 +62,41 @@ def createCourse(major, num):
                                  title='c' + str(num),
                                  description='course ' + str(num),
                                  credits_earned=Decimal('1.0'))
+
+
+# dates are not dates, but number of days (plus or minus) from now.
+# this lets you create all semester combinations.
+def createSemester(year=None,
+                   date_registration_opens=None,
+                   date_registration_closes=None,
+                   date_started=None,
+                   date_last_drop=None,
+                   date_ended=None,
+                   session=None):
+    if year is None:
+        year = 2020
+    if session is None:
+        session = Semester.FALL
+    dro = datetime.now()
+    if date_registration_opens is not None:
+        dro += timedelta(days=date_registration_opens)
+    drc = datetime.now()
+    if date_registration_closes is not None:
+        drc += timedelta(days=date_registration_closes)
+    ds = datetime.now()
+    if date_started is not None:
+        ds += timedelta(days=date_started)
+    dld = datetime.now()
+    if date_last_drop is not None:
+        dld += timedelta(days=date_last_drop)
+    de = datetime.now()
+    if date_ended is not None:
+        de += timedelta(days=date_ended)
+    semester = Semester.objects.create(date_registration_opens=dro,
+                                       date_registration_closes=drc,
+                                       date_started=ds,
+                                       date_last_drop=dld,
+                                       date_ended=de,
+                                       session=session,
+                                       year=year)
+    return semester

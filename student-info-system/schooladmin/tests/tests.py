@@ -1,6 +1,3 @@
-from datetime import datetime
-
-from django.contrib.auth.models import User
 from django.test import TestCase
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
@@ -51,36 +48,27 @@ class AdminViewsAccess(TestCase):
 
 class AdminUserViewsTest(TestCase):
 
-    def setUp(self):
-        # Create two users
-        test_user1 = createAdmin(username='testuser1', password='hello')
+    @classmethod
+    def setUpTestData(cls):
+        super(AdminUserViewsTest, cls).setUpTestData()
+        createAdmin(username='u1', password='hello')
 
     # list views
     def test_users_view_exists(self):
-        login = self.client.login(username='testuser1', password='hello')
-        response = self.client.get('/schooladmin/users')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.simple('/schooladmin/users'), 200)
 
     # single-object views
     def test_user_view_exists(self):
-        login = self.client.login(username='testuser1', password='hello')
-        response = self.client.get('/schooladmin/user/1')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.simple('/schooladmin/user/1'), 200)
 
     # edit views
     def test_edit_user_view_exists(self):
-        login = self.client.login(username='testuser1', password='hello')
-        response = self.client.get('/schooladmin/user/1/edit')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.simple('/schooladmin/user/1/edit'), 200)
 
     # create views
     def test_new_user_view_exists(self):
-        login = self.client.login(username='testuser1', password='hello')
-        response = self.client.get('/schooladmin/user_new')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.simple('/schooladmin/user_new'), 200)
 
     # misc
     def test_user_pass_change_view_exists(self):
-        login = self.client.login(username='testuser1', password='hello')
-        response = self.client.get('/schooladmin/user/1/change_password')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.simple('/schooladmin/user/1/change_password'), 200)
