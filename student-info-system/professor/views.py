@@ -110,7 +110,7 @@ def add_reference(request, sectionid):
                                    "There was a problem saving the new item to the database.")
                 return render(request, 'professor/reference_add.html', data)
 
-            # Specify all current and future sections by reg date or only current sections by reg date
+            # Specify all current+future sects by reg date or only current sections by reg date
             if request.POST.get('semester_future') == 'future':
                 sects_to_update = course.section_set.exclude(
                     status__in=[Section.REG_CLOSED, Section.CANCELLED])
