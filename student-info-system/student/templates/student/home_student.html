@@ -9,6 +9,7 @@
   <button class="tablinks">References</button>
   <button class="tablinks">My History</button>
   <button class="tablinks">My Profile</button>
+  <button class="tablinks">My Messages</button>
 </div>
 
 <span height="400" width="300">
@@ -22,5 +23,7 @@
     ></iframe>
   <iframe id="My Profile" class="tabcontent" loading="lazy" title="My Profile" src="{% url 'student:profile' %}"
     ></iframe>
+    <iframe id="My Messages" class="tabcontent" title="My Messages" loading="lazy" src="{% url 'sis:messages' %}"
+        ></iframe>
 </span>
 {% endblock content %}

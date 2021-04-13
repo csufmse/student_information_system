@@ -82,6 +82,16 @@ class MessageReceivedTable(MessageTable):
         }
         attrs = {"class": 'message_table'}
 
+class StudentMessageReceivedTable(MessageReceivedTable):
+
+    class Meta:
+        exclude = ('handled',)
+        row_attrs = {
+            'class': (lambda record: classes_for(record)),
+            'data-id': lambda record: record.pk
+        }
+        attrs = {"class": 'message_table'}
+
 
 class MessageSentTable(MessageTable):
 
@@ -96,3 +106,4 @@ class MessageSentTable(MessageTable):
             'data-id': lambda record: record.pk
         }
         attrs = {"class": 'message_table'}
+

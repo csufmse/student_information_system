@@ -9,11 +9,14 @@
     <button class="tablinks" id="defaultOpen">Sections</button>
     <button class="tablinks">Students</button>
     <button class="tablinks">Grades</button>
+  <button class="tablinks">My Messages</button>
   </div>
 
   <span height="400" width="300">
     <iframe id="Sections" class="tabcontent samplecontentblock" title="Sections" src="{% url 'professor:sections' %}"></iframe>
     <div id="Students" class="tabcontent" title="Students" >Student Search.</div>
     <div id="Grades" class="tabcontent" title="Grades" >Edit Grades.</div>
+    <iframe id="My Messages" class="tabcontent" title="My Messages" loading="lazy" src="{% url 'sis:messages' %}"
+        ></iframe>
   </span>
 {% endblock content%}

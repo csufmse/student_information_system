@@ -1,7 +1,6 @@
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
 {% load bootstrap3 %}
-{% load sis-filter %}
 {% load user_demographics %}
 
 {% block content %}
@@ -17,12 +16,6 @@
 </dl>
     <h3>Demographic Data</h3>
     {%  demographic_details user.profile %}
-
-        <h3>Received Messages:</h3>
-    {% sis_filter 'received' %}
-
-        <h3>Sent Messages:</h3>
-    {% sis_filter 'sent' %}
 
   <form method="post">
     {% csrf_token %}
@@ -46,8 +39,6 @@
 
   </form>
 <script>
-stylizeRange({field:'time_sent',name:'Sent',prefix:'received',width:'100px'});
-stylizeRange({field:'time_sent',name:'Received',prefix:'sent',width:'100px'});
 addButtonClickHandler('passchg', "{% url 'schooladmin:change_password' user.id %}");
 addButtonClickHandler('edit_profile', "{% url 'schooladmin:user_edit' user.id %}");
 </script>

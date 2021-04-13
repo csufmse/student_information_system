@@ -1,7 +1,6 @@
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
 {% load bootstrap3 %}
-{% load sis-filter %}
 {%  load user_demographics %}
 
 {% block content %}
@@ -20,12 +19,6 @@
     <h3>Personal Profile</h3>
     {%  demographic_details user.profile %}
 
-
-         <h3>Received Messages:</h3>
-    {% sis_filter 'received' %}
-
-        <h3>Sent Messages:</h3>
-    {% sis_filter 'sent' %}
 
  <form method="post">
     {% csrf_token %}
