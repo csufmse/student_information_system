@@ -15,9 +15,71 @@
         <span class="message_header_value">
             {% if message_read %}{{ message.time_read }}{% else %}(Unread){% endif %}
         </span></div>{% endif %}
+    {% if show_archive %}<div><span class="message_header">Archived At:</span>
+        <span class="message_header_value">
+            {% if message_archived %}{{ message.time_archived }}{% else %}(Not archived){% endif %}
+        </span></div>{% endif %}
     {% if show_type %}<div><span class="message_header">Type:</span>
         <span class="message_header_value">{{ message.message_type }}</span></div>{% endif %}
     <div><span class="message_header">Subject:</span>
         <span class="message_header_value">{{ message.subject }}</span></div>
+    {% if show_handled %}<div><span class="message_header">Handled:</span>
+        <span class="message_header_value">
+            {% if message_handled %}{{ message.time_handled }}{% else %}(Not Handled){% endif %}
+        </span></div>{% endif %}
     <div id="body" class="message_body">{{ message.body }}</div>
+  <form method="post">
+    {% csrf_token %}
+        {%  if show_archive %}
+          {%  if message_archived %}
+            <input id="unarchive" name="unarchive"
+                action="action" type="submit"
+                value="Unarchive" class="btn btn-info"
+            />
+          {% else %}
+            <input id="archive" name="archive"
+                action="action" type="submit"
+                value="Archive" class="btn btn-info"
+            />
+          {%  endif %}
+        {%  endif %}
+        <input id="reply" name="reply"
+            action="action" type="submit"
+            value="Reply" class="btn btn-info"
+        />
+
+      {%  if show_approve_drop %}
+        <input id="approvedrop" name="approvedrop"
+            action="action" type="submit"
+            value="Approve Drop" class="btn btn-info"
+        />
+        <input id="rejectdrop" name="rejectdrop"
+            action="action" type="submit"
+            value="Reject Drop" class="btn btn-info"
+        />
+      {%  endif %}
+
+      {%  if show_approve_major %}
+        <input id="approvemajor" name="approvemajor"
+            action="action" type="submit"
+            value="Approve Major Change" class="btn btn-info"
+        />
+        <input id="rejectmajor" name="rejectmajor"
+            action="action" type="submit"
+            value="Reject Major Change" class="btn btn-info"
+        />
+      {%  endif %}
+
+  </form>
+    <script>
+document.getElementById("archive").addEventListener("click", function () {
+        this.form.submit();
+        return true;
+    });
+document.getElementById("unarchive").addEventListener("click", function () {
+        this.form.submit();
+        return true;
+    });
+
+    </script>
 {% endblock %}

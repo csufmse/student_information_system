@@ -17,8 +17,8 @@ def createData():
     for year in range(2015, 2022):
         next = date(year, 9, 15)
         for session in Semester.SESSIONS_ORDER:
-            print(f'Creating {year} {session}...')
-            Semester.objects.create(year=year,
+            print(f'Creating {session} {next.year} ...')
+            Semester.objects.create(year=next.year,
                                     date_registration_opens=next - timedelta(days=60),
                                     date_registration_closes=next - timedelta(days=7),
                                     date_started=next,
@@ -28,9 +28,13 @@ def createData():
             next = next + timedelta(days=90)
 
     # make sure we have at least one semester open for registration
-    last_sem = Semester.objects.order_by('-date_started')[0]
-    last_sem.date_registration_opens = datetime.now() - timedelta(days=1)
-    last_sem.save()
+    current_semester = Semester.objects.get(date_started__lte=datetime.now(),
+                                            date_ended__gte=datetime.now())
+    current_semester.date_registration_opens = datetime.now() - timedelta(days=1)
+    current_semester.date_registration_closes = datetime.now() + timedelta(days=21)
+    current_semester.date_last_drop = datetime.now() + timedelta(days=28)
+    current_semester.date_ended = datetime.now() + timedelta(days=29)
+    current_semester.save()
 
 
 def cleanData():

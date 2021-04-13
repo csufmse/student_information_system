@@ -33,7 +33,7 @@
                 {% bootstrap_form sent_filter.form layout='inline' %}
                 <button class="btn btn-primary">Filter</button>
                 {% if sent_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:messages' userid=user.id %}">Clear</a>
+                    <a  class="btn btn-success" href="{%  url 'schooladmin:messages' %}">Clear</a>
                 {% endif %}
             </form>
         {% endif %}
