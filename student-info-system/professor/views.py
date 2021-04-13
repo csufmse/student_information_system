@@ -98,7 +98,6 @@ def add_reference(request, sectionid):
                 return render(request, 'professor/reference_add.html', data)
             section.refresh_reference_items()
             messages.success(request, "New reference item successfully created")
-            print(sectionid)
             return redirect('professor:section', sectionid)
         else:
             messages.error(request, "Please correct the error(s) below")
