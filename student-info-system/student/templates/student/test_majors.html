@@ -20,6 +20,7 @@
 
     <h3>Courses for {{ major.abbreviation }}:</h3>
     {% sis_filter 'majorcourses' %}
+    <h3>{{ remaining_course_count }} course{{ remaining_course_count|pluralize }} ({{ remaining_credit_count }} credit{{ remaining_credit_count|pluralize }}) remaining with this major.</h3>
 
 
  <form method="post">

@@ -644,7 +644,6 @@ class Semester_tests(TestCase):
         s2 = Semester.objects.get(year=2000)
 
         self.assertEqual(s2.session_name, 'Fall')
-        self.assertEqual(s2.semester_order, '2000-0')
         self.assertEqual(s2.session_order, 0)
 
 
@@ -723,16 +722,5 @@ class ProfileTest_Basic(TestCase):
         usr = User.objects.create(username='foo')
         prof = usr.profile
         self.assertEqual(prof.role, Profile.ACCESS_NONE)
-        prof.delete()
-        usr.delete()
-
-    def test_admin_excluded(self):
-        usr = User.objects.create(username='foo')
-        prof = usr.profile
-        self.assertEqual(prof.role, Profile.ACCESS_NONE)
-        users = Profile.objects.all()
-        self.assertEqual(users.count(), 1)
-        users_ann = User.annotated()
-        self.assertEqual(users_ann.count(), 0)
         prof.delete()
         usr.delete()

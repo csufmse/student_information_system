@@ -8,7 +8,7 @@ class SectionsTable(tables.Table):
     semester = ClassyColumn(verbose_name='Semester',
                             css_class_base='semester',
                             accessor='semester',
-                            order_by=('semester.semester_order'))
+                            order_by=('semester.year', 'semester.session_order'))
     course = ClassyColumn(css_class_base='course', accessor='course__name')
     number = ClassyColumn(css_class_base='section_number')
     status = ClassyColumn(css_class_base='sectionstatus')
@@ -42,7 +42,7 @@ class SectionForClassTable(tables.Table):
     semester = ClassyColumn(verbose_name='Semester',
                             css_class_base='semester',
                             accessor='semester__name',
-                            order_by=('semester_order'))
+                            order_by=('semester.year', 'semester.session_order'))
     section = ClassyColumn(css_class_base='section_name', accessor='name')
     status = ClassyColumn(css_class_base='sectionstatus')
     hours = ClassyColumn(css_class_base='hours')

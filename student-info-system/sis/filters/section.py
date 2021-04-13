@@ -1,4 +1,4 @@
-from django.db.models import CharField, Value
+from django.db.models import CharField, Value, F
 from django.db.models.functions import Concat
 from django_filters import (
     CharFilter,
@@ -37,13 +37,13 @@ class SectionFilter(FilterSet):
                                                  slug__icontains=value)
 
     def filter_course(self, queryset, name, value):
-        return queryset.annotate(slug=Concat(
-            'course__major__abbreviation',
-            Value('-'),
-            'course__catalog_number',
-            Value(' '),
-            'course__title',
-        )).filter(slug__icontains=value)
+        return queryset.annotate(slug=Concat('course__major__abbreviation',
+                                             Value('-'),
+                                             'course__catalog_number',
+                                             Value(': '),
+                                             'course__title',
+                                             output_field=CharField())).filter(
+                                                 slug__icontains=value)
 
     def __init__(self, *args, **kwargs):
         super(SectionFilter, self).__init__(*args, **kwargs)

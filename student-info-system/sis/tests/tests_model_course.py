@@ -1,15 +1,16 @@
 from django.test import TestCase
-from datetime import datetime
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
                         Semester, Student, ClassLevel)
 
-from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
+from sis.tests.utils import *
 
 
 class CourseTestCase_Basic(TestCase):
 
-    def setUp(self):
+    @classmethod
+    def setUpTestData(cls):
+        super(CourseTestCase_Basic, cls).setUpTestData()
         ad = createAdmin('foobar').profile
         major = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         Course.objects.create(major=major,
@@ -38,34 +39,41 @@ class CourseTestCase_deps(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        KLASS = CourseTestCase_deps
+        super(KLASS, cls).setUpTestData()
         ad = createAdmin('foobar').profile
         m = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
-        CourseTestCase_deps.major = m
+        KLASS.major = m
 
-        CourseTestCase_deps.courses = {}
+        KLASS.courses = {}
         for i in range(1, 15):
-            CourseTestCase_deps.courses[i] = createCourse(m, str(i))
+            KLASS.courses[i] = createCourse(m, str(i))
 
     def test_none(self):
-        cs = CourseTestCase_deps.courses
+        KLASS = self.__class__
+        cs = KLASS.courses
         self.assertEqual(cs[1].are_candidate_prerequisites_valid(), True)
 
     def test_valid_candidate(self):
-        cs = CourseTestCase_deps.courses
+        KLASS = self.__class__
+        cs = KLASS.courses
         self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2]]), True)
 
     def test_candidate_loop(self):
-        cs = CourseTestCase_deps.courses
+        KLASS = self.__class__
+        cs = KLASS.courses
         self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[1]]), False)
 
     def test_candidate_chain(self):
-        cs = CourseTestCase_deps.courses
+        KLASS = self.__class__
+        cs = KLASS.courses
         cp = CoursePrerequisite.objects.create(course=cs[2], prerequisite=cs[3])
         self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2]]), True)
         cp.delete()
 
     def test_candidate_loop(self):
-        cs = CourseTestCase_deps.courses
+        KLASS = self.__class__
+        cs = KLASS.courses
         cp1 = CoursePrerequisite.objects.create(course=cs[2], prerequisite=cs[3])
         cp2 = CoursePrerequisite.objects.create(course=cs[3], prerequisite=cs[1])
         self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2]]), False)
@@ -73,7 +81,8 @@ class CourseTestCase_deps(TestCase):
         cp2.delete()
 
     def test_double_dep(self):
-        cs = CourseTestCase_deps.courses
+        KLASS = self.__class__
+        cs = KLASS.courses
         cp1 = CoursePrerequisite.objects.create(course=cs[2], prerequisite=cs[3])
         cp2 = CoursePrerequisite.objects.create(course=cs[5], prerequisite=cs[3])
         self.assertEqual(cs[1].are_candidate_prerequisites_valid([cs[2], cs[5]]), True)
@@ -81,7 +90,8 @@ class CourseTestCase_deps(TestCase):
         cp2.delete()
 
     def test_offset(self):
-        cs = CourseTestCase_deps.courses
+        KLASS = self.__class__
+        cs = KLASS.courses
 
         def cp(c, p):
             return CoursePrerequisite.objects.create(course=cs[c], prerequisite=cs[p])
@@ -98,19 +108,20 @@ class CourseTestCase_edit(TestCase):
 
     @classmethod
     def setUpTestData(cls):
+        KLASS = CourseTestCase_edit
+        super(KLASS, cls).setUpTestData()
         ad = createAdmin('foobar').profile
         m = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
-        CourseTestCase_edit.m1 = Major.objects.create(abbreviation='XYAZ',
-                                                      title='Bananas',
-                                                      contact=ad)
-        CourseTestCase_edit.major = m
+        KLASS.m1 = Major.objects.create(abbreviation='XYAZ', title='Bananas', contact=ad)
+        KLASS.major = m
 
-        CourseTestCase_edit.courses = {}
+        KLASS.courses = {}
         for i in range(1, 15):
-            CourseTestCase_edit.courses[i] = createCourse(m, str(i))
+            KLASS.courses[i] = createCourse(m, str(i))
 
     def test_editnumber(self):
-        c = CourseTestCase_edit.courses[1]
+        KLASS = self.__class__
+        c = KLASS.courses[1]
         self.assertEqual(c.catalog_number, '1')
         c.catalog_number = '923'
         c.save()
@@ -118,7 +129,8 @@ class CourseTestCase_edit(TestCase):
         self.assertEqual(c1.catalog_number, '923')
 
     def test_edittitle(self):
-        c = CourseTestCase_edit.courses[1]
+        KLASS = self.__class__
+        c = KLASS.courses[1]
         self.assertEqual(c.title, 'c1')
         c.title = 'my new name'
         c.save()
@@ -126,7 +138,8 @@ class CourseTestCase_edit(TestCase):
         self.assertEqual(c1.title, 'my new name')
 
     def test_editdescr(self):
-        c = CourseTestCase_edit.courses[1]
+        KLASS = self.__class__
+        c = KLASS.courses[1]
         self.assertEqual(c.description, 'course 1')
         c.description = 'amazing facts'
         c.save()
@@ -134,7 +147,8 @@ class CourseTestCase_edit(TestCase):
         self.assertEqual(c1.description, 'amazing facts')
 
     def test_editcredits(self):
-        c = CourseTestCase_edit.courses[1]
+        KLASS = self.__class__
+        c = KLASS.courses[1]
         self.assertEqual(c.credits_earned, 1.0)
         c.credits_earned = 6.4
         c.save()
@@ -142,9 +156,10 @@ class CourseTestCase_edit(TestCase):
         self.assertEqual(float(c1.credits_earned), 6.4)
 
     def test_edit_major(self):
-        c = CourseTestCase_edit.courses[1]
+        KLASS = self.__class__
+        c = KLASS.courses[1]
         self.assertEqual(c.major.title, 'Computer Science')
-        c.major = CourseTestCase_edit.m1
+        c.major = KLASS.m1
         c.save()
         c1 = Course.objects.get(id=1)
         self.assertEqual(c1.major_name, 'Bananas')

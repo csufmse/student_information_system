@@ -1,18 +1,18 @@
 from django.test import TestCase
-from datetime import datetime
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
                         Semester, Student, ClassLevel)
 
 from schooladmin.forms import (CourseEditForm, CourseCreationForm)
 
-from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
+from sis.tests.utils import *
 
 
 class CourseCreation_formtest(TestCase):
 
     @classmethod
-    def setUpTestData(self):
+    def setUpTestData(cls):
+        super(CourseCreation_formtest, cls).setUpTestData()
         ad = createAdmin('foobar').profile
         CourseCreation_formtest.m = Major.objects.create(abbreviation='ABCD',
                                                          title='The A, The B',
@@ -65,27 +65,26 @@ class CourseCreation_formtest(TestCase):
 class CourseEdit_formtest(TestCase):
 
     @classmethod
-    def setUpTestData(self):
+    def setUpTestData(cls):
+        KLASS = CourseEdit_formtest
+        super(CourseEdit_formtest, cls).setUpTestData()
         ad = createAdmin('foobar').profile
-        CourseEdit_formtest.m = Major.objects.create(abbreviation='ABCD',
-                                                     title='The A, The B',
-                                                     contact=ad)
-        CourseEdit_formtest.m1 = Major.objects.create(abbreviation='ASDF',
-                                                      title='The A, The B',
-                                                      contact=ad)
-        CourseEdit_formtest.c1 = createCourse(CourseEdit_formtest.m, 101)
+        KLASS.m = Major.objects.create(abbreviation='ABCD', title='The A, The B', contact=ad)
+        KLASS.m1 = Major.objects.create(abbreviation='ASDF', title='The A, The B', contact=ad)
+        KLASS.c1 = createCourse(KLASS.m, 101)
 
     def test_valid_data(self):
+        KLASS = self.__class__
         form = CourseEditForm(
             {
-                'major': CourseEdit_formtest.m1.id,
+                'major': KLASS.m1.id,
                 'title': 'the titlicious',
                 'catalog_number': '102',
                 'description': 'descr',
                 'credits_earned': '3.0',
                 'prereqs': [],
             },
-            instance=CourseEdit_formtest.c1)
+            instance=KLASS.c1)
         self.assertEqual(form.errors, {})
         self.assertTrue(form.is_valid())
         c2 = form.save()
@@ -96,32 +95,34 @@ class CourseEdit_formtest(TestCase):
         self.assertEqual(c2.credits_earned, 3.0)
 
     def test_null_catnumber(self):
+        KLASS = self.__class__
         form = CourseEditForm(
             {
-                'major': CourseEdit_formtest.m1.id,
+                'major': KLASS.m1.id,
                 'title': 'the titlicious',
                 'catalog_number': '',
                 'description': 'descr',
                 'credits_earned': '3.0',
                 'prereqs': [],
             },
-            instance=CourseEdit_formtest.c1)
+            instance=KLASS.c1)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {
             'catalog_number': ['This field is required.'],
         })
 
     def test_long_catnumber(self):
+        KLASS = self.__class__
         form = CourseEditForm(
             {
-                'major': CourseEdit_formtest.m1.id,
+                'major': KLASS.m1.id,
                 'title': 'the titlicious',
                 'catalog_number': '123451234512345123451234512345',
                 'description': 'descr',
                 'credits_earned': '3.0',
                 'prereqs': [],
             },
-            instance=CourseEdit_formtest.c1)
+            instance=KLASS.c1)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {
             'catalog_number': ['Ensure this value has at most 20 characters (it has 30).'],

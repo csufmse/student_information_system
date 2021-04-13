@@ -1,12 +1,25 @@
 
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
-{% load sis-filter %}
+{% load django_tables2 %}
 
 {% block content %}
-{% sis_filter 'sections' %}
-    <script>
-    const handler = insertScrollableDivs(applyHandlers=true);
-    handler();
+    <form name="semester" method="post" action="{% url 'professor:sections' %}">
+      {% csrf_token %}
+      <select name="semester">
+      {% for semester in semesters %}
+        <option value="{{semester}}">{{semester}}</option>
+      {% endfor %}
+      </select>
+      <input class="btn btn-primary" type="submit" value="Submit">
+    </form>
+
+    <h2>{{semester}}</h2>
+    <div class="data-table-alt">
+      {% render_table table 'django_tables2/bootstrap.html' %}
+    </div>
+
+  <script>
+    addClickHandlers("{% url 'professor:section' sectionid=1234599 %}", "section_row");
   </script>
 {% endblock content %}

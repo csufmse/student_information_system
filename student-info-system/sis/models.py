@@ -2,18 +2,18 @@ from datetime import timedelta, datetime
 
 import pytz
 from django.contrib.auth.models import User, AbstractUser
+from django.core.exceptions import *
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.db.models import Case, ExpressionWrapper, F, Q, Sum, Max, Subquery, Value, When, Count
 from django.db.models.fields import (CharField, DateField, DecimalField, FloatField, IntegerField)
 from django.db.models import Exists, OuterRef
-from django.db.models.functions import Concat, Cast
+from django.db.models.functions import Concat
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.utils import timezone
 
 from isbn_field import ISBNField
-from phone_field import PhoneField
 
 
 class UpperField(models.CharField):
@@ -227,11 +227,7 @@ class Profile(models.Model):
 
     @property
     def name(self):
-        return self.user.first_name + ' ' + self.user.last_name
-
-    @property
-    def name_sort(self):
-        return self.user.last_name + ', ' + self.user.first_name
+        return self.user.get_full_name()
 
     def __str__(self):
         return self.name
@@ -289,7 +285,7 @@ class Student(models.Model):
 
     @property
     def name(self):
-        return f'{self.profile.user.first_name} {self.profile.user.last_name}'
+        return self.profile.name
 
     def __str__(self):
         return self.name
@@ -625,27 +621,7 @@ class CoursePrerequisite(models.Model):
         return self.course.name + ' requires ' + self.prerequisite.name
 
 
-class SemesterManager(models.Manager):
-
-    def get_queryset(self):
-        """Overrides the models.Manager method"""
-        qs = super(SemesterManager, self).get_queryset().annotate(
-            session_order=Case(When(Q(session='FA'), then=0),
-                               When(Q(session='WI'), then=1),
-                               When(Q(session='SP'), then=2),
-                               When(Q(session='SU'), then=3),
-                               default=None,
-                               output_field=IntegerField()),
-            semester_order=Concat(Cast('year', CharField()),
-                                  Value('-'),
-                                  Cast('session_order', CharField()),
-                                  output_field=CharField()),
-        )
-        return qs
-
-
 class Semester(models.Model):
-    objects = SemesterManager()
 
     FALL = 'FA'
     WINTER = 'WI'
@@ -671,14 +647,14 @@ class Semester(models.Model):
             at = datetime.now()
         try:
             sem = Semester.objects.get(date_started__lte=at, date_ended__gte=at)
-        except self.model.DoesNotExist:
+        except DoesNotExist:
             sem = None
 
         if sem is None:
             try:
                 sem = Semester.objects.get(date_registration_opens__lte=at,
                                            date_registration_closes__gte=at)
-            except self.model.DoesNotExist:
+            except DoesNotExist:
                 sem = None
         return sem
 
@@ -695,15 +671,18 @@ class Semester(models.Model):
                                            MaxValueValidator(2300)])
 
     @property
+    def session_order(self):
+        return Semester.SESSIONS_ORDER.index(self.session)
+
+    @property
     def session_name(self):
         return Semester.name_for_session(self.session)
 
     def professors_teaching(self):
-        return User.annotated().filter(profile__professor__section__semester=self.id).distinct()
+        return User.objects.filter(profile__professor__section__semester=self.id).distinct()
 
     def students_attending(self):
-        return User.annotated().filter(
-            profile__student__semesterstudent__semester=self.id).distinct()
+        return User.objects.filter(profile__student__semesterstudent__semester=self.id).distinct()
 
     def registration_open(self, when=None):
         if when is None:
@@ -733,11 +712,6 @@ class Semester(models.Model):
     @property
     def name(self):
         return str(self.session) + "-" + str(self.year)
-
-    @property
-    def name_sort(self):
-        return str(self.year) + '-' + str(Semester.SESSIONS_ORDER.index(
-            self.session)) + self.session
 
     def __str__(self):
         return self.name
@@ -928,6 +902,13 @@ class Section(models.Model):
     course_name.fget.short_description = 'Course Name'
 
     @property
+    def course_descr(self):
+        return f'{self.course.major.abbreviation}-{self.course.catalog_number}: ' +\
+               f'{self.course.title}'
+
+    course_descr.fget.short_description = 'Course Description'
+
+    @property
     def professor_name(self):
         return self.professor.name
 
@@ -1113,46 +1094,3 @@ class Message(models.Model):
         return self.message_type in (
             Message.DROP_REQUEST_TYPE, Message.MAJOR_CHANGE_TYPE
         ) and self.time_handled is None and self.time_sent < as_of - timedelta(days=7)
-
-
-# making it so users know about roles, but without overhead of subclassing
-
-
-def access_role(self):
-    return self.profile.rolename
-
-
-def name(self):
-    return self.profile.name
-
-
-def student_gpa(self):
-    return self.profile.student.gpa()
-
-
-User.add_to_class('student_gpa', student_gpa)
-User.add_to_class('access_role', access_role)
-User.add_to_class('name', name)
-
-# end
-
-
-# Extend User to return annotated User objects
-def uannotated(cls):
-    return User.objects.exclude(profile__role=Profile.ACCESS_NONE).annotate(
-        role=F('profile__role',),
-        name=Concat(F("first_name"), Value(' '), F("last_name")),
-        name_sort=Concat(F("last_name"), Value(', '), F("first_name")),
-    )
-
-
-User.annotated = classmethod(uannotated)
-
-
-def sannotated(cls):
-    return Section.objects.annotate(course_descr=Concat(F('course__major'), Value('-'),
-                                                        F('catalog_number'), Value(': '),
-                                                        F('course__title')),)
-
-
-Section.annotated = classmethod(sannotated)
