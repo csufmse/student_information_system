@@ -40,7 +40,7 @@ def createData():
             # sort of interesting...
             # if len(prereqs_met) < len(sections):
             #     print(
-            #         f'student {semstud.student}, {semstud.semester.name_sort}, ' +
+            #         f'student {semstud.student}, {semstud.semester}, ' +
             #         f'{len(sections)-len(prereqs_met)} '
             #         + 'eliminated')
 

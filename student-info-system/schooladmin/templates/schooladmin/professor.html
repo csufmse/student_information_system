@@ -12,8 +12,8 @@
   <dd>{{ user.username }}</dd>
   <dt>Email</dt>
   <dd>{{ user.email }}</dd>
-  <dt>Professor Type</dt>
-  <dd>{{ user.access_role }}</dd>
+  <dt>Role</dt>
+  <dd>{{ user.profile.role }}</dd>
   <dt>Teaching Department</dt>
   <dd><a href="{% url 'schooladmin:major' majorid=user.profile.professor.major.id %}">{{ user.profile.professor.major.abbreviation }}: {{  user.profile.professor.major.name }}</a></dd>
   <dt>Enabled?</dt>

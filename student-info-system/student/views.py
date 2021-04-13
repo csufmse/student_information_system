@@ -2,6 +2,7 @@ from datetime import date, datetime
 
 from django.contrib import messages
 from django.db import transaction
+from django.db.models import Sum, Count
 from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse
 
@@ -44,7 +45,7 @@ def current_schedule_view(request):
             request.user.profile.student.sectionstudent_set.filter(
                 section__semester=current_semester),
         'name':
-            request.user.profile.student.name,
+            request.user.profile.name,
         'semester':
             current_semester,
     }
@@ -133,28 +134,6 @@ def profile(request):
     }
     data.update(
         filtered_table2(
-            name='semesters',
-            qs=the_user.profile.student.semesters.all(),
-            filter=SemesterFilter,
-            table=SemestersSummaryTable,
-            request=request,
-            wrap_list=False,
-            self_url=reverse('student:profile'),
-            click_url=reverse('student:semester', args=[DUMMY_ID]),
-        ))
-
-    data.update(
-        filtered_table2(
-            name='majorcourses',
-            qs=the_user.profile.student.requirements_met_list(),
-            filter=RequirementsCourseFilter,
-            table=MajorCoursesMetTable,
-            request=request,
-            self_url=reverse('student:profile'),
-            click_url=reverse('student:course', args=[DUMMY_ID]),
-        ))
-    data.update(
-        filtered_table2(
             name='received',
             qs=the_user.profile.sent_to.filter(time_archived__isnull=True),
             filter=ReceivedMessageFilter,
@@ -193,6 +172,32 @@ def history(request):
             wrap_list=False,
             self_url=reverse('student:history'),
             click_url=reverse('student:sectionstudent', args=[DUMMY_ID]),
+        ))
+    data.update(
+        filtered_table2(
+            name='semesters',
+            qs=the_user.profile.student.semesters.all(),
+            filter=SemesterFilter,
+            table=SemestersSummaryTable,
+            request=request,
+            self_url=reverse('student:profile'),
+            click_url=reverse('student:semester', args=[DUMMY_ID]),
+        ))
+
+    remaining = the_user.profile.student.requirements_met_list()
+    stats = remaining.filter(met=False).aggregate(remaining_course_count=Count('id'),
+                                                  remaining_credit_count=Sum('credits_earned'))
+    data.update(stats)
+
+    data.update(
+        filtered_table2(
+            name='majorcourses',
+            qs=remaining,
+            filter=RequirementsCourseFilter,
+            table=MajorCoursesMetTable,
+            request=request,
+            self_url=reverse('student:profile'),
+            click_url=reverse('student:course', args=[DUMMY_ID]),
         ))
 
     return render(request, 'student/history.html', data)
@@ -346,10 +351,15 @@ def test_majors(request):
         'major': the_major,
         'major_form': major_form,
     }
+    candidate_remaining = the_user.profile.student.requirements_met_list(major=the_major)
+    stats = candidate_remaining.filter(met=False).aggregate(
+        remaining_course_count=Count('id'), remaining_credit_count=Sum('credits_earned'))
+    data.update(stats)
+
     data.update(
         filtered_table2(
             name='majorcourses',
-            qs=the_user.profile.student.requirements_met_list(major=the_major),
+            qs=candidate_remaining,
             filter=RequirementsCourseFilter,
             table=MajorCoursesMetTable,
             request=request,
