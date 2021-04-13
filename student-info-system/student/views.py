@@ -10,7 +10,7 @@ from schooladmin.views import major as admin_major
 from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
 
-from sis.utils import filtered_table2
+from sis.utils import filtered_table2, DUMMY_ID
 
 from sis.tables.courses import CoursesTable, MajorCoursesMetTable
 from sis.tables.messages import MessageSentTable, MessageReceivedTable
@@ -163,7 +163,7 @@ def profile(request):
             wrap_list=False,
             self_url=reverse('student:profile'),
         ))
-    data.update2(
+    data.update(
         filtered_table2(
             name='sent',
             qs=the_user.profile.sent_by.filter(time_archived__isnull=True),
@@ -313,7 +313,7 @@ def secitems(request):
     }
     data.update(
         filtered_table2(
-            name='secitem',
+            name='secitems',
             qs=the_user.profile.student.section_reference_items_for(the_semester),
             filter=SectionItemFilter,
             table=SectionReferenceItemsTable,
