@@ -230,10 +230,6 @@ class Profile(models.Model):
     def name(self):
         return self.user.first_name + ' ' + self.user.last_name
 
-    @property
-    def name_sort(self):
-        return self.user.last_name + ', ' + self.user.first_name
-
     def __str__(self):
         return self.name
 
@@ -626,27 +622,7 @@ class CoursePrerequisite(models.Model):
         return self.course.name + ' requires ' + self.prerequisite.name
 
 
-class SemesterManager(models.Manager):
-
-    def get_queryset(self):
-        """Overrides the models.Manager method"""
-        qs = super(SemesterManager, self).get_queryset().annotate(
-            session_order=Case(When(Q(session='FA'), then=0),
-                               When(Q(session='WI'), then=1),
-                               When(Q(session='SP'), then=2),
-                               When(Q(session='SU'), then=3),
-                               default=None,
-                               output_field=IntegerField()),
-            semester_order=Concat(Cast('year', CharField()),
-                                  Value('-'),
-                                  Cast('session_order', CharField()),
-                                  output_field=CharField()),
-        )
-        return qs
-
-
 class Semester(models.Model):
-    objects = SemesterManager()
 
     FALL = 'FA'
     WINTER = 'WI'
@@ -696,6 +672,10 @@ class Semester(models.Model):
                                            MaxValueValidator(2300)])
 
     @property
+    def session_order(self):
+        return Semester.SESSIONS_ORDER.index(self.session)
+
+    @property
     def session_name(self):
         return Semester.name_for_session(self.session)
 
@@ -734,11 +714,6 @@ class Semester(models.Model):
     @property
     def name(self):
         return str(self.session) + "-" + str(self.year)
-
-    @property
-    def name_sort(self):
-        return str(self.year) + '-' + str(Semester.SESSIONS_ORDER.index(
-            self.session)) + self.session
 
     def __str__(self):
         return self.name
@@ -1143,7 +1118,6 @@ def uannotated(cls):
     return User.objects.exclude(profile__role=Profile.ACCESS_NONE).annotate(
         role=F('profile__role',),
         name=Concat(F("first_name"), Value(' '), F("last_name")),
-        name_sort=Concat(F("last_name"), Value(', '), F("first_name")),
     )
 
 

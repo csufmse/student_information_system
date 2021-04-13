@@ -1,11 +1,10 @@
 import django_tables2 as tables
 
 
-# mix in a method to get specified CSS row class
+# mix in a method to get specified CSS row class. Used by filtered_table2
 def row_class(cls):
     ra = getattr(cls, 'Meta').row_attrs
     return ra['class']
-
 
 tables.Table.row_class = classmethod(row_class)
 
@@ -41,17 +40,6 @@ class ClassyDateTimeColumn(tables.DateTimeColumn):
             css_class_base = kwargs.pop('css_class_base', None)
             kwargs['attrs'] = field_css_classes(css_class_base)
         super(ClassyDateTimeColumn, self).__init__(*args, **kwargs)
-
-
-# For User names we want to show the full name ("first last") but sort by "last, first"
-class NameColumn(ClassyColumn):
-
-    def render(self, record):
-        return record.name
-
-    def order(self, queryset, is_descending):
-        queryset = queryset.order_by(("-" if is_descending else "") + "name_sort")
-        return (queryset, True)
 
 
 class AbilityColumn(tables.BooleanColumn):

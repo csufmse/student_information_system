@@ -644,7 +644,6 @@ class Semester_tests(TestCase):
         s2 = Semester.objects.get(year=2000)
 
         self.assertEqual(s2.session_name, 'Fall')
-        self.assertEqual(s2.semester_order, '2000-0')
         self.assertEqual(s2.session_order, 0)
 
 

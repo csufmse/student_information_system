@@ -176,7 +176,6 @@ def student(request, userid):
             filter=SemesterFilter,
             table=SemestersSummaryTable,
             request=request,
-            wrap_list=False,
             self_url=reverse('schooladmin:student', args=[userid]),
             click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
         ))

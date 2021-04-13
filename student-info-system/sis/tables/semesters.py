@@ -8,11 +8,11 @@ class SemestersTable(tables.Table):
     semester = ClassyColumn(verbose_name='Semester',
                             css_class_base='semester',
                             accessor='name',
-                            order_by=('semester_order'))
+                            order_by=('year','session_order'))
     session = ClassyColumn(verbose_name='Session',
                            css_class_base='session',
                            accessor='session',
-                           order_by=('session_order'))
+                           order_by=('session_order',))
     year = ClassyColumn(css_class_base='year')
     date_registration_opens = ClassyColumn(verbose_name='Registration Opens',
                                            css_class_base='date')
@@ -31,19 +31,11 @@ class SemestersTable(tables.Table):
         row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}
 
 
-class SemestersSummaryTable(tables.Table):
-    year = ClassyColumn(verbose_name='Year', css_class_base='year')
-    session = ClassyColumn(verbose_name='Semester',
-                           css_class_base='session',
-                           accessor='name',
-                           order_by=('semester_order'))
-
+class SemestersSummaryTable(SemestersTable):
     class Meta:
         model = Semester
         template_name = "django_tables2/bootstrap.html"
-        fields = (
-            'year',
-            'session',
-        )
+        exclude = ('date_registration_opens','id',
+                  'date_registration_closes', 'date_started', 'date_last_drop', 'date_ended',)
         attrs = {"class": 'semester_table'}
         row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}

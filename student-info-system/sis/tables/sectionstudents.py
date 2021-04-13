@@ -47,7 +47,7 @@ class SectionStudentsTable(tables.Table):
     semester = ClassyColumn(verbose_name='Semester',
                             css_class_base='semester',
                             accessor='name',
-                            order_by=('semester_order'))
+                            order_by=('semester.year','semester.session_order'))
     course = ClassyColumn(accessor='course', css_class_base='course')
     username = ClassyColumn(accessor='student__profile__user__username',
                             css_class_base='username')

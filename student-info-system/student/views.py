@@ -180,7 +180,6 @@ def history(request):
             filter=SemesterFilter,
             table=SemestersSummaryTable,
             request=request,
-            wrap_list=False,
             self_url=reverse('student:profile'),
             click_url=reverse('student:semester', args=[DUMMY_ID]),
         ))
