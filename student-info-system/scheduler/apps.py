@@ -1,9 +1,8 @@
 from django.apps import AppConfig
 
 
-class SchooladminConfig(AppConfig):
-    name = 'schooladmin'
-    label = 'admin.school'
+class SchedulerConfig(AppConfig):
+    name = 'scheduler'
 
     def ready(self):
         from . import scheduler
