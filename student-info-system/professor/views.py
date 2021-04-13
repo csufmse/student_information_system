@@ -22,11 +22,25 @@ def index(request):
 @role_login_required(Profile.ACCESS_PROFESSOR)
 def sections(request):
     the_prof = request.user.profile.professor
-    sections_qs = Section.objects.filter(professor=the_prof).exclude(status=Section.REG_CLOSED)
-    sections_table = ProfSectionsTable(sections_qs)
-    RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(sections_table)
+    sections_qs = Section.objects.filter(professor=the_prof).order_by('-semester')
+    sections = {}
+    section_by_sem = {}
+    # set up our sectons qs dictionary by semester
+    for sect in sections_qs:
+        if sect.semester.name not in sections.keys():
+            sections[sect.semester.name] = [sect.semester.id]
 
-    return render(request, 'professor/sections.html', {'sections': sections_table})
+    # fill in our sections dictionary with tables by semester
+    for name, sem in sections.items():
+        qs = sections_qs.filter(semester=sem[0])
+        table = ProfSectionsTable(qs)
+        RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
+        sections[name].append(table)
+#    if request.method == 'POST':
+#        sem = request.POST.get('semester')
+#        sections[sem
+
+    return render(request, 'professor/sections.html', {'sections': sections})
 
 
 @role_login_required(Profile.ACCESS_PROFESSOR)
@@ -63,15 +77,18 @@ def student(request, studentid):
 @role_login_required(Profile.ACCESS_PROFESSOR)
 def add_reference(request, sectionid):
     data = {'sectionid': sectionid}
+
     if request.method == 'POST':
         form = ReferenceItemForm(request.POST)
         data['form'] = form
+
         if form.is_valid():
             new_ref = form.save(commit=False)
             new_ref.professor = request.user.profile.professor
             section = Section.objects.get(id=sectionid)
             course = Course.objects.get(id=section.course.id)
             new_ref.course = course
+
             try:
                 new_ref.save()
             except IntegrityError as e:
@@ -81,10 +98,18 @@ def add_reference(request, sectionid):
                     messages.error(request,
                                    "There was a problem saving the new item to the database.")
                 return render(request, 'professor/reference_add.html', data)
-            for section in course.section_set.all():
-                section.refresh_reference_items()
+
+            # Specify all current and future sections by reg date or only current sections by reg date
+            if request.POST.get('semester_future') == 'future':
+                sects_to_update = course.section_set.exclude(status__in=[Section.REG_CLOSED, Section.CANCELLED])
+            else:
+                sects_to_update = course.section_set.filter(status=Section.REG_OPEN)
+
+            for sect in sects_to_update:
+                sect.refresh_reference_items()
             messages.success(request, "New reference item successfully created")
             return redirect('professor:section', sectionid)
+
         else:
             messages.error(request, "Please correct the error(s) below")
             return render(request, 'professor/reference_add.html', data)

@@ -4,12 +4,13 @@
 {% load render_table from django_tables2 %}
 
 {% block content %}
-<div class="data-table-alt scrollify-me">
-  {% render_table sections 'django_tables2/bootstrap.html' %}
-</div>
+  {% for semester, table in sections.items %}
+    <h2>{{semester}}</h2>
+    <div class="data-table-alt">
+      {% render_table table.1 'django_tables2/bootstrap.html' %}
+    </div>
+  {% endfor %}
   <script>
-    const handler = insertScrollableDivs(applyHandlers=true);
-    handler();
     addClickHandlers("{% url 'professor:section' sectionid=1234599 %}", "section_row");
   </script>
 {% endblock content %}
