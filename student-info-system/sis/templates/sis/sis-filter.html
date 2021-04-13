@@ -1,0 +1,20 @@
+{% load render_table from django_tables2 %}
+{% load bootstrap3 %}
+
+{% if filt.filter %}
+    <form id="{{ filt.name }}" action="" method="get" class="form form-inline" autocomplete="off">
+        {% bootstrap_form form=filt.filter.form layout='inline' %}
+        <button class="btn btn-primary">Filter</button>
+        {% if filt.has_filter %}
+            <a class="btn btn-success" href="{{ filt.self_url }}">Clear</a>
+        {% endif %}
+    </form>
+{% endif %}
+<div class="{{ filt.div_classes }}">
+    {% render_table filt.table 'django_tables2/bootstrap.html' %}
+</div>
+{%  if filt.click_url %}
+    <script>
+        addClickHandlers("{{ filt.click_url }}", "{{ filt.row_class }}");
+    </script>
+{% endif %}

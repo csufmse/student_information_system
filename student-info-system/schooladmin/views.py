@@ -11,18 +11,22 @@ from django.utils.html import format_html
 from django.urls import reverse
 
 from sis.authentication_helpers import role_login_required
+
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, Semester, Student,
                         SectionStudent, Profile, Message)
-from sis.utils import filtered_table
 
-from .filters import (MajorFilter, SectionFilter, SemesterFilter, UserFilter, StudentFilter,
-                      ItemFilter)
+from sis.utils import filtered_table, filtered_table2, DUMMY_ID
 
 from sis.filters.course import CourseFilter
+from sis.filters.major import MajorFilter
 from sis.filters.message import (FullSentMessageFilter, FullReceivedMessageFilter,
                                  SentMessageFilter, ReceivedMessageFilter)
+from sis.filters.referenceitem import ItemFilter
+from sis.filters.section import SectionFilter
 from sis.filters.sectionreferenceitem import SectionItemFilter
 from sis.filters.sectionstudent import SectionStudentFilter
+from sis.filters.semester import SemesterFilter
+from sis.filters.user import StudentFilter, UserFilter
 
 from .forms import (
     CourseCreationForm,
@@ -64,12 +68,15 @@ def index(request):
 def users(request):
     return render(
         request, 'schooladmin/users.html',
-        filtered_table(
+        filtered_table2(
             name='users',
             qs=User.annotated(),
             filter=UserFilter,
             table=FullUsersTable,
             request=request,
+            scrollable=True,
+            self_url=reverse('schooladmin:users'),
+            click_url=reverse('schooladmin:user', args=[DUMMY_ID]),
         ))
 
 
@@ -77,12 +84,15 @@ def users(request):
 def students(request):
     return render(
         request, 'schooladmin/students.html',
-        filtered_table(
+        filtered_table2(
             name='students',
             qs=User.annotated().filter(profile__role=Profile.ACCESS_STUDENT),
             filter=StudentFilter,
             table=StudentsTable,
             request=request,
+            scrollable=True,
+            self_url=reverse('schooladmin:students'),
+            click_url=reverse('schooladmin:student', args=[DUMMY_ID]),
         ))
 
 
@@ -114,22 +124,24 @@ def user(request, userid):
         'user': the_user,
     }
     data.update(
-        filtered_table(
+        filtered_table2(
             name='received',
             qs=the_user.profile.sent_to.all(),
             filter=FullReceivedMessageFilter,
             table=MessageReceivedTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('schooladmin:user', args=[userid]),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='sent',
             qs=the_user.profile.sent_by.all(),
             filter=FullSentMessageFilter,
             table=MessageSentTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('schooladmin:user', args=[userid]),
         ))
 
     return render(request, 'schooladmin/user.html', data)
@@ -158,57 +170,67 @@ def student(request, userid):
         'user': the_user,
     }
     data.update(
-        filtered_table(
+        filtered_table2(
             name='semesters',
             qs=the_user.profile.student.semesters.all(),
             filter=SemesterFilter,
             table=SemestersSummaryTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('schooladmin:student', args=[userid]),
+            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
         ))
 
     data.update(
-        filtered_table(
+        filtered_table2(
             name='history',
             qs=the_user.profile.student.course_history(),
             filter=SectionStudentFilter,
             table=StudentHistoryTable,
             request=request,
+            self_url=reverse('schooladmin:student', args=[userid]),
+            click_url=reverse('schooladmin:sectionstudent', args=[DUMMY_ID]),
         ))
 
     data.update(
-        filtered_table(
+        filtered_table2(
             name='remaining',
             qs=the_user.profile.student.remaining_required_courses(),
             filter=CourseFilter,
             table=CoursesTable,
             request=request,
+            self_url=reverse('schooladmin:student', args=[userid]),
+            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='majorcourses',
             qs=the_user.profile.student.requirements_met_list(),
             filter=CourseFilter,
             table=MajorCoursesMetTable,
             request=request,
+            self_url=reverse('schooladmin:student', args=[userid]),
+            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='received',
             qs=the_user.profile.sent_to.filter(time_archived__isnull=True),
             filter=ReceivedMessageFilter,
             table=MessageReceivedTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('schooladmin:student', args=[userid]),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='sent',
             qs=the_user.profile.sent_by.filter(time_archived__isnull=True),
             filter=SentMessageFilter,
             table=MessageSentTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('schooladmin:student', args=[userid]),
         ))
 
     return render(request, 'schooladmin/student.html', data)
@@ -237,48 +259,56 @@ def professor(request, userid):
         'user': the_user,
     }
     data.update(
-        filtered_table(
+        filtered_table2(
             name='semesters',
             qs=the_user.profile.professor.semesters_teaching(),
             filter=SemesterFilter,
             table=SemestersSummaryTable,
             request=request,
+            self_url=reverse('schooladmin:professor', args=[userid]),
+            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
         ))
 
     data.update(
-        filtered_table(
+        filtered_table2(
             name='sections',
             qs=the_user.profile.professor.section_set,
             filter=SectionFilter,
             table=SectionsTable,
             request=request,
+            self_url=reverse('schooladmin:professor', args=[userid]),
+            click_url=reverse('schooladmin:section', args=[DUMMY_ID]),
         ))
 
     data.update(
-        filtered_table(
+        filtered_table2(
             name='items',
             qs=the_user.profile.professor.referenceitem_set,
             filter=ItemFilter,
             table=ProfReferenceItemsTable,
             request=request,
+            self_url=reverse('schooladmin:professor', args=[userid]),
+            click_url=reverse('schooladmin:professor_item', args=[userid, DUMMY_ID]),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='received',
             qs=the_user.profile.sent_to.filter(time_archived__isnull=True),
             filter=ReceivedMessageFilter,
             table=MessageReceivedTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('schooladmin:professor', args=[userid]),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='sent',
             qs=the_user.profile.sent_by.filter(time_archived__isnull=True),
             filter=SentMessageFilter,
             table=MessageSentTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('schooladmin:professor', args=[userid]),
         ))
 
     return render(request, 'schooladmin/professor.html', data)
@@ -298,12 +328,14 @@ def professor_items(request, userid):
         'user': the_user,
     }
     data.update(
-        filtered_table(
+        filtered_table2(
             name='items',
             qs=the_user.profile.professor.referenceitem_set,
             filter=ItemFilter,
             table=ProfReferenceItemsTable,
             request=request,
+            self_url=reverse('schooladmin:professor_items', args=[userid]),
+            click_url=reverse('schooladmin:professor_item', args=[userid, DUMMY_ID]),
         ))
 
     return render(request, 'schooladmin/professor_items.html', data)
@@ -527,12 +559,15 @@ def user_new(request):
 def majors(request):
     return render(
         request, 'schooladmin/majors.html',
-        filtered_table(
+        filtered_table2(
             name='majors',
             qs=Major.objects,
             filter=MajorFilter,
             table=MajorsTable,
             request=request,
+            scrollable=True,
+            self_url=reverse('schooladmin:majors'),
+            click_url=reverse('schooladmin:major', args=[DUMMY_ID]),
         ))
 
 
@@ -551,40 +586,48 @@ def major(request, majorid):
         'permit_edit': request.user.profile.role == Profile.ACCESS_ADMIN,
     }
     data.update(
-        filtered_table(
+        filtered_table2(
             name='profs',
             qs=User.annotated().filter(profile__professor__major=the_major),
             filter=UserFilter,
             table=UsersTable,
             request=request,
+            self_url=reverse('schooladmin:major', args=[majorid]),
+            click_url=reverse('schooladmin:professor', args=[DUMMY_ID]),
         ))
 
     data.update(
-        filtered_table(
+        filtered_table2(
             name='required',
             qs=Course.objects.filter(required_by=the_major),
             filter=CourseFilter,
             table=CoursesTable,
             request=request,
+            self_url=reverse('schooladmin:major', args=[majorid]),
+            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
 
     data.update(
-        filtered_table(
+        filtered_table2(
             name='offered',
             qs=Course.objects.filter(major=the_major),
             filter=CourseFilter,
             table=CoursesForMajorTable,
             request=request,
+            self_url=reverse('schooladmin:major', args=[majorid]),
+            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
 
     if include_students:
         data.update(
-            filtered_table(
+            filtered_table2(
                 name='students',
                 qs=User.annotated().filter(profile__student__major=the_major),
                 filter=UserFilter,
                 table=StudentInMajorTable,
                 request=request,
+                self_url=reverse('schooladmin:major', args=[majorid]),
+                click_url=reverse('schooladmin:student', args=[DUMMY_ID]),
             ))
 
     return render(request, 'schooladmin/major.html', data)
@@ -633,12 +676,15 @@ def major_new(request):
 def courses(request):
     return render(
         request, 'schooladmin/courses.html',
-        filtered_table(
+        filtered_table2(
             name='courses',
             qs=Course.objects.all(),
             filter=CourseFilter,
             table=CoursesTable,
             request=request,
+            scrollable=True,
+            self_url=reverse('schooladmin:courses'),
+            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
 
 
@@ -653,30 +699,36 @@ def course(request, courseid):
         'course': the_course,
     }
     data.update(
-        filtered_table(
+        filtered_table2(
             name='sections',
             qs=Section.objects.filter(course=the_course),
             filter=SectionFilter,
             table=SectionForClassTable,
             request=request,
+            self_url=reverse('schooladmin:course', args=[courseid]),
+            click_url=reverse('schooladmin:section', args=[DUMMY_ID]),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='prereqs',
             qs=Course.objects.filter(a_prerequisite__course=the_course),
             filter=CourseFilter,
             table=CoursesTable,
             request=request,
             page_size=5,
+            self_url=reverse('schooladmin:course', args=[courseid]),
+            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='neededby',
             qs=Course.objects.filter(a_course__prerequisite=the_course),
             filter=CourseFilter,
             table=CoursesTable,
             request=request,
             page_size=10,
+            self_url=reverse('schooladmin:course', args=[courseid]),
+            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
 
     return render(request, 'schooladmin/course.html', data)
@@ -726,12 +778,15 @@ def course_section_new(request, courseid):
 def semesters(request):
     return render(
         request, 'schooladmin/semesters.html',
-        filtered_table(
+        filtered_table2(
             name='semesters',
             qs=Semester.objects.all(),
             filter=SemesterFilter,
             table=SemestersTable,
             request=request,
+            scrollable=True,
+            self_url=reverse('schooladmin:semesters'),
+            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
         ))
 
 
@@ -746,28 +801,34 @@ def semester(request, semester_id):
         'semester': the_semester,
     }
     data.update(
-        filtered_table(
+        filtered_table2(
             name='sections',
             qs=Section.objects.filter(semester=the_semester),
             filter=SectionFilter,
             table=SectionsTable,
             request=request,
+            self_url=reverse('schooladmin:semester', args=[semester_id]),
+            click_url=reverse('schooladmin:section', args=[DUMMY_ID]),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='students',
             qs=the_semester.students_attending(),
             filter=StudentFilter,
             table=StudentsTable,
             request=request,
+            self_url=reverse('schooladmin:semester', args=[semester_id]),
+            click_url=reverse('schooladmin:student', args=[DUMMY_ID]),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='professors',
             qs=the_semester.professors_teaching(),
             filter=UserFilter,
             table=UsersTable,
             request=request,
+            self_url=reverse('schooladmin:semester', args=[semester_id]),
+            click_url=reverse('schooladmin:professor', args=[DUMMY_ID]),
         ))
 
     return render(request, 'schooladmin/semester.html', data)
@@ -826,12 +887,15 @@ def semester_section_new(request, semester_id):
 def sections(request):
     return render(
         request, 'schooladmin/sections.html',
-        filtered_table(
+        filtered_table2(
             name='sections',
             qs=Section.objects.all(),
             filter=SectionFilter,
             table=SectionsTable,
             request=request,
+            scrollable=True,
+            self_url=reverse('schooladmin:sections'),
+            click_url=reverse('schooladmin:section', args=[DUMMY_ID]),
         ))
 
 
@@ -846,20 +910,23 @@ def section(request, sectionid):
         'section': the_section,
     }
     data.update(
-        filtered_table(
-            name='secstud',
+        filtered_table2(
+            name='secstuds',
             qs=SectionStudent.objects.filter(section=the_section),
             filter=SectionStudentFilter,
             table=StudentInSectionTable,
             request=request,
+            self_url=reverse('schooladmin:section', args=[sectionid]),
+            click_url=reverse('schooladmin:sectionstudent', args=[DUMMY_ID]),
         ))
     data.update(
-        filtered_table(
-            name='secitem',
+        filtered_table2(
+            name='secitems',
             qs=the_section.sectionreferenceitem_set,
             filter=SectionItemFilter,
             table=ReferenceItemsForSectionTable,
             request=request,
+            self_url=reverse('schooladmin:section', args=[sectionid]),
         ))
 
     return render(request, 'schooladmin/section.html', data)
@@ -1052,22 +1119,24 @@ def profile(request):
         'user': the_user,
     }
     data.update(
-        filtered_table(
+        filtered_table2(
             name='received',
             qs=the_user.profile.sent_to.all(),
             filter=FullReceivedMessageFilter,
             table=MessageReceivedTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('schooladmin:profile'),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='sent',
             qs=the_user.profile.sent_by.all(),
             filter=FullSentMessageFilter,
             table=MessageSentTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('schooladmin:profile'),
         ))
 
     return render(request, 'schooladmin/profile.html', data)

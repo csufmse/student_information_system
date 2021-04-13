@@ -6,11 +6,11 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse
 
 from schooladmin.views import major as admin_major
-from schooladmin.filters import (SectionFilter, SemesterFilter, StudentFilter)
 
 from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
-from sis.utils import filtered_table
+
+from sis.utils import filtered_table2, DUMMY_ID
 
 from sis.tables.courses import CoursesTable, MajorCoursesMetTable
 from sis.tables.messages import MessageSentTable, MessageReceivedTable
@@ -20,8 +20,10 @@ from sis.tables.semesters import SemestersSummaryTable
 
 from sis.filters.course import RequirementsCourseFilter
 from sis.filters.message import SentMessageFilter, ReceivedMessageFilter
+from sis.filters.section import SectionFilter
 from sis.filters.sectionreferenceitem import SectionItemFilter
 from sis.filters.sectionstudent import StudentHistoryFilter
+from sis.filters.semester import SemesterFilter
 
 from sis.forms.major import MajorSelectForm, MajorChangeForm
 from sis.forms.profile import DemographicForm, UnprivProfileEditForm
@@ -130,40 +132,46 @@ def profile(request):
         'user': the_user,
     }
     data.update(
-        filtered_table(
+        filtered_table2(
             name='semesters',
             qs=the_user.profile.student.semesters.all(),
             filter=SemesterFilter,
             table=SemestersSummaryTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('student:profile'),
+            click_url=reverse('student:semester', args=[DUMMY_ID]),
         ))
 
     data.update(
-        filtered_table(
+        filtered_table2(
             name='majorcourses',
             qs=the_user.profile.student.requirements_met_list(),
             filter=RequirementsCourseFilter,
             table=MajorCoursesMetTable,
             request=request,
+            self_url=reverse('student:profile'),
+            click_url=reverse('student:course', args=[DUMMY_ID]),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='received',
             qs=the_user.profile.sent_to.filter(time_archived__isnull=True),
             filter=ReceivedMessageFilter,
             table=MessageReceivedTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('student:profile'),
         ))
     data.update(
-        filtered_table(
+        filtered_table2(
             name='sent',
             qs=the_user.profile.sent_by.filter(time_archived__isnull=True),
             filter=SentMessageFilter,
             table=MessageSentTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('student:profile'),
         ))
 
     return render(request, 'student/student.html', data)
@@ -176,13 +184,15 @@ def history(request):
         'user': the_user,
     }
     data.update(
-        filtered_table(
+        filtered_table2(
             name='history',
             qs=the_user.profile.student.course_history(),
             filter=StudentHistoryFilter,
             table=StudentHistoryTable,
             request=request,
             wrap_list=False,
+            self_url=reverse('student:history'),
+            click_url=reverse('student:sectionstudent', args=[DUMMY_ID]),
         ))
 
     return render(request, 'student/history.html', data)
@@ -302,12 +312,14 @@ def secitems(request):
         'semester': the_semester,
     }
     data.update(
-        filtered_table(
-            name='secitem',
+        filtered_table2(
+            name='secitems',
             qs=the_user.profile.student.section_reference_items_for(the_semester),
             filter=SectionItemFilter,
             table=SectionReferenceItemsTable,
             request=request,
+            self_url=reverse('student:secitems'),
+            click_url=reverse('student:secitem', args=[DUMMY_ID]),
         ))
 
     return render(request, 'student/items.html', data)
@@ -335,12 +347,14 @@ def test_majors(request):
         'major_form': major_form,
     }
     data.update(
-        filtered_table(
+        filtered_table2(
             name='majorcourses',
             qs=the_user.profile.student.requirements_met_list(major=the_major),
             filter=RequirementsCourseFilter,
             table=MajorCoursesMetTable,
             request=request,
+            self_url=reverse('student:test_majors'),
+            click_url=reverse('student:course', args=[DUMMY_ID]),
         ))
 
     return render(request, 'student/test_majors.html', data)

@@ -6,10 +6,10 @@
 <div>
 <span>
   <dl class="dl-horizontal">
-    <dt>Logged in as</dt>
+    <dt>Name</dt>
+    <dd>{{ user.get_full_name }}</dd>
+    <dt>Account Id</dt>
     <dd>{{ user.username }}</dd>
-    <dt>User Role</dt>
-    <dd>{{ user.access_role }}</dd>
     {% if total %}<dt>Unread Messages</dt>
     <dd><b>{{ normal }} normal message{{ normal|pluralize }}, {{ priority }} priority message{{ priority|pluralize }}</b></dd>{% endif %}
   </dl>

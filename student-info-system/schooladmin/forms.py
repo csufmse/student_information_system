@@ -17,8 +17,6 @@ class CourseCreationForm(forms.ModelForm):
                                   widget=forms.Textarea(attrs={'rows': 3}))
     credits_earned = forms.DecimalField(label='Credits', max_digits=2, decimal_places=1)
 
-    # prereqs = models.ManyToManyField('self', through='CoursePrerequisite')
-
     class Meta:
         model = Course
         fields = ('major', 'catalog_number', 'title', 'description', 'credits_earned')
