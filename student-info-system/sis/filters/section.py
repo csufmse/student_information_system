@@ -1,8 +1,13 @@
 from django.db.models import CharField, Value
 from django.db.models.functions import Concat
-from django_filters import (CharFilter, ChoiceFilter, FilterSet,)
+from django_filters import (
+    CharFilter,
+    ChoiceFilter,
+    FilterSet,
+)
 
 from sis.models import (Course, Section, Semester)
+
 
 class SectionFilter(FilterSet):
     semester = CharFilter(Semester.objects, label='Semester', method='filter_semester')
@@ -47,5 +52,3 @@ class SectionFilter(FilterSet):
     class Meta:
         model = Section
         fields = ['semester', 'course_descr', 'professor', 'hours', 'location', 'status']
-
-

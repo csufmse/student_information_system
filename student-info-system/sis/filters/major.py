@@ -1,9 +1,13 @@
 from django.db.models import Value
 from django.db.models.functions import Concat
-from django_filters import (CharFilter, FilterSet,)
+from django_filters import (
+    CharFilter,
+    FilterSet,
+)
 
 from sis.models import (Course, CoursePrerequisite, Major, Message, Professor, Section, Semester,
                         Student, SectionStudent, Profile, ReferenceItem, SectionReferenceItem)
+
 
 class MajorFilter(FilterSet):
     abbreviation = CharFilter(field_name='abbreviation', lookup_expr='icontains')
@@ -42,6 +46,3 @@ class MajorFilter(FilterSet):
         def __init__(self, *args, **kwargs):
             super(MajorFilter, self).__init__(*args, **kwargs)
             self.filters['abbreviation'].extra.update({'empty_label': 'Any Major/Department...'})
-
-
-

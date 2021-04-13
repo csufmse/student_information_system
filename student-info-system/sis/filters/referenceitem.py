@@ -4,6 +4,7 @@ from django_filters import (CharFilter, ChoiceFilter, FilterSet)
 
 from sis.models import (Course, ReferenceItem)
 
+
 class ItemFilter(FilterSet):
     course = CharFilter(Course.objects, label='Course Info', method='filter_course')
 

@@ -447,7 +447,7 @@ class Student(models.Model):
             time_sent=when,
             in_response_to=request_message,
             subject=f'FYI: Drop of {sectionstudent.student.name} ' +
-                    f'from {sectionstudent.section.name} approved',
+            f'from {sectionstudent.section.name} approved',
         )
         request_message.now_handled(status=True, when=when)
         sectionstudent.drop()

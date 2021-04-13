@@ -6,6 +6,7 @@ def row_class(cls):
     ra = getattr(cls, 'Meta').row_attrs
     return ra['class']
 
+
 tables.Table.row_class = classmethod(row_class)
 
 

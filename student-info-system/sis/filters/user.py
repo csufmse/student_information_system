@@ -1,10 +1,16 @@
 from django.contrib.auth.models import User
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
-from django_filters import (CharFilter, ChoiceFilter, FilterSet,
-                            ModelChoiceFilter)
+from django_filters import (CharFilter, ChoiceFilter, FilterSet, ModelChoiceFilter)
 
-from sis.models import (Major, Message, Professor, Semester, Student, Profile, )
+from sis.models import (
+    Major,
+    Message,
+    Professor,
+    Semester,
+    Student,
+    Profile,
+)
 
 
 class UserFilter(FilterSet):
@@ -108,5 +114,3 @@ class StudentFilter(FilterSet):
 #        super(MajorFilter, self).__init__(*args, **kwargs)
 #        self.filters['professors'].extra.update(
 #            {'empty_label': 'Has Professor'})
-
-

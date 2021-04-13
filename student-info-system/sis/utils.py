@@ -3,6 +3,7 @@ from django_tables2 import RequestConfig
 # used as dummy in addClickHandler
 DUMMY_ID = 1234599
 
+
 # helper function to make tables
 # merge the result of this into the response data
 def filtered_table(name=None,
@@ -28,18 +29,19 @@ def filtered_table(name=None,
     RequestConfig(request, paginate={"per_page": page_size, "page": 1}).configure(tab)
     return {name + '_table': tab, name + '_filter': filt, name + '_has_filter': has_filter}
 
+
 def filtered_table2(name=None,
-                   qs=None,
-                   filter=None,
-                   table=None,
-                   request=None,
-                   page_size=25,
-                   row_class=None,
-                   self_url=None,
-                   click_url=None,
-                   scrollable=False,
-                   table_type='data-table-alt',
-                   wrap_list=True):
+                    qs=None,
+                    filter=None,
+                    table=None,
+                    request=None,
+                    page_size=25,
+                    row_class=None,
+                    self_url=None,
+                    click_url=None,
+                    scrollable=False,
+                    table_type='data-table-alt',
+                    wrap_list=True):
     if row_class is None:
         # "table" is the class, for which we added...
         row_class = table.row_class()
@@ -55,7 +57,15 @@ def filtered_table2(name=None,
     if scrollable:
         div_classes += ' scrollify-me'
     RequestConfig(request, paginate={"per_page": page_size, "page": 1}).configure(tab)
-    return { name: { 'name': name, 'table': tab,
-                     'filter': filter, 'has_filter': has_filter,
-                     'self_url': self_url, 'click_url': click_url,
-                     'row_class': row_class, 'div_classes':div_classes, } }
+    return {
+        name: {
+            'name': name,
+            'table': tab,
+            'filter': filter,
+            'has_filter': has_filter,
+            'self_url': self_url,
+            'click_url': click_url,
+            'row_class': row_class,
+            'div_classes': div_classes,
+        }
+    }

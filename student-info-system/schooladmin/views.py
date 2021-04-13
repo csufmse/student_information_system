@@ -17,7 +17,6 @@ from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, S
 
 from sis.utils import filtered_table, filtered_table2, DUMMY_ID
 
-
 from sis.filters.course import CourseFilter
 from sis.filters.major import MajorFilter
 from sis.filters.message import (FullSentMessageFilter, FullReceivedMessageFilter,
