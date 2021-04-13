@@ -1,97 +1,76 @@
 from datetime import datetime
 
-from django.contrib.auth.models import User
 from django.test import TestCase
 
-from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, SemesterStudent, Student, UpperField)
-
-from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
+from sis.models import Semester
+from sis.tests.utils import *
 
 
 class AdminSemesterViewsExist(TestCase):
 
     @classmethod
-    def setUpTestData(self):
-        test_user1 = createAdmin(username='u1', password='hello')
-        semester = Semester.objects.create(date_registration_opens=datetime.now(),
-                                           date_registration_closes=datetime.now(),
-                                           date_started=datetime.now(),
-                                           date_last_drop=datetime.now(),
-                                           date_ended=datetime.now(),
-                                           session=Semester.FALL,
-                                           year=2000)
+    def setUpTestData(cls):
+        super(AdminSemesterViewsExist, cls).setUpTestData()
+
+        createAdmin(username='u1', password='hello')
+        createSemester()
 
     # list view
     def test_semesters_view_exists(self):
-        login = self.client.login(username='u1', password='hello')
-        response = self.client.get('/schooladmin/semesters')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.simple('/schooladmin/semesters'), 200)
 
     # single-object view
     def test_semester_view_exists(self):
-        login = self.client.login(username='u1', password='hello')
-        response = self.client.get('/schooladmin/semester/1')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.simple('/schooladmin/semester/1'), 200)
 
     # edit view
     def test_edit_semesters_view_exists(self):
-        login = self.client.login(username='u1', password='hello')
-        response = self.client.get('/schooladmin/semester/1/edit')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.simple('/schooladmin/semester/1/edit'), 200)
 
     # create view
     def test_new_semesters_view_exists(self):
-        login = self.client.login(username='u1', password='hello')
-        response = self.client.get('/schooladmin/semester_new')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.simple('/schooladmin/semester_new'), 200)
 
     # create view
     def test_semester_section_new_view_exists(self):
-        login = self.client.login(username='u1', password='hello')
-        response = self.client.get('/schooladmin/semester/1/section_new')
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(self.simple('/schooladmin/semester/1/section_new'), 200)
 
 
 class AdminSemesterViewsTemplate(TestCase):
 
     @classmethod
-    def setUpTestData(self):
-        test_user1 = createAdmin(username='u1', password='hello')
-        semester = Semester.objects.create(date_registration_opens=datetime.now(),
-                                           date_registration_closes=datetime.now(),
-                                           date_started=datetime.now(),
-                                           date_last_drop=datetime.now(),
-                                           date_ended=datetime.now(),
-                                           session=Semester.FALL,
-                                           year=2000)
+    def setUpTestData(cls):
+        super(AdminSemesterViewsTemplate, cls).setUpTestData()
+
+        createAdmin(username='u1', password='hello')
+        createSemester()
 
     # list view
     def test_semesters_view_exists(self):
-        login = self.client.login(username='u1', password='hello')
+        self.client.login(username='u1', password='hello')
         response = self.client.get('/schooladmin/semesters')
         self.assertTemplateUsed(response, 'schooladmin/semesters.html')
 
     # single-object view
     def test_semester_view_exists(self):
-        login = self.client.login(username='u1', password='hello')
+        self.client.login(username='u1', password='hello')
         response = self.client.get('/schooladmin/semester/1')
         self.assertTemplateUsed(response, 'schooladmin/semester.html')
 
     # edit view
-    # def test_edit_semesters_view_exists(self):
-    #     login = self.client.login(username='u1', password='hello')
-    #     response = self.client.get('/schooladmin/semester/1/edit')
-    #     self.assertTemplateUsed(response, 'schooladmin/semester_edit.html')
+    def test_edit_semesters_view_exists(self):
+        self.client.login(username='u1', password='hello')
+        response = self.client.get('/schooladmin/semester/1/edit')
+        self.assertTemplateUsed(response, 'schooladmin/semester_edit.html')
 
     # create view
-    # def test_new_semesters_view_exists(self):
-    #     login = self.client.login(username='u1', password='hello')
-    #     response = self.client.get('/schooladmin/semester_new')
-    #     self.assertTemplateUsed(response, 'schooladmin/semester_new.html')
+    def test_new_semesters_view_exists(self):
+        self.client.login(username='u1', password='hello')
+        response = self.client.get('/schooladmin/semester_new')
+        self.assertTemplateUsed(response, 'schooladmin/semester_new.html')
 
     # create view
     def test_semester_section_new_view_exists(self):
-        login = self.client.login(username='u1', password='hello')
+        self.client.login(username='u1', password='hello')
         response = self.client.get('/schooladmin/semester/1/section_new')
         self.assertTemplateUsed(response, 'schooladmin/section_new.html')

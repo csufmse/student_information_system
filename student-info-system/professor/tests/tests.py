@@ -1,26 +1,24 @@
-from datetime import datetime
-
-from django.contrib.auth.models import User
 from django.test import TestCase
 
-from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, SemesterStudent, Student, UpperField)
-from sis.tests.utils import (createStudent, createProfessor, createAdmin, createCourse)
+from sis.models import (
+    Major,)
+from sis.tests.utils import *
 
 
 class ProfessorViewsAccess(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        super(ProfessorViewsAccess, cls).setUpTestData()
+        KLASS = ProfessorViewsAccess
+        super(KLASS, cls).setUpTestData()
         ad = createAdmin('foobar').profile
         m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
-        ProfessorViewsAccess.u1 = createProfessor(username='u1', password='hello')
-        ProfessorViewsAccess.u3 = createStudent(username='u3', password='hello', major=m1)
+        KLASS.u1 = createProfessor(username='u1', password='hello')
+        KLASS.u3 = createStudent(username='u3', password='hello', major=m1)
 
     # list views
     def test_home_view_exists_for_professor(self):
-        login = self.client.login(username='u1', password='hello')
+        self.client.login(username='u1', password='hello')
         response = self.client.get('/professor/')
         # Check our user is logged in
         self.assertEqual(str(response.context['user']), 'u1')
