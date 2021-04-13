@@ -7,7 +7,7 @@ from django.urls import reverse
 from django_tables2 import RequestConfig
 
 from sis.authentication_helpers import role_login_required
-from sis.models import (Professor, Section, Semester, Student, Profile, SectionStudent,
+from sis.models import (Course, Professor, Section, Semester, Student, Profile, SectionStudent,
                         ReferenceItem, SectionReferenceItem)
 from sis.tables.sections import ProfSectionsTable
 from sis.utils import filtered_table2, DUMMY_ID
@@ -115,7 +115,7 @@ def add_reference(request, sectionid):
                 sects_to_update = course.section_set.exclude(
                     status__in=[Section.REG_CLOSED, Section.CANCELLED])
             else:
-                sects_to_update = course.section_set.filter(status=Section.REG_OPEN)
+                sects_to_update = course.section_set.filter(semester=section.semester)
 
             for sect in sects_to_update:
                 sect.refresh_reference_items()
