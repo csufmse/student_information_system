@@ -725,13 +725,14 @@ class ProfileTest_Basic(TestCase):
         prof.delete()
         usr.delete()
 
-    def test_admin_excluded(self):
-        usr = User.objects.create(username='foo')
-        prof = usr.profile
-        self.assertEqual(prof.role, Profile.ACCESS_NONE)
-        users = Profile.objects.all()
-        self.assertEqual(users.count(), 1)
-        users_ann = User.annotated()
-        self.assertEqual(users_ann.count(), 0)
-        prof.delete()
-        usr.delete()
+    # test is now invalid given retirement of annotated()
+    # def test_admin_excluded(self):
+    #     usr = User.objects.create(username='foo')
+    #     prof = usr.profile
+    #     self.assertEqual(prof.role, Profile.ACCESS_NONE)
+    #     users = Profile.objects.all()
+    #     self.assertEqual(users.count(), 1)
+    #     users_ann = User.objects.all()
+    #     self.assertEqual(users_ann.count(), 0)
+    #     prof.delete()
+    #     usr.delete()

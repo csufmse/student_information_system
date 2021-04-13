@@ -45,7 +45,7 @@ def current_schedule_view(request):
             request.user.profile.student.sectionstudent_set.filter(
                 section__semester=current_semester),
         'name':
-            request.user.profile.student.name,
+            request.user.profile.name,
         'semester':
             current_semester,
     }

@@ -70,7 +70,7 @@ def users(request):
         request, 'schooladmin/users.html',
         filtered_table2(
             name='users',
-            qs=User.annotated(),
+            qs=User.objects.exclude(profile__role=Profile.ACCESS_NONE),
             filter=UserFilter,
             table=FullUsersTable,
             request=request,
@@ -86,7 +86,7 @@ def students(request):
         request, 'schooladmin/students.html',
         filtered_table2(
             name='students',
-            qs=User.annotated().filter(profile__role=Profile.ACCESS_STUDENT),
+            qs=User.objects.all().filter(profile__role=Profile.ACCESS_STUDENT),
             filter=StudentFilter,
             table=StudentsTable,
             request=request,
@@ -587,7 +587,7 @@ def major(request, majorid):
     data.update(
         filtered_table2(
             name='profs',
-            qs=User.annotated().filter(profile__professor__major=the_major),
+            qs=User.objects.all().filter(profile__professor__major=the_major),
             filter=UserFilter,
             table=UsersTable,
             request=request,
@@ -621,7 +621,7 @@ def major(request, majorid):
         data.update(
             filtered_table2(
                 name='students',
-                qs=User.annotated().filter(profile__student__major=the_major),
+                qs=User.objects.all().filter(profile__student__major=the_major),
                 filter=UserFilter,
                 table=StudentInMajorTable,
                 request=request,
