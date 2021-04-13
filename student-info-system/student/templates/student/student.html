@@ -20,17 +20,6 @@
     <h3>Personal Profile</h3>
     {%  demographic_details user.profile %}
 
-    <h3>Semesters Attended:</h3>
-    {% sis_filter 'semesters' %}
-
-    <h3>Required Courses for {{ user.profile.student.major.abbreviation }}:</h3>
-    {% sis_filter 'majorcourses' %}
-    <input id="test_majors"
-        action="action"
-           class="btn btn-info"
-        value="Explore Another Major..."
-    />
-
 
          <h3>Received Messages:</h3>
     {% sis_filter 'received' %}
@@ -65,11 +54,8 @@
 
   </form>
 <script>
-addButtonClickHandler('test_majors', "{% url 'student:test_majors' %}");
 addButtonClickHandler('change_password', "{% url 'student:change_password' %}");
 addButtonClickHandler('request_major_change', "{% url 'student:request_major_change' %}");
 addButtonClickHandler('edit_user', "{% url 'student:profile_edit' %}");
-stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'majorcourses'});
-stylizeRange({field:'credits_earned',name:'Cred',prefix:'majorcourses'});
 </script>
 {% endblock %}
