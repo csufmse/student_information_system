@@ -772,7 +772,7 @@ class SectionStudent(models.Model):
         (GRADE_D, 'D'),
         (GRADE_F, 'F'),
     )
-    POINTS = tuple((x[1],x[0]) for x in GRADES)
+    POINTS = tuple((x[1], x[0]) for x in GRADES)
 
     @classmethod
     def letter_grade_for(cls, grade):
