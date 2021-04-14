@@ -375,7 +375,7 @@ def request_major_change(request):
     the_user = request.user
 
     if request.method == 'POST':
-        major_form = MajorSelectForm(request.POST)
+        major_form = MajorChangeForm(request.POST)
         if major_form.is_valid(
         ) and major_form.cleaned_data.get('major') != the_user.profile.student.major:
             the_major = major_form.cleaned_data.get('major')
