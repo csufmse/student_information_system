@@ -45,5 +45,9 @@
     </div>
 <script>
 {% if permit_edit %}addButtonClickHandler('edit_major', '{% url 'schooladmin:major_edit' major.id %}');{% endif %}
+stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'required'});
+stylizeRange({field:'credits_earned',name:'Cred',prefix:'required'});
+stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'offered'});
+stylizeRange({field:'credits_earned',name:'Cred',prefix:'offered'});
 </script>
 {% endblock %}

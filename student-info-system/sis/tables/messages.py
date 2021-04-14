@@ -82,6 +82,7 @@ class MessageReceivedTable(MessageTable):
         }
         attrs = {"class": 'message_table'}
 
+
 class StudentMessageReceivedTable(MessageReceivedTable):
 
     class Meta:
@@ -106,4 +107,3 @@ class MessageSentTable(MessageTable):
             'data-id': lambda record: record.pk
         }
         attrs = {"class": 'message_table'}
-

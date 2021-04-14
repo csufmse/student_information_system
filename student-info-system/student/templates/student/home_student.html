@@ -6,7 +6,12 @@
 <div class="tab">
   <button class="tablinks" id="defaultOpen">Current Schedule</button>
   <button class="tablinks">Registration</button>
-  <button class="tablinks">References</button>
+  <button class="tablinks">My Textbooks and References</button>
+    <button class="tablinks">Majors</button>
+  <button class="tablinks">Professors</button>
+    <button class="tablinks">Semesters</button>
+    <button class="tablinks">Courses</button>
+    <button class="tablinks">Sections</button>
   <button class="tablinks">My History</button>
   <button class="tablinks">My Profile</button>
   <button class="tablinks">My Messages</button>
@@ -17,11 +22,21 @@
     src="{% url 'student:current_schedule' %}"></iframe>
   <iframe id="Registration" class="tabcontent" loading="lazy" title="Registration" src="{% url 'student:registration' %}"
     ></iframe>
-  <iframe id="References" class="tabcontent" loading="lazy" title="References" src="{% url 'student:secitems' %}"
+<iframe id="Professors" class="tabcontent" title="Professors" loading="lazy" src="{% url 'schooladmin:professors' %}"
+    ></iframe>
+    <iframe id="Majors" class="tabcontent" title="Majors" loading="lazy" src="{% url 'sis:majors' %}"
+        ></iframe>
+    <iframe id="Semesters" class="tabcontent" title="Semesters" loading="lazy" src="{% url 'schooladmin:semesters' %}"
+        ></iframe>
+    <iframe id="Courses" class="tabcontent" title="Courses" loading="lazy" src="{% url 'schooladmin:courses' %}"
+        ></iframe>
+    <iframe id="Sections" class="tabcontent" title="Sections" loading="lazy" src="{% url 'schooladmin:sections' %}"
+        ></iframe>
+  <iframe id="My Textbooks and References" class="tabcontent" loading="lazy" title="My Textbooks and References" src="{% url 'student:secitems' %}"
     ></iframe>
   <iframe id="My History" class="tabcontent" loading="lazy" title="My History" src="{% url 'student:history' %}"
     ></iframe>
-  <iframe id="My Profile" class="tabcontent" loading="lazy" title="My Profile" src="{% url 'student:profile' %}"
+  <iframe id="My Profile" class="tabcontent" loading="lazy" title="My Profile" src="{% url 'sis:profile' %}"
     ></iframe>
     <iframe id="My Messages" class="tabcontent" title="My Messages" loading="lazy" src="{% url 'sis:messages' %}"
         ></iframe>

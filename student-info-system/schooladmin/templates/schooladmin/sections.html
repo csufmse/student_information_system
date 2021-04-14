@@ -5,12 +5,16 @@
 
 {% block content %}
 <div>
+{%  if can_add %}
     <button class="btn btn-primary" id="section_new">Add Section to Class</button>
+{% endif %}
     {% sis_filter 'sections' %}
 </div>
 <script>
 const handler = insertScrollableDivs(applyHandlers=true);
 handler();
+{%  if can_add %}
 addButtonClickHandler('section_new', "{% url 'schooladmin:section_new' %}");
+{% endif %}
 </script>
 {% endblock content %}

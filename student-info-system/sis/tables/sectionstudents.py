@@ -51,7 +51,7 @@ class SectionStudentsTable(tables.Table):
     course = ClassyColumn(accessor='course', css_class_base='course')
     username = ClassyColumn(accessor='student__profile__user__username',
                             css_class_base='username')
-    name = ClassyColumn(accessor='student__profile__name',
+    name = ClassyColumn(accessor='student__profile__user__get_full_name',
                         css_class_base='user_name',
                         order_by=('student__profile__user__last_name',
                                   'student__profile__user__first_name'))
@@ -86,7 +86,10 @@ class SectionStudentsTable(tables.Table):
 class StudentInSectionTable(tables.Table):
     username = ClassyColumn(accessor='student__profile__user__username',
                             css_class_base='username')
-    name = ClassyColumn(accessor='student__profile__user__name', css_class_base='user_name')
+    name = ClassyColumn(accessor='student__profile__user__get_full_name',
+                        css_class_base='user_name',
+                        order_by=('student__profile__user__last_name',
+                                  'student__profile__user__first_name'))
     major = ClassyColumn(accessor='student__major__abbreviation', css_class_base='major')
     gpa = ClassyColumn(accessor='student__gpa', css_class_base='gpa')
 
