@@ -9,6 +9,7 @@
 <div class="tab">
   <button class="tablinks" id="defaultOpen">Users</button>
   <button class="tablinks">Students</button>
+  <button class="tablinks">Professors</button>
   <button class="tablinks">Majors</button>
   <button class="tablinks">Semesters</button>
   <button class="tablinks">Courses</button>
@@ -23,7 +24,9 @@
     ></iframe>
 <iframe id="Students" class="tabcontent" title="Students" loading="lazy" src="{% url 'schooladmin:students' %}"
     ></iframe>
-<iframe id="Majors" class="tabcontent" title="Majors" loading="lazy" src="{% url 'schooladmin:majors' %}"
+<iframe id="Professors" class="tabcontent" title="Professors" loading="lazy" src="{% url 'schooladmin:professors' %}"
+    ></iframe>
+<iframe id="Majors" class="tabcontent" title="Majors" loading="lazy" src="{% url 'sis:majors' %}"
     ></iframe>
 <iframe id="Semesters" class="tabcontent" title="Semesters" loading="lazy" src="{% url 'schooladmin:semesters' %}"
     ></iframe>
@@ -33,7 +36,7 @@
     ></iframe>
 <iframe id="Demographics" class="tabcontent" title="Demographics" loading="lazy" src="{% url 'schooladmin:demographics' %}"
     ></iframe>
-<iframe id="My Profile" class="tabcontent" title="My Profile" loading="lazy" src="{% url 'schooladmin:profile' %}"
+<iframe id="My Profile" class="tabcontent" title="My Profile" loading="lazy" src="{% url 'sis:profile' %}"
     ></iframe>
 <iframe id="My Messages" class="tabcontent" title="My Messages" loading="lazy" src="{% url 'sis:messages' %}"
     ></iframe>

@@ -60,6 +60,7 @@ def message(request, id):
     is_sender = the_mess.sender == the_profile
     is_student = the_profile.role == Profile.ACCESS_STUDENT
     is_admin = the_profile.role == Profile.ACCESS_ADMIN
+    can_reply = the_mess.recipient == the_profile and not is_sender
 
     if the_mess is None:
         messages.error(request, 'Invalid message')
@@ -132,4 +133,5 @@ def message(request, id):
             'show_type': not is_student,
             'show_handled': handleable_message and not is_student,
             'show_read': True,
+            'can_reply': can_reply
         })

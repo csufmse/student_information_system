@@ -57,7 +57,6 @@ class UserFilter(FilterSet):
             'username',
             'name',
             'major',
-            # 'gpa', 'class_level',
             'access_role',
             'is_active'
         ]
@@ -83,9 +82,7 @@ class StudentFilter(FilterSet):
         label='Major')
 
     def filter_has_major(self, queryset, name, value):
-        return queryset.filter(
-            Q(profile__professor__major__abbreviation=value) |
-            Q(profile__student__major__abbreviation=value))
+        return queryset.filter(profile__student__major__abbreviation=value)
 
     def filter_has_name(self, queryset, name, value):
         return queryset.annotate(fullname=Concat('first_name', Value(' '), 'last_name')).filter(
@@ -109,8 +106,35 @@ class StudentFilter(FilterSet):
         self.filters['major'].extra.update({'empty_label': 'Any Major/Dept'})
 
 
-# this is useful for the ModelChoice version of professor
-#    def __init__(self, *args, **kwargs):
-#        super(MajorFilter, self).__init__(*args, **kwargs)
-#        self.filters['professors'].extra.update(
-#            {'empty_label': 'Has Professor'})
+class ProfessorFilter(FilterSet):
+    username = CharFilter(lookup_expr='icontains')
+    name = CharFilter(field_name='name',
+                      label='Name',
+                      method='filter_has_name',
+                      lookup_expr='icontains')
+    major = ModelChoiceFilter(
+        queryset=Major.objects.order_by('abbreviation'),
+        # provided because it needs one. Will be ignoring this.
+        field_name='name',
+        method='filter_has_major',
+        label='Major')
+
+    def filter_has_major(self, queryset, name, value):
+        return queryset.filter(profile__professor__major__abbreviation=value)
+
+    def filter_has_name(self, queryset, name, value):
+        return queryset.annotate(fullname=Concat('first_name', Value(' '), 'last_name')).filter(
+            fullname__icontains=value).distinct()
+
+    class Meta:
+        model = User
+        fields = [
+            'username',
+            'name',
+            'major',
+        ]
+
+    def __init__(self, *args, **kwargs):
+        super(ProfessorFilter, self).__init__(*args, **kwargs)
+        self.filters['major'].extra.update({'empty_label': 'Any Major/Dept'})
+

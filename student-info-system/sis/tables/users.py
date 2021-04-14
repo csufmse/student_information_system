@@ -92,7 +92,7 @@ class StudentsTable(tables.Table):
         attrs = {"class": 'students_table'}
         fields = ('username', 'name', 'student_major', 'student_gpa', 'credits_earned',
                   'class_level', 'is_active')
-        row_attrs = {'class': 'user_row', 'data-id': lambda record: record.pk}
+        row_attrs = {'class': 'student_row', 'data-id': lambda record: record.pk}
         template_name = "django_tables2/bootstrap.html"
 
 
@@ -121,5 +121,24 @@ class StudentInMajorTable(tables.Table):
     class Meta:
         attrs = {"class": 'studentmajor_table'}
         fields = ('username', 'name', 'gpa', 'credits_earned', 'class_level')
-        row_attrs = {'class': 'user_row', 'data-id': lambda record: record.pk}
+        row_attrs = {'class': 'student_row', 'data-id': lambda record: record.pk}
+        template_name = "django_tables2/bootstrap.html"
+
+class ProfessorsTable(tables.Table):
+    name = ClassyColumn(
+        css_class_base='user_name',
+        accessor='get_full_name',
+        order_by=("last_name", "first_name"),
+    )
+    username = ClassyColumn(css_class_base='username')
+    department = ClassyColumn(verbose_name='Department',
+                                 css_class_base='major',
+                                 accessor='profile__professor__major__abbreviation')
+    department_name = ClassyColumn(verbose_name='Department Name',
+                                 css_class_base='majorname',
+                                 accessor='profile__professor__major__title')
+    class Meta:
+        attrs = {"class": 'professors_table'}
+        fields = ('username', 'name', 'department', 'department_name')
+        row_attrs = {'class': 'professor_row', 'data-id': lambda record: record.pk}
         template_name = "django_tables2/bootstrap.html"

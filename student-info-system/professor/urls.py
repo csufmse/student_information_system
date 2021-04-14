@@ -1,6 +1,7 @@
 from django.urls import path
 
 from . import views
+from sis.views import profile
 
 app_name = 'professor'
 
