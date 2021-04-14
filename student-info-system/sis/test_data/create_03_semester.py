@@ -28,9 +28,11 @@ def createData():
                                         session=session)
             except IntegrityError as e:
                 if 'UNIQUE constraint' in e.args[0]:
-                    print(f'ERROR: {next.year}/{session} already exists. (did you drop all data before doing this?)')
+                    print(f'ERROR: {next.year}/{session} already exists. ' +
+                          f'(did you drop all data before doing this?)')
                 else:
-                    print(f'ERROR: There was a problem saving {next.year}/{session} to the database.')
+                    print(f'ERROR: There was a problem saving {next.year}/' +
+                          f'{session} to the database.')
 
             next = next + timedelta(days=90)
 
