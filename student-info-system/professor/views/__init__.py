@@ -18,8 +18,12 @@ from professor.forms import ReferenceItemForm
 
 @role_login_required(Profile.ACCESS_PROFESSOR)
 def index(request):
-    return render(request, 'professor/home_professor.html',
-                  request.user.profile.unread_messages())
+    data = {
+        'current_semester': Semester.current_semester(),
+        'registration_open': Semester.semesters_open_for_registration(),
+    }
+    data.update(request.user.profile.unread_messages())
+    return render(request, 'professor/home_professor.html', data)
 
 
 @role_login_required(Profile.ACCESS_PROFESSOR)

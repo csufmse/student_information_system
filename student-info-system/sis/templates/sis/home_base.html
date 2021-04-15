@@ -12,6 +12,12 @@
     <dd>{{ user.username }}</dd>
     {% if total %}<dt>Unread Messages</dt>
     <dd><b>{{ normal }} normal message{{ normal|pluralize }}, {{ priority }} priority message{{ priority|pluralize }}</b></dd>{% endif %}
+    {% if current_semester %}
+        <dt>Current Semester</dt><dd><a href="{% url 'schooladmin:semester' semester_id=current_semester.id %}">{{ current_semester }}</a></dd>
+  {% endif %}
+    {% if registration_open %}
+        <dt>Open for Registration</dt><dd>{% for sem in registration_open %}<a href="{% url 'schooladmin:semester' semester_id=sem.id %}">{{ sem }}</a>  {% endfor %}</dd>
+  {% endif %}
   </dl>
   <a
      class="btn btn-primary"
