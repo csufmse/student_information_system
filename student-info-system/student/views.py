@@ -34,7 +34,12 @@ from sis.forms.user import UserEditForm
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def index(request):
-    return render(request, 'student/home_student.html', request.user.profile.unread_messages())
+    data = {
+        'current_semester': Semester.current_semester(),
+        'registration_open': Semester.semesters_open_for_registration(),
+    }
+    data.update(request.user.profile.unread_messages())
+    return render(request, 'student/home_student.html', data)
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
