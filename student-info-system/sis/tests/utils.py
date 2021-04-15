@@ -75,8 +75,8 @@ def createSemester(year=2020,
                    session=Semester.FALL,
                    offsets=None):
     if offsets is not None:
-        (date_registration_opens, date_registration_closes,
-         date_started, date_last_drop, date_ended) = offsets
+        (date_registration_opens, date_registration_closes, date_started, date_last_drop,
+         date_ended) = offsets
 
     dro = datetime.now()
     dro += timedelta(days=date_registration_opens)

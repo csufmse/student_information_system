@@ -13,8 +13,8 @@ class Semester_tests(TestCase):
 
     @classmethod
     def setUpTestData(cls):
-        super(Semester_tests,cls).setUpTestData()
-        Semester_tests.s1 = createSemester(offsets=(0,1,1,1,2))
+        super(Semester_tests, cls).setUpTestData()
+        Semester_tests.s1 = createSemester(offsets=(0, 1, 1, 1, 2))
 
     def test_names(self):
         self.assertEqual(Semester.name_for_session(Semester.FALL), 'Fall')
@@ -36,40 +36,45 @@ class Semester_tests(TestCase):
         self.assertTrue(Semester_tests.s1.registration_open())
 
     def test_reg_open_not(self):
-        self.assertFalse(Semester_tests.s1.registration_open(when=datetime.now()-timedelta(days=1)))
-        self.assertFalse(Semester_tests.s1.registration_open(when=datetime.now()+timedelta(days=3)))
+        self.assertFalse(
+            Semester_tests.s1.registration_open(when=datetime.now() - timedelta(days=1)))
+        self.assertFalse(
+            Semester_tests.s1.registration_open(when=datetime.now() + timedelta(days=3)))
 
     def test_in_session(self):
         s1 = Semester_tests.s1
-        self.assertTrue(Semester_tests.s1.in_session(when=datetime.now()+timedelta(days=1.5)))
+        self.assertTrue(Semester_tests.s1.in_session(when=datetime.now() + timedelta(days=1.5)))
 
     def test_in_session_not(self):
-        self.assertFalse(Semester_tests.s1.in_session(when=datetime.now()-timedelta(days=1)))
-        self.assertFalse(Semester_tests.s1.in_session(when=datetime.now()+timedelta(days=3)))
+        self.assertFalse(Semester_tests.s1.in_session(when=datetime.now() - timedelta(days=1)))
+        self.assertFalse(Semester_tests.s1.in_session(when=datetime.now() + timedelta(days=3)))
 
     def test_preparing_grades(self):
-        self.assertTrue(Semester_tests.s1.preparing_grades(when=datetime.now()+timedelta(days=7)))
+        self.assertTrue(
+            Semester_tests.s1.preparing_grades(when=datetime.now() + timedelta(days=7)))
 
     def test_preparing_grades_not(self):
-        self.assertFalse(Semester_tests.s1.preparing_grades(when=datetime.now()-timedelta(days=1)))
-        self.assertFalse(Semester_tests.s1.preparing_grades(when=datetime.now()+timedelta(days=20)))
+        self.assertFalse(
+            Semester_tests.s1.preparing_grades(when=datetime.now() - timedelta(days=1)))
+        self.assertFalse(
+            Semester_tests.s1.preparing_grades(when=datetime.now() + timedelta(days=20)))
 
     def test_finalized(self):
-        self.assertTrue(Semester_tests.s1.finalized(when=datetime.now()+timedelta(days=20)))
+        self.assertTrue(Semester_tests.s1.finalized(when=datetime.now() + timedelta(days=20)))
 
     def test_finalized_not(self):
-        self.assertFalse(Semester_tests.s1.finalized(when=datetime.now()-timedelta(days=1)))
-        self.assertFalse(Semester_tests.s1.finalized(when=datetime.now()+timedelta(days=1)))
+        self.assertFalse(Semester_tests.s1.finalized(when=datetime.now() - timedelta(days=1)))
+        self.assertFalse(Semester_tests.s1.finalized(when=datetime.now() + timedelta(days=1)))
 
     def test_drop_possible(self):
-        s2 = createSemester(offsets=(0,0,0,1,1),session=Semester.WINTER)
+        s2 = createSemester(offsets=(0, 0, 0, 1, 1), session=Semester.WINTER)
         self.assertTrue(s2.drop_possible())
         s2.delete()
 
     def test_drop_possible_not(self):
-        s2 = createSemester(date_ended=1,date_last_drop=1,session=Semester.WINTER)
-        self.assertFalse(s2.drop_possible(when=datetime.now()-timedelta(days=1)))
-        self.assertFalse(s2.drop_possible(when=datetime.now()+timedelta(days=3)))
+        s2 = createSemester(date_ended=1, date_last_drop=1, session=Semester.WINTER)
+        self.assertFalse(s2.drop_possible(when=datetime.now() - timedelta(days=1)))
+        self.assertFalse(s2.drop_possible(when=datetime.now() + timedelta(days=3)))
         s2.delete()
 
     # test is broken until better date PR is merged
