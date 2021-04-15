@@ -61,11 +61,14 @@ class SemesterCreationForm(forms.ModelForm):
     session = forms.ChoiceField(choices=Semester.SESSIONS)
     session.widget.attrs.update({'class': 'session_sel selectpicker'})
     year = forms.IntegerField()
-    date_registration_opens = forms.DateField()
-    date_registration_closes = forms.DateField()
-    date_started = forms.DateField()
-    date_ended = forms.DateField()
-    date_last_drop = forms.DateField()
+    date_started = forms.DateField(help_text=Semester._meta.get_field('date_started').help_text)
+    date_ended = forms.DateField(help_text=Semester._meta.get_field('date_ended').help_text)
+    date_registration_opens = forms.DateField(
+        help_text=Semester._meta.get_field('date_registration_opens').help_text)
+    date_registration_closes = forms.DateField(
+        help_text=Semester._meta.get_field('date_registration_closes').help_text)
+    date_last_drop = forms.DateField(
+        help_text=Semester._meta.get_field('date_last_drop').help_text)
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')
@@ -75,6 +78,10 @@ class SemesterCreationForm(forms.ModelForm):
         ld = self.cleaned_data.get('date_last_drop')
         if not (rego <= st <= ld <= de and rego <= regc <= de):
             raise forms.ValidationError('Dates are not in order.')
+        overlappers = Semester.objects.filter(date_started__lte=de, date_ended__gte=st)
+        if overlappers.count():
+            name = overlappers[0].name
+            raise forms.ValidationError(f'Classes (Start-End) overlap with those of {name}')
 
     class Meta:
         model = Semester
@@ -83,11 +90,14 @@ class SemesterCreationForm(forms.ModelForm):
 
 
 class SemesterEditForm(forms.ModelForm):
-    date_started = forms.DateField()
-    date_ended = forms.DateField()
-    date_registration_opens = forms.DateField()
-    date_registration_closes = forms.DateField()
-    date_last_drop = forms.DateField()
+    date_started = forms.DateField(help_text=Semester._meta.get_field('date_started').help_text)
+    date_ended = forms.DateField(help_text=Semester._meta.get_field('date_ended').help_text)
+    date_registration_opens = forms.DateField(
+        help_text=Semester._meta.get_field('date_registration_opens').help_text)
+    date_registration_closes = forms.DateField(
+        help_text=Semester._meta.get_field('date_registration_closes').help_text)
+    date_last_drop = forms.DateField(
+        help_text=Semester._meta.get_field('date_last_drop').help_text)
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')
@@ -97,6 +107,11 @@ class SemesterEditForm(forms.ModelForm):
         ld = self.cleaned_data.get('date_last_drop')
         if not (rego <= st <= ld <= de and rego <= regc <= de):
             raise forms.ValidationError('Dates are not in order.')
+        overlappers = Semester.objects.exclude(id=self.instance.id).filter(date_started__lte=de,
+                                                                           date_ended__gte=st)
+        if overlappers.count():
+            name = overlappers[0].name
+            raise forms.ValidationError(f'Classes (Start-End) overlap with those of {name}')
 
     class Meta:
         model = Semester
