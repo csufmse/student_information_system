@@ -1,6 +1,9 @@
 from django.test import TestCase
 
-from sis.models import (Course, Major, )
+from sis.models import (
+    Course,
+    Major,
+)
 
 from sis.tests.utils import *
 

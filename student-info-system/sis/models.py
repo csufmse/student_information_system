@@ -647,14 +647,14 @@ class Semester(models.Model):
             at = datetime.now()
         try:
             sem = Semester.objects.get(date_started__lte=at, date_ended__gte=at)
-        except DoesNotExist:
+        except Semester.DoesNotExist:
             sem = None
 
         if sem is None:
             try:
                 sem = Semester.objects.get(date_registration_opens__lte=at,
                                            date_registration_closes__gte=at)
-            except DoesNotExist:
+            except Semester.DoesNotExist:
                 sem = None
         return sem
 
@@ -985,6 +985,11 @@ class ReferenceItem(models.Model):
     @property
     def name(self):
         return f'{self.course}:{self.professor}/{self.title}'
+
+    @property
+    def type_label(self):
+        labels = dict(ReferenceItem.TYPES)
+        return labels[self.type]
 
     def __str__(self):
         return self.name

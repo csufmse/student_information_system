@@ -138,7 +138,7 @@ def history(request):
             request=request,
             wrap_list=False,
             self_url=reverse('student:history'),
-            click_url=reverse('student:sectionstudent', args=[DUMMY_ID]),
+            click_url=reverse('schooladmin:sectionstudent', args=[DUMMY_ID]),
         ))
     data.update(
         filtered_table2(
@@ -148,7 +148,7 @@ def history(request):
             table=SemestersSummaryTable,
             request=request,
             self_url=reverse('student:history'),
-            click_url=reverse('student:semester', args=[DUMMY_ID]),
+            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
         ))
 
     remaining = the_user.profile.student.requirements_met_list()
@@ -164,40 +164,10 @@ def history(request):
             table=MajorCoursesMetTable,
             request=request,
             self_url=reverse('student:history'),
-            click_url=reverse('student:course', args=[DUMMY_ID]),
+            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
 
     return render(request, 'student/history.html', data)
-
-
-@role_login_required(Profile.ACCESS_STUDENT)
-def course(request, courseid):
-    return HttpResponse("student:course not implemented")
-
-
-@role_login_required(Profile.ACCESS_STUDENT)
-def sectionstudent(request, id):
-    return HttpResponse("student:sectionstudent not implemented")
-
-
-@role_login_required(Profile.ACCESS_STUDENT)
-def semester(request, semester_id):
-    return HttpResponse("student:semester not implemented")
-
-
-@role_login_required(Profile.ACCESS_STUDENT)
-def user(request, userid):
-    return HttpResponse("student:user not implemented")
-
-
-@role_login_required(Profile.ACCESS_STUDENT)
-def secitem(request, id):
-    return HttpResponse("student:secitem not implemented")
-
-
-@role_login_required(Profile.ACCESS_STUDENT)
-def section(request, sectionid):
-    return HttpResponse("student:section not implemented")
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
@@ -250,7 +220,7 @@ def secitems(request):
             table=SectionReferenceItemsTable,
             request=request,
             self_url=reverse('student:secitems'),
-            click_url=reverse('student:secitem', args=[DUMMY_ID]),
+            click_url=reverse('sis:secitem', args=[DUMMY_ID]),
         ))
 
     return render(request, 'student/items.html', data)
@@ -290,7 +260,7 @@ def test_majors(request):
             table=MajorCoursesMetTable,
             request=request,
             self_url=reverse('student:test_majors'),
-            click_url=reverse('student:course', args=[DUMMY_ID]),
+            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
 
     return render(request, 'student/test_majors.html', data)

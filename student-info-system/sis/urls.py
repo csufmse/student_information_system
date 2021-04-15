@@ -1,5 +1,5 @@
 from django.urls import path
-from sis.views import messages, profile, users, majors
+from sis.views import messages, profile, users, majors, sectionreferenceitem
 
 from . import views
 
@@ -14,4 +14,5 @@ urlpatterns = [
     path('messages', messages.usermessages, name='messages'),
     path('message/<int:id>', messages.message, name='message'),
     path('user/<int:userid>/change_password', users.user_change_password, name='change_password'),
+    path('secitem/<int:id>', sectionreferenceitem.sectionreferenceitem, name='secitem'),
 ]

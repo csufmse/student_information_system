@@ -40,8 +40,7 @@ from sis.tables.messages import MessageSentTable, MessageReceivedTable
 from sis.tables.referenceitems import ProfReferenceItemsTable
 from sis.tables.sectionreferenceitems import ReferenceItemsForSectionTable
 from sis.tables.sections import SectionForClassTable, SectionsTable
-from sis.tables.sectionstudents import (StudentHistoryTable, SectionStudentsTable,
-                                        StudentInSectionTable)
+from sis.tables.sectionstudents import (StudentHistoryTable, StudentInSectionTable)
 from sis.tables.semesters import SemestersSummaryTable, SemestersTable
 from sis.tables.users import (UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable,
                               ProfessorsTable)
@@ -628,12 +627,15 @@ def sections(request):
     return render(request, 'schooladmin/sections.html', data)
 
 
-@role_login_required(Profile.ACCESS_ADMIN)
 def section(request, sectionid):
     logged_in = request.user.is_authenticated
     if logged_in:
-        user_role = request.user.profile.role
+        the_profile = request.user.profile
+        user_role = the_profile.role
+
     is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
+    is_prof = logged_in and user_role == Profile.ACCESS_PROFESSOR
+    can_see_students = logged_in and user_role in (Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
 
     qs = Section.objects.filter(id=sectionid)
     if qs.count() < 1:
@@ -642,8 +644,11 @@ def section(request, sectionid):
 
     data = {
         'section': the_section,
+        'can_edit': is_admin,
+        'can_refresh_items': is_prof and the_section.professor == the_profile.professor,
+        'can_see_students': can_see_students,
     }
-    if logged_in and user_role in (Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR):
+    if can_see_students:
         data.update(
             filtered_table2(
                 name='secstuds',
@@ -662,6 +667,7 @@ def section(request, sectionid):
             table=ReferenceItemsForSectionTable,
             request=request,
             self_url=reverse('schooladmin:section', args=[sectionid]),
+            click_url=reverse('sis:secitem', args=[DUMMY_ID]),
         ))
 
     return render(request, 'schooladmin/section.html', data)
@@ -787,9 +793,20 @@ def sectionstudent(request, id):
     qs = SectionStudent.objects.filter(id=id)
     if qs.count() < 1:
         return HttpResponse("No such sectionstudent")
-    the_sectionstud = qs.get()
+    the_sectionstud = qs[0]
 
-    return HttpResponse('not implemented yet')
+    if the_sectionstud.status == SectionStudent.GRADED:
+        grade = the_sectionstud.letter_grade
+    else:
+        grade = '(N/A)'
+
+    data = {
+        'secstud': the_sectionstud,
+        'student': the_sectionstud.student,
+        'section': the_sectionstud.section,
+        'grade': grade
+    }
+    return render(request, 'schooladmin/sectionstudent.html', data)
 
 
 @role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)

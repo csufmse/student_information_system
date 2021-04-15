@@ -1,0 +1,53 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+
+{% block content %}
+<dl class="dl-horizontal">
+<h3>Section: {{ section }}</h3>
+  <dt>Major</dt>
+    <dd><a href="{% url 'sis:major' majorid=section.course.major.id %}">{{ section.course.major }}: {{  section.course.major.name }}</a></dd>
+  <dt>Course</dt>
+    <dd><a href="{% url 'schooladmin:course' courseid=section.course.id %}">{{ section.course.name }}: {{  section.course.title }}</a></dd>
+    <dt>Section:</dt>
+    <dd><a href="{% url 'schooladmin:section' sectionid=section.id %}">{{ section.name }}</a></dd>
+  <dt>Semester</dt>
+    <dd><a href="{% url 'schooladmin:semester' semester_id=section.semester.id %}">{{ section.semester }}</a></dd>
+  <dt>Professor</dt>
+    <dd><a href="{% url 'schooladmin:user' userid=section.professor.profile.user.id %}">{{ section.professor.profile.name }}</a></dd>
+</dl>
+
+<dl class="dl-horizontal">
+
+    <dt>Index</dt>
+    <dd>{{  index }}</dd>
+
+    <dt>Type</dt>
+    <dd>{{  item.type_label }}</dd>
+
+    <dt>Title</dt>
+    <dd>{{ item.title }}</dd>
+
+    <dt>Description</dt>
+    <dd>{{ item.description }}</dd>
+
+    {%  if item.edition %}
+    <dt>Edition</dt>
+    <dd>{{ item.edition }}</dd>
+    {%  endif %}
+
+    {%  if item.link %}
+    <dt>Link:</dt>
+    <dd><a href="{{ item.link }}" target="_new">{{ item.link }}</a></dd>
+    {% endif %}
+
+    {%  if item.isbn %}
+    <dt>ISBN</dt>
+    <dd>{{  item.isbn }}</dd>
+    {% endif %}
+
+  <form method="post">
+    {% csrf_token %}
+    <input action="action" class="btn btn-info" onclick="window.history.go(-1); return false;" value="Back"/>
+  </form>
+{% endblock %}

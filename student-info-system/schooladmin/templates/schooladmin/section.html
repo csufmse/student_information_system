@@ -6,14 +6,14 @@
 {% block content %}
 <dl class="dl-horizontal">
 <h3>Section: {{ section }}</h3>
-  <dt>Course</dt>
-    <dd><a href="{% url 'schooladmin:course' courseid=section.course.id %}">{{ section.course.name }}: {{  section.course.title }}</a></dd>
-  <dt>Section Number</dt>
-  <dd>{{ section.number }}</dd>
   <dt>Major</dt>
     <dd><a href="{% url 'sis:major' majorid=section.course.major.id %}">{{ section.course.major }}: {{  section.course.major.name }}</a></dd>
+  <dt>Course</dt>
+    <dd><a href="{% url 'schooladmin:course' courseid=section.course.id %}">{{ section.course.name }}: {{  section.course.title }}</a></dd>
   <dt>Semester</dt>
     <dd><a href="{% url 'schooladmin:semester' semester_id=section.semester.id %}">{{ section.semester }}</a></dd>
+  <dt>Section Number</dt>
+  <dd>{{ section.number }}</dd>
   <dt>Professor</dt>
     <dd><a href="{% url 'schooladmin:user' userid=section.professor.profile.user.id %}">{{ section.professor.profile.name }}</a></dd>
   <dt>Hours</dt>
@@ -29,46 +29,34 @@
     <h3>Reference Items:</h3>
     {% sis_filter 'secitems' %}
 
+    {% if can_see_students %}
     <h3>Students:</h3>
     {% sis_filter 'secstuds' %}
+    {% endif %}
     
   <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
 <div>
-    <input
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
-     <input id="new_section"
-        action="action"
-           class="btn btn-info"
-        value="New Section of this Class"
-    />
-     <input id="refresh_items"
-        action="action"
-           class="btn btn-info"
-        value="Refresh Reference Items for Section"
-    />
-     <input id="edit_section"
-        action="action"
-           class="btn btn-info"
-        value="Edit Section"
-    />
-     <input id="manage_students"
-        action="action"
-           class="btn btn-info"
-        value="Manage Students in Section"
-     /></div>
+    <input action="action" class="btn btn-info" onclick="window.history.go(-1); return false;" value="Back"/>
+    {%  if can_refresh_items %}<input id="refresh_items" action="action" class="btn btn-info" value="Refresh Reference Items for Section"/>{% endif %}
+    {%  if can_edit %}
+        <input id="new_section" action="action" class="btn btn-info" value="New Section of this Class"/>
+        <input id="edit_section" action="action" class="btn btn-info" value="Edit Section"/>
+        <input id="manage_students" action="action" class="btn btn-info" value="Manage Students in Section"/>
+    {% endif %}
+</div>
 </form>
 
 <script>
-addButtonClickHandler('new_section', '{% url 'schooladmin:section_new_from_section' sectionid=section.id %}');
-addButtonClickHandler('edit_section', '{% url 'schooladmin:section_edit' sectionid=section.id %}');
-addButtonClickHandler('refresh_items', '{% url 'schooladmin:section_refreshitems' sectionid=section.id %}');
-addButtonClickHandler('manage_students', '{% url 'schooladmin:section_students_manage' sectionid=section.id %}');
+{%  if can_refresh_items %}
+    addButtonClickHandler('refresh_items', '{% url 'schooladmin:section_refreshitems' sectionid=section.id %}');
+{% endif %}
+{% if can_edit %}
+    addButtonClickHandler('new_section', '{% url 'schooladmin:section_new_from_section' sectionid=section.id %}');
+    addButtonClickHandler('edit_section', '{% url 'schooladmin:section_edit' sectionid=section.id %}');
+    addButtonClickHandler('manage_students', '{% url 'schooladmin:section_students_manage' sectionid=section.id %}');
+{% endif %}
 stylizeRange({field:'index',min_label:'From #',max_label:'To #',prefix:"secitems"});
 </script>
 {% endblock %}
