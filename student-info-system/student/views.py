@@ -6,8 +6,6 @@ from django.db.models import Sum, Count
 from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse
 
-from schooladmin.views import major as admin_major
-
 from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
 
@@ -126,37 +124,6 @@ def registration_view(request):
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
-def profile(request):
-    the_user = request.user
-
-    data = {
-        'user': the_user,
-    }
-    data.update(
-        filtered_table2(
-            name='received',
-            qs=the_user.profile.sent_to.filter(time_archived__isnull=True),
-            filter=ReceivedMessageFilter,
-            table=MessageReceivedTable,
-            request=request,
-            wrap_list=False,
-            self_url=reverse('student:profile'),
-        ))
-    data.update(
-        filtered_table2(
-            name='sent',
-            qs=the_user.profile.sent_by.filter(time_archived__isnull=True),
-            filter=SentMessageFilter,
-            table=MessageSentTable,
-            request=request,
-            wrap_list=False,
-            self_url=reverse('student:profile'),
-        ))
-
-    return render(request, 'student/student.html', data)
-
-
-@role_login_required(Profile.ACCESS_STUDENT)
 def history(request):
     the_user = request.user
     data = {
@@ -180,7 +147,7 @@ def history(request):
             filter=SemesterFilter,
             table=SemestersSummaryTable,
             request=request,
-            self_url=reverse('student:profile'),
+            self_url=reverse('student:history'),
             click_url=reverse('student:semester', args=[DUMMY_ID]),
         ))
 
@@ -196,52 +163,11 @@ def history(request):
             filter=RequirementsCourseFilter,
             table=MajorCoursesMetTable,
             request=request,
-            self_url=reverse('student:profile'),
+            self_url=reverse('student:history'),
             click_url=reverse('student:course', args=[DUMMY_ID]),
         ))
 
     return render(request, 'student/history.html', data)
-
-
-@transaction.atomic
-@role_login_required(Profile.ACCESS_STUDENT)
-def profile_edit(request):
-    the_user = request.user
-    user_profile = the_user.profile
-    if request.method == 'POST':
-        user_form = UserEditForm(request.POST, instance=the_user, prefix='u')
-        profile_form = UnprivProfileEditForm(request.POST, instance=user_profile, prefix='p')
-        demo_form = DemographicForm(request.POST, instance=user_profile)
-        if user_form.is_valid() and profile_form.is_valid() and demo_form.is_valid():
-            user_form.save()
-            profile_form.save()
-            demo_form.save()
-            messages.success(request, "Profile has been updated.")
-            return profile(request)
-        else:
-            messages.error(request, 'Please correct the error(s) below.')
-    else:
-        user_form = UserEditForm(instance=the_user, prefix='u')
-        profile_form = UnprivProfileEditForm(instance=user_profile, prefix='p')
-        demo_form = DemographicForm(instance=user_profile,)
-
-    return render(
-        request, 'student/student_edit.html', {
-            'user': the_user,
-            'user_form': user_form,
-            'profile_form': profile_form,
-            'demo_form': demo_form,
-        })
-
-
-@role_login_required(Profile.ACCESS_STUDENT)
-def major(request, majorid):
-    return admin_major(request, majorid)
-
-
-@role_login_required(Profile.ACCESS_STUDENT)
-def change_password(request):
-    return HttpResponse("student:change_password not implemented")
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
@@ -289,7 +215,7 @@ def drop(request, id):
             mesg = the_user.profile.student.request_drop(sectionstudent=the_ssect, reason=reason)
             as_str = mesg.time_sent.strftime('%m/%d/%Y, %H:%M:%S')
             messages.success(request, f'Request submitted at {as_str}.')
-            return redirect(reverse('student:profile'))
+            return redirect(reverse('sis:profile'))
         else:
             messages.error(request, "Something went wrong.")
 
@@ -375,7 +301,7 @@ def request_major_change(request):
     the_user = request.user
 
     if request.method == 'POST':
-        major_form = MajorSelectForm(request.POST)
+        major_form = MajorChangeForm(request.POST)
         if major_form.is_valid(
         ) and major_form.cleaned_data.get('major') != the_user.profile.student.major:
             the_major = major_form.cleaned_data.get('major')
@@ -383,7 +309,7 @@ def request_major_change(request):
             mesg = the_user.profile.student.request_major_change(major=the_major, reason=reason)
             as_str = mesg.time_sent.strftime('%m/%d/%Y, %H:%M:%S')
             messages.success(request, f'Request submitted at {as_str}.')
-            return redirect(reverse('student:profile'))
+            return redirect(reverse('sis:profile'))
         else:
             messages.error(request, "Please select a major other than your current one.")
 

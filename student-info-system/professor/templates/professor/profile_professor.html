@@ -26,7 +26,7 @@
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
-    <input id="passchg"
+    <input id="change_password"
         action="action"
            class="btn btn-info"
         value="Change Password"
@@ -39,7 +39,7 @@
 
   </form>
 <script>
-addButtonClickHandler('passchg', "{% url 'sis:change_password' user.id %}");
-addButtonClickHandler('edit_profile', "{% url 'schooladmin:user_edit' user.id %}");
+addButtonClickHandler('change_password', "{% url 'sis:change_password' 0 %}");
+addButtonClickHandler('edit_profile', "{% url 'sis:profile_edit' %}");
 </script>
 {% endblock %}

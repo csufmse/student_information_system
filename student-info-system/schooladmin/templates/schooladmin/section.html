@@ -11,7 +11,7 @@
   <dt>Section Number</dt>
   <dd>{{ section.number }}</dd>
   <dt>Major</dt>
-    <dd><a href="{% url 'schooladmin:major' majorid=section.course.major.id %}">{{ section.course.major }}: {{  section.course.major.name }}</a></dd>
+    <dd><a href="{% url 'sis:major' majorid=section.course.major.id %}">{{ section.course.major }}: {{  section.course.major.name }}</a></dd>
   <dt>Semester</dt>
     <dd><a href="{% url 'schooladmin:semester' semester_id=section.semester.id %}">{{ section.semester }}</a></dd>
   <dt>Professor</dt>
@@ -69,6 +69,6 @@ addButtonClickHandler('new_section', '{% url 'schooladmin:section_new_from_secti
 addButtonClickHandler('edit_section', '{% url 'schooladmin:section_edit' sectionid=section.id %}');
 addButtonClickHandler('refresh_items', '{% url 'schooladmin:section_refreshitems' sectionid=section.id %}');
 addButtonClickHandler('manage_students', '{% url 'schooladmin:section_students_manage' sectionid=section.id %}');
-stylizeRange({field:'index',min_label:'From #',max_label:'To #',prefix:"secitem"});
+stylizeRange({field:'index',min_label:'From #',max_label:'To #',prefix:"secitems"});
 </script>
 {% endblock %}

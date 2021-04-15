@@ -5,8 +5,10 @@
 
 {% block content %}
 <div>
-<button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:course_new' %}';">New Course</button>
-<div>
+{%  if can_add %}
+    <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:course_new' %}';">New Course</button>
+{% endif %}
+    <div>
 {% sis_filter 'courses' %}
 
 </div>

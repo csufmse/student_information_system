@@ -414,7 +414,7 @@ class Student(models.Model):
             },
             time_sent=when,
             subject='Request: Drop Section ' + sectionstudent.section.name,
-            body=f'Reason:\n{reason}',
+            body=f'Professor: {sectionstudent.section.professor.name}\nReason:\n{reason}',
         )
         info_mesg = Message.objects.create(
             sender=self.profile,
