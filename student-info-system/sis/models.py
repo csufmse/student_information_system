@@ -414,7 +414,7 @@ class Student(models.Model):
             },
             time_sent=when,
             subject='Request: Drop Section ' + sectionstudent.section.name,
-            body=f'Reason:\n{reason}',
+            body=f'Professor: {sectionstudent.section.professor.name}\nReason:\n{reason}',
         )
         info_mesg = Message.objects.create(
             sender=self.profile,
@@ -782,6 +782,7 @@ class SectionStudent(models.Model):
         (GRADE_D, 'D'),
         (GRADE_F, 'F'),
     )
+    POINTS = tuple((x[1], x[0]) for x in GRADES)
 
     @classmethod
     def letter_grade_for(cls, grade):

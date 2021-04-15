@@ -13,8 +13,8 @@ class MessageViews(TestCase):
 
     # list views
     def test_messages_view_exists(self):
-        self.assertEqual(self.simple('/schooladmin/messages'), 200)
+        self.assertEqual(self.simple('/sis/messages'), 200)
 
     # Single-object views
     def test_student_view_exists(self):
-        self.assertEqual(self.simple('/schooladmin/message/1'), 200)
+        self.assertEqual(self.simple('/sis/message/1'), 200)

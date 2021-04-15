@@ -18,13 +18,22 @@ def createData():
         next = date(year, 9, 15)
         for session in Semester.SESSIONS_ORDER:
             print(f'Creating {session} {next.year} ...')
-            Semester.objects.create(year=next.year,
-                                    date_registration_opens=next - timedelta(days=60),
-                                    date_registration_closes=next - timedelta(days=7),
-                                    date_started=next,
-                                    date_last_drop=next + timedelta(days=14),
-                                    date_ended=next + timedelta(weeks=11),
-                                    session=session)
+            try:
+                Semester.objects.create(year=next.year,
+                                        date_registration_opens=next - timedelta(days=60),
+                                        date_registration_closes=next - timedelta(days=7),
+                                        date_started=next,
+                                        date_last_drop=next + timedelta(days=14),
+                                        date_ended=next + timedelta(weeks=11),
+                                        session=session)
+            except IntegrityError as e:
+                if 'UNIQUE constraint' in e.args[0]:
+                    print(f'ERROR: {next.year}/{session} already exists. ' +
+                          f'(did you drop all data before doing this?)')
+                else:
+                    print(f'ERROR: There was a problem saving {next.year}/' +
+                          f'{session} to the database.')
+
             next = next + timedelta(days=90)
 
     # make sure we have at least one semester open for registration

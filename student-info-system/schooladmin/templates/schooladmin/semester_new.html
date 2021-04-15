@@ -1,6 +1,13 @@
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
 {% load bootstrap3 %}
+{%  block scripts %}
+    {{ block.super }}
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <!-- Fengyuan Chen's Datepicker: https://github.com/fengyuanchen/datepicker -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/0.6.5/datepicker.min.css" integrity="sha256-b88RdwbRJEzRx95nCuuva+hO5ExvXXnpX+78h8DjyOE=" crossorigin="anonymous" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/0.6.5/datepicker.min.js" integrity="sha256-/7FLTdzP6CfC1VBAj/rsp3Rinuuu9leMRGd354hvk0k=" crossorigin="anonymous"></script>
+{%  endblock %}
 
 {% block content %}
   <h3>Create New Semester</h3>
@@ -13,6 +20,68 @@
         type="submit"
         value="Cancel" class="btn btn-info"
     />
-    <button type="submit" class="btn btn-primary">Create Semester</button>
+    <input id="submitme" name="submitme"
+        action="action"
+        value="Create Semester" class="btn btn-primary submitme"
+    />
   </form>
+{% endblock %}
+
+{% block late_scripts %}
+<script>
+    $.fn.datepicker.setDefaults({
+      format: 'yyyy-mm-dd',
+        autoHide: true
+    })
+    $(function () {
+      $("#id_date_started").datepicker();
+    });
+    $(function () {
+      $("#id_date_ended").datepicker();
+    });
+    $(function () {
+      $("#id_date_registration_opens").datepicker();
+    });
+    $(function () {
+      $("#id_date_registration_closes").datepicker();
+    });
+    $(function () {
+      $("#id_date_last_drop").datepicker();
+    });
+    document.getElementById("submitme").addEventListener("click", function () {
+        const yr = document.getElementById("id_year");
+        const dro = document.getElementById("id_date_registration_opens");
+        const drc = document.getElementById("id_date_registration_closes");
+        const ds = document.getElementById("id_date_started");
+        const dld = document.getElementById("id_date_last_drop");
+        const de = document.getElementById("id_date_ended");
+
+        var sem_year = yr.value;
+        var drod = new Date(dro.value);
+        var drcd = new Date(drc.value);
+        var dsd = new Date(ds.value);
+        var dldd = new Date(dld.value);
+        var ded = new Date(de.value);
+console.log(sem_year);
+console.log(ded);
+        var any_matching = sem_year == drod.getFullYear() ||
+                sem_year == drcd.getFullYear() ||
+                sem_year == dsd.getFullYear() ||
+                sem_year == dldd.getFullYear() ||
+                sem_year == ded.getFullYear();
+console.log(any_matching);
+        if (!any_matching) {
+            var answer = window.confirm("All dates are outside the semester year ("+
+                sem_year+").\nAre you sure you want to proceed?");
+            if (answer) {
+                this.form.submit();
+                return true;
+            }
+        } else {
+            this.form.submit();
+            return true;
+        }
+        return false;
+    });
+</script>
 {% endblock %}

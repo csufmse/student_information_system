@@ -7,21 +7,23 @@
 {% block content %}
 <dl class="dl-horizontal">
   <dt>Student</dt>
-  <dd>{{ user.name }}</dd>
+  <dd>{{ user.get_full_name }}</dd>
   <dt>Username</dt>
   <dd>{{ user.username }}</dd>
   <dt>Email</dt>
   <dd>{{ user.email }}</dd>
   <dt>Student Major</dt>
-  <dd><a href="{% url 'schooladmin:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
+  <dd><a href="{% url 'sis:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
   <dt>Class Level</dt>
   <dd>{{ user.profile.student.class_level }}</dd>
   <dt>GPA</dt>
   <dd>{{ user.profile.student.gpa|floatformat:2 }}</dd>
   <dt>Credits Earned</dt>
   <dd>{{ user.profile.student.credits_earned }}</dd>
+{%  if can_edit %}
   <dt>Enabled?</dt>
   <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
+{% endif %}
   <dt>Bio</dt>
   <dd>{{  user.profile.bio }}</dd>
   <dt>Transcript<dt>
@@ -42,65 +44,62 @@
     <h3>Major Required Courses:</h3>
     {% sis_filter 'majorcourses' %}
 
+    {%  if received %}
          <h3>Received Messages:</h3>
-    {% sis_filter 'received' %}
+        {% sis_filter 'received' %}
+    {% endif %}
 
+    {% if sent %}
         <h3>Sent Messages:</h3>
-    {% sis_filter 'sent' %}
-
+        {% sis_filter 'sent' %}
+    {% endif %}
  <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
-    <input
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
-    <input id="passchg"
-        action="action"
-           class="btn btn-info"
-        value="Change Password"
-    />
-      {% if user.is_active %}
-    <input id="disbutton" name="disbutton"
-           class="btn btn-primary"
-           action="action"
-        value="Disable Student"
-    />
-    {% else %}
-    <input id="enabutton" name="enabutton"
-        action="action"
-           class="btn btn-primary"
-        value="Enable Student"
-   />
-   {% endif %}
-     <input id="editu"
-        action="action"
-           class="btn btn-info"
-        value="Edit Student"
-    />
+    <input action="action" class="btn btn-info" onclick="window.history.go(-1); return false;" value="Back"/>
+    {%  if can_edit %}
+        <input id="change_password" action="action" class="btn btn-info" value="Change Password"/>
+        {% if user.is_active %}
+            <input id="disbutton" name="disbutton" class="btn btn-primary" action="action" value="Disable Student"/>
+        {% else %}
+            <input id="enabutton" name="enabutton" action="action" class="btn btn-primary" value="Enable Student"/>
+        {% endif %}
+        <input id="edit_user" action="action" class="btn btn-info" value="Edit Student"/>
+    {% endif %}
 
   </form>
 <script>
-function confirmit(evt) {
-    var btntitle = evt.target.value;
-    var answer = window.confirm("Are you sure you want to "+btntitle+' \n"{{ user.username }}" ({{ user.get_full_name  }})');
-    if (answer) {
-        this.form.submit();
-        return true;
+{%  if can_edit %}
+    function confirmit(evt) {
+        var btntitle = evt.target.value;
+        var answer = window.confirm("Are you sure you want to "+btntitle+' \n"{{ user.username }}" ({{ user.get_full_name  }})');
+        if (answer) {
+            this.form.submit();
+            return true;
+        }
+        return false;
     }
-    return false;
-}
-var btn = document.getElementById("disbutton");
-if ( btn ) {
-    btn.addEventListener("click", confirmit);
-}
-btn = document.getElementById("enabutton");
-if ( btn ) {
-    btn.addEventListener("click", confirmit);
-}
-addButtonClickHandler('passchg', "{% url 'schooladmin:change_password' user.id %}");
-addButtonClickHandler('editu', "{% url 'schooladmin:user_edit' user.id %}");
+    var btn = document.getElementById("disbutton");
+    if ( btn ) {
+        btn.addEventListener("click", confirmit);
+    }
+    btn = document.getElementById("enabutton");
+    if ( btn ) {
+        btn.addEventListener("click", confirmit);
+    }
+    addButtonClickHandler('change_password', "{% url 'sis:change_password' user.id %}");
+    addButtonClickHandler('edit_user', "{% url 'schooladmin:user_edit' user.id %}");
+{% endif %}
+stylizeRange({field:'year',min_label:'From Year',max_label:'To Year',prefix:"semesters"});
+{%  if received %}
+    stylizeRange({field:'time_sent',name:'Sent',prefix:'received',width:'100px'});
+{% endif %}
+{% if sent %}
+    stylizeRange({field:'time_sent',name:'Received',prefix:'sent',width:'100px'});
+{% endif %}
+stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'remaining'});
+stylizeRange({field:'credits_earned',name:'Cred',prefix:'remaining'});
+stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'majorcourses'});
+stylizeRange({field:'credits_earned',name:'Cred',prefix:'majorcourses'});
 </script>
 {% endblock %}

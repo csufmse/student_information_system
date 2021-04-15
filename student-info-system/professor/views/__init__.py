@@ -51,7 +51,6 @@ def sections(request):
         values = sections.get(sem)
         if values is not None:
             table = values[1]
-    print(table)
     return render(request, 'professor/sections.html', {
         'table': table,
         'semesters': sections.keys()
@@ -61,20 +60,20 @@ def sections(request):
 @role_login_required(Profile.ACCESS_PROFESSOR)
 def section(request, sectionid):
     data = {}
-    section = Section.objects.get(id=sectionid)
-    references = section.sectionreferenceitem_set.all()
-    ssects = SectionStudent.objects.filter(section=section)
+    aSection = Section.objects.get(id=sectionid)
+    references = aSection.sectionreferenceitem_set.all()
+    ssects = SectionStudent.objects.filter(section=aSection)
     if request.method == "POST":
-        for student in section.students.all():
+        for student in aSection.students.all():
             if request.POST.get(str(student.pk)) != 'None':
                 ssect = ssects.get(student=student)
                 ssect.grade = request.POST.get(str(student.pk))
                 ssect.save()
                 data['grade_submitted'] = {True}
-    grades = ((None, None), ('A', 4), ('B', 3), ('C', 2), ('D', 1), ('F', 1))
+    grades = ((None, None),) + SectionStudent.POINTS
     data.update({
         'grades': grades,
-        'section': section,
+        'section': aSection,
         'ssects': ssects,
         'references': references
     })
