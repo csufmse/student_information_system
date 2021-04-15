@@ -2,6 +2,8 @@ from datetime import timedelta, datetime
 
 import pytz
 from django.contrib.auth.models import User, AbstractUser
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey
 from django.core.exceptions import *
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -14,6 +16,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from isbn_field import ISBNField
+from abc import ABCMeta, abstractmethod
 
 
 class UpperField(models.CharField):
@@ -1094,3 +1097,81 @@ class Message(models.Model):
         return self.message_type in (
             Message.DROP_REQUEST_TYPE, Message.MAJOR_CHANGE_TYPE
         ) and self.time_handled is None and self.time_sent < as_of - timedelta(days=7)
+
+
+class Interval(models.Model):
+
+    SECONDS = 'seconds'
+    MINUTES = 'minutes'
+    HOURS = 'hours'
+    DAYS = 'days'
+    WEEKS = 'weeks'
+    MONTHS = 'months'
+    INTERVAL_TYPES = {
+        (SECONDS, 'seconds'),
+        (MINUTES, 'minutes'),
+        (HOURS, 'hours'),
+        (DAYS, 'days'),
+        (WEEKS, 'weeks'),
+        (MONTHS, 'months')
+    }
+
+    interval_amount = models.IntegerField('Interval Amount', validators=[MinValueValidator(1)])
+    interval_type = models.CharField('Interval Type', choices=INTERVAL_TYPES)
+
+    def create_kw_dict(self):
+        return {self.interval_type: self.interval_amount}
+
+
+class AbstractModelMeta(ABCMeta, type(models.Model)):
+    pass
+
+
+class Task(models.Model):
+
+    task_id = models.IntegerField()
+    task_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
+    task = GenericForeignKey('task_id', 'task_type')
+
+    DATE = 'date'
+    INTERVAL = 'interval'
+    IMMEDIATE = None
+    FREQUENCY_TYPES = {
+        (DATE, 'date'),
+        (INTERVAL, 'interval'),
+        (IMMEDIATE,'immediate'),
+    }
+
+    interval = models.OneToOneField(Interval, on_delete=models.CASCADE, blank=True)   
+    date = models.DateField('Date', default=None, blank=True)
+    frequency_type=models.CharField('Frequency Type', choices=FREQUENCY_TYPES)
+    name = models.CharField('Task Name')
+    active = models.BooleanField('Active')
+    description = models.CharField('Description', max_length=256)
+
+    @property
+    def name(self):
+        return self.name
+
+    def add_task(self, task):
+        task_type = ContentType.objects.get_for_model(task)
+        Task.objects.create(task=self, task_type=task_type, task_id=task.pk)
+    
+    @abstractmethod
+    def execute(self, frequency_type, interval=None, date=None):
+        pass
+    
+    
+class AcademicProbationTask(Task):
+
+    def execute(self):
+            academic_probation_check()
+        
+    def academic_probation_check():
+        students = Student.objects.all()
+        profile = Profile.objects.get(user__username='zeus')
+        for student in students:
+            if student.gpa() < 2.0:
+                ap_message = "Your GPA has fallen below 2.0, putting you on academic probation."
+                student.notify_probation(sender=profile, when=timezone.now(), body=ap_message)
+

@@ -5,5 +5,6 @@ class SchedulerConfig(AppConfig):
     name = 'scheduler'
 
     def ready(self):
-        from . import scheduler
+        from .scheduler import TaskScheduler
+        scheduler = TaskScheduler()
         scheduler.start()
