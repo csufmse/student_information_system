@@ -80,7 +80,7 @@ class ViewsExist(TestCase):
         self.assertEqual(self.simple('/profile'), 200)
 
     def change_password(self):
-        self.assertEqual(self.simple('/change_password'), 200)
+        self.assertEqual(self.simple('/change_password/0'), 200)
 
     def course(self):
         self.assertEqual(self.simple('/course/1'), 200)

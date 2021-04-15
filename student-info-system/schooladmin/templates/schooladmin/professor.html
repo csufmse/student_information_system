@@ -7,26 +7,22 @@
 {% block content %}
 <dl class="dl-horizontal">
   <dt>Professor</dt>
-  <dd>{{ user.name }}</dd>
-  <dt>Professor Name</dt>
+  <dd>{{ user.get_full_name }}</dd>
+  <dt>Username</dt>
   <dd>{{ user.username }}</dd>
   <dt>Email</dt>
   <dd>{{ user.email }}</dd>
-  <dt>Role</dt>
-  <dd>{{ user.profile.role }}</dd>
+  <dt>Bio</dt>
+  <dd>{{  user.profile.bio }}</dd>
   <dt>Teaching Department</dt>
-  <dd><a href="{% url 'schooladmin:major' majorid=user.profile.professor.major.id %}">{{ user.profile.professor.major.abbreviation }}: {{  user.profile.professor.major.name }}</a></dd>
-  <dt>Enabled?</dt>
-  <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
+  <dd><a href="{% url 'sis:major' majorid=user.profile.professor.major.id %}">{{ user.profile.professor.major.abbreviation }}: {{  user.profile.professor.major.name }}</a></dd>
+    {%  if can_edit %}
+      <dt>Enabled?</dt>
+      <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
+    {% endif %}
 </dl>
     <h3>Demographic Data</h3>
     {%  demographic_details user.profile %}
-
-        <h3>Received Messages:</h3>
-    {% sis_filter 'received' %}
-
-        <h3>Sent Messages:</h3>
-    {% sis_filter 'sent' %}
 
     <h3>Semesters Taught</h3>
     {% sis_filter 'semesters' %}
@@ -37,71 +33,56 @@
     <h3>Reference Items for Courses</h3>
     {% sis_filter 'items' %}
 
-  <form method="post">
-    {% csrf_token %}
-     <input type="hidden" name="userid" value="{{ user.id }}"/>
-    <input
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
-    <input id="change_password"
-        action="action"
-           class="btn btn-info"
-        value="Change Password"
-    />
-      {% if user.is_active %}
-    <input id="disbutton" name="disbutton"
-           class="btn btn-primary"
-           action="action"
-        value="Disable Professor"
-    />
-    {% else %}
-    <input id="enabutton" name="enabutton"
-        action="action"
-           class="btn btn-primary"
-        value="Enable Professor"
-   />
-   {% endif %}
-     <input id="showitems"
-        action="action"
-           class="btn btn-info"
-        value="Reference Items"
-    />
-     <input id="new_item"
-        action="action"
-           class="btn btn-info"
-        value="Add Reference Item"
-    />
-     <input id="edit_professor"
-        action="action"
-           class="btn btn-info"
-        value="Edit Professor"
-    />
+    {% if received %}
+        <h3>Received Messages:</h3>
+        {% sis_filter 'received' %}
+    {%  endif %}
 
-  </form>
+    {% if sent %}
+        <h3>Sent Messages:</h3>
+        {% sis_filter 'sent' %}
+    {%  endif %}
+
+  <form method="post">
+{% csrf_token %}
+    <input type="hidden" name="userid" value="{{ user.id }}"/>
+    <input action="action" class="btn btn-info" onclick="window.history.go(-1); return false;" value="Back"/>
+    <input id="showitems" action="action" class="btn btn-info" value="Reference Items"/>
+    {% if can_edit %}
+        <input id="change_password" action="action" class="btn btn-info" value="Change Password"/>
+        {% if user.is_active %}
+            <input id="disbutton" name="disbutton" class="btn btn-primary" action="action" value="Disable Professor"/>
+        {% else %}
+            <input id="enabutton" name="enabutton" action="action" class="btn btn-primary" value="Enable Professor"/>
+        {% endif %}
+        <input id="new_item" action="action" class="btn btn-info" value="Add Reference Item"/>
+        <input id="edit_professor" action="action" class="btn btn-info" value="Edit Professor"/>
+    {% endif %}
+</form>
 <script>
-function confirmit(evt) {
-    var btntitle = evt.target.value;
-    var answer = window.confirm("Are you sure you want to "+btntitle+' \n"{{ user.username }}" ({{ user.get_full_name  }})');
-    if (answer) {
-        this.form.submit();
-        return true;
+{% if can_edit %}
+    function confirmit(evt) {
+        var btntitle = evt.target.value;
+        var answer = window.confirm("Are you sure you want to "+btntitle+' \n"{{ user.username }}" ({{ user.get_full_name  }})');
+        if (answer) {
+            this.form.submit();
+            return true;
+        }
+        return false;
     }
-    return false;
-}
-var btn = document.getElementById("disbutton");
-if ( btn ) {
-    btn.addEventListener("click", confirmit);
-}
-btn = document.getElementById("enabutton");
-if ( btn ) {
-    btn.addEventListener("click", confirmit);
-}
-addButtonClickHandler('new_item', "{% url 'schooladmin:professor_item_new' userid=user.id %}");
-addButtonClickHandler('change_password', "{% url 'schooladmin:change_password' user.id %}");
-addButtonClickHandler('edit_professor', "{% url 'schooladmin:user_edit' user.id %}");
+    var btn = document.getElementById("disbutton");
+    if ( btn ) {btn.addEventListener("click", confirmit);}
+    btn = document.getElementById("enabutton");
+    if ( btn ) {btn.addEventListener("click", confirmit);}
+    addButtonClickHandler('new_item', "{% url 'schooladmin:professor_item_new' userid=user.id %}");
+    addButtonClickHandler('change_password', "{% url 'sis:change_password' user.id %}");
+    addButtonClickHandler('edit_professor', "{% url 'schooladmin:user_edit' user.id %}");
+{%  endif %}
 addButtonClickHandler('showitems', "{% url 'schooladmin:professor_items' user.id %}");
+stylizeRange({field:'year',min_label:'From Year',max_label:'To Year',prefix:"semesters"});
+{%  if received %}
+    stylizeRange({field:'time_sent',name:'Sent',prefix:'received',width:'100px'}); {% endif %}
+{%  if sent %}
+    stylizeRange({field:'time_sent',name:'Received',prefix:'sent',width:'100px'}); {% endif %}
 </script>
 {% endblock %}

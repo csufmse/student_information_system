@@ -13,7 +13,7 @@
                 {% bootstrap_form received_filter.form layout='inline' %}
                 <button class="btn btn-primary">Filter</button>
                 {% if received_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:messages' %}">Clear</a>
+                    <a  class="btn btn-success" href="{%  url 'sis:messages' %}">Clear</a>
                 {% endif %}
             </form>
         {% endif %}
@@ -33,7 +33,7 @@
                 {% bootstrap_form sent_filter.form layout='inline' %}
                 <button class="btn btn-primary">Filter</button>
                 {% if sent_has_filter %}
-                    <a  class="btn btn-success" href="{%  url 'schooladmin:messages' %}">Clear</a>
+                    <a  class="btn btn-success" href="{%  url 'sis:messages' %}">Clear</a>
                 {% endif %}
             </form>
         {% endif %}
@@ -58,13 +58,13 @@
 
   </form>
 <script>
-addDetailClickHander({template:"{% url 'schooladmin:message' id=1234599 %}",
+addDetailClickHander({template:"{% url 'sis:message' id=1234599 %}",
     table_parent: 'received',
     row_class:"message_row",
     iframe_id:'received_frame',
     mark_read: true
 });
-addDetailClickHander({template:"{% url 'schooladmin:message' id=1234599 %}",
+addDetailClickHander({template:"{% url 'sis:message' id=1234599 %}",
     table_parent: 'sent',
     row_class:"message_row",
     iframe_id:'sent_frame',
