@@ -54,4 +54,7 @@ urlpatterns = [
     path('message/<int:id>', views.message, name='message'),
     path('profile/edit', views.profile_edit, name='profile_edit'),
     path('profile', views.profile, name='profile'),
+    path('scheduled-tasks', views.tasks, name='tasks'),
+    path('tasks/add', views.task_add, name='task_add'),
+    path('tasks/edit', views.task_edit, name='task_edit'),
 ]

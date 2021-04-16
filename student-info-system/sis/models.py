@@ -3,7 +3,7 @@ from datetime import timedelta, datetime
 import pytz
 from django.contrib.auth.models import User, AbstractUser
 from django.contrib.contenttypes.models import ContentType
-from django.contrib.contenttypes.fields import GenericForeignKey
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.core.exceptions import *
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -1117,7 +1117,7 @@ class Interval(models.Model):
     }
 
     interval_amount = models.IntegerField('Interval Amount', validators=[MinValueValidator(1)])
-    interval_type = models.CharField('Interval Type', choices=INTERVAL_TYPES)
+    interval_type = models.CharField('Interval Type', choices=INTERVAL_TYPES, max_length=7)
 
     def create_kw_dict(self):
         return {self.interval_type: self.interval_amount}
@@ -1127,11 +1127,22 @@ class AbstractModelMeta(ABCMeta, type(models.Model)):
     pass
 
 
-class Task(models.Model):
-
+class Tasks(models.Model):
+    # Class for holding the subclass objects of the abstract class Task
     task_id = models.IntegerField()
     task_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
-    task = GenericForeignKey('task_id', 'task_type')
+    task = GenericForeignKey('task_type', 'task_id')
+
+    @classmethod
+    def add_task(self, task):
+        task_type = ContentType.objects.get_for_model(task)
+        return Tasks.objects.create(task_type=task_type, task_id=task.pk)
+
+
+class Task(models.Model):
+
+    class Meta:
+        abstract = True
 
     DATE = 'date'
     INTERVAL = 'interval'
@@ -1142,32 +1153,34 @@ class Task(models.Model):
         (IMMEDIATE,'immediate'),
     }
 
-    interval = models.OneToOneField(Interval, on_delete=models.CASCADE, blank=True)   
-    date = models.DateField('Date', default=None, blank=True)
-    frequency_type=models.CharField('Frequency Type', choices=FREQUENCY_TYPES)
-    name = models.CharField('Task Name')
-    active = models.BooleanField('Active')
+    interval = models.OneToOneField(Interval, on_delete=models.CASCADE, blank=True, null=True)   
+    date = models.DateField('Date', default=None, blank=True, null=True)
+    frequency_type=models.CharField('Frequency Type', choices=FREQUENCY_TYPES, max_length=8)
+    title = models.CharField('Task Title', max_length=30, blank=True)
+    active = models.BooleanField('Active', default=True)
+    tasks = GenericRelation(Tasks, content_type_field='task_type', object_id_field='task_id')
     description = models.CharField('Description', max_length=256)
 
     @property
     def name(self):
-        return self.name
+        return self.title
 
-    def add_task(self, task):
-        task_type = ContentType.objects.get_for_model(task)
-        Task.objects.create(task=self, task_type=task_type, task_id=task.pk)
-    
     @abstractmethod
     def execute(self, frequency_type, interval=None, date=None):
         pass
+
+    @property
+    def job_id(self):
+        return self.__class__.__name__ + str(self.pk)
     
     
 class AcademicProbationTask(Task):
+    # For all attributes see Task
 
     def execute(self):
-            academic_probation_check()
+        academic_probation_check()
         
-    def academic_probation_check():
+    def academic_probation_check(self):
         students = Student.objects.all()
         profile = Profile.objects.get(user__username='zeus')
         for student in students:

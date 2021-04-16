@@ -13,7 +13,7 @@ from django.urls import reverse
 from sis.authentication_helpers import role_login_required
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, Semester, Student,
-                        SectionStudent, Profile, Message)
+                        SectionStudent, Profile, Message, Tasks)
 
 from sis.utils import filtered_table, filtered_table2, DUMMY_ID
 
@@ -42,6 +42,7 @@ from sis.forms.profile import DemographicForm, ProfileCreationForm, ProfileEditF
 from sis.forms.referenceitem import ReferenceItemCreationForm
 from sis.forms.section import SectionCreationForm, SectionEditForm
 from sis.forms.student import StudentEditForm, StudentCreationForm
+from sis.forms.tasks import AcademicProbationTaskForm
 from sis.forms.user import UserCreationForm, UserEditForm
 
 from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
@@ -1262,3 +1263,30 @@ def message(request, id):
             'show_handled': handleable_message and not is_student,
             'show_read': True,
         })
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def tasks(request):
+    tasks = Tasks.objects.all()
+    data = [x.task for x in tasks]
+    return render(request, 'schooladmin/tasks.html', {'data': data})
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def task_add(request):
+    if request.method == 'POST':
+        form = AcademicProbationTaskForm(request.Post)
+        try:
+            task = form.save()
+            messages.success(request, 'Successfully created a task')
+        except ValueError as e:
+            messages.error(request, 'Something in the form is incorrect, see errors')
+            return render(request, 'schooladmin/task_add.html', {'form': form})
+        Tasks.add_task(task)
+    else:
+        form = AcademicProbationTaskForm()
+    return render(request, 'schooladmin/task_add.html', {'form': form})
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def task_edit(request, task_id):
+   pass 

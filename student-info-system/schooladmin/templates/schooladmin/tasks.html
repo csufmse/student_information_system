@@ -1,0 +1,25 @@
+{% extends 'sis/subpage_base.html' %}
+{% load static %}
+
+{% block content %}
+  <table class="table-data-alt">
+    <tr>
+      <th>Title</th>
+      <th>Description</th>
+      <th>Active</th>
+      <th>Frequency Type</th>
+      <th>Date</th>
+      <th>Interval</th>
+    </tr>
+    {% for task in tasks %}
+      <tr>
+        <td>{{task.name}}</td>
+        <td>{{task.description}}</td>
+        <td>{{task.active}}</td>
+        <td>{{task.frequency_type}}</td>
+        <td>{{task.date}}</td>
+        <td>{{task.interval.interval_type}}: {{task.interval.interval_amount}}</td>
+      </tr>
+    {% endfor %}
+  <a href="{% url 'schooladmin:task_add' %}" class="btn btn-info">Add Task</a>
+{% endblock content %}
