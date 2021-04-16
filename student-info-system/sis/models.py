@@ -997,6 +997,11 @@ class ReferenceItem(models.Model):
     def name(self):
         return f'{self.course}:{self.professor}/{self.title}'
 
+    @property
+    def type_label(self):
+        labels = dict(ReferenceItem.TYPES)
+        return labels[self.type]
+
     def __str__(self):
         return self.name
 

@@ -67,64 +67,28 @@ class ViewsExist(TestCase):
         KLASS.sec.refresh_reference_items()
         KLASS.secstud = SectionStudent.objects.create(section=KLASS.sec, student=s)
 
-    def current_schedule(self):
-        self.assertEqual(self.simple('/current_schedule'), 200)
+    # Changes in #324 fix this
+    # def test_current_schedule(self):
+    #     self.assertEqual(self.simple('/student/current_schedule'), 200)
 
-    def registration(self):
-        self.assertEqual(self.simple('/registration'), 200)
+    def test_registration(self):
+        self.assertEqual(self.simple('/student/registration'), 200)
 
-    def profile_edit(self):
-        self.assertEqual(self.simple('/profile/edit'), 200)
-
-    def profile(self):
-        self.assertEqual(self.simple('/profile'), 200)
-
-    def change_password(self):
-        self.assertEqual(self.simple('/change_password/0'), 200)
-
-    def course(self):
-        self.assertEqual(self.simple('/course/1'), 200)
-
-    def drop(self):
+    def test_drop(self):
         KLASS = self.__class__
-        self.assertEqual(self.simple(f'/drop/{KLASS.secstud.id}'), 200)
+        self.assertEqual(self.simple(f'/student/drop/{KLASS.secstud.id}'), 200)
 
-    def user(self):
-        self.assertEqual(self.simple('/user/1'), 200)
+    def test_secitems(self):
+        self.assertEqual(self.simple('/student/secitems'), 200)
 
-    def sectionstudent(self):
-        KLASS = self.__class__
-        self.assertEqual(self.simple(f'/sectionstudent/{KLASS.secstud.id}'), 200)
+    def test_history(self):
+        self.assertEqual(self.simple('/student/history'), 200)
 
-    def section(self):
-        KLASS = self.__class__
-        self.assertEqual(self.simple(f'/section/{KLASS.sec.id}'), 200)
+    def test_test_majors(self):
+        self.assertEqual(self.simple('/student/test_major'), 200)
 
-    def semester(self):
-        KLASS = self.__class__
-        self.assertEqual(self.simple(f'/semester/{KLASS.sem.id}'), 200)
-
-    def secitems(self):
-        self.assertEqual(self.simple('/secitems'), 200)
-
-    def secitem(self):
-        KLASS = self.__class__
-        sri = KLASS.sec.sectionreferenceitem_set.all()[0]
-        self.assertEqual(self.simple(f'/secitem/{sri.id}'), 200)
-
-    def major(self):
-        KLASS = self.__class__
-        self.assertEqual(self.simple(f'/section/{KLASS.m.id}'), 200)
-
-    def history(self):
-        self.assertEqual(self.simple('/history'), 200)
-
-    # test methods can't start with "test"
-    def xtest_majors(self):
-        self.assertEqual(self.simple('/test_majors'), 200)
-
-    def request_major_change(self):
-        self.assertEqual(self.simple('/request_major_change'), 200)
+    def test_request_major_change(self):
+        self.assertEqual(self.simple('/student/request_major_change'), 200)
 
 
 class ViewsUseTemplate(TestCase):
@@ -136,12 +100,12 @@ class ViewsUseTemplate(TestCase):
         m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         ViewsAccess.u = createStudent(username='u', password='hello', major=m1)
 
-    def current_schedule(self):
+    def test_current_schedule(self):
         login = self.client.login(username='u', password='hello')
-        response = self.client.get('/')
+        response = self.client.get('/student/current_schedule')
         self.assertTemplateUsed(response, 'student/current_schedule.html')
 
-    def registration(self):
+    def test_registration(self):
         login = self.client.login(username='u', password='hello')
-        response = self.client.get('/registration')
+        response = self.client.get('/student/registration')
         self.assertTemplateUsed(response, 'student/registration.html')
