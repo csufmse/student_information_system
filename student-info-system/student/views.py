@@ -32,7 +32,12 @@ from sis.forms.user import UserEditForm
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def index(request):
-    return render(request, 'student/home_student.html', request.user.profile.unread_messages())
+    data = {
+        'current_semester': Semester.current_semester(),
+        'registration_open': Semester.semesters_open_for_registration(),
+    }
+    data.update(request.user.profile.unread_messages())
+    return render(request, 'student/home_student.html', data)
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
@@ -271,7 +276,7 @@ def request_major_change(request):
     the_user = request.user
 
     if request.method == 'POST':
-        major_form = MajorSelectForm(request.POST)
+        major_form = MajorChangeForm(request.POST)
         if major_form.is_valid(
         ) and major_form.cleaned_data.get('major') != the_user.profile.student.major:
             the_major = major_form.cleaned_data.get('major')

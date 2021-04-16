@@ -18,12 +18,12 @@
       <th>Openings</th>
     </tr>
     <tr class="reg-row">
-      <td>{{section.semester_name}}</td>
-      <td>{{section.course_name}}</td>
-      <td>{{section.name}}</td>
-      <td>{{section.course_title}}</td>
-      <td>{{section.capacity}}</td>
-      <td>{{section.seats_remaining}}</td>
+      <td class="sem_cell">{{section.semester_name}}</td>
+      <td class="course_cell">{{section.course_name}}</td>
+      <td class="section_name_cell">{{section.name}}</td>
+      <td class="coursetitle_cellr">{{section.course_title}}</td>
+      <td class="capac_cell">{{section.capacity}}</td>
+      <td class="capac_cell">{{section.seats_remaining}}</td>
     </tr>
   </table>
 
@@ -70,13 +70,13 @@
       </tr>
       {% for ssect in ssects %}
         <tr class="reg-row">
-          <td>{{ssect.student.name}}</td>
-          <td>{{ssect.student.major}}</td>
-          <td>{{ssect.student.gpa}}</td>
-          <td>{{ssect.student.credits_earned}}</td>
-          <td>{{ssect.student.class_level}}</td>
-          <td>{{ssect.letter_grade}}</td>
-          <td><select name="{{ssect.student.pk}}">
+          <td class="user_name_cell">{{ssect.student.name}}</td>
+          <td class="major_cell">{{ssect.student.major}}</td>
+          <td class="gpa_cell">{{ssect.student.gpa|floatformat:2}}</td>
+          <td class="credits_cell">{{ssect.student.credits_earned}}</td>
+          <td class="classlevel_cell">{{ssect.student.class_level}}</td>
+          <td class="lettergrade_cell">{{ssect.letter_grade}}</td>
+          <td class="lettergrade_cell"><select name="{{ssect.student.pk}}">
             {% for id, value in grades %}
               <option value="{{value}}">{{id}}</option>
             {% endfor %}
