@@ -112,6 +112,8 @@ class SemesterEditForm(forms.ModelForm):
         help_text=Semester._meta.get_field('date_registration_closes').help_text)
     date_last_drop = forms.DateField(
         help_text=Semester._meta.get_field('date_last_drop').help_text)
+    date_finalized = forms.DateField(
+        label="Grades Finalized", help_text=Semester._meta.get_field('date_finalized').help_text)
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')
