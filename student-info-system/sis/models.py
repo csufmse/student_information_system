@@ -672,7 +672,10 @@ class Semester(models.Model):
                                     help_text="Must on or after Registration Opens")
     date_last_drop = models.DateField(
         'Last Drop', help_text="Must be on or after Classes Start and before Classes End")
-    date_ended = models.DateField('Classes End', help_text="Must be on or after Classes Start")
+    date_ended = models.DateField('Classes End',
+                                  help_text="Must be on or after Classes Start")
+    date_finalized = models.DateField('Grades Finalized',
+                                      help_text="Must be on or after Classes End")
 
     session = models.CharField('semester', choices=SESSIONS, default=FALL, max_length=6)
     year = models.IntegerField('year',
@@ -707,12 +710,12 @@ class Semester(models.Model):
     def preparing_grades(self, when=None):
         if when is None:
             when = datetime.now().date()
-        return self.date_ended <= when <= self.date_ended + timedelta(days=14)
+        return self.date_ended <= when <= self.date_finalized
 
     def finalized(self, when=None):
         if when is None:
             when = datetime.now().date()
-        return self.date_ended + timedelta(days=14) <= when
+        return self.date_finalized <= when
 
     def drop_possible(self, when=None):
         if when is None:

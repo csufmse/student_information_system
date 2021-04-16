@@ -65,6 +65,9 @@ class SemesterCreationForm(forms.ModelForm):
     date_started = forms.DateField(label="Classes Start")
     date_ended = forms.DateField(label="Classes End")
     date_last_drop = forms.DateField(label="Last Drop")
+    date_finalized = forms.DateField(label="Grades Finalized",
+                                     help_text=Semester._meta.get_field(
+                                         'date_finalized').help_text)
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')
@@ -72,13 +75,14 @@ class SemesterCreationForm(forms.ModelForm):
         st = self.cleaned_data.get('date_started')
         de = self.cleaned_data.get('date_ended')
         ld = self.cleaned_data.get('date_last_drop')
-        if not (rego <= st <= ld <= de and rego <= regc <= de):
+        df = self.cleaned_data.get('date_finalized')
+        if not (rego <= st <= ld <= de and rego <= regc <= de and de <= df):
             raise forms.ValidationError('Dates are not in order.')
 
     class Meta:
         model = Semester
         fields = ('session', 'year', 'date_registration_opens', 'date_registration_closes',
-                  'date_started', 'date_last_drop', 'date_ended')
+                  'date_started', 'date_last_drop', 'date_ended', 'date_finalized')
 
 
 class SemesterEditForm(forms.ModelForm):
@@ -87,6 +91,9 @@ class SemesterEditForm(forms.ModelForm):
     date_started = forms.DateField(label="Classes Start")
     date_ended = forms.DateField(label="Classes End")
     date_last_drop = forms.DateField(label="Last Drop")
+    date_finalized = forms.DateField(label="Grades Finalized",
+                                     help_text=Semester._meta.get_field(
+                                         'date_finalized').help_text)
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')
@@ -94,10 +101,11 @@ class SemesterEditForm(forms.ModelForm):
         st = self.cleaned_data.get('date_started')
         de = self.cleaned_data.get('date_ended')
         ld = self.cleaned_data.get('date_last_drop')
-        if not (rego <= st <= ld <= de and rego <= regc <= de):
+        df = self.cleaned_data.get('date_finalized')
+        if not (rego <= st <= ld <= de and rego <= regc <= de and de <= df):
             raise forms.ValidationError('Dates are not in order.')
 
     class Meta:
         model = Semester
         fields = ('date_registration_opens', 'date_registration_closes', 'date_started',
-                  'date_last_drop', 'date_ended')
+                  'date_last_drop', 'date_ended', 'date_finalized')

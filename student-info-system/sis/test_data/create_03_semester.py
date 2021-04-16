@@ -25,6 +25,7 @@ def createData():
                                         date_started=next,
                                         date_last_drop=next + timedelta(days=14),
                                         date_ended=next + timedelta(weeks=11),
+                                        date_finalized=next + time_delta(weeks=13),
                                         session=session)
             except IntegrityError as e:
                 if 'UNIQUE constraint' in e.args[0]:
