@@ -591,6 +591,44 @@ class Course(models.Model):
 
         return not loop_seen
 
+    def deep_prerequisites(self):
+        all_requirements_for_course = {}
+        courses_to_visit = [self]
+
+        while len(courses_to_visit) > 0:
+            course_to_check = courses_to_visit.pop()
+            print(f'checking {course_to_check}')
+
+            the_course_prereqs = []
+            if course_to_check.prereqs.count():
+                print(f'adding {course_to_check.prereqs.all()} to {the_course_prereqs}')
+                the_course_prereqs.extend(course_to_check.prereqs.all())
+
+            if course_to_check not in all_requirements_for_course:
+                all_requirements_for_course[course_to_check] = []
+                all_requirements_for_course[course_to_check].extend(course_to_check.prereqs.all())
+                print(f'all_requirements is new...{all_requirements_for_course[course_to_check]}')
+
+            for a_prereq in the_course_prereqs:
+                print(f'visiting prereq of {a_prereq}')
+                courses_to_visit.append(a_prereq)
+
+                # through a_prereq, course_to_check is dependent on everything a_prereq is.
+                if a_prereq in all_requirements_for_course:
+                    for cp in all_requirements_for_course[a_prereq]:
+                        if cp not in all_requirements_for_course[course_to_check]:
+                            print(f'adding {cp} to all[{course_to_check}]')
+                            all_requirements_for_course[course_to_check].append(cp)
+                    print(f'extended prereqs for {course_to_check} to {all_requirements_for_course[course_to_check]}' +
+                          f'(added {all_requirements_for_course[a_prereq]}')
+
+        # now final collect:
+        all = []
+        for cp in all_requirements_for_course[self]:
+            all.extend(all_requirements_for_course[cp])
+        print(f'{all}')
+        return all
+
     def max_section_for_semester(self, semester):
         max_dict = self.section_set.filter(semester=semester).aggregate(Max('number'))
         max_num = max_dict['number__max']
