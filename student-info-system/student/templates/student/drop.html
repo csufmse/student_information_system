@@ -5,7 +5,7 @@
 {% block content %}
 <dl class="dl-horizontal">
   <dt>Name</dt>
-  <dd>{{ user.name }}</dd>
+  <dd>{{ user.get_full_name }}</dd>
   <dt>Account Id</dt>
   <dd>{{ user.username }}</dd>
 </dl>

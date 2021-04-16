@@ -414,7 +414,7 @@ class Student(models.Model):
             },
             time_sent=when,
             subject='Request: Drop Section ' + sectionstudent.section.name,
-            body=f'Reason:\n{reason}',
+            body=f'Professor: {sectionstudent.section.professor.name}\nReason:\n{reason}',
         )
         info_mesg = Message.objects.create(
             sender=self.profile,
@@ -621,6 +621,10 @@ class CoursePrerequisite(models.Model):
         return self.course.name + ' requires ' + self.prerequisite.name
 
 
+class MultipleCurrentSemesters(Exception):
+    pass
+
+
 class Semester(models.Model):
 
     FALL = 'FA'
@@ -642,27 +646,33 @@ class Semester(models.Model):
     """
 
     @classmethod
+    # note that this MAY return more than one semester
     def current_semester(cls, at=None):
         if at is None:
             at = datetime.now()
-        try:
-            sem = Semester.objects.get(date_started__lte=at, date_ended__gte=at)
-        except DoesNotExist:
-            sem = None
+        sems = Semester.objects.filter(date_started__lte=at, date_ended__gte=at)
+        if not sems.count():
+            return None
+        elif sems.count() == 1:
+            return sems[0]
+        else:
+            raise MultipleCurrentSemesters()
 
-        if sem is None:
-            try:
-                sem = Semester.objects.get(date_registration_opens__lte=at,
-                                           date_registration_closes__gte=at)
-            except DoesNotExist:
-                sem = None
-        return sem
+    @classmethod
+    def semesters_open_for_registration(cls, at=None):
+        if at is None:
+            at = datetime.now()
+        return Semester.objects.filter(date_registration_opens__lte=at,
+                                       date_registration_closes__gte=at)
 
     date_registration_opens = models.DateField('Registration Opens')
-    date_registration_closes = models.DateField('Registration Closes')
-    date_started = models.DateField('Classes Start')
-    date_last_drop = models.DateField('Last Drop')
-    date_ended = models.DateField('Classes End')
+    date_registration_closes = models.DateField(
+        'Registration Closes', help_text="Must be on or after Registration Opens")
+    date_started = models.DateField('Classes Start',
+                                    help_text="Must on or after Registration Opens")
+    date_last_drop = models.DateField(
+        'Last Drop', help_text="Must be on or after Classes Start and before Classes End")
+    date_ended = models.DateField('Classes End', help_text="Must be on or after Classes Start")
 
     session = models.CharField('semester', choices=SESSIONS, default=FALL, max_length=6)
     year = models.IntegerField('year',
@@ -773,6 +783,7 @@ class SectionStudent(models.Model):
         (GRADE_D, 'D'),
         (GRADE_F, 'F'),
     )
+    POINTS = tuple((x[1], x[0]) for x in GRADES)
 
     @classmethod
     def letter_grade_for(cls, grade):
@@ -986,6 +997,11 @@ class ReferenceItem(models.Model):
     @property
     def name(self):
         return f'{self.course}:{self.professor}/{self.title}'
+
+    @property
+    def type_label(self):
+        labels = dict(ReferenceItem.TYPES)
+        return labels[self.type]
 
     def __str__(self):
         return self.name

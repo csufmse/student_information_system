@@ -40,17 +40,24 @@ class AdminMajorViewsTest(TestCase):
         KLASS.m1.courses_required.add(KLASS.c3)
         KLASS.m1.save()
 
-    # edit views
-    def test_edit_major_view_exists(self):
-        login = self.client.login(username='u1', password='hello')
-        response = self.client.get('/schooladmin/major/' + str(AdminMajorViewsTest.m1.id) +
-                                   '/edit')
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'schooladmin/major_edit.html')
+    def test_majors_view_exists(self):
+        self.assertEqual(self.simple('/sis/majors'), 200)
 
-    # create views
-    def test_new_major_view_exists(self):
+    def test_majors_view_uses_template(self):
         login = self.client.login(username='u1', password='hello')
-        response = self.client.get('/schooladmin/major_new')
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'schooladmin/major_new.html')
+        response = self.client.get('/sis/majors')
+        self.assertTemplateUsed(response, 'sis/majors.html')
+
+    # single-object views
+    def test_major_view_exists(self):
+        self.assertEqual(self.simple('/sis/major/' + str(AdminMajorViewsTest.m1.id)), 200)
+
+    def test_nonexistent_major_fails_view(self):
+        login = self.client.login(username='u1', password='hello')
+        response = self.client.get('/sis/major/' + '445455554')
+        self.assertEqual(response.status_code, 404)
+
+    def test_major_view_uses_template(self):
+        login = self.client.login(username='u1', password='hello')
+        response = self.client.get('/sis/major/' + str(AdminMajorViewsTest.m1.id))
+        self.assertTemplateUsed(response, 'sis/major.html')

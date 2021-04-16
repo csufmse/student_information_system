@@ -11,8 +11,8 @@ class ProfileUserViews(TestCase):
 
     # list views
     def test_profile_view_exists(self):
-        self.assertEqual(self.simple('/schooladmin/profile'), 200)
+        self.assertEqual(self.simple('/sis/profile'), 200)
 
     # Single-object views
     def test_profile_edit_view_exists(self):
-        self.assertEqual(self.simple('/schooladmin/profile/edit'), 200)
+        self.assertEqual(self.simple('/sis/profile/edit'), 200)

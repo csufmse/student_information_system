@@ -1,13 +1,12 @@
 {% extends 'sis/subpage_base.html' %}
 {% load static %}
 {% load bootstrap3 %}
-{% load sis-filter %}
 {%  load user_demographics %}
 
 {% block content %}
 <dl class="dl-horizontal">
   <dt>Name</dt>
-  <dd>{{ user.name }}</dd>
+  <dd>{{ user.get_full_name }}</dd>
   <dt>Account Id</dt>
   <dd>{{ user.username }}</dd>
   <dt>Email</dt>
@@ -20,12 +19,6 @@
     <h3>Personal Profile</h3>
     {%  demographic_details user.profile %}
 
-
-         <h3>Received Messages:</h3>
-    {% sis_filter 'received' %}
-
-        <h3>Sent Messages:</h3>
-    {% sis_filter 'sent' %}
 
  <form method="post">
     {% csrf_token %}
@@ -54,8 +47,8 @@
 
   </form>
 <script>
-addButtonClickHandler('change_password', "{% url 'student:change_password' %}");
+addButtonClickHandler('change_password', "{% url 'sis:change_password' 0 %}");
 addButtonClickHandler('request_major_change', "{% url 'student:request_major_change' %}");
-addButtonClickHandler('edit_user', "{% url 'student:profile_edit' %}");
+addButtonClickHandler('edit_user', "{% url 'sis:profile_edit' %}");
 </script>
 {% endblock %}

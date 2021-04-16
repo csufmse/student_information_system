@@ -35,50 +35,7 @@ class StudentHistoryTable(tables.Table):
         fields = ('semester', 'major', 'section', 'title', 'professor', 'credits_earned',
                   'status', 'letter_grade')
         template_name = "django_tables2/bootstrap.html"
-        row_attrs = {
-            'class': 'sectionstudent_row',
-            'data-id': lambda record: record.student.profile.user.pk
-        }
-        attrs = {"class": 'sectionstudent_table'}
-
-
-# shows all info: semester, course, section, student
-class SectionStudentsTable(tables.Table):
-    semester = ClassyColumn(verbose_name='Semester',
-                            css_class_base='semester',
-                            accessor='name',
-                            order_by=('semester.year', 'semester.session_order'))
-    course = ClassyColumn(accessor='course', css_class_base='course')
-    username = ClassyColumn(accessor='student__profile__user__username',
-                            css_class_base='username')
-    name = ClassyColumn(accessor='student__profile__name',
-                        css_class_base='user_name',
-                        order_by=('student__profile__user__last_name',
-                                  'student__profile__user__first_name'))
-    major = ClassyColumn(accessor='student__profile__major__abbreviation', css_class_base='major')
-    sec_status = ClassyColumn(
-        verbose_name="Section Status",
-        css_class_base='sectionstatus',
-        accessor='section__status',
-    )
-    stud_status = ClassyColumn(
-        verbose_name="Student Status",
-        css_class_base='sectionstudentstatus',
-        accessor='status',
-    )
-    letter_grade = ClassyColumn(verbose_name="Grade",
-                                accessor='grade',
-                                css_class_base='lettergrade')
-
-    class Meta:
-        model = SectionStudent
-        template_name = "django_tables2/bootstrap.html"
-        fields = ('semester', 'course', 'username', 'name', 'major', 'sec_status', 'stud_status',
-                  'letter_grade')
-        row_attrs = {
-            'class': 'sectionstudent_row',
-            'data-id': lambda record: record.student.profile.user.pk
-        }
+        row_attrs = {'class': 'sectionstudent_row', 'data-id': lambda record: record.pk}
         attrs = {"class": 'sectionstudent_table'}
 
 
@@ -86,7 +43,10 @@ class SectionStudentsTable(tables.Table):
 class StudentInSectionTable(tables.Table):
     username = ClassyColumn(accessor='student__profile__user__username',
                             css_class_base='username')
-    name = ClassyColumn(accessor='student__profile__user__name', css_class_base='user_name')
+    name = ClassyColumn(accessor='student__profile__user__get_full_name',
+                        css_class_base='user_name',
+                        order_by=('student__profile__user__last_name',
+                                  'student__profile__user__first_name'))
     major = ClassyColumn(accessor='student__major__abbreviation', css_class_base='major')
     gpa = ClassyColumn(accessor='student__gpa', css_class_base='gpa')
 
@@ -106,8 +66,5 @@ class StudentInSectionTable(tables.Table):
         model = SectionStudent
         template_name = "django_tables2/bootstrap.html"
         fields = ('username', 'name', 'major', 'gpa', 'status', 'letter_grade')
-        row_attrs = {
-            'class': 'sectionstudent_row',
-            'data-id': lambda record: record.student.profile.user.pk
-        }
+        row_attrs = {'class': 'sectionstudent_row', 'data-id': lambda record: record.pk}
         attrs = {"class": 'sectionstudent_table'}

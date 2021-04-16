@@ -1,26 +1,25 @@
 from django.urls import path
 
-from . import views
+from schooladmin import views
+from schooladmin.views import users
 
 app_name = 'schooladmin'
 urlpatterns = [
     path('', views.index, name='index'),
-    path('users', views.users, name='users'),
-    path('user/<int:userid>/change_password', views.user_change_password, name='change_password'),
-    path('user/<int:userid>/edit', views.user_edit, name='user_edit'),
-    path('user/<int:userid>', views.user, name='user'),
-    path('user_new', views.user_new, name='user_new'),
+    path('users', users.userslist, name='users'),
+    path('user/<int:userid>/edit', users.user_edit, name='user_edit'),
+    path('user/<int:userid>', users.user, name='user'),
+    path('user_new', users.user_new, name='user_new'),
     path('students', views.students, name='students'),
     path('student/<int:userid>', views.student, name='student'),
     path('student/<int:userid>/transcript', views.transcript, name='transcript'),
+    path('professors', views.professors, name='professors'),
     path('professor/<int:userid>', views.professor, name='professor'),
     path('professor/<int:userid>/items', views.professor_items, name='professor_items'),
     path('professor/<int:userid>/item_new', views.professor_item_new, name='professor_item_new'),
     path('professor/<int:userid>/item/<int:item_id>', views.professor_item,
          name='professor_item'),
-    path('majors', views.majors, name='majors'),
     path('major/<int:majorid>/edit', views.major_edit, name='major_edit'),
-    path('major/<int:majorid>', views.major, name='major'),
     path('major_new', views.major_new, name='major_new'),
     path('courses', views.courses, name='courses'),
     path('course/<int:courseid>/edit', views.course_edit, name='course_edit'),
@@ -50,8 +49,4 @@ urlpatterns = [
     path('semester/<int:semester_id>/edit', views.semester_edit, name='semester_edit'),
     path('semester/<int:semester_id>', views.semester, name='semester'),
     path('demographics', views.demographics, name='demographics'),
-    path('messages', views.usermessages, name='messages'),
-    path('message/<int:id>', views.message, name='message'),
-    path('profile/edit', views.profile_edit, name='profile_edit'),
-    path('profile', views.profile, name='profile'),
 ]

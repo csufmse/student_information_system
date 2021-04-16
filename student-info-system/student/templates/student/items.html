@@ -7,7 +7,7 @@
 <dl class="dl-horizontal">
 <h3>Reference Items for:</h3>
   <dt>Semester</dt>
-    <dd><a href="{% url 'student:semester' semester_id=semester.id %}">{{ semester }}</a></dd>
+    <dd><a href="{% url 'schooladmin:semester' semester_id=semester.id %}">{{ semester }}</a></dd>
 </dl>
 
 {% sis_filter 'secitems' %}
@@ -20,6 +20,6 @@
     />
 
 <script>
-stylizeRange({field:'index',min_label:'From #',max_label:'To #',prefix:"secitem"});
+stylizeRange({field:'index',min_label:'From #',max_label:'To #',prefix:"secitems"});
 </script>
 {% endblock %}

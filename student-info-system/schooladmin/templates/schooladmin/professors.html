@@ -5,10 +5,8 @@
 
 {% block content %}
 <div>
-{%  if can_add %}
   <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
-{%  endif %}
-    {% sis_filter 'students' %}
+    {% sis_filter 'professors' %}
 </div>
   <script>
     const handler = insertScrollableDivs(applyHandlers=true);
