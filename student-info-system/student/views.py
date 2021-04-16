@@ -94,14 +94,15 @@ def registration_view(request):
                         if not Course.objects.get(id=sect.course.id).prerequisites_met(student):
                             messages.error(request,
                                            "You have not met the prerequisites for this course.")
-                            return render(request, 'student/registration.html', context)
-                        status = SectionStudent.REGISTERED
-                        if sect.seats_remaining < 1:
-                            status = SectionStudent.WAITLISTED
-                        sectstud = SectionStudent(section=sect, student=student, status=status)
-                        sectstud.save()
-                        sect.is_selected = True
-                        messages.success(request, "Registraion successful")
+                        else:
+                            status = SectionStudent.REGISTERED
+                            if sect.seats_remaining < 1:
+                                status = SectionStudent.WAITLISTED
+                            sectstud = SectionStudent(section=sect, student=student,
+                                                      status=status)
+                            sectstud.save()
+                            sect.is_selected = True
+                            messages.success(request, "Registration successful")
     else:
         if len(semester_list) > 0:
             the_sem = semester_list[0]
