@@ -72,6 +72,7 @@ def createSemester(year=None,
                    date_started=None,
                    date_last_drop=None,
                    date_ended=None,
+                   date_finalized=None,
                    session=None):
     if year is None:
         year = 2020
@@ -92,11 +93,15 @@ def createSemester(year=None,
     de = datetime.now()
     if date_ended is not None:
         de += timedelta(days=date_ended)
+    df = datetime.now()
+    if date_finalized is not None:
+        df += timedelta(days=date_finalized)
     semester = Semester.objects.create(date_registration_opens=dro,
                                        date_registration_closes=drc,
                                        date_started=ds,
                                        date_last_drop=dld,
                                        date_ended=de,
+                                       date_finalized=df,
                                        session=session,
                                        year=year)
     return semester

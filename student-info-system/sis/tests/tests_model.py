@@ -6,7 +6,7 @@ from django.contrib.auth.models import User
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
                         Semester, Student, ClassLevel, Profile)
 
-from sis.tests.utils import (createAdmin, createStudent, createProfessor, createCourse)
+from sis.tests.utils import *
 
 
 class StudentTestCase_Basic(TestCase):
@@ -28,14 +28,7 @@ class StudentTestCase_Basic(TestCase):
                                                          title="required by major",
                                                          credits_earned=3.0)
 
-        StudentTestCase_Basic.semester = Semester.objects.create(
-            date_registration_opens=datetime.now(),
-            date_registration_closes=datetime.now(),
-            date_started=datetime.now(),
-            date_last_drop=datetime.now(),
-            date_ended=datetime.now(),
-            session=Semester.FALL,
-            year=2000)
+        StudentTestCase_Basic.semester = createSemester()
 
     def test_class_level(self):
         student = StudentTestCase_Basic.stud
@@ -127,13 +120,7 @@ class StudentTestCase_History(TestCase):
         CoursePrerequisite.objects.create(course=KLASS.c4, prerequisite=KLASS.c1)
         CoursePrerequisite.objects.create(course=KLASS.c5, prerequisite=KLASS.c1)
 
-        KLASS.semester = Semester.objects.create(date_registration_opens=datetime.now(),
-                                                 date_registration_closes=datetime.now(),
-                                                 date_started=datetime.now(),
-                                                 date_last_drop=datetime.now(),
-                                                 date_ended=datetime.now(),
-                                                 session=Semester.FALL,
-                                                 year=2000)
+        KLASS.semester = createSemester()
 
         KLASS.stud.semesters.add(KLASS.semester)
         KLASS.stud.save()
@@ -285,14 +272,7 @@ class Professor_teaching_test(TestCase):
                                                                title="Intro To Test",
                                                                credits_earned=3.0)
 
-        Professor_teaching_test.semester = Semester.objects.create(
-            date_registration_opens=datetime.now(),
-            date_registration_closes=datetime.now(),
-            date_started=datetime.now(),
-            date_last_drop=datetime.now(),
-            date_ended=datetime.now(),
-            session=Semester.FALL,
-            year=2000)
+        Professor_teaching_test.semester = createSemester()
 
     def test_no_teaching(self):
         self.assertEqual(Professor_teaching_test.professor.semesters_teaching().count(), 0)
@@ -306,7 +286,7 @@ class Professor_teaching_test(TestCase):
                                    hours="MW 1200-1400")
         teaching_sems = Professor_teaching_test.professor.semesters_teaching()
         self.assertEqual(teaching_sems.count(), 1)
-        self.assertEqual(str(teaching_sems[0]), "FA-2000")
+        self.assertEqual(str(teaching_sems[0]), "FA-2020")
         s.delete()
 
 
@@ -406,13 +386,7 @@ class CourseMeetingPrereqsTest(TestCase):
                                          title="Outro To Test",
                                          credits_earned=3.0)
         CoursePrerequisite.objects.create(course=KLASS.c2, prerequisite=KLASS.c1)
-        KLASS.sem = Semester.objects.create(date_registration_opens=datetime.now(),
-                                            date_registration_closes=datetime.now(),
-                                            date_started=datetime.now(),
-                                            date_last_drop=datetime.now(),
-                                            date_ended=datetime.now(),
-                                            session=Semester.FALL,
-                                            year=2000)
+        KLASS.sem = createSemester()
         p = createProfessor(username='frodo', major=KLASS.m1)
         KLASS.sec1 = Section.objects.create(course=KLASS.c1,
                                             professor=p,
@@ -471,13 +445,7 @@ class SectionTestCase(TestCase):
                                        catalog_number='101',
                                        title="Intro To Test",
                                        credits_earned=3.0)
-        semester = Semester.objects.create(date_registration_opens=datetime.now(),
-                                           date_registration_closes=datetime.now(),
-                                           date_started=datetime.now(),
-                                           date_last_drop=datetime.now(),
-                                           date_ended=datetime.now(),
-                                           session=Semester.FALL,
-                                           year=2000)
+        semester = createSemester()
         Section.objects.create(course=course,
                                professor=professor,
                                semester=semester,
@@ -495,7 +463,7 @@ class SectionTestCase(TestCase):
 
     def test_section_semester_name(self):
         section = Section.objects.get(hours="MW 1200-1400")
-        self.assertEqual(section.semester_name, "FA-2000")
+        self.assertEqual(section.semester_name, "FA-2020")
 
     def test_section_name(self):
         section = Section.objects.get(hours="MW 1200-1400")
@@ -557,13 +525,7 @@ class MajorTestCase(TestCase):
         p = createProfessor(major=m1, username='herc')
         s = createStudent(username='frodo', major=m1)
 
-        sem = Semester.objects.create(date_registration_opens=datetime.now(),
-                                      date_registration_closes=datetime.now(),
-                                      date_started=datetime.now(),
-                                      date_last_drop=datetime.now(),
-                                      date_ended=datetime.now(),
-                                      session=Semester.FALL,
-                                      year=2000)
+        sem = createSemester()
         sec1 = Section.objects.create(course=MajorTestCase.c1, semester=sem, professor=p)
 
         # moved this to after has not completed and test passed. Seems like either the
@@ -633,15 +595,9 @@ class Semester_tests(TestCase):
         self.assertRaises(Exception, Semester.name_for_session('xx'))
 
     def test_order_fields(self):
-        s1 = Semester.objects.create(date_registration_opens=datetime.now(),
-                                     date_registration_closes=datetime.now(),
-                                     date_started=datetime.now(),
-                                     date_last_drop=datetime.now(),
-                                     date_ended=datetime.now(),
-                                     session=Semester.FALL,
-                                     year=2000)
+        s1 = createSemester()
         # forcing the fetch here lets the annotation generate the extra attributes
-        s2 = Semester.objects.get(year=2000)
+        s2 = Semester.objects.get(year=2020)
 
         self.assertEqual(s2.session_name, 'Fall')
         self.assertEqual(s2.session_order, 0)
@@ -654,13 +610,7 @@ class SemesterProf_tests(TestCase):
         KLASS = SemesterProf_tests
         super(SemesterProf_tests, cls).setUpTestData()
         ad = createAdmin('foobar').profile
-        KLASS.sem = Semester.objects.create(date_registration_opens=datetime.now(),
-                                            date_registration_closes=datetime.now(),
-                                            date_started=datetime.now(),
-                                            date_last_drop=datetime.now(),
-                                            date_ended=datetime.now(),
-                                            session=Semester.FALL,
-                                            year=2000)
+        KLASS.sem = createSemester()
 
         KLASS.m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         KLASS.p1 = createProfessor(username='frodo', major=KLASS.m1)
