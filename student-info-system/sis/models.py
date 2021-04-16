@@ -672,8 +672,7 @@ class Semester(models.Model):
                                     help_text="Must on or after Registration Opens")
     date_last_drop = models.DateField(
         'Last Drop', help_text="Must be on or after Classes Start and before Classes End")
-    date_ended = models.DateField('Classes End',
-                                  help_text="Must be on or after Classes Start")
+    date_ended = models.DateField('Classes End', help_text="Must be on or after Classes Start")
     date_finalized = models.DateField('Grades Finalized',
                                       help_text="Must be on or after Classes End")
 

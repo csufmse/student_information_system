@@ -38,14 +38,7 @@ class SemestersSummaryTable(SemestersTable):
     class Meta:
         model = Semester
         template_name = "django_tables2/bootstrap.html"
-        exclude = (
-            'date_registration_opens',
-            'id',
-            'date_registration_closes',
-            'date_started',
-            'date_last_drop',
-            'date_ended',
-            'date_finalized'
-        )
+        exclude = ('date_registration_opens', 'id', 'date_registration_closes', 'date_started',
+                   'date_last_drop', 'date_ended', 'date_finalized')
         attrs = {"class": 'semester_table'}
         row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}
