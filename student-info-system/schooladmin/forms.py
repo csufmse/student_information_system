@@ -65,9 +65,8 @@ class SemesterCreationForm(forms.ModelForm):
     date_started = forms.DateField(label="Classes Start")
     date_ended = forms.DateField(label="Classes End")
     date_last_drop = forms.DateField(label="Last Drop")
-    date_finalized = forms.DateField(label="Grades Finalized",
-                                     help_text=Semester._meta.get_field(
-                                         'date_finalized').help_text)
+    date_finalized = forms.DateField(
+        label="Grades Finalized", help_text=Semester._meta.get_field('date_finalized').help_text)
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')
@@ -91,9 +90,8 @@ class SemesterEditForm(forms.ModelForm):
     date_started = forms.DateField(label="Classes Start")
     date_ended = forms.DateField(label="Classes End")
     date_last_drop = forms.DateField(label="Last Drop")
-    date_finalized = forms.DateField(label="Grades Finalized",
-                                     help_text=Semester._meta.get_field(
-                                         'date_finalized').help_text)
+    date_finalized = forms.DateField(
+        label="Grades Finalized", help_text=Semester._meta.get_field('date_finalized').help_text)
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')

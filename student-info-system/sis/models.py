@@ -591,43 +591,31 @@ class Course(models.Model):
 
         return not loop_seen
 
-    def deep_prerequisites(self):
+    # not really intended for direct calling, but it can be. Use list for an in-list filter
+    # as below.
+    def deep_prerequisite_ids(self, include_self=False):
         all_requirements_for_course = {}
-        courses_to_visit = [self]
 
-        while len(courses_to_visit) > 0:
-            course_to_check = courses_to_visit.pop()
-            print(f'checking {course_to_check}')
+        def add_self_and_prereqs(course):
+            all_requirements_for_course[course.id] = True
+            for pre in course.prereqs.all():
+                add_self_and_prereqs(pre)
 
-            the_course_prereqs = []
-            if course_to_check.prereqs.count():
-                print(f'adding {course_to_check.prereqs.all()} to {the_course_prereqs}')
-                the_course_prereqs.extend(course_to_check.prereqs.all())
+        add_self_and_prereqs(self)
+        if not include_self and self.id in all_requirements_for_course:
+            del all_requirements_for_course[self.id]
+        return all_requirements_for_course.keys()
 
-            if course_to_check not in all_requirements_for_course:
-                all_requirements_for_course[course_to_check] = []
-                all_requirements_for_course[course_to_check].extend(course_to_check.prereqs.all())
-                print(f'all_requirements is new...{all_requirements_for_course[course_to_check]}')
+    def deep_prerequisites(self, include_self=False):
+        return Course.objects.filter(id__in=self.deep_prerequisite_ids(include_self=include_self))
 
-            for a_prereq in the_course_prereqs:
-                print(f'visiting prereq of {a_prereq}')
-                courses_to_visit.append(a_prereq)
-
-                # through a_prereq, course_to_check is dependent on everything a_prereq is.
-                if a_prereq in all_requirements_for_course:
-                    for cp in all_requirements_for_course[a_prereq]:
-                        if cp not in all_requirements_for_course[course_to_check]:
-                            print(f'adding {cp} to all[{course_to_check}]')
-                            all_requirements_for_course[course_to_check].append(cp)
-                    print(f'extended prereqs for {course_to_check} to {all_requirements_for_course[course_to_check]}' +
-                          f'(added {all_requirements_for_course[a_prereq]}')
-
-        # now final collect:
-        all = []
-        for cp in all_requirements_for_course[self]:
-            all.extend(all_requirements_for_course[cp])
-        print(f'{all}')
-        return all
+    @classmethod
+    def deep_prerequisites_for(cls, courses=None, include_self=False):
+        accumulated_prereqs = {}
+        for c in courses:
+            cp = c.deep_prerequisite_ids(include_self=include_self)
+            accumulated_prereqs.update({x: True for x in cp})
+        return Course.objects.filter(id__in=accumulated_prereqs.keys())
 
     def max_section_for_semester(self, semester):
         max_dict = self.section_set.filter(semester=semester).aggregate(Max('number'))
@@ -710,8 +698,7 @@ class Semester(models.Model):
                                     help_text="Must on or after Registration Opens")
     date_last_drop = models.DateField(
         'Last Drop', help_text="Must be on or after Classes Start and before Classes End")
-    date_ended = models.DateField('Classes End',
-                                  help_text="Must be on or after Classes Start")
+    date_ended = models.DateField('Classes End', help_text="Must be on or after Classes Start")
     date_finalized = models.DateField('Grades Finalized',
                                       help_text="Must be on or after Classes End")
 
@@ -1003,6 +990,17 @@ class Section(models.Model):
         if check_prerequisites and not self.course.prerequisites_met(student):
             raise PrerequisitesNotMet()
 
+        if self.seats_remaining <= 0.1 * self.capacity:
+            Message.objects.create(message_type=Section.SECTION_FILLING_TYPE,
+                                   recipient=self.course.major.contact,
+                                   sender=self.course.major.contact,
+                                   subject=f'Section {self} is almost full',
+                                   support_data={
+                                       'section': self,
+                                   },
+                                   body=f'Capacity is {self.capacity}, but only ' +
+                                   f'{self.seats_remaining} are available.')
+
         return SectionStudent.objects.create(section=self,
                                              student=student,
                                              status=SectionStudent.REGISTERED)
@@ -1084,11 +1082,13 @@ class Message(models.Model):
     DROP_REJECTED_TYPE = 'droprejected'
     MAJOR_CHANGE_APPROVAL_TYPE = 'majorapproved'
     MAJOR_CHANGE_REJECTED_TYPE = 'majorrejected'
+    SECTION_FILLING_TYPE = 'sectionfilling'
     TYPES = (
         (GENERIC_TYPE, GENERIC_TYPE),
         (ACADEMIC_PROBATION_TYPE, ACADEMIC_PROBATION_TYPE),
         (DROP_REQUEST_TYPE, DROP_REQUEST_TYPE),
         (MAJOR_CHANGE_TYPE, MAJOR_CHANGE_TYPE),
+        (SECTION_FILLING_TYPE, SECTION_FILLING_TYPE),
     )
 
     message_type = models.CharField(choices=TYPES, default=GENERIC_TYPE, max_length=15)
