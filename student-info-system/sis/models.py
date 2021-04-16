@@ -676,6 +676,7 @@ class Semester(models.Model):
 
     session = models.CharField('semester', choices=SESSIONS, default=FALL, max_length=6)
     year = models.IntegerField('year',
+                               help_text="School Year",
                                default=2000,
                                validators=[MinValueValidator(1900),
                                            MaxValueValidator(2300)])
@@ -696,27 +697,27 @@ class Semester(models.Model):
 
     def registration_open(self, when=None):
         if when is None:
-            when = datetime.now().date()
+            when = datetime.now()
         return self.date_registration_opens <= when <= self.date_registration_closes
 
     def in_session(self, when=None):
         if when is None:
-            when = datetime.now().date()
+            when = datetime.now()
         return self.date_started <= when <= self.date_ended
 
     def preparing_grades(self, when=None):
         if when is None:
-            when = datetime.now().date()
+            when = datetime.now()
         return self.date_ended <= when <= self.date_ended + timedelta(days=14)
 
     def finalized(self, when=None):
         if when is None:
-            when = datetime.now().date()
+            when = datetime.now()
         return self.date_ended + timedelta(days=14) <= when
 
     def drop_possible(self, when=None):
         if when is None:
-            when = datetime.now().date()
+            when = datetime.now()
         return self.date_registration_opens <= when <= self.date_last_drop
 
     @property

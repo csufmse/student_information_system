@@ -66,32 +66,28 @@ def createCourse(major, num):
 
 # dates are not dates, but number of days (plus or minus) from now.
 # this lets you create all semester combinations.
-def createSemester(year=None,
-                   date_registration_opens=None,
-                   date_registration_closes=None,
-                   date_started=None,
-                   date_last_drop=None,
-                   date_ended=None,
-                   session=None):
-    if year is None:
-        year = 2020
-    if session is None:
-        session = Semester.FALL
+def createSemester(year=2020,
+                   date_registration_opens=0,
+                   date_registration_closes=0,
+                   date_started=0,
+                   date_last_drop=0,
+                   date_ended=0,
+                   session=Semester.FALL,
+                   offsets=None):
+    if offsets is not None:
+        (date_registration_opens, date_registration_closes, date_started, date_last_drop,
+         date_ended) = offsets
+
     dro = datetime.now()
-    if date_registration_opens is not None:
-        dro += timedelta(days=date_registration_opens)
+    dro += timedelta(days=date_registration_opens)
     drc = datetime.now()
-    if date_registration_closes is not None:
-        drc += timedelta(days=date_registration_closes)
+    drc += timedelta(days=date_registration_closes)
     ds = datetime.now()
-    if date_started is not None:
-        ds += timedelta(days=date_started)
+    ds += timedelta(days=date_started)
     dld = datetime.now()
-    if date_last_drop is not None:
-        dld += timedelta(days=date_last_drop)
+    dld += timedelta(days=date_last_drop)
     de = datetime.now()
-    if date_ended is not None:
-        de += timedelta(days=date_ended)
+    de += timedelta(days=date_ended)
     semester = Semester.objects.create(date_registration_opens=dro,
                                        date_registration_closes=drc,
                                        date_started=ds,
