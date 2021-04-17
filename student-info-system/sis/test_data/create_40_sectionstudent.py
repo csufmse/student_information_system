@@ -104,7 +104,7 @@ def createData():
 
             for sec in attending:
                 try:
-                    ss = sec.register(student=semstud.student)
+                    ss = sec.register(student=semstud.student, check_section_status=False)
 
                     if sec.status == Section.REG_CLOSED:
                         if random() < 0.05:
@@ -147,8 +147,7 @@ def createData():
                 except Exception:
                     error_count = error_count + 1
                     print(f'ERROR: {i} Unable to put {semstud.student} in {sec} [sec={sec.id}, ' +
-                          f'stud={semstud.student.profile.user.id}, ' +
-                          f'status={ss.status}, grade={ltr}]')
+                          f'stud={semstud.student.profile.user.id}, ' + f'grade={ltr}]')
                     print(f'attending = {attending}')
                     i = i - 1
                 else:

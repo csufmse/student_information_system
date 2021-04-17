@@ -14,7 +14,7 @@ class Semester_tests(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(Semester_tests, cls).setUpTestData()
-        Semester_tests.s1 = createSemester(offsets=(0, 1, 1, 1, 2))
+        Semester_tests.s1 = createSemester(offsets=(0, 1, 1, 1, 2, 3))
 
     def test_names(self):
         self.assertEqual(Semester.name_for_session(Semester.FALL), 'Fall')
@@ -51,7 +51,7 @@ class Semester_tests(TestCase):
 
     def test_preparing_grades(self):
         self.assertTrue(
-            Semester_tests.s1.preparing_grades(when=datetime.now() + timedelta(days=7)))
+            Semester_tests.s1.preparing_grades(when=datetime.now() + timedelta(days=2)))
 
     def test_preparing_grades_not(self):
         self.assertFalse(
@@ -67,7 +67,7 @@ class Semester_tests(TestCase):
         self.assertFalse(Semester_tests.s1.finalized(when=datetime.now() + timedelta(days=1)))
 
     def test_drop_possible(self):
-        s2 = createSemester(offsets=(0, 0, 0, 1, 1), session=Semester.WINTER)
+        s2 = createSemester(offsets=(0, 0, 0, 1, 1, 2), session=Semester.WINTER)
         self.assertTrue(s2.drop_possible())
         s2.delete()
 
@@ -77,7 +77,6 @@ class Semester_tests(TestCase):
         self.assertFalse(s2.drop_possible(when=datetime.now() + timedelta(days=3)))
         s2.delete()
 
-    # test is broken until better date PR is merged
-    # def test_current_semester_is(self):
-    #     s2 = createSemester(date_started=1,date_ended=7,session=Semester.WINTER)
-    #     self.assertEqual(Semester.current_semester(),s2)
+    def test_current_semester_is(self):
+        s2 = createSemester(date_started=4, date_ended=7, session=Semester.WINTER)
+        self.assertEqual(Semester.current_semester(at=datetime.now() + timedelta(days=4.5)), s2)

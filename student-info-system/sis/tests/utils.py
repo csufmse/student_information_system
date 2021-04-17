@@ -85,12 +85,12 @@ def createSemester(year=2020,
     dld = datetime.now() + timedelta(days=date_last_drop)
     de = datetime.now() + timedelta(days=date_ended)
     df = datetime.now() + timedelta(days=date_finalized)
-    semester = Semester.objects.create(date_registration_opens=dro,
-                                       date_registration_closes=drc,
-                                       date_started=ds,
-                                       date_last_drop=dld,
-                                       date_ended=de,
-                                       date_finalized=df,
+    semester = Semester.objects.create(date_registration_opens=dro.date(),
+                                       date_registration_closes=drc.date(),
+                                       date_started=ds.date(),
+                                       date_last_drop=dld.date(),
+                                       date_ended=de.date(),
+                                       date_finalized=df.date(),
                                        session=session,
                                        year=year)
     return semester

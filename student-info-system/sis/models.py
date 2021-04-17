@@ -311,15 +311,18 @@ class Student(models.Model):
 
         return hist
 
-    def remaining_required_courses(self, major=None):
+    def remaining_required_courses(self, major=None, deep=False):
         if major is None:
             major = self.major
         hist = self.course_history(passed=True)
-        major_required = major.courses_required.all()
-        major_required = major_required.exclude(
-            id__in=Subquery(hist.values('section__course__id')))
+        if deep:
+            required = Course.deep_prerequisites_for(courses=major.courses_required.all(),
+                                                     include_self=True)
+        else:
+            required = major.courses_required.all()
+        required = required.exclude(id__in=Subquery(hist.values('section__course__id')))
 
-        return major_required
+        return required
 
     def requirements_met_list(self, major=None):
         if major is None:
@@ -620,6 +623,8 @@ class Course(models.Model):
     def max_section_for_semester(self, semester):
         max_dict = self.section_set.filter(semester=semester).aggregate(Max('number'))
         max_num = max_dict['number__max']
+        if max_num is None:
+            max_num = 0
         return max_num
 
     def prerequisites_met(self, student):
@@ -725,27 +730,37 @@ class Semester(models.Model):
 
     def registration_open(self, when=None):
         if when is None:
-            when = datetime.now()
+            when = datetime.now().date()
+        elif isinstance(when, datetime):
+            when = when.date()
         return self.date_registration_opens <= when <= self.date_registration_closes
 
     def in_session(self, when=None):
         if when is None:
-            when = datetime.now()
+            when = datetime.now().date()
+        elif isinstance(when, datetime):
+            when = when.date()
         return self.date_started <= when <= self.date_ended
 
     def preparing_grades(self, when=None):
         if when is None:
-            when = datetime.now()
-        return self.date_ended <= when <= self.date_ended + timedelta(days=14)
+            when = datetime.now().date()
+        elif isinstance(when, datetime):
+            when = when.date()
+        return self.date_ended <= when <= self.date_finalized
 
     def finalized(self, when=None):
         if when is None:
-            when = datetime.now()
-        return self.date_ended + timedelta(days=14) <= when
+            when = datetime.now().date()
+        elif isinstance(when, datetime):
+            when = when.date()
+        return self.date_finalized <= when
 
     def drop_possible(self, when=None):
         if when is None:
-            when = datetime.now()
+            when = datetime.now().date()
+        elif isinstance(when, datetime):
+            when = when.date()
         return self.date_registration_opens <= when <= self.date_last_drop
 
     @property
@@ -884,6 +899,10 @@ class PrerequisitesNotMet(Exception):
     pass
 
 
+class NotOpenForRegistration(Exception):
+    pass
+
+
 class Section(models.Model):
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     professor = models.ForeignKey(Professor, on_delete=models.CASCADE)
@@ -985,26 +1004,63 @@ class Section(models.Model):
                 SectionReferenceItem.objects.create(item=item, section=self, index=ix)
                 ix = ix + 1
 
-    def register(self, student=None, check_prerequisites=True):
+    def open_new_section_from(self,
+                              professor=None,
+                              semester=None,
+                              number=None,
+                              capacity=None,
+                              location=None,
+                              hours=None,
+                              status=None):
+        sem = (semester if semester is not None else self.semester)
+        maxnum = self.course.max_section_for_semester(semester=sem)
+        s = Section.objects.create(
+            course=self.course,
+            professor=(professor if professor is not None else self.professor),
+            semester=sem,
+            number=(number if number is not None else maxnum + 1),
+            capacity=(capacity if capacity is not None else self.capacity),
+            location=(location if location is not None else self.location),
+            hours=(hours if hours is not None else self.hours),
+            status=(status if status is not None else Section.REG_OPEN))
+        return s
+
+    def register(self, student=None, check_prerequisites=True, check_section_status=True):
+        if check_section_status and self.status != Section.REG_OPEN:
+            raise NotOpenForRegistration()
         if self.seats_remaining < 1:
             raise NoSeatsRemaining()
         if check_prerequisites and not self.course.prerequisites_met(student):
             raise PrerequisitesNotMet()
 
-        if self.seats_remaining <= 0.1 * self.capacity:
-            Message.objects.create(message_type=Section.SECTION_FILLING_TYPE,
+        ssect = SectionStudent.objects.create(section=self,
+                                              student=student,
+                                              status=SectionStudent.REGISTERED)
+
+        if self.seats_remaining == 0:
+            Message.objects.create(message_type=Message.SECTION_FULL_TYPE,
+                                   recipient=self.course.major.contact,
+                                   sender=self.course.major.contact,
+                                   subject=f'Section {self} is full',
+                                   support_data={
+                                       'section': self.pk,
+                                   },
+                                   body=f'Capacity is {self.capacity} and all seats are taken.')
+        elif self.seats_remaining <= 0.1 * self.capacity:
+            Message.objects.create(message_type=Message.SECTION_FILLING_TYPE,
                                    recipient=self.course.major.contact,
                                    sender=self.course.major.contact,
                                    subject=f'Section {self} is almost full',
                                    support_data={
-                                       'section': self,
+                                       'section': self.pk,
                                    },
                                    body=f'Capacity is {self.capacity}, but only ' +
                                    f'{self.seats_remaining} are available.')
 
-        return SectionStudent.objects.create(section=self,
-                                             student=student,
-                                             status=SectionStudent.REGISTERED)
+        if self.seats_remaining == 0:
+            self.status = Section.REG_CLOSED
+
+        return ssect
 
 
 class ReferenceItem(models.Model):
@@ -1089,12 +1145,14 @@ class Message(models.Model):
     MAJOR_CHANGE_APPROVAL_TYPE = 'majorapproved'
     MAJOR_CHANGE_REJECTED_TYPE = 'majorrejected'
     SECTION_FILLING_TYPE = 'sectionfilling'
+    SECTION_FULL_TYPE = 'sectionfull'
     TYPES = (
         (GENERIC_TYPE, GENERIC_TYPE),
         (ACADEMIC_PROBATION_TYPE, ACADEMIC_PROBATION_TYPE),
         (DROP_REQUEST_TYPE, DROP_REQUEST_TYPE),
         (MAJOR_CHANGE_TYPE, MAJOR_CHANGE_TYPE),
         (SECTION_FILLING_TYPE, SECTION_FILLING_TYPE),
+        (SECTION_FULL_TYPE, SECTION_FULL_TYPE),
     )
 
     message_type = models.CharField(choices=TYPES, default=GENERIC_TYPE, max_length=15)
