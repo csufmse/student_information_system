@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block content %}
-  <table class="table-data-alt">
+  <table class="data-table-alt">
     <tr>
       <th>Title</th>
       <th>Description</th>
@@ -12,14 +12,20 @@
       <th>Interval</th>
     </tr>
     {% for task in tasks %}
-      <tr>
-        <td>{{task.name}}</td>
-        <td>{{task.description}}</td>
-        <td>{{task.active}}</td>
-        <td>{{task.frequency_type}}</td>
-        <td>{{task.date}}</td>
-        <td>{{task.interval.interval_type}}: {{task.interval.interval_amount}}</td>
+      <tr class="task_row" data-id="{{task.task.pk}}">
+        <td>{{task.task.name}}</td>
+        <td>{{task.task.description}}</td>
+        <td>{{task.task.active}}</td>
+        <td>{{task.task.frequency_type}}</td>
+        <td>{{task.task.date}}</td>
+        <td>{% if task.task.interval %}{{task.task.interval.interval_type}}: {{task.task.interval.interval_amount}}{% else %}None{% endif %}</td>
       </tr>
     {% endfor %}
-  <a href="{% url 'schooladmin:task_add' %}" class="btn btn-info">Add Task</a>
+  <a href="{% url 'schooladmin:task_edit' %}" class="btn btn-info">Add Task</a>
 {% endblock content %}
+{% block late_scripts %}
+  {{block.super}}
+  <script>
+    addClickHandlers("{% url 'schooladmin:task_edit' taskid=1234599 %}", "task_row");
+  </script>
+{% endblock late_scripts %}

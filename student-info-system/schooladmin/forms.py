@@ -1,7 +1,6 @@
 from django import forms
 
-from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Profile, Semester, UpperField, ReferenceItem)
+from sis.models import (Course, CoursePrerequisite, Major, Semester)
 
 from sis.forms.utils import *
 
@@ -58,14 +57,14 @@ class CourseEditForm(forms.ModelForm):
 
 
 class SemesterCreationForm(forms.ModelForm):
-    session = forms.ChoiceField(choices=Semester.SESSIONS)
+    session = forms.ChoiceField(choices=Semester.SESSIONS, label="Semester Session")
     session.widget.attrs.update({'class': 'session_sel selectpicker'})
-    year = forms.IntegerField()
-    date_registration_opens = forms.DateField()
-    date_registration_closes = forms.DateField()
-    date_started = forms.DateField()
-    date_ended = forms.DateField()
-    date_last_drop = forms.DateField()
+    year = forms.IntegerField(label="Semester School Year")
+    date_registration_opens = forms.DateField(label="Registration Opens")
+    date_registration_closes = forms.DateField(label="Registration Closes")
+    date_started = forms.DateField(label="Classes Start")
+    date_ended = forms.DateField(label="Classes End")
+    date_last_drop = forms.DateField(label="Last Drop")
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')
@@ -83,11 +82,11 @@ class SemesterCreationForm(forms.ModelForm):
 
 
 class SemesterEditForm(forms.ModelForm):
-    date_started = forms.DateField()
-    date_ended = forms.DateField()
-    date_registration_opens = forms.DateField()
-    date_registration_closes = forms.DateField()
-    date_last_drop = forms.DateField()
+    date_registration_opens = forms.DateField(label="Registration Opens")
+    date_registration_closes = forms.DateField(label="Registration Closes")
+    date_started = forms.DateField(label="Classes Start")
+    date_ended = forms.DateField(label="Classes End")
+    date_last_drop = forms.DateField(label="Last Drop")
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')
@@ -102,31 +101,3 @@ class SemesterEditForm(forms.ModelForm):
         model = Semester
         fields = ('date_registration_opens', 'date_registration_closes', 'date_started',
                   'date_last_drop', 'date_ended')
-
-
-class ProfessorCreationForm(forms.ModelForm):
-    prefix = 'r'
-    major = forms.ModelChoiceField(queryset=Major.objects.all(), required=False)
-
-    class Meta:
-        model = Professor
-        fields = ('major',)
-
-    def __init__(self, *args, **kwargs):
-        super(ProfessorCreationForm, self).__init__(*args, **kwargs)
-        major = self.fields['major']
-        major.widget.attrs.update({'class': 'major_sel selectpicker'})
-
-
-class ProfessorEditForm(forms.ModelForm):
-    prefix = 'r'
-    major = forms.ModelChoiceField(queryset=Major.objects.all(), required=False)
-
-    class Meta:
-        model = Professor
-        fields = ('major',)
-
-    def __init__(self, *args, **kwargs):
-        super(ProfessorEditForm, self).__init__(*args, **kwargs)
-        major = self.fields['major']
-        major.widget.attrs.update({'class': 'major_sel selectpicker'})

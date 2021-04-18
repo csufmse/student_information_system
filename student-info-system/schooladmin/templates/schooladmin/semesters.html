@@ -4,11 +4,13 @@
 
 {% block content %}
 <div>
-    <button class="btn btn-primary" onclick=location.href="{% url 'schooladmin:semester_new' %}">New Semester</button>
-<div id="Semesters">
+    {%  if can_add %}
+        <button class="btn btn-primary" onclick=location.href="{% url 'schooladmin:semester_new' %}">New Semester</button>
+    {% endif %}
+    <div id="Semesters">
     {% sis_filter 'semesters' %}
 </div>
-
+`
 </div>
 <script>
 insertScrollableDivs(applyHandlers=true);

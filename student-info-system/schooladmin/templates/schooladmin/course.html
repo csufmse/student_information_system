@@ -6,7 +6,7 @@
 {% block content %}
 <dl class="dl-horizontal">
   <dt>Major</dt>
-    <dd><a href="{% url 'schooladmin:major' majorid=course.major.id %}">{{ course.major }}: {{  course.major.name }}</a></dd>
+    <dd><a href="{% url 'sis:major' majorid=course.major.id %}">{{ course.major }}: {{  course.major.name }}</a></dd>
   <dt>Catalog Number</dt>
   <dd>{{ course.catalog_number }}</dd>
   <dt>Title</dt>
@@ -26,24 +26,19 @@
     <h3>Sections:</h3>
     {% sis_filter 'sections' %}
 
-    <input
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
-     <input id="new_section"
-        action="action"
-           class="btn btn-info"
-        value="New Section"
-    />
-     <input id="course_edit"
-        action="action"
-           class="btn btn-info"
-        value="Edit Course"
-    />
+    <input action="action" class="btn btn-info" onclick="window.history.go(-1); return false;" value="Back"/>
+    {%  if can_edit %}
+        <input id="new_section" action="action" class="btn btn-info" value="New Section"/>
+        <input id="course_edit" action="action" class="btn btn-info" value="Edit Course"/>
+    {%  endif %}
 <script>
-addButtonClickHandler('course_edit', "{% url 'schooladmin:course_edit' courseid=course.id %}");
-addButtonClickHandler('new_section', "{% url 'schooladmin:course_section_new' courseid=course.id %}");
+{%  if can_edit %}
+    addButtonClickHandler('course_edit', "{% url 'schooladmin:course_edit' courseid=course.id %}");
+    addButtonClickHandler('new_section', "{% url 'schooladmin:course_section_new' courseid=course.id %}");
+{% endif %}
+stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'prereqs'});
+stylizeRange({field:'credits_earned',name:'Cred',prefix:'prereqs'});
+stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'neededby'});
+stylizeRange({field:'credits_earned',name:'Cred',prefix:'neededby'});
 </script>
 {% endblock %}

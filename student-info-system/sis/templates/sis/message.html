@@ -43,11 +43,9 @@
             />
           {%  endif %}
         {%  endif %}
-        <input id="reply" name="reply"
-            action="action" type="submit"
-            value="Reply" class="btn btn-info"
-        />
-
+        {%  if can_reply %}
+            <input id="reply" name="reply" action="action" type="submit" value="Reply" class="btn btn-info"/>
+        {% endif %}
       {%  if show_approve_drop %}
         <input id="approvedrop" name="approvedrop"
             action="action" type="submit"

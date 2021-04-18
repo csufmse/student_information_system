@@ -5,7 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 from django_apscheduler.jobstores import DjangoJobStore
 
 from config import settings
-from sis.models import Tasks
+from sis.models import Tasks, Task
 
 
 class TaskScheduler:
@@ -13,20 +13,12 @@ class TaskScheduler:
 
     def add_jobs(self, tasks):
         for task in tasks:
-            if task.frequency_type == Task.DATE:
-                TaskScheduler.scheduler.add_job(task.execute(),
-                                       task.frequency_type,
-                                       task.date,
-                                       id=task.job_id,
-                                       replace_existing=True)
-            elif task.frequency_type == Task.INTERVAL:
-                TaskScheduler.scheduler.add_job(task.execute(),
-                                       task.frequency_type,
-                                       **task.interval.create_kw_dict(),
-                                       id=task.job_id,
-                                       replace_existing=True)
-            else:
-                TaskScheduler.scheduler.add_job(task.execute(), id=task.job_id)
+            job_dict = task.create_job_dict()
+            TaskScheduler.scheduler.scheduled_job(job_dict)
+
+    def pause_jobs(self, tasks):
+        for task in tasks:
+            TaskScheduler.scheduler.pause_job(task.job_id, 'default')
 
     def start(self):
         if TaskScheduler.scheduler == None:
@@ -35,6 +27,8 @@ class TaskScheduler:
 
         tasks = Tasks.objects.all()
         jobs = [x.task for x in tasks if x.task.active == True]
+        inactive_jobs = [x.task for x in tasks if x.task.active == False]
         self.add_jobs(jobs)
+        self.pause_jobs(inactive_jobs)
 
         TaskScheduler.scheduler.start()

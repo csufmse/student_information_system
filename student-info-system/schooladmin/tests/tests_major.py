@@ -1,7 +1,6 @@
 from django.test import TestCase
 
-from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
-                        Semester, SemesterStudent, Student, UpperField)
+from sis.models import (Course, Major, )
 
 from sis.tests.utils import *
 
@@ -37,28 +36,6 @@ class AdminMajorViewsTest(TestCase):
         KLASS.m1.courses_required.add(KLASS.c1)
         KLASS.m1.courses_required.add(KLASS.c3)
         KLASS.m1.save()
-
-    def test_majors_view_exists(self):
-        self.assertEqual(self.simple('/schooladmin/majors'), 200)
-
-    def test_majors_view_uses_template(self):
-        login = self.client.login(username='u1', password='hello')
-        response = self.client.get('/schooladmin/majors')
-        self.assertTemplateUsed(response, 'schooladmin/majors.html')
-
-    # single-object views
-    def test_major_view_exists(self):
-        self.assertEqual(self.simple('/schooladmin/major/' + str(AdminMajorViewsTest.m1.id)), 200)
-
-    def test_nonexistent_major_fails_view(self):
-        login = self.client.login(username='u1', password='hello')
-        response = self.client.get('/schooladmin/major/' + '445455554')
-        self.assertEqual(response.status_code, 404)
-
-    def test_major_view_uses_template(self):
-        login = self.client.login(username='u1', password='hello')
-        response = self.client.get('/schooladmin/major/' + str(AdminMajorViewsTest.m1.id))
-        self.assertTemplateUsed(response, 'schooladmin/major.html')
 
     # edit views
     def test_edit_major_view_exists(self):
