@@ -1041,7 +1041,7 @@ class Section(models.Model):
             Message.objects.create(message_type=Message.SECTION_FULL_TYPE,
                                    recipient=self.course.major.contact,
                                    sender=self.course.major.contact,
-                                   subject=f'Section {self} is full',
+                                   subject=f'Section {self} ({self.semester}) is full',
                                    support_data={
                                        'section': self.pk,
                                    },
@@ -1050,14 +1050,14 @@ class Section(models.Model):
             Message.objects.create(message_type=Message.SECTION_FILLING_TYPE,
                                    recipient=self.course.major.contact,
                                    sender=self.course.major.contact,
-                                   subject=f'Section {self} is almost full',
+                                   subject=f'Section {self} ({self.semester}) is almost full',
                                    support_data={
                                        'section': self.pk,
                                    },
                                    body=f'Capacity is {self.capacity}, but only ' +
                                    f'{self.seats_remaining} are available.')
 
-        if self.seats_remaining == 0:
+        if self.seats_remaining == 0 and self.status == Section.REG_OPEN:
             self.status = Section.REG_CLOSED
 
         return ssect
@@ -1146,6 +1146,7 @@ class Message(models.Model):
     MAJOR_CHANGE_REJECTED_TYPE = 'majorrejected'
     SECTION_FILLING_TYPE = 'sectionfilling'
     SECTION_FULL_TYPE = 'sectionfull'
+    SECTION_ADDED = 'sectionadded'
     TYPES = (
         (GENERIC_TYPE, GENERIC_TYPE),
         (ACADEMIC_PROBATION_TYPE, ACADEMIC_PROBATION_TYPE),
@@ -1153,6 +1154,7 @@ class Message(models.Model):
         (MAJOR_CHANGE_TYPE, MAJOR_CHANGE_TYPE),
         (SECTION_FILLING_TYPE, SECTION_FILLING_TYPE),
         (SECTION_FULL_TYPE, SECTION_FULL_TYPE),
+        (SECTION_ADDED, SECTION_ADDED),
     )
 
     message_type = models.CharField(choices=TYPES, default=GENERIC_TYPE, max_length=15)

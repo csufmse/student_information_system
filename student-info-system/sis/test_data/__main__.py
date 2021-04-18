@@ -89,9 +89,8 @@ def main(argv):
     spec = 'test_data [ --create | --delete | --list ] [--start <num> --stop <num>' + \
            ' | --only <num>] [ --reals ]'
     try:
-        opts, args = getopt.getopt(argv, "hclds:o:r",
-                                   ["list", "create", "start=", "stop=",
-                                    "delete", "only=", "reals"])
+        opts, args = getopt.getopt(
+            argv, "hclds:o:r", ["list", "create", "start=", "stop=", "delete", "only=", "reals"])
     except getopt.GetoptError:
         print(spec)
         sys.exit(2)

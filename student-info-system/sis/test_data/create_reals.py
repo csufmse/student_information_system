@@ -113,7 +113,7 @@ def createData():
 
         # creating less than actually needed
         number_of_courses_to_create = min(max_number_of_courses_to_create,
-                                          int(len(most_needed) * 0.5))
+                                          int(len(most_needed) * 0.75))
 
         print(f'{len(most_needed)} courses needed by {len(semstudents)} students. ', end='')
         if len(semstudents):
@@ -122,7 +122,6 @@ def createData():
         # fill out schedule with other courses
         not_needed = diff(courses, most_needed)
         shuffle(not_needed)
-        shuffle(most_needed)
         to_schedule = (most_needed + not_needed)[0:number_of_courses_to_create]
 
         print(f'Creating {len(to_schedule)} sections')
@@ -182,13 +181,16 @@ def createData():
             # now schedule students for it
             number_attended = randrange(3, 6)
 
-            print(f'{semstud.student} registering for {number_attended} sections...')
+            print(
+                f'{semstud.student} ({semstud.student.major.abbreviation}) reg ' +
+                f'for {number_attended} sections: ',
+                end='')
 
             # start by listing the ones for whom we've met the requirements
             prereqs_met = [
                 aSec for aSec in sections if aSec.course.prerequisites_met(semstud.student)
             ]
-            print(f'{semstud.student}: prereqs_met={len(prereqs_met)}, ', end='')
+            print(f'prereqs_met={len(prereqs_met)}, ', end='')
 
             if len(prereqs_met) == 0:
                 print(f'ERROR: Student {semstud.student} meets the prereqs for NO ' +
@@ -214,7 +216,7 @@ def createData():
 
             # all required courses
             deep_requirements = Course.deep_prerequisites_for(
-                semstud.student.major.courses_required.all())
+                semstud.student.major.courses_required.all(), include_self=True)
 
             print(f'deep_req={len(deep_requirements)}, ', end='')
 
@@ -229,19 +231,21 @@ def createData():
             # take as many as we can
             attending = reqd_secs[0:number_attended]
 
-            # but if there weren't enough, take the others
-            extras = diff(prereqs_met, reqd_secs)
+            if number_attended > len(attending):
+                # but if there weren't enough, take the others
+                extras = diff(prereqs_met, reqd_secs)
 
-            print(f'extras={len(extras)}, ', end='')
+                print(f'extras={len(extras)}, ', end='')
 
-            # bias towards their major
-            weights = list(
-                map((lambda sec: 10 if sec.course.major == semstud.student.major else 1), extras))
+                # bias towards their major
+                weights = list(
+                    map((lambda sec: 10 if sec.course.major == semstud.student.major else 1),
+                        extras))
 
-            while len(attending) < number_attended:
-                aSec = choices(extras, weights=weights, k=1)[0]
-                if aSec not in attending:
-                    attending.append(aSec)
+                while len(attending) < number_attended:
+                    aSec = choices(extras, weights=weights, k=1)[0]
+                    if aSec not in attending:
+                        attending.append(aSec)
 
             print(f'attending={len(attending)}')
 
@@ -255,8 +259,16 @@ def createData():
                     secstud = sec.register(student=semstud.student, check_section_status=False)
                 except NoSeatsRemaining:
                     newsec = sec.open_new_section_from()
+                    if newsec.status != Section.REG_CLOSED:
+                        newsec.status = sec.status
+                        newsec.save()
                     sections.append(newsec)
                     sec = newsec
+                    Message.objects.create(sender=sec.course.major.contact,
+                                           recipient=sec.course.major.contact,
+                                           message_type=Message.SECTION_ADDED,
+                                           subject=f'Created section {sec} ({sem})',
+                                           support_data={'section': sec.pk})
 
                     print(f'Opened new section {sec} in {sem}')
                     secstud = sec.register(student=semstud.student, check_section_status=False)
