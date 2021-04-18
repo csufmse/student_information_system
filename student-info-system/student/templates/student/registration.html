@@ -46,7 +46,7 @@
 
     {% for s in sections %}
       {% if s.new_course %}
-        <tr class="class_heading_row ">
+        <tr class="class_heading_row p_row" id="{{s.course}}">
           <th>{{s.course.name}}</th>
           <th>{{s.course.title}}</th>
           <th>{{s.course.credits_earned}}</th>
@@ -57,7 +57,7 @@
                 <p>None</p>
               {% endif %}
           </th>
-            <tr id="c_row" class="heading_row">
+            <tr id="{{s.course}}" class="heading_row c_row">
               <td>Section Number</td>
               <td>Professor</td>
               <td>Schedule</td>
@@ -66,7 +66,7 @@
               <td>Select</td>
             </tr>
         {% endif %}
-        <tr id="c_row" class="section_row">
+        <tr id="{{s.course}}" class="section_row c_row">
           <td>{{s.number}}</td>
           <td>{{s.professor_name}}</td>
           <td>{{s.hours}}</td>
@@ -88,13 +88,16 @@
   {{block.super}}
   <script>
     $(".c_row").hide();
-    $(".p_row").click(function(index, element){
-        $("c_row").each(function(){
-            if($(this).id == element.id && $(this).is(":visible")){
-                $(this).show();
-            } else {
-                $(this).hide();
-            }
+
+    $(".p_row").each(function(index, p){
+        $(p).on("click", function(){
+            $(".c_row").each(function(index, c){
+                if(c.id == p.id && $(c).is(":visible")){
+                    $(c).hide();
+                } else if (c.id == p.id && $(c).is(":hidden")){
+                    $(c).show();
+                }
+            })
         })
     })
   </script>
