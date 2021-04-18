@@ -7,7 +7,7 @@ from .scheduler import TaskScheduler
 class TaskSchedulerTestCase(TestCase):
 
     @classmethod
-    def setUpTestData(self):
+    def setUpTestData(cls):
         interval = Interval.objects.create(interval_amount=20, interval_type=Interval.SECONDS)
         cls.APT = AcademicProbationTask.objects.create(
             interval=interval,
@@ -19,5 +19,3 @@ class TaskSchedulerTestCase(TestCase):
         task_scheduler = TaskScheduler()
         task_scheduler.start()
 
-
-# replace_existing=True
