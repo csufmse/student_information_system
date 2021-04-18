@@ -4,9 +4,7 @@
 {% load django_tables2 %}
 
 {% block content %}
-    {%  if not semesters %}
-        <h3> No Sections Taught in Open Semesters</h3>
-    {% else %}
+    {%  if table %}
         <form name="semester" method="post" action="{% url 'professor:sections' %}">
           {% csrf_token %}
           <select name="semester">
@@ -21,6 +19,8 @@
         <div class="data-table-alt">
           {% render_table table 'django_tables2/bootstrap.html' %}
         </div>
+    {% else %}
+        <h3> No Sections Taught in Open Semesters</h3>
     {% endif %}
 
   <script>
