@@ -507,9 +507,9 @@ class MajorTestCase(TestCase):
     def test_required_order(self):
         m = Major.objects.get(abbreviation='CPSC')
         self.assertEqual(m.courses_required.count(), 3)
-        self.assertEqual(m.courses_required.all()[0].catalog_number, '300')
-        self.assertEqual(m.courses_required.all()[1].catalog_number, '350')
-        self.assertEqual(m.courses_required.all()[2].catalog_number, '400')
+        self.assertEqual(m.courses_required.all()[0].catalog_number, 300)
+        self.assertEqual(m.courses_required.all()[1].catalog_number, 350)
+        self.assertEqual(m.courses_required.all()[2].catalog_number, 400)
 
     def test_requirements_met_none(self):
         m1 = MajorTestCase.m1
@@ -557,9 +557,9 @@ class MajorTestCase(TestCase):
         self.assertEqual(len(reql), 3)
         for c in reql:
             if c.met:
-                self.assertEqual(c.catalog_number, '400')
+                self.assertEqual(c.catalog_number, 400)
             else:
-                self.assertNotEqual(c.catalog_number, '400')
+                self.assertNotEqual(c.catalog_number, 400)
 
 
 class ClassLevel_tests(TestCase):
