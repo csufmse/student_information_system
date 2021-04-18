@@ -75,7 +75,8 @@ def section(request, sectionid):
         'grades': grades,
         'section': aSection,
         'ssects': ssects,
-        'references': references
+        'references': references,
+        'can_grade': not aSection.semester.finalized(),
     })
     return render(request, 'professor/section.html', data)
 
