@@ -18,4 +18,3 @@ class TaskSchedulerTestCase(TestCase):
     def test_scheduler_adds_jobs(self):
         task_scheduler = TaskScheduler()
         task_scheduler.start()
-

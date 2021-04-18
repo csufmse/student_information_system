@@ -21,13 +21,13 @@ class TaskScheduler:
             TaskScheduler.scheduler.pause_job(task.job_id, 'default')
 
     def start(self):
-        if TaskScheduler.scheduler == None:
+        if TaskScheduler.scheduler is None:
             TaskScheduler.scheduler = BackgroundScheduler(timezone=settings.TIME_ZONE)
             TaskScheduler.scheduler.add_jobstore(DjangoJobStore(), 'default')
 
         tasks = Tasks.objects.all()
-        jobs = [x.task for x in tasks if x.task.active == True]
-        inactive_jobs = [x.task for x in tasks if x.task.active == False]
+        jobs = [x.task for x in tasks if x.task.active is True]
+        inactive_jobs = [x.task for x in tasks if x.task.active is False]
         self.add_jobs(jobs)
         self.pause_jobs(inactive_jobs)
 
