@@ -527,7 +527,7 @@ class Major(models.Model):
 
 class Course(models.Model):
     major = models.ForeignKey(Major, on_delete=models.CASCADE)
-    catalog_number = models.CharField('Number', max_length=20)
+    catalog_number = models.IntegerField('Number', validators=[MinValueValidator(1)])
     title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
     credits_earned = models.DecimalField('Credits', max_digits=2, decimal_places=1)
@@ -679,6 +679,7 @@ class Semester(models.Model):
 
     session = models.CharField('semester', choices=SESSIONS, default=FALL, max_length=6)
     year = models.IntegerField('year',
+                               help_text="School Year",
                                default=2000,
                                validators=[MinValueValidator(1900),
                                            MaxValueValidator(2300)])
@@ -699,27 +700,37 @@ class Semester(models.Model):
 
     def registration_open(self, when=None):
         if when is None:
-            when = datetime.now().date()
+            when = datetime.now()
+        if isinstance(when, datetime):
+            when = when.date()
         return self.date_registration_opens <= when <= self.date_registration_closes
 
     def in_session(self, when=None):
         if when is None:
-            when = datetime.now().date()
+            when = datetime.now()
+        if isinstance(when, datetime):
+            when = when.date()
         return self.date_started <= when <= self.date_ended
 
     def preparing_grades(self, when=None):
         if when is None:
-            when = datetime.now().date()
+            when = datetime.now()
+        if isinstance(when, datetime):
+            when = when.date()
         return self.date_ended <= when <= self.date_ended + timedelta(days=14)
 
     def finalized(self, when=None):
         if when is None:
-            when = datetime.now().date()
+            when = datetime.now()
+        if isinstance(when, datetime):
+            when = when.date()
         return self.date_ended + timedelta(days=14) <= when
 
     def drop_possible(self, when=None):
         if when is None:
-            when = datetime.now().date()
+            when = datetime.now()
+        if isinstance(when, datetime):
+            when = when.date()
         return self.date_registration_opens <= when <= self.date_last_drop
 
     @property
@@ -999,6 +1010,11 @@ class ReferenceItem(models.Model):
     @property
     def name(self):
         return f'{self.course}:{self.professor}/{self.title}'
+
+    @property
+    def type_label(self):
+        labels = dict(ReferenceItem.TYPES)
+        return labels[self.type]
 
     def __str__(self):
         return self.name
