@@ -4,20 +4,24 @@
 {% load django_tables2 %}
 
 {% block content %}
-    <form name="semester" method="post" action="{% url 'professor:sections' %}">
-      {% csrf_token %}
-      <select name="semester">
-      {% for semester in semesters %}
-        <option value="{{semester}}">{{semester}}</option>
-      {% endfor %}
-      </select>
-      <input class="btn btn-primary" type="submit" value="Submit">
-    </form>
+    {%  if not semesters %}
+        <h3> No Sections Taught in Open Semesters</h3>
+    {% else %}
+        <form name="semester" method="post" action="{% url 'professor:sections' %}">
+          {% csrf_token %}
+          <select name="semester">
+          {% for semester in semesters %}
+            <option value="{{semester}}">{{semester}}</option>
+          {% endfor %}
+          </select>
+          <input class="btn btn-primary" type="submit" value="Submit">
+        </form>
 
-    <h2>{{semester}}</h2>
-    <div class="data-table-alt">
-      {% render_table table 'django_tables2/bootstrap.html' %}
-    </div>
+        <h2>{{semester}}</h2>
+        <div class="data-table-alt">
+          {% render_table table 'django_tables2/bootstrap.html' %}
+        </div>
+    {% endif %}
 
   <script>
     addClickHandlers("{% url 'professor:section' sectionid=1234599 %}", "section_row");
