@@ -235,6 +235,7 @@ def secitems(request):
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def test_majors(request):
+    pass
     the_user = request.user
     the_major = the_user.profile.student.major
 
