@@ -22,7 +22,7 @@ class Migration(migrations.Migration):
             name='Course',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('catalog_number', models.CharField(max_length=20, verbose_name='Number')),
+                ('catalog_number', models.IntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Number')),
                 ('title', models.CharField(max_length=256, verbose_name='Title')),
                 ('description', models.CharField(blank=True, max_length=256, verbose_name='Description')),
                 ('credits_earned', models.DecimalField(decimal_places=1, max_digits=2, verbose_name='Credits')),
