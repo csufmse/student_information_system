@@ -17,7 +17,7 @@ def tasks(request):
 @role_login_required(Profile.ACCESS_ADMIN)
 def task_edit(request, taskid=None):
     interval_options = Interval.INTERVAL_TYPES
-    interval= None
+    interval = None
     if request.method == 'POST' and not taskid:
         form = AcademicProbationTaskForm(request.POST)
         if request.POST['frequency_type'] == Task.INTERVAL:
@@ -30,7 +30,10 @@ def task_edit(request, taskid=None):
             messages.success(request, 'Successfully created a task')
         except ValueError as e:
             messages.error(request, 'Please correct the following fields.')
-            return render(request, 'schooladmin/task_edit.html', {'form': form, 'options': interval_options})
+            return render(request, 'schooladmin/task_edit.html', {
+                'form': form,
+                'options': interval_options
+            })
         Tasks.add_task(task)
     elif request.method == 'POST':
         tasks_obj = Tasks.objects.get(pk=taskid)
@@ -51,5 +54,8 @@ def task_edit(request, taskid=None):
             form = AcademicProbationTaskForm(instance=instance.task)
         else:
             form = AcademicProbationTaskForm()
-    return render(request, 'schooladmin/task_edit.html', {'form': form, 'options': interval_options, 'interval': interval})
-
+    return render(request, 'schooladmin/task_edit.html', {
+        'form': form,
+        'options': interval_options,
+        'interval': interval
+    })

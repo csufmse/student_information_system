@@ -1134,14 +1134,8 @@ class Interval(models.Model):
     DAYS = 'days'
     WEEKS = 'weeks'
     MONTHS = 'months'
-    INTERVAL_TYPES = {
-        (SECONDS, 'seconds'),
-        (MINUTES, 'minutes'),
-        (HOURS, 'hours'),
-        (DAYS, 'days'),
-        (WEEKS, 'weeks'),
-        (MONTHS, 'months')
-    }
+    INTERVAL_TYPES = {(SECONDS, 'seconds'), (MINUTES, 'minutes'), (HOURS, 'hours'),
+                      (DAYS, 'days'), (WEEKS, 'weeks'), (MONTHS, 'months')}
 
     interval_amount = models.IntegerField('Interval Amount', validators=[MinValueValidator(1)])
     interval_type = models.CharField('Interval Type', choices=INTERVAL_TYPES, max_length=7)
@@ -1177,12 +1171,12 @@ class Task(models.Model):
     FREQUENCY_TYPES = {
         (DATE, 'date'),
         (INTERVAL, 'interval'),
-        (IMMEDIATE,'immediate'),
+        (IMMEDIATE, 'immediate'),
     }
 
-    interval = models.OneToOneField(Interval, on_delete=models.CASCADE, blank=True, null=True)   
+    interval = models.OneToOneField(Interval, on_delete=models.CASCADE, blank=True, null=True)
     date = models.DateField('Date', default=None, blank=True, null=True)
-    frequency_type=models.CharField('Frequency Type', choices=FREQUENCY_TYPES, max_length=9)
+    frequency_type = models.CharField('Frequency Type', choices=FREQUENCY_TYPES, max_length=9)
     title = models.CharField('Task Title', max_length=30, blank=True)
     active = models.BooleanField('Active', default=True)
     tasks = GenericRelation(Tasks, content_type_field='task_type', object_id_field='task_id')
@@ -1210,8 +1204,8 @@ class Task(models.Model):
             return job_dict
         else:
             return job_dict
-    
-    
+
+
 class AcademicProbationTask(Task):
     # For all attributes see Task
 
@@ -1225,4 +1219,3 @@ class AcademicProbationTask(Task):
 
     def execute(self):
         AcademicProbationTask.academic_probation_check(self)
-        
