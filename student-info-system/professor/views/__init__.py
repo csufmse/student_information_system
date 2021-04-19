@@ -31,8 +31,10 @@ def sections(request):
     the_prof = request.user.profile.professor
     sections_qs = Section.objects.filter(professor=the_prof)
     sections = {}
-    # set up our sectons qs dictionary by semester
+    # set up our sections qs dictionary by semester
     for sect in sections_qs:
+        if sect.semester.finalized():
+            continue
         if sect.semester.name not in sections.keys():
             sections[sect.semester.name] = [sect.semester.id]
 
@@ -67,17 +69,22 @@ def section(request, sectionid):
     ssects = SectionStudent.objects.filter(section=aSection)
     if request.method == "POST":
         for student in aSection.students.all():
-            if request.POST.get(str(student.pk)) != 'None':
+            if request.POST.get(str(student.pk)) != 'No Change':
                 ssect = ssects.get(student=student)
-                ssect.grade = request.POST.get(str(student.pk))
+                grade_value = request.POST.get(str(student.pk))
+                ssect.grade = grade_value if grade_value != 'No Grade Assigned' else None
                 ssect.save()
                 data['grade_submitted'] = {True}
-    grades = ((None, None),) + SectionStudent.POINTS
+    grades = (
+        ('No Change', 'No Change'),
+        ('No Grade Assigned', 'No Grade Assigned'),
+    ) + SectionStudent.POINTS
     data.update({
         'grades': grades,
         'section': aSection,
         'ssects': ssects,
-        'references': references
+        'references': references,
+        'can_grade': not aSection.semester.finalized(),
     })
     return render(request, 'professor/section.html', data)
 

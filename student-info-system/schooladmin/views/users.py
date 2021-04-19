@@ -9,18 +9,34 @@ from django.urls import reverse
 
 from sis.authentication_helpers import role_login_required
 
-from sis.models import (Major, Professor, Student, Profile)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, Semester, Student,
+                        SectionStudent, Profile, Message)
+
+from sis.filters.course import CourseFilter
+from sis.filters.section import SectionFilter
+from sis.filters.user import StudentFilter, UserFilter, ProfessorFilter
 
 from sis.filters.user import UserFilter
-from sis.filters.message import FullReceivedMessageFilter, FullSentMessageFilter
 from sis.forms.profile import DemographicForm, ProfileCreationForm, ProfileEditForm
 from sis.forms.student import StudentEditForm, StudentCreationForm
 from sis.forms.user import UserCreationForm, UserEditForm
 from sis.forms.professor import ProfessorCreationForm, ProfessorEditForm
-from sis.tables.messages import MessageSentTable, MessageReceivedTable
-from sis.tables.users import UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable
-from schooladmin.views import users
 from sis.utils import filtered_table2, DUMMY_ID
+from sis.filters.semester import SemesterFilter
+from sis.filters.message import (FullSentMessageFilter, FullReceivedMessageFilter,
+                                 SentMessageFilter, ReceivedMessageFilter)
+from sis.filters.referenceitem import ItemFilter
+from sis.tables.messages import MessageSentTable, MessageReceivedTable
+from sis.tables.referenceitems import ProfReferenceItemsTable
+from sis.forms.referenceitem import ReferenceItemCreationForm
+from sis.filters.sectionstudent import SectionStudentFilter
+
+from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
+from sis.tables.sections import SectionForClassTable, SectionsTable
+from sis.tables.sectionstudents import (StudentHistoryTable, StudentInSectionTable)
+from sis.tables.semesters import SemestersSummaryTable, SemestersTable
+from sis.tables.users import (UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable,
+                              ProfessorsTable)
 
 
 @role_login_required(Profile.ACCESS_ADMIN)
@@ -59,9 +75,9 @@ def user(request, userid):
         return redirect('schooladmin:users')
 
     if the_user.profile.role == Profile.ACCESS_STUDENT:
-        return users.student(request, userid)
+        return student(request, userid)
     elif the_user.profile.role == Profile.ACCESS_PROFESSOR:
-        return users.professor(request, userid)
+        return professor(request, userid)
 
     data = {
         'user': the_user,
@@ -241,3 +257,283 @@ def user_new(request):
             'student_form': student_form,
             'professor_form': professor_form
         })
+
+
+@role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
+def students(request):
+    logged_in = request.user.is_authenticated
+    if logged_in:
+        user_role = request.user.profile.role
+    is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
+
+    data = {
+        'can_add': is_admin,
+    }
+    data.update(
+        filtered_table2(
+            name='students',
+            qs=User.objects.all().filter(profile__role=Profile.ACCESS_STUDENT),
+            filter=StudentFilter,
+            table=StudentsTable,
+            request=request,
+            scrollable=True,
+            self_url=reverse('schooladmin:students'),
+            click_url=reverse('schooladmin:student', args=[DUMMY_ID]),
+        ))
+    return render(request, 'schooladmin/students.html', data)
+
+
+@role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
+def student(request, userid):
+    logged_in = request.user.is_authenticated
+    if logged_in:
+        user_role = request.user.profile.role
+    is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
+
+    qs = User.objects.filter(id=userid)
+    if qs.count() < 1:
+        return HttpResponse("No such user")
+    the_user = qs.get()
+
+    if the_user.profile.role != Profile.ACCESS_STUDENT:
+        return user(request, userid)
+
+    if request.method == 'POST':
+        if request.POST.get('disbutton'):
+            the_user.is_active = False
+            the_user.save()
+        elif request.POST.get('enabutton'):
+            the_user.is_active = True
+            the_user.save()
+        return redirect('schooladmin:users')
+
+    data = {
+        'user': the_user,
+        'can_edit': is_admin,
+    }
+    data.update(
+        filtered_table2(
+            name='semesters',
+            qs=the_user.profile.student.semesters.all(),
+            filter=SemesterFilter,
+            table=SemestersSummaryTable,
+            request=request,
+            self_url=reverse('schooladmin:student', args=[userid]),
+            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
+        ))
+
+    data.update(
+        filtered_table2(
+            name='history',
+            qs=the_user.profile.student.course_history(),
+            filter=SectionStudentFilter,
+            table=StudentHistoryTable,
+            request=request,
+            self_url=reverse('schooladmin:student', args=[userid]),
+            click_url=reverse('schooladmin:sectionstudent', args=[DUMMY_ID]),
+        ))
+
+    data.update(
+        filtered_table2(
+            name='remaining',
+            qs=the_user.profile.student.remaining_required_courses(),
+            filter=CourseFilter,
+            table=CoursesTable,
+            request=request,
+            self_url=reverse('schooladmin:student', args=[userid]),
+            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
+        ))
+    data.update(
+        filtered_table2(
+            name='majorcourses',
+            qs=the_user.profile.student.requirements_met_list(),
+            filter=CourseFilter,
+            table=MajorCoursesMetTable,
+            request=request,
+            self_url=reverse('schooladmin:student', args=[userid]),
+            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
+        ))
+    if is_admin:
+        data.update(
+            filtered_table2(
+                name='received',
+                qs=the_user.profile.sent_to.filter(time_archived__isnull=True),
+                filter=ReceivedMessageFilter,
+                table=MessageReceivedTable,
+                request=request,
+                wrap_list=False,
+                self_url=reverse('schooladmin:student', args=[userid]),
+            ))
+        data.update(
+            filtered_table2(
+                name='sent',
+                qs=the_user.profile.sent_by.filter(time_archived__isnull=True),
+                filter=SentMessageFilter,
+                table=MessageSentTable,
+                request=request,
+                wrap_list=False,
+                self_url=reverse('schooladmin:student', args=[userid]),
+            ))
+
+    return render(request, 'schooladmin/student.html', data)
+
+
+def professors(request):
+    return render(
+        request, 'schooladmin/professors.html',
+        filtered_table2(
+            name='professors',
+            qs=User.objects.all().filter(profile__role=Profile.ACCESS_PROFESSOR),
+            filter=ProfessorFilter,
+            table=ProfessorsTable,
+            request=request,
+            scrollable=True,
+            self_url=reverse('schooladmin:professors'),
+            click_url=reverse('schooladmin:professor', args=[DUMMY_ID]),
+        ))
+
+
+def professor(request, userid):
+    logged_in = request.user.is_authenticated
+    if logged_in:
+        user_role = request.user.profile.role
+    is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
+    if logged_in:
+        the_user = request.user
+
+    qs = User.objects.filter(id=userid)
+    if qs.count() < 1:
+        return HttpResponse("No such user")
+    the_prof = qs[0]
+
+    if is_admin and request.method == 'POST':
+        if request.POST.get('disbutton'):
+            the_prof.is_active = False
+            the_prof.save()
+        elif request.POST.get('enabutton'):
+            the_prof.is_active = True
+            the_prof.save()
+        return redirect('schooladmin:users')
+
+    data = {'user': the_prof, 'can_edit': is_admin}
+    data.update(
+        filtered_table2(
+            name='semesters',
+            qs=the_prof.profile.professor.semesters_teaching(),
+            filter=SemesterFilter,
+            table=SemestersSummaryTable,
+            request=request,
+            self_url=reverse('schooladmin:professor', args=[userid]),
+            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
+        ))
+
+    data.update(
+        filtered_table2(
+            name='sections',
+            qs=the_prof.profile.professor.section_set,
+            filter=SectionFilter,
+            table=SectionsTable,
+            request=request,
+            self_url=reverse('schooladmin:professor', args=[userid]),
+            click_url=reverse('schooladmin:section', args=[DUMMY_ID]),
+        ))
+
+    data.update(
+        filtered_table2(
+            name='items',
+            qs=the_prof.profile.professor.referenceitem_set,
+            filter=ItemFilter,
+            table=ProfReferenceItemsTable,
+            request=request,
+            self_url=reverse('schooladmin:professor', args=[userid]),
+            click_url=reverse('schooladmin:professor_item', args=[userid, DUMMY_ID]),
+        ))
+    if is_admin:
+        data.update(
+            filtered_table2(
+                name='received',
+                qs=the_prof.profile.sent_to.filter(time_archived__isnull=True),
+                filter=ReceivedMessageFilter,
+                table=MessageReceivedTable,
+                request=request,
+                wrap_list=False,
+                self_url=reverse('schooladmin:professor', args=[userid]),
+            ))
+        data.update(
+            filtered_table2(
+                name='sent',
+                qs=the_prof.profile.sent_by.filter(time_archived__isnull=True),
+                filter=SentMessageFilter,
+                table=MessageSentTable,
+                request=request,
+                wrap_list=False,
+                self_url=reverse('schooladmin:professor', args=[userid]),
+            ))
+
+    return render(request, 'schooladmin/professor.html', data)
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def professor_items(request, userid):
+    qs = User.objects.filter(id=userid)
+    if qs.count() < 1:
+        return HttpResponse("No such user")
+    the_user = qs.get()
+
+    if the_user.profile.role != Profile.ACCESS_PROFESSOR:
+        return user(request, userid)
+
+    data = {
+        'user': the_user,
+    }
+    data.update(
+        filtered_table2(
+            name='items',
+            qs=the_user.profile.professor.referenceitem_set,
+            filter=ItemFilter,
+            table=ProfReferenceItemsTable,
+            request=request,
+            self_url=reverse('schooladmin:professor_items', args=[userid]),
+            click_url=reverse('schooladmin:professor_item', args=[userid, DUMMY_ID]),
+        ))
+
+    return render(request, 'schooladmin/professor_items.html', data)
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def professor_item(request, userid, item_id):
+    return HttpResponse("not yet")
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def professor_item_new(request, userid):
+    qs = User.objects.filter(id=userid)
+    if qs.count() < 1:
+        return HttpResponse("No such user")
+    the_prof = qs[0]
+
+    if the_prof.profile.role != Profile.ACCESS_PROFESSOR:
+        messages.error(request, "That's not a professor.")
+        return users.user(request, userid)
+
+    if request.method == 'POST':
+        form = ReferenceItemCreationForm(request.POST)
+        if form.is_valid():
+            the_new_item = form.save(commit=False)
+            the_new_item.professor = the_prof.profile.professor
+            the_new_item.save()
+            form.save_m2m()
+            messages.success(
+                request, f'New item created for ' + f'{the_new_item.course} has been created.')
+            return redirect('schooladmin:professor_items', userid=the_prof.id)
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
+    else:
+        dict = {}
+        profs = Professor.objects.filter(profile__user_id=the_prof.id)
+        dict['professor'] = profs[0]
+        form = ReferenceItemCreationForm(initial=dict)
+    return render(request, 'schooladmin/professor_new_item.html', {
+        'form': form,
+        'user': the_prof
+    })
