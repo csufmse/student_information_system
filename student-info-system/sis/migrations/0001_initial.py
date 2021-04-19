@@ -15,6 +15,7 @@ class Migration(migrations.Migration):
 
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
+        ('contenttypes', '0002_remove_content_type_name'),
     ]
 
     operations = [
@@ -22,7 +23,7 @@ class Migration(migrations.Migration):
             name='Course',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
-                ('catalog_number', models.CharField(max_length=20, verbose_name='Number')),
+                ('catalog_number', models.IntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Number')),
                 ('title', models.CharField(max_length=256, verbose_name='Title')),
                 ('description', models.CharField(blank=True, max_length=256, verbose_name='Description')),
                 ('credits_earned', models.DecimalField(decimal_places=1, max_digits=2, verbose_name='Credits')),
@@ -30,6 +31,14 @@ class Migration(migrations.Migration):
             options={
                 'ordering': ['major', 'catalog_number', 'title'],
             },
+        ),
+        migrations.CreateModel(
+            name='Interval',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('interval_amount', models.IntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Interval Amount')),
+                ('interval_type', models.CharField(choices=[('minutes', 'minutes'), ('days', 'days'), ('hours', 'hours'), ('months', 'months'), ('seconds', 'seconds'), ('weeks', 'weeks')], max_length=7, verbose_name='Interval Type')),
+            ],
         ),
         migrations.CreateModel(
             name='Major',
@@ -138,6 +147,14 @@ class Migration(migrations.Migration):
             },
         ),
         migrations.CreateModel(
+            name='Tasks',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('task_id', models.IntegerField()),
+                ('task_type', models.ForeignKey(on_delete=django.db.models.deletion.PROTECT, to='contenttypes.contenttype')),
+            ],
+        ),
+        migrations.CreateModel(
             name='Student',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
@@ -241,6 +258,21 @@ class Migration(migrations.Migration):
             name='prereqs',
             field=models.ManyToManyField(through='sis.CoursePrerequisite', to='sis.Course'),
         ),
+        migrations.CreateModel(
+            name='AcademicProbationTask',
+            fields=[
+                ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
+                ('date', models.DateField(blank=True, default=None, null=True, verbose_name='Date')),
+                ('frequency_type', models.CharField(choices=[('immediate', 'immediate'), ('date', 'date'), ('interval', 'interval')], max_length=9, verbose_name='Frequency Type')),
+                ('title', models.CharField(blank=True, max_length=30, verbose_name='Task Title')),
+                ('active', models.BooleanField(default=True, verbose_name='Active')),
+                ('description', models.CharField(max_length=256, verbose_name='Description')),
+                ('interval', models.OneToOneField(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='sis.interval')),
+            ],
+            options={
+                'abstract': False,
+            },
+        ),
         migrations.AlterUniqueTogether(
             name='semesterstudent',
             unique_together={('semester', 'student')},
@@ -254,7 +286,7 @@ class Migration(migrations.Migration):
                 ('section', models.ForeignKey(null=True, on_delete=django.db.models.deletion.CASCADE, to='sis.section')),
             ],
             options={
-                'unique_together': {('section', 'index'), ('section', 'item')},
+                'unique_together': {('section', 'item'), ('section', 'index')},
             },
         ),
         migrations.AlterUniqueTogether(

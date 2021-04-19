@@ -30,10 +30,12 @@ INSTALLED_APPS = [
     "phone_field",
     "django_tables2",
     "django_filters",
+    "django_apscheduler",
     "sis",
     "student",
     "professor",
     "schooladmin",
+    "scheduler.apps.SchedulerConfig",
 ]
 
 MIDDLEWARE = [

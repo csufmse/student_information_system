@@ -98,7 +98,8 @@ def registration_view(request):
                             status = SectionStudent.REGISTERED
                             if sect.seats_remaining < 1:
                                 status = SectionStudent.WAITLISTED
-                            sectstud = SectionStudent(section=sect, student=student,
+                            sectstud = SectionStudent(section=sect,
+                                                      student=student,
                                                       status=status)
                             sectstud.save()
                             sect.is_selected = True
