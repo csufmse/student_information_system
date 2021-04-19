@@ -1,7 +1,7 @@
 from django.urls import path
 
 from schooladmin import views
-from schooladmin.views import users, tasks
+from schooladmin.views import users
 
 app_name = 'schooladmin'
 urlpatterns = [
@@ -49,7 +49,4 @@ urlpatterns = [
     path('semester/<int:semester_id>/edit', views.semester_edit, name='semester_edit'),
     path('semester/<int:semester_id>', views.semester, name='semester'),
     path('demographics', views.demographics, name='demographics'),
-    path('scheduled-tasks', tasks.tasks, name='tasks'),
-    path('tasks/edit', tasks.task_edit, name='task_edit'),
-    path('tasks/edit/<int:taskid>', tasks.task_edit, name='task_edit'),
 ]

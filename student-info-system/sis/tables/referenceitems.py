@@ -5,9 +5,7 @@ from sis.tables import *
 
 
 class ProfReferenceItemsTable(tables.Table):
-    course = ClassyColumn(css_class_base='course',
-                          accessor='course__name',
-                          order_by=('course__major__abbreviation', 'course__catalog_number'))
+    course = ClassyColumn(css_class_base='course', accessor='course__name')
     type = ClassyColumn(verbose_name='Type', css_class_base='item_type')
     title = ClassyColumn(css_class_base='item_title')
     link = tables.TemplateColumn(

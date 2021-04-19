@@ -9,10 +9,7 @@ class StudentHistoryTable(tables.Table):
     semester = ClassyColumn(verbose_name='Semester',
                             css_class_base='semester',
                             accessor='section__semester__name')
-    section = ClassyColumn(css_class_base='section_name',
-                           accessor='section__name',
-                           order_by=('section__course__major__abbreviation',
-                                     'section__course__catalog_number'))
+    section = ClassyColumn(css_class_base='section_name', accessor='section__name')
     major = ClassyColumn(accessor='section__course__major', css_class_base='major')
     title = ClassyColumn(accessor='section__course__title', css_class_base='coursetitle')
     credits_earned = ClassyColumn(
