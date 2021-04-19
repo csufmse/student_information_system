@@ -43,18 +43,20 @@ def sections(request):
         RequestConfig(request, paginate={"per_page": 25, "page": 1}).configure(table)
         sections[name].append(table)
 
+    data = {
+        'semesters': sections.keys(),
+    }
     if request.method == 'POST':
         sem = request.POST.get('semester')
         table = sections[sem][1]
+        data['table'] = table
     else:
         sem = Semester.current_semester().name
         values = sections.get(sem)
         if values is not None:
             table = values[1]
-    return render(request, 'professor/sections.html', {
-        'table': table,
-        'semesters': sections.keys()
-    })
+            data['table'] = table
+    return render(request, 'professor/sections.html', data)
 
 
 @role_login_required(Profile.ACCESS_PROFESSOR)
