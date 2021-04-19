@@ -98,8 +98,7 @@ def registration_view(request):
                             status = SectionStudent.REGISTERED
                             if sect.seats_remaining < 1:
                                 status = SectionStudent.WAITLISTED
-                            sectstud = SectionStudent(section=sect,
-                                                      student=student,
+                            sectstud = SectionStudent(section=sect, student=student,
                                                       status=status)
                             sectstud.save()
                             sect.is_selected = True
@@ -235,7 +234,6 @@ def secitems(request):
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def test_majors(request):
-    pass
     the_user = request.user
     the_major = the_user.profile.student.major
 
