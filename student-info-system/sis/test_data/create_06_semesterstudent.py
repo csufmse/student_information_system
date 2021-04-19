@@ -26,7 +26,7 @@ def createData():
     for stud in stud_list[0:stud_count]:
 
         start = randint(0, semesters.count() - 1)
-        stop = start + randint(1, 12)
+        stop = start + randint(4, 16)
         stop = min(stop, len(semesters) - 1)
         print(f'Student {stud.name} will attend from {semesters[start].session_name}-' +
               f'{semesters[start].year} ' +

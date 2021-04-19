@@ -8,8 +8,24 @@ sys.path.append(".")  # noqa
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")  # noqa
 django.setup()  # noqa
 
+from loremipsum import Generator
+from english_words import english_words_set
+
 from sis.models import Course, Major, Professor, ReferenceItem
 from django.db import connection
+
+loremgen = Generator(dictionary=english_words_set)
+
+
+def get_sentence():
+    (w, s, text) = loremgen.generate_sentence()
+    return text
+
+
+def get_paragraph():
+    (w, s, text) = loremgen.generate_paragraph()
+    return text
+
 
 prof_fraction = 0.75
 
@@ -39,7 +55,7 @@ def createData():
                 ri = ReferenceItem(
                     course=course,
                     professor=prof,
-                    title=f'Something fierce #{ix} for {aType[1]}',
+                    title=f'{get_sentence()} #{ix} for {aType[1]}',
                     type=aType[0],
                 )
                 if random() < .3:
@@ -50,7 +66,7 @@ def createData():
                 if random() < .3:
                     ri.edition = choice(['any', 'first', 'new', 'special', 'worst'])
                 if random() < .3:
-                    ri.description = f'the worst {aType[1]} you can imagine'
+                    ri.description = f'{get_sentence()}'
                 try:
                     ri.save()
                 except Exception:

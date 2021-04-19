@@ -8339,7 +8339,7 @@ def cleanData():
         list.append(str(ad.user.id))
     with connection.cursor() as cursor:
         cursor.execute("DELETE FROM sis_professor")
-        cursor.execute("DELETE FROM sis_profile WHERE user_id in (" + (','.join(list)) + ')')
+        cursor.execute("DELETE FROM sis_profile WHERE role = 'P'")
         cursor.execute('DELETE FROM auth_user WHERE id IN (' + (','.join(list)) + ')')
 
 
