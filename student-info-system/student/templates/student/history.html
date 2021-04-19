@@ -13,6 +13,31 @@
   <dt>Credits Earned</dt>
   <dd>{{ user.profile.student.credits_earned }}</dd>
 </dl>
+
+<table class="data-table-alt">
+{% for gpa, sem in ssects_gpas %}
+  <tr>
+    <th></th>
+    <th>Semester: {{sem.0.section.semester}}</th>
+    <th></th>
+    <th>GPA: {{gpa|floatformat:2}}</th>
+  </tr>
+  <tr>
+    <th>Course</th>
+    <th>Course Title</th>
+    <th>Professor</th>
+    <th>Grade</th>
+  </tr>
+  {% for sec in sem %}
+    <tr>
+      <td>{{sec.section.course}}</td>
+      <td>{{sec.section.course.title}}</td>
+      <td>{{sec.professor}}</td>
+      <td>{{sec.letter_grade}}</td>
+    </tr>
+  {% endfor %}
+{% endfor %}
+{% comment %}
     <h3>Semesters Attended:</h3>
     {% sis_filter 'semesters' %}
 
@@ -27,6 +52,7 @@
            class="btn btn-info"
         value="Explore Another Major..."
     />
+{% endcomment %}
 
  <form method="post">
     {% csrf_token %}

@@ -69,3 +69,18 @@ def filtered_table2(name=None,
             'div_classes': div_classes,
         }
     }
+
+
+def ssects_by_sem(user):
+    qs = user.profile.student.course_history().order_by('section__semester')
+    ssects_by_sem = None
+    if len(qs):
+        ssects_by_sem = [[qs[0]]]
+        i = 0
+        for ssect in qs:
+            if ssect.section.semester == ssects_by_sem[i][0].section.semester:
+                ssects_by_sem[i].append(ssect)
+            else:
+                i += 1
+                ssects_by_sem.insert(i, [ssect])
+    return ssects_by_sem

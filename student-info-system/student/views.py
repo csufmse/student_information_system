@@ -9,7 +9,7 @@ from django.shortcuts import redirect, render, reverse
 from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
 
-from sis.utils import filtered_table2, DUMMY_ID
+from sis.utils import filtered_table2, DUMMY_ID, ssects_by_sem
 
 from sis.tables.courses import CoursesTable, MajorCoursesMetTable
 from sis.tables.messages import MessageSentTable, MessageReceivedTable
@@ -136,43 +136,56 @@ def history(request):
     data = {
         'user': the_user,
     }
-    data.update(
-        filtered_table2(
-            name='history',
-            qs=the_user.profile.student.course_history(),
-            filter=StudentHistoryFilter,
-            table=StudentHistoryTable,
-            request=request,
-            wrap_list=False,
-            self_url=reverse('student:history'),
-            click_url=reverse('schooladmin:sectionstudent', args=[DUMMY_ID]),
-        ))
-    data.update(
-        filtered_table2(
-            name='semesters',
-            qs=the_user.profile.student.semesters.all(),
-            filter=SemesterFilter,
-            table=SemestersSummaryTable,
-            request=request,
-            self_url=reverse('student:history'),
-            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
-        ))
+    ssects = ssects_by_sem(the_user)
+    sem_gpas = []
+    # lets get the gpa for each semester
+    for sem in ssects:
+        credits_attempted = grade_pnts = 0
+        for ssec in sem:
+            credits_attempted = credits_attempted + ssec.section.course.credits_earned
+            grade_pnts = grade_pnts + ssec.grade_points
+        gpa = grade_pnts / float(credits_attempted)
+        sem_gpas.append(gpa)
 
-    remaining = the_user.profile.student.requirements_met_list()
-    stats = remaining.filter(met=False).aggregate(remaining_course_count=Count('id'),
-                                                  remaining_credit_count=Sum('credits_earned'))
-    data.update(stats)
-
-    data.update(
-        filtered_table2(
-            name='majorcourses',
-            qs=remaining,
-            filter=RequirementsCourseFilter,
-            table=MajorCoursesMetTable,
-            request=request,
-            self_url=reverse('student:history'),
-            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
-        ))
+    ssects_gpas = zip(sem_gpas, ssects)
+    data['ssects_gpas'] = ssects_gpas
+    #    data.update(
+    #        filtered_table2(
+    #            name='history',
+    #            qs=the_user.profile.student.course_history(),
+    #            filter=StudentHistoryFilter,
+    #            table=StudentHistoryTable,
+    #            request=request,
+    #            wrap_list=False,
+    #            self_url=reverse('student:history'),
+    #            click_url=reverse('schooladmin:sectionstudent', args=[DUMMY_ID]),
+    #        ))
+    #    data.update(
+    #        filtered_table2(
+    #            name='semesters',
+    #            qs=the_user.profile.student.semesters.all(),
+    #            filter=SemesterFilter,
+    #            table=SemestersSummaryTable,
+    #            request=request,
+    #            self_url=reverse('student:history'),
+    #            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
+    #        ))
+    #
+    #    remaining = the_user.profile.student.requirements_met_list()
+    #    stats = remaining.filter(met=False).aggregate(remaining_course_count=Count('id'),
+    #                                                  remaining_credit_count=Sum('credits_earned'))
+    #    data.update(stats)
+    #
+    #    data.update(
+    #        filtered_table2(
+    #            name='majorcourses',
+    #            qs=remaining,
+    #            filter=RequirementsCourseFilter,
+    #            table=MajorCoursesMetTable,
+    #            request=request,
+    #            self_url=reverse('student:history'),
+    #            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
+    #        ))
 
     return render(request, 'student/history.html', data)
 
