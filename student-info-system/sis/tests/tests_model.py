@@ -507,9 +507,9 @@ class MajorTestCase(TestCase):
     def test_required_order(self):
         m = Major.objects.get(abbreviation='CPSC')
         self.assertEqual(m.courses_required.count(), 3)
-        self.assertEqual(m.courses_required.all()[0].catalog_number, 300)
-        self.assertEqual(m.courses_required.all()[1].catalog_number, 350)
-        self.assertEqual(m.courses_required.all()[2].catalog_number, 400)
+        self.assertEqual(m.courses_required.all()[0].catalog_number, '300')
+        self.assertEqual(m.courses_required.all()[1].catalog_number, '350')
+        self.assertEqual(m.courses_required.all()[2].catalog_number, '400')
 
     def test_requirements_met_none(self):
         m1 = MajorTestCase.m1
@@ -557,9 +557,9 @@ class MajorTestCase(TestCase):
         self.assertEqual(len(reql), 3)
         for c in reql:
             if c.met:
-                self.assertEqual(c.catalog_number, 400)
+                self.assertEqual(c.catalog_number, '400')
             else:
-                self.assertNotEqual(c.catalog_number, 400)
+                self.assertNotEqual(c.catalog_number, '400')
 
 
 class ClassLevel_tests(TestCase):
@@ -581,6 +581,26 @@ class ClassLevel_tests(TestCase):
 
     def test_senior(self):
         self.assertEqual(ClassLevel.level(98), ClassLevel.SENIOR)
+
+
+class Semester_tests(TestCase):
+
+    def test_names(self):
+        self.assertEqual(Semester.name_for_session(Semester.FALL), 'Fall')
+        self.assertEqual(Semester.name_for_session(Semester.SPRING), 'Spring')
+        self.assertEqual(Semester.name_for_session(Semester.SUMMER), 'Summer')
+        self.assertEqual(Semester.name_for_session(Semester.WINTER), 'Winter')
+
+    def test_bad_name(self):
+        self.assertRaises(Exception, Semester.name_for_session('xx'))
+
+    def test_order_fields(self):
+        s1 = createSemester()
+        # forcing the fetch here lets the annotation generate the extra attributes
+        s2 = Semester.objects.get(year=2020)
+
+        self.assertEqual(s2.session_name, 'Fall')
+        self.assertEqual(s2.session_order, 0)
 
 
 class SemesterProf_tests(TestCase):

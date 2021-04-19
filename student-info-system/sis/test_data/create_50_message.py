@@ -82,8 +82,8 @@ def createData():
                       f'(semester {aSemester}, sent to {mesg.recipient})')
 
             # yo be on AP
-            if random() < 0.2:
-                anAdmin = choice(admin_profiles)
+            if 0.01 < student.gpa() < 2.0:
+                anAdmin = student.major.contact
                 when = rand_between(aSemester.date_started, aSemester.date_ended)
                 reason = get_sentence()
                 mesg = student.notify_probation(sender=anAdmin, body=reason, when=when)

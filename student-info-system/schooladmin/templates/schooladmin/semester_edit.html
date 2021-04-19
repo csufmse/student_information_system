@@ -53,6 +53,9 @@
     $(function () {
       $("#id_date_last_drop").datepicker();
     });
+    $(function () {
+      $("#id_date_finalized").datepicker();
+    });
     document.getElementById("submitme").addEventListener("click", function () {
         const sem_year = {{ semester.year }};
         const dro = document.getElementById("id_date_registration_opens");
@@ -60,18 +63,21 @@
         const ds = document.getElementById("id_date_started");
         const dld = document.getElementById("id_date_last_drop");
         const de = document.getElementById("id_date_ended");
+        const df = document.getElementById("id_date_finalized");
 
         var drod = new Date(dro.value);
         var drcd = new Date(drc.value);
         var dsd = new Date(ds.value);
         var dldd = new Date(dld.value);
         var ded = new Date(de.value);
+        var dfd = new Date(df.value);
 
         var any_matching = sem_year == drod.getFullYear() ||
                 sem_year == drcd.getFullYear() ||
                 sem_year == dsd.getFullYear() ||
                 sem_year == dldd.getFullYear() ||
-                sem_year == ded.getFullYear();
+                sem_year == ded.getFullYear() ||
+                sem_year == dfd.getFullYear();
 
         if (!any_matching) {
             var answer = window.confirm("All dates are outside the semester year ({{ semester.year }}).\nAre you sure you want to proceed?");

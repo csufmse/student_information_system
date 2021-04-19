@@ -14,9 +14,12 @@ from sis.test_data import create_22_majorprerequisites
 from sis.test_data import create_25_courseprerequisites
 from sis.test_data import create_27_reference_items
 from sis.test_data import create_30_section
-from sis.test_data import create_32_sectionreferenceitem
+from sis.test_data import create_43_sectionreferenceitem
 from sis.test_data import create_40_sectionstudent
 from sis.test_data import create_50_message
+
+# this substitutes for modules 30/40 and makes realish data a semester at a time
+from sis.test_data import create_reals
 
 modules = [
     (
@@ -64,12 +67,12 @@ modules = [
         create_30_section,
     ),
     (
-        32,
-        create_32_sectionreferenceitem,
-    ),
-    (
         40,
         create_40_sectionstudent,
+    ),
+    (
+        43,
+        create_43_sectionreferenceitem,
     ),
     (
         50,
@@ -82,11 +85,12 @@ def main(argv):
     next = 0
     last = 999
     doit = None
+    doit_real = False
     spec = 'test_data [ --create | --delete | --list ] [--start <num> --stop <num>' + \
-           ' | --only <num>]'
+           ' | --only <num>] [ --reals ]'
     try:
-        opts, args = getopt.getopt(argv, "hclds:o:",
-                                   ["list", "create", "start=", "stop=", "delete", "only="])
+        opts, args = getopt.getopt(
+            argv, "hclds:o:r", ["list", "create", "start=", "stop=", "delete", "only=", "reals"])
     except getopt.GetoptError:
         print(spec)
         sys.exit(2)
@@ -100,14 +104,24 @@ def main(argv):
             sys.exit()
         elif opt in ("-s", "--start"):
             next = int(arg)
+        elif opt in ("-r", "--reals"):
+            doit_real = True
         elif opt in ("--stop"):
             last = int(arg)
         elif opt in ("--only"):
             next = int(arg)
             last = int(arg)
         elif opt in ("-c", "--create"):
+            if doit:
+                print('Multiple things to do specified. Cowardly refusing to proceed.')
+                doit = None
+                break
             doit = 'create'
         elif opt in ("-d", "--delete"):
+            if doit:
+                print('Multiple things to do specified. Cowardly refusing to proceed.')
+                doit = None
+                break
             doit = 'delete'
     if not doit:
         print('You probably want "--create" to add data to a clean database. ' +
@@ -127,10 +141,16 @@ def main(argv):
     if doit == 'create':
         for mod in modules:
             if next <= mod[0] <= last:
-                next = mod[0] + 1
-                print(f'********************** about to {doit} {mod[0]}:')
-                mod[1].createData()
-                print(f'********************** done {mod[0]}:')
+                if mod[0] == 30 and doit_real:
+                    next = mod[0] + 11
+                    print(f'********************** about to {doit} REAL:')
+                    create_reals.createData()
+                    print(f'********************** done REAL:')
+                else:
+                    next = mod[0] + 1
+                    print(f'********************** about to {doit} {mod[0]}:')
+                    mod[1].createData()
+                    print(f'********************** done {mod[0]}:')
     else:
         (next, last) = (last, next)
         modules.reverse()

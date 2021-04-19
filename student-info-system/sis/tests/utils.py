@@ -72,27 +72,25 @@ def createSemester(year=2020,
                    date_started=0,
                    date_last_drop=0,
                    date_ended=0,
+                   date_finalized=0,
                    session=Semester.FALL,
                    offsets=None):
     if offsets is not None:
         (date_registration_opens, date_registration_closes, date_started, date_last_drop,
-         date_ended) = offsets
+         date_ended, date_finalized) = offsets
 
-    dro = datetime.now()
-    dro += timedelta(days=date_registration_opens)
-    drc = datetime.now()
-    drc += timedelta(days=date_registration_closes)
-    ds = datetime.now()
-    ds += timedelta(days=date_started)
-    dld = datetime.now()
-    dld += timedelta(days=date_last_drop)
-    de = datetime.now()
-    de += timedelta(days=date_ended)
+    dro = datetime.now() + timedelta(days=date_registration_opens)
+    drc = datetime.now() + timedelta(days=date_registration_closes)
+    ds = datetime.now() + timedelta(days=date_started)
+    dld = datetime.now() + timedelta(days=date_last_drop)
+    de = datetime.now() + timedelta(days=date_ended)
+    df = datetime.now() + timedelta(days=date_finalized)
     semester = Semester.objects.create(date_registration_opens=dro.date(),
                                        date_registration_closes=drc.date(),
                                        date_started=ds.date(),
                                        date_last_drop=dld.date(),
                                        date_ended=de.date(),
+                                       date_finalized=df.date(),
                                        session=session,
                                        year=year)
     return semester
