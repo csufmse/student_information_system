@@ -3,6 +3,11 @@
 {% load render_table from django_tables2 %}
 {% load bootstrap3 %}
 
+{% block scripts %}
+  {{block.super}}
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+{% endblock scripts %}
+
 {% block content %}
   {% if not any_sections %}
     <p>No courses offered</P>
@@ -41,7 +46,7 @@
 
     {% for s in sections %}
       {% if s.new_course %}
-        <tr class="class_heading_row">
+        <tr class="class_heading_row p_row" id="{{s.course}}">
           <th>{{s.course.name}}</th>
           <th>{{s.course.title}}</th>
           <th>{{s.course.credits_earned}}</th>
@@ -52,7 +57,7 @@
                 <p>None</p>
               {% endif %}
           </th>
-            <tr id="childRow" class="heading_row">
+            <tr id="{{s.course}}" class="heading_row c_row">
               <td>Section Number</td>
               <td>Professor</td>
               <td>Schedule</td>
@@ -61,7 +66,7 @@
               <td>Select</td>
             </tr>
         {% endif %}
-        <tr id="childRow" class="section_row">
+        <tr id="{{s.course}}" class="section_row c_row">
           <td>{{s.number}}</td>
           <td>{{s.professor_name}}</td>
           <td>{{s.hours}}</td>
@@ -79,4 +84,21 @@
   <input type="submit" id="register" name="register" value="Register" class="btn btn-primary">
   </form>
 {% endblock content %}
-    
+{% block late_scripts %}
+  {{block.super}}
+  <script>
+    $(".c_row").hide();
+
+    $(".p_row").each(function(index, p){
+        $(p).on("click", function(){
+            $(".c_row").each(function(index, c){
+                if(c.id == p.id && $(c).is(":visible")){
+                    $(c).hide();
+                } else if (c.id == p.id && $(c).is(":hidden")){
+                    $(c).show();
+                }
+            })
+        })
+    })
+  </script>
+{% endblock late_scripts %}    

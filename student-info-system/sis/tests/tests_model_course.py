@@ -126,7 +126,7 @@ class CourseTestCase_edit(TestCase):
         c.catalog_number = '923'
         c.save()
         c1 = Course.objects.get(id=1)
-        self.assertEqual(c1.catalog_number, '923')
+        self.assertEqual(c1.catalog_number, 923)
 
     def test_edittitle(self):
         KLASS = self.__class__
