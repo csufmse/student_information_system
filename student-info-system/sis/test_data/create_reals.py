@@ -242,10 +242,14 @@ def createData():
                     map((lambda sec: 10 if sec.course.major == semstud.student.major else 1),
                         extras))
 
-                while len(attending) < number_attended:
-                    aSec = choices(extras, weights=weights, k=1)[0]
-                    if aSec not in attending:
-                        attending.append(aSec)
+                potentials = diff(extras, attending)
+                if len(potentials) < number_attended - len(attending):
+                    attending.extend(potentials)
+                else:
+                    while len(attending) < number_attended:
+                        aSec = choices(extras, weights=weights, k=1)[0]
+                        if aSec not in attending:
+                            attending.append(aSec)
 
             print(f'attending={len(attending)}')
 

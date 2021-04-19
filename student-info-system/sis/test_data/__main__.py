@@ -112,8 +112,16 @@ def main(argv):
             next = int(arg)
             last = int(arg)
         elif opt in ("-c", "--create"):
+            if doit:
+                print('Multiple things to do specified. Cowardly refusing to proceed.')
+                doit = None
+                break
             doit = 'create'
         elif opt in ("-d", "--delete"):
+            if doit:
+                print('Multiple things to do specified. Cowardly refusing to proceed.')
+                doit = None
+                break
             doit = 'delete'
     if not doit:
         print('You probably want "--create" to add data to a clean database. ' +

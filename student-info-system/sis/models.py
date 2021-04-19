@@ -527,7 +527,7 @@ class Major(models.Model):
 
 class Course(models.Model):
     major = models.ForeignKey(Major, on_delete=models.CASCADE)
-    catalog_number = models.IntegerField('Number', validators=[MinValueValidator(1)])
+    catalog_number = models.CharField('Number', max_length=20)
     title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
     credits_earned = models.DecimalField('Credits', max_digits=2, decimal_places=1)

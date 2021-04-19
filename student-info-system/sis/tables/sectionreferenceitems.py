@@ -5,9 +5,7 @@ from sis.tables import *
 
 
 class SectionReferenceItemsTable(tables.Table):
-    section = ClassyColumn(css_class_base='section_name',
-                           accessor='name',
-                           order_by=('course__major__abbreviation', 'course__catalog_number'))
+    section = ClassyColumn(css_class_base='section')
     semester = ClassyColumn(accessor='section__semester', css_class_base='semester')
     professor = ClassyColumn(accessor='section__professor', css_class_base='user_name')
     index = ClassyColumn(verbose_name="#", css_class_base='item_index')
