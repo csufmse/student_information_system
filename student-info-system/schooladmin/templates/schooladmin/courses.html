@@ -1,17 +1,16 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load sis-filter %}
 {% load bootstrap3 %}
 
+{% block class %}courses{% endblock %}
 {% block content %}
-<div>
 {%  if can_add %}
     <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:course_new' %}';">New Course</button>
 {% endif %}
     <div>
 {% sis_filter 'courses' %}
 
-</div>
 </div>
 {% endblock content %}
 

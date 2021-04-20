@@ -1,4 +1,4 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {%  block scripts %}
@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/datepicker/0.6.5/datepicker.min.css" integrity="sha256-b88RdwbRJEzRx95nCuuva+hO5ExvXXnpX+78h8DjyOE=" crossorigin="anonymous" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/datepicker/0.6.5/datepicker.min.js" integrity="sha256-/7FLTdzP6CfC1VBAj/rsp3Rinuuu9leMRGd354hvk0k=" crossorigin="anonymous"></script>
 {%  endblock %}
+{% block class %}semesters{% endblock %}
 
 {% block content %}
   <h3>Edit Semester {{ semester }}</h3>
@@ -15,12 +16,6 @@
   <form method="post">
     {% csrf_token %}
       <table>{{ form.as_table }}</table>
-    <input
-        action="action"
-        onclick="window.history.go(-1); return false;"
-        type="submit"
-        value="Cancel" class="btn btn-info"
-    />
     <input
         type="reset" id="reset_button"
         value="Reset" class="btn btn-info"

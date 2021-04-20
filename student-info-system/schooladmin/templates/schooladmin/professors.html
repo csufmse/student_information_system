@@ -1,15 +1,17 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load sis-filter %}
 {% load bootstrap3 %}
+{% block class %}professors{% endblock %}
 
 {% block content %}
-<div>
   <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
     {% sis_filter 'professors' %}
-</div>
+{% endblock %}
+
+{% block late_scripts %}
   <script>
     const handler = insertScrollableDivs(applyHandlers=true);
     handler();
   </script>
-{% endblock content %}
+{% endblock  %}

@@ -1,11 +1,12 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {% load sis-filter %}
 {% load user_demographics %}
+{% block class %}profile{% endblock %}
 
 {% block content %}
-<dl class="dl-horizontal">
+    <dl class="dl-horizontal">
   <dt>User</dt>
   <dd>{{ user.get_full_name }}</dd>
   <dt>Username</dt>
@@ -27,12 +28,6 @@
   <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
-    <input id="go_back"
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
     <input id="passchg"
         action="action"
            class="btn btn-info"
@@ -45,6 +40,9 @@
     />
 
   </form>
+{% endblock %}
+
+{% block late_scripts %}
 <script>
 stylizeRange({field:'time_sent',name:'Sent',prefix:'received',width:'100px'});
 stylizeRange({field:'time_sent',name:'Received',prefix:'sent',width:'100px'});

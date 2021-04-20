@@ -1,7 +1,9 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {% load sis-filter %}
+
+{% block class %}profile{% endblock %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -23,17 +25,6 @@
     <h3>{{ remaining_course_count }} course{{ remaining_course_count|pluralize }} ({{ remaining_credit_count }} credit{{ remaining_credit_count|pluralize }}) remaining with this major.</h3>
 
 
- <form method="post">
-    {% csrf_token %}
-     <input type="hidden" name="userid" value="{{ user.id }}"/>
-    <input
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
-
-  </form>
 <script>
 stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'majorcourses'});
 stylizeRange({field:'credits_earned',name:'Cred',prefix:'majorcourses'});

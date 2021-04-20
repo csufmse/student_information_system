@@ -1,10 +1,11 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {% load sis-filter %}
+{% block class %}sections{% endblock %}
 
 {% block content %}
-<dl class="dl-horizontal">
+    <dl class="dl-horizontal">
 <h3>Section: {{ section }}</h3>
   <dt>Major</dt>
     <dd><a href="{% url 'sis:major' majorid=section.course.major.id %}">{{ section.course.major }}: {{  section.course.major.name }}</a></dd>
@@ -40,8 +41,4 @@
     <dt>Grade</dt>
     <dd>{{ grade }}</dd>
 
-  <form method="post">
-    {% csrf_token %}
-    <input action="action" class="btn btn-info" onclick="window.history.go(-1); return false;" value="Back"/>
-  </form>
 {% endblock %}

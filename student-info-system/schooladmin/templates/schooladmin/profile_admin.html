@@ -1,7 +1,8 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {% load user_demographics %}
+{% block class %}profile{% endblock %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -38,6 +39,9 @@
     />
 
   </form>
+{% endblock %}
+
+{% block late_scripts %}
 <script>
 addButtonClickHandler('passchg', "{% url 'sis:change_password' auser.id %}");
 addButtonClickHandler('edit_profile', "{% url 'schooladmin:user_edit' auser.id %}");

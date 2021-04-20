@@ -32,12 +32,13 @@ from sis.forms.user import UserEditForm
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def index(request):
-    data = {
-        'current_semester': Semester.current_semester(),
-        'registration_open': Semester.semesters_open_for_registration(),
-    }
-    data.update(request.user.profile.unread_messages())
-    return render(request, 'student/home_student.html', data)
+    return current_schedule_view(request)
+    # data = {
+    #     'current_semester': Semester.current_semester(),
+    #     'registration_open': Semester.semesters_open_for_registration(),
+    # }
+    # data.update(request.user.profile.unread_messages())
+    # return render(request, 'student/home_student.html', data)
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
@@ -98,8 +99,7 @@ def registration_view(request):
                             status = SectionStudent.REGISTERED
                             if sect.seats_remaining < 1:
                                 status = SectionStudent.WAITLISTED
-                            sectstud = SectionStudent(section=sect,
-                                                      student=student,
+                            sectstud = SectionStudent(section=sect, student=student,
                                                       status=status)
                             sectstud.save()
                             sect.is_selected = True

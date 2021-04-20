@@ -1,18 +1,13 @@
-{% extends 'sis/base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 
+{% block class %}courses{% endblock %}
 {% block content %}
-  <h3>Create New Course</h3>
+    <h3>Create New Course</h3>
   <form method="post">
     {% csrf_token %}
       <table>{{ form.as_table }}</table>
-    <input
-        action="action"
-        onclick="window.history.go(-1); return false;"
-        type="submit"
-        value="Cancel" class="btn btn-info"
-    />
     <button type="submit" class="btn btn-primary">Create Course</button>
   </form>
 {% endblock %}
