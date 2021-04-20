@@ -65,8 +65,10 @@
         <th>Credits</th>
         <th>Class</th>
         <th>Grade</th>
-        <th>Select</th>
-        <th>View</th>
+        {% if can_grade %}
+            <th>Assign Grade</th>
+        {% endif %}
+        <th class="sched_col">View</th>
       </tr>
       {% for ssect in ssects %}
         <tr class="reg-row">
@@ -76,17 +78,23 @@
           <td class="credits_cell">{{ssect.student.credits_earned}}</td>
           <td class="classlevel_cell">{{ssect.student.class_level}}</td>
           <td class="lettergrade_cell">{{ssect.letter_grade}}</td>
-          <td class="lettergrade_cell"><select name="{{ssect.student.pk}}">
-            {% for id, value in grades %}
-              <option value="{{value}}">{{id}}</option>
-            {% endfor %}
-            </select>
+        {% if can_grade %}
+          <td class="lettergrade_cell">
+                <select name="{{ssect.student.pk}}">
+                {% for id, value in grades %}
+                    <option value="{{value}}">{{id}}</option>
+                {% endfor %}
+                </select>
           </td>
-          <td class="sched_sel btn-info btn" data-id="{{ssect.student.pk}}">Schedule</td>
-        </tr>
+        {% endif %}
+          <td class="sched_cell">
+         <input id="sched{{ ssect.student.pk }}" action="action" class="btn btn-info sched_sel" value="Student Schedule" data-id="{{ssect.student.pk}}"/></td>
+       </tr>
       {% endfor %}
     </table>
+{% if can_grade %}
     <input type="submit" value="Submit" class="btn btn-info"/>
+{% endif %}
   </form>
 {% else %}
   <p>No students in this section</p>

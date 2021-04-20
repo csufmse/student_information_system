@@ -79,101 +79,6 @@ def students(request):
     return render(request, 'schooladmin/students.html', data)
 
 
-@role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
-def student(request, userid):
-    logged_in = request.user.is_authenticated
-    if logged_in:
-        user_role = request.user.profile.role
-    is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
-
-    qs = User.objects.filter(id=userid)
-    if qs.count() < 1:
-        return HttpResponse("No such user")
-    the_user = qs.get()
-
-    if the_user.profile.role != Profile.ACCESS_STUDENT:
-        return users.user(request, userid)
-
-    if request.method == 'POST':
-        if request.POST.get('disbutton'):
-            the_user.is_active = False
-            the_user.save()
-        elif request.POST.get('enabutton'):
-            the_user.is_active = True
-            the_user.save()
-        return redirect('schooladmin:users')
-
-    data = {
-        'user': the_user,
-        'can_edit': is_admin,
-    }
-    data.update(
-        filtered_table2(
-            name='semesters',
-            qs=the_user.profile.student.semesters.all(),
-            filter=SemesterFilter,
-            table=SemestersSummaryTable,
-            request=request,
-            self_url=reverse('schooladmin:student', args=[userid]),
-            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
-        ))
-
-    data.update(
-        filtered_table2(
-            name='history',
-            qs=the_user.profile.student.course_history(),
-            filter=SectionStudentFilter,
-            table=StudentHistoryTable,
-            request=request,
-            self_url=reverse('schooladmin:student', args=[userid]),
-            click_url=reverse('schooladmin:sectionstudent', args=[DUMMY_ID]),
-        ))
-
-    data.update(
-        filtered_table2(
-            name='remaining',
-            qs=the_user.profile.student.remaining_required_courses(),
-            filter=CourseFilter,
-            table=CoursesTable,
-            request=request,
-            self_url=reverse('schooladmin:student', args=[userid]),
-            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
-        ))
-    data.update(
-        filtered_table2(
-            name='majorcourses',
-            qs=the_user.profile.student.requirements_met_list(),
-            filter=CourseFilter,
-            table=MajorCoursesMetTable,
-            request=request,
-            self_url=reverse('schooladmin:student', args=[userid]),
-            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
-        ))
-    if is_admin:
-        data.update(
-            filtered_table2(
-                name='received',
-                qs=the_user.profile.sent_to.filter(time_archived__isnull=True),
-                filter=ReceivedMessageFilter,
-                table=MessageReceivedTable,
-                request=request,
-                wrap_list=False,
-                self_url=reverse('schooladmin:student', args=[userid]),
-            ))
-        data.update(
-            filtered_table2(
-                name='sent',
-                qs=the_user.profile.sent_by.filter(time_archived__isnull=True),
-                filter=SentMessageFilter,
-                table=MessageSentTable,
-                request=request,
-                wrap_list=False,
-                self_url=reverse('schooladmin:student', args=[userid]),
-            ))
-
-    return render(request, 'schooladmin/student.html', data)
-
-
 def professors(request):
     return render(
         request, 'schooladmin/professors.html',
@@ -189,86 +94,6 @@ def professors(request):
         ))
 
 
-def professor(request, userid):
-    logged_in = request.user.is_authenticated
-    if logged_in:
-        user_role = request.user.profile.role
-    is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
-    if logged_in:
-        the_user = request.user
-
-    qs = User.objects.filter(id=userid)
-    if qs.count() < 1:
-        return HttpResponse("No such user")
-    the_prof = qs[0]
-
-    if is_admin and request.method == 'POST':
-        if request.POST.get('disbutton'):
-            the_prof.is_active = False
-            the_prof.save()
-        elif request.POST.get('enabutton'):
-            the_prof.is_active = True
-            the_prof.save()
-        return redirect('schooladmin:users')
-
-    data = {'user': the_prof, 'can_edit': is_admin}
-    data.update(
-        filtered_table2(
-            name='semesters',
-            qs=the_prof.profile.professor.semesters_teaching(),
-            filter=SemesterFilter,
-            table=SemestersSummaryTable,
-            request=request,
-            self_url=reverse('schooladmin:professor', args=[userid]),
-            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
-        ))
-
-    data.update(
-        filtered_table2(
-            name='sections',
-            qs=the_prof.profile.professor.section_set,
-            filter=SectionFilter,
-            table=SectionsTable,
-            request=request,
-            self_url=reverse('schooladmin:professor', args=[userid]),
-            click_url=reverse('schooladmin:section', args=[DUMMY_ID]),
-        ))
-
-    data.update(
-        filtered_table2(
-            name='items',
-            qs=the_prof.profile.professor.referenceitem_set,
-            filter=ItemFilter,
-            table=ProfReferenceItemsTable,
-            request=request,
-            self_url=reverse('schooladmin:professor', args=[userid]),
-            click_url=reverse('schooladmin:professor_item', args=[userid, DUMMY_ID]),
-        ))
-    if is_admin:
-        data.update(
-            filtered_table2(
-                name='received',
-                qs=the_prof.profile.sent_to.filter(time_archived__isnull=True),
-                filter=ReceivedMessageFilter,
-                table=MessageReceivedTable,
-                request=request,
-                wrap_list=False,
-                self_url=reverse('schooladmin:professor', args=[userid]),
-            ))
-        data.update(
-            filtered_table2(
-                name='sent',
-                qs=the_prof.profile.sent_by.filter(time_archived__isnull=True),
-                filter=SentMessageFilter,
-                table=MessageSentTable,
-                request=request,
-                wrap_list=False,
-                self_url=reverse('schooladmin:professor', args=[userid]),
-            ))
-
-    return render(request, 'schooladmin/professor.html', data)
-
-
 @role_login_required(Profile.ACCESS_ADMIN)
 def professor_items(request, userid):
     qs = User.objects.filter(id=userid)
@@ -280,7 +105,7 @@ def professor_items(request, userid):
         return users.user(request, userid)
 
     data = {
-        'user': the_user,
+        'auser': the_user,
     }
     data.update(
         filtered_table2(
@@ -331,7 +156,7 @@ def professor_item_new(request, userid):
         form = ReferenceItemCreationForm(initial=dict)
     return render(request, 'schooladmin/professor_new_item.html', {
         'form': form,
-        'user': the_prof
+        'auser': the_prof
     })
 
 
@@ -788,12 +613,18 @@ def section_new_helper(request, semester_id=None, courseid=None):
         })
 
 
-@role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
+@login_required
 def sectionstudent(request, id):
     qs = SectionStudent.objects.filter(id=id)
     if qs.count() < 1:
         return HttpResponse("No such sectionstudent")
     the_sectionstud = qs[0]
+    is_admin = request.user.profile.role == Profile.ACCESS_ADMIN
+    is_prof = request.user.profile.role == Profile.ACCESS_PROFESSOR
+
+    if not is_admin and not is_prof and request.user.id != the_sectionstud.student.profile.id:
+        messages.error(request, "Something went wrong")
+        return HttpResponse("Unauthorized")
 
     if the_sectionstud.status == SectionStudent.GRADED:
         grade = the_sectionstud.letter_grade

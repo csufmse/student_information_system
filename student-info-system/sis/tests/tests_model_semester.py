@@ -14,7 +14,7 @@ class Semester_tests(TestCase):
     @classmethod
     def setUpTestData(cls):
         super(Semester_tests, cls).setUpTestData()
-        Semester_tests.s1 = createSemester(offsets=(0, 1, 1, 1, 2))
+        Semester_tests.s1 = createSemester(offsets=(0, 1, 1, 1, 2, 12))
 
     def test_names(self):
         self.assertEqual(Semester.name_for_session(Semester.FALL), 'Fall')
@@ -67,7 +67,7 @@ class Semester_tests(TestCase):
         self.assertFalse(Semester_tests.s1.finalized(when=datetime.now() + timedelta(days=1)))
 
     def test_drop_possible(self):
-        s2 = createSemester(offsets=(0, 0, 0, 1, 1), session=Semester.WINTER)
+        s2 = createSemester(offsets=(0, 0, 0, 1, 1, 2), session=Semester.WINTER)
         self.assertTrue(s2.drop_possible())
         s2.delete()
 

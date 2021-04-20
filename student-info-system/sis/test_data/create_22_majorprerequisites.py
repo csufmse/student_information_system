@@ -23,8 +23,12 @@ def createData():
         to_add = randint(3, 9)
         added = {}
 
+        major_count = Course.objects.filter(major=m).count()
+        # major courses should be 90% of prereqs by weight
+        per_major_course_weight = 9 * (courses.count() - major_count) / major_count
         # bias towards courses in their major
-        weights = list(map((lambda course: 5 if course.major == m else 1), courses))
+        weights = list(
+            map((lambda course: per_major_course_weight if course.major == m else 1), courses))
 
         for i in range(to_add):
             while True:

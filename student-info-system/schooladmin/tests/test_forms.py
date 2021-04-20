@@ -43,7 +43,7 @@ class CourseCreation_formtest(TestCase):
         c2 = form.save()
         self.assertEqual(c2.name, 'ABCD-102')
         self.assertEqual(c2.title, 'the titlicious')
-        self.assertEqual(c2.catalog_number, 102)
+        self.assertEqual(c2.catalog_number, '102')
         self.assertEqual(c2.description, 'descr')
         self.assertEqual(c2.credits_earned, 3.0)
 
@@ -90,7 +90,7 @@ class CourseEdit_formtest(TestCase):
         c2 = form.save()
         self.assertEqual(c2.name, 'ASDF-102')
         self.assertEqual(c2.title, 'the titlicious')
-        self.assertEqual(c2.catalog_number, 102)
+        self.assertEqual(c2.catalog_number, '102')
         self.assertEqual(c2.description, 'descr')
         self.assertEqual(c2.credits_earned, 3.0)
 

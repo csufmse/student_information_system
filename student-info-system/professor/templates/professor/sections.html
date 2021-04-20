@@ -4,6 +4,7 @@
 {% load django_tables2 %}
 
 {% block content %}
+    {%  if table %}
     <form name="semester" method="post" action="{% url 'professor:sections' %}">
       {% csrf_token %}
       <select name="semester">
@@ -15,9 +16,12 @@
     </form>
 
     <h2>{{semester}}</h2>
-    <div class="data-table-alt">
-      {% render_table table 'django_tables2/bootstrap.html' %}
-    </div>
+        <div class="data-table-alt">
+          {% render_table table 'django_tables2/bootstrap.html' %}
+        </div>
+    {% else %}
+        <h3> No Sections Taught in Open Semesters</h3>
+    {% endif %}
 
   <script>
     addClickHandlers("{% url 'professor:section' sectionid=1234599 %}", "section_row");

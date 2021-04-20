@@ -1,4 +1,5 @@
 from django import forms
+from django.core.validators import *
 
 from sis.models import (Course, CoursePrerequisite, Major, Semester)
 
@@ -9,7 +10,7 @@ class CourseCreationForm(forms.ModelForm):
     major = forms.ModelChoiceField(queryset=Major.objects.all())
     major.widget.attrs.update({'class': 'major_sel selectpicker'})
 
-    catalog_number = forms.IntegerField(label='Number')
+    catalog_number = forms.IntegerField(label='Number', validators=(MinValueValidator(1),))
     title = forms.CharField(label='Title', max_length=256)
     description = forms.CharField(max_length=256,
                                   required=False,
@@ -25,7 +26,7 @@ class CourseEditForm(forms.ModelForm):
     major = forms.ModelChoiceField(queryset=Major.objects.all())
     major.widget.attrs.update({'class': 'major_sel selectpicker'})
 
-    catalog_number = forms.IntegerField(label='Number')
+    catalog_number = forms.IntegerField(label='Number', validators=(MinValueValidator(1),))
     title = forms.CharField(label='Title', max_length=256)
     description = forms.CharField(label='Description',
                                   max_length=256,
@@ -57,17 +58,26 @@ class CourseEditForm(forms.ModelForm):
 
 
 class SemesterCreationForm(forms.ModelForm):
-    session = forms.ChoiceField(choices=Semester.SESSIONS, label="Semester Session")
+    session = forms.ChoiceField(choices=Semester.SESSIONS,
+                                label="Semester Session",
+                                help_text=Semester._meta.get_field('session').help_text)
     session.widget.attrs.update({'class': 'session_sel selectpicker'})
-    year = forms.IntegerField()
-    date_started = forms.DateField(help_text=Semester._meta.get_field('date_started').help_text)
-    date_ended = forms.DateField(help_text=Semester._meta.get_field('date_ended').help_text)
+    year = forms.IntegerField(label="Semester School Year",
+                              help_text=Semester._meta.get_field('year').help_text)
+    date_started = forms.DateField(label="Classes Start",
+                                   help_text=Semester._meta.get_field('date_started').help_text)
+    date_ended = forms.DateField(label="Classes End",
+                                 help_text=Semester._meta.get_field('date_ended').help_text)
     date_registration_opens = forms.DateField(
+        label="Registration Opens",
         help_text=Semester._meta.get_field('date_registration_opens').help_text)
     date_registration_closes = forms.DateField(
+        label="Registration Closes",
         help_text=Semester._meta.get_field('date_registration_closes').help_text)
     date_last_drop = forms.DateField(
-        help_text=Semester._meta.get_field('date_last_drop').help_text)
+        label="Last Drop", help_text=Semester._meta.get_field('date_last_drop').help_text)
+    date_finalized = forms.DateField(
+        label="Grades Finalized", help_text=Semester._meta.get_field('date_finalized').help_text)
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')
@@ -75,7 +85,8 @@ class SemesterCreationForm(forms.ModelForm):
         st = self.cleaned_data.get('date_started')
         de = self.cleaned_data.get('date_ended')
         ld = self.cleaned_data.get('date_last_drop')
-        if not (rego <= st <= ld <= de and rego <= regc <= de):
+        df = self.cleaned_data.get('date_finalized')
+        if not (rego <= st <= ld <= de and rego <= regc <= de and de <= df):
             raise forms.ValidationError('Dates are not in order.')
         overlappers = Semester.objects.filter(date_started__lte=de, date_ended__gte=st)
         if overlappers.count():
@@ -85,10 +96,17 @@ class SemesterCreationForm(forms.ModelForm):
     class Meta:
         model = Semester
         fields = ('session', 'year', 'date_registration_opens', 'date_registration_closes',
-                  'date_started', 'date_last_drop', 'date_ended')
+                  'date_started', 'date_last_drop', 'date_ended', 'date_finalized')
 
 
 class SemesterEditForm(forms.ModelForm):
+    date_registration_opens = forms.DateField(label="Registration Opens")
+    date_registration_closes = forms.DateField(label="Registration Closes")
+    date_started = forms.DateField(label="Classes Start")
+    date_ended = forms.DateField(label="Classes End")
+    date_last_drop = forms.DateField(label="Last Drop")
+    date_finalized = forms.DateField(
+        label="Grades Finalized", help_text=Semester._meta.get_field('date_finalized').help_text)
     date_started = forms.DateField(help_text=Semester._meta.get_field('date_started').help_text)
     date_ended = forms.DateField(help_text=Semester._meta.get_field('date_ended').help_text)
     date_registration_opens = forms.DateField(
@@ -97,6 +115,8 @@ class SemesterEditForm(forms.ModelForm):
         help_text=Semester._meta.get_field('date_registration_closes').help_text)
     date_last_drop = forms.DateField(
         help_text=Semester._meta.get_field('date_last_drop').help_text)
+    date_finalized = forms.DateField(
+        label="Grades Finalized", help_text=Semester._meta.get_field('date_finalized').help_text)
 
     def clean(self):
         rego = self.cleaned_data.get('date_registration_opens')
@@ -104,7 +124,8 @@ class SemesterEditForm(forms.ModelForm):
         st = self.cleaned_data.get('date_started')
         de = self.cleaned_data.get('date_ended')
         ld = self.cleaned_data.get('date_last_drop')
-        if not (rego <= st <= ld <= de and rego <= regc <= de):
+        df = self.cleaned_data.get('date_finalized')
+        if not (rego <= st <= ld <= de and rego <= regc <= de and de <= df):
             raise forms.ValidationError('Dates are not in order.')
         overlappers = Semester.objects.exclude(id=self.instance.id).filter(date_started__lte=de,
                                                                            date_ended__gte=st)
@@ -115,4 +136,4 @@ class SemesterEditForm(forms.ModelForm):
     class Meta:
         model = Semester
         fields = ('date_registration_opens', 'date_registration_closes', 'date_started',
-                  'date_last_drop', 'date_ended')
+                  'date_last_drop', 'date_ended', 'date_finalized')

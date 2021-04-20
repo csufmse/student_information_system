@@ -12,7 +12,7 @@
   <dt>Email</dt>
   <dd>{{ user.email }}</dd>
   <dt>Major</dt>
-  <dd><a href="{% url 'student:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
+  <dd><a href="{% url 'sis:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
   <dt>Bio</dt>
   <dd>{{  user.profile.bio }}</dd>
 </dl>

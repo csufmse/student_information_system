@@ -7,42 +7,47 @@
 {% block content %}
 <dl class="dl-horizontal">
   <dt>User</dt>
-  <dd>{{ user.get_full_name }}</dd>
+  <dd>{{ auser.get_full_name }}</dd>
   <dt>Username</dt>
-  <dd>{{ user.username }}</dd>
+  <dd>{{ auser.username }}</dd>
   <dt>Email</dt>
-  <dd>{{ user.email }}</dd>
+  <dd>{{ auser.email }}</dd>
+{%  if show_all %}
   <dt>User Type</dt>
-  <dd>{{ user.profile.rolename }}</dd>
+  <dd>{{ auser.profile.rolename }}</dd>
   <dt>Enabled?</dt>
-  <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
+  <dd>{% if auser.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
+{%  endif %}
   <dt>Bio</dt>
-  <dd>{{ user.profile.bio }}</dd>
+  <dd>{{ auser.profile.bio }}</dd>
 </dl>
     <h3>Demographic Data</h3>
-    {% demographic_details user.profile %}
+    {% demographic_details auser.profile %}
 
+    {%  if show_all %}
         <h3>Received Messages:</h3>
-    {% sis_filter 'received' %}
+        {% sis_filter 'received' %}
 
         <h3>Sent Messages:</h3>
-    {% sis_filter 'sent' %}
+        {% sis_filter 'sent' %}
+    {%  endif %}
 
   <form method="post">
     {% csrf_token %}
-     <input type="hidden" name="userid" value="{{ user.id }}"/>
+     <input type="hidden" name="userid" value="{{ auser.id }}"/>
     <input
         action="action"
            class="btn btn-info"
         onclick="window.history.go(-1); return false;"
         value="Back"
     />
-    <input id="passchg"
+     {%  if show_all %}
+   <input id="passchg"
         action="action"
            class="btn btn-info"
         value="Change Password"
     />
-      {% if user.is_active %}
+      {% if auser.is_active %}
     <input id="disbutton" name="disbutton"
            class="btn btn-primary"
            action="action"
@@ -60,13 +65,14 @@
            class="btn btn-info"
         value="Edit User"
     />
-
+{% endif %}
   </form>
 <script>
+     {%  if show_all %}
 function confirmit(evt) {
     var btntitle = evt.target.value;
     var answer = window.confirm("Are you sure you want to "+btntitle+
-                    '\n user "{{ user.username }}" ({{ user.get_full_name }})?');
+                    '\n user "{{ auser.username }}" ({{ auser.get_full_name }})?');
     if (answer) {
         this.form.submit();
         return true;
@@ -83,7 +89,8 @@ if ( btn ) {
 }
 stylizeRange({field:'time_sent',name:'Sent',prefix:'received',width:'100px'});
 stylizeRange({field:'time_sent',name:'Received',prefix:'sent',width:'100px'});
-addButtonClickHandler('passchg', "{% url 'sis:change_password' user.id %}");
-addButtonClickHandler('editu', "{% url 'schooladmin:user_edit' user.id %}");
+addButtonClickHandler('passchg', "{% url 'sis:change_password' auser.id %}");
+addButtonClickHandler('editu', "{% url 'schooladmin:user_edit' auser.id %}");
+     {% endif %}
 </script>
 {% endblock %}

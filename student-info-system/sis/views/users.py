@@ -37,4 +37,4 @@ def user_change_password(request, userid):
             messages.error(request, 'Please correct the error(s) below.')
     else:
         form = AdminPasswordChangeForm(request.user)
-    return render(request, 'sis/user_change_password.html', {'user': the_user, 'form': form})
+    return render(request, 'sis/user_change_password.html', {'auser': the_user, 'form': form})

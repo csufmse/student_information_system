@@ -36,9 +36,8 @@
     
   <form method="post">
     {% csrf_token %}
-     <input type="hidden" name="userid" value="{{ user.id }}"/>
+     <input type="hidden" name="userid" value="{{ auser.id }}"/>
 <div>
-    <input action="action" class="btn btn-info" onclick="window.history.go(-1); return false;" value="Back"/>
     {%  if can_refresh_items %}<input id="refresh_items" action="action" class="btn btn-info" value="Refresh Reference Items for Section"/>{% endif %}
     {%  if can_edit %}
         <input id="new_section" action="action" class="btn btn-info" value="New Section of this Class"/>
