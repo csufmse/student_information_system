@@ -161,6 +161,8 @@ def history(request):
     remaining = the_user.profile.student.requirements_met_list()
     stats = remaining.filter(met=False).aggregate(remaining_course_count=Count('id'),
                                                   remaining_credit_count=Sum('credits_earned'))
+    if stats['remaining_credit_count'] is None:
+        stats['remaining_credit_count'] = 0
     data.update(stats)
 
     data.update(
@@ -257,6 +259,9 @@ def test_majors(request):
     candidate_remaining = the_user.profile.student.requirements_met_list(major=the_major)
     stats = candidate_remaining.filter(met=False).aggregate(
         remaining_course_count=Count('id'), remaining_credit_count=Sum('credits_earned'))
+    if stats['remaining_credit_count'] is None:
+        stats['remaining_credit_count'] = 0
+
     data.update(stats)
 
     data.update(
