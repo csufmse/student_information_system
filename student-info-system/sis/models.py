@@ -530,7 +530,7 @@ class Major(models.Model):
 
 class Course(models.Model):
     major = models.ForeignKey(Major, on_delete=models.CASCADE)
-    catalog_number = models.IntegerField('Number', validators=[MinValueValidator(1)])
+    catalog_number = models.CharField('Number', max_length=20)
     title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
     credits_earned = models.DecimalField('Credits', max_digits=2, decimal_places=1)
@@ -1215,6 +1215,19 @@ class Message(models.Model):
         return self.message_type in (
             Message.DROP_REQUEST_TYPE, Message.MAJOR_CHANGE_TYPE
         ) and self.time_handled is None and self.time_sent < as_of - timedelta(days=7)
+
+
+def home_template(self):
+    if self.profile.role == Profile.ACCESS_ADMIN:
+        return "schooladmin/home_admin.html"
+    elif self.profile.role == Profile.ACCESS_PROFESSOR:
+        return "professor/home_professor.html"
+    elif self.profile.role == Profile.ACCESS_STUDENT:
+        return "student/home_student.html"
+    return "schooladmin/home_guest.html"
+
+
+User.add_to_class('home_template', home_template)
 
 
 class Interval(models.Model):

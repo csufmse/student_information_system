@@ -1,0 +1,13 @@
+{% extends 'sis/base.html' %}
+{% load static %}
+{% load bootstrap3 %}
+
+{% block nav %}
+<div class="tab">
+  <button class="tablinks" name="section" id="professors-btn" onclick="location.href='{% url 'schooladmin:professors' %}';">Professors</button>
+  <button class="tablinks" name="section" id="majors-btn" onclick="location.href='{% url 'sis:majors' %}';">Majors</button>
+  <button class="tablinks" name="section" id="semesters-btn" onclick="location.href='{% url 'schooladmin:semesters' %}';">Semesters</button>
+  <button class="tablinks" name="section" id="courses-btn" onclick="location.href='{% url 'schooladmin:courses' %}';">Courses</button>
+  <button class="tablinks" name="section" id="sections-btn" onclick="location.href='{% url 'schooladmin:sections' %}';">Sections</button>
+</div>
+{% endblock %}
