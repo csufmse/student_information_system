@@ -9,7 +9,8 @@ from django.urls import reverse
 
 from sis.authentication_helpers import role_login_required
 
-from sis.models import (Major, Professor, Student, Profile)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, Semester, Student,
+                        SectionStudent, Profile, Message)
 
 from sis.forms.profile import DemographicForm, ProfileCreationForm, ProfileEditForm
 from sis.forms.student import StudentEditForm, StudentCreationForm
@@ -28,6 +29,13 @@ from sis.filters.user import StudentFilter, UserFilter, ProfessorFilter
 from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
 from sis.tables.messages import MessageSentTable, MessageReceivedTable
 from sis.tables.referenceitems import ProfReferenceItemsTable
+from sis.tables.sections import SectionForClassTable, SectionsTable
+from sis.tables.sectionstudents import (StudentHistoryTable, StudentInSectionTable)
+from sis.tables.semesters import SemestersSummaryTable, SemestersTable
+from sis.tables.users import (UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable,
+                              ProfessorsTable)
+
+from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
 from sis.tables.sections import SectionForClassTable, SectionsTable
 from sis.tables.sectionstudents import (StudentHistoryTable, StudentInSectionTable)
 from sis.tables.semesters import SemestersSummaryTable, SemestersTable

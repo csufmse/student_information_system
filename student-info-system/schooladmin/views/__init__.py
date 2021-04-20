@@ -1,11 +1,11 @@
 from datetime import date
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.html import format_html
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 from sis.authentication_helpers import role_login_required
 
@@ -15,14 +15,12 @@ from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, S
 from sis.utils import filtered_table, filtered_table2, DUMMY_ID
 
 from sis.filters.course import CourseFilter
-from sis.filters.message import (FullSentMessageFilter, FullReceivedMessageFilter,
-                                 SentMessageFilter, ReceivedMessageFilter)
-from sis.filters.referenceitem import ItemFilter
 from sis.filters.section import SectionFilter
 from sis.filters.sectionreferenceitem import SectionItemFilter
 from sis.filters.sectionstudent import SectionStudentFilter
 from sis.filters.semester import SemesterFilter
 from sis.filters.user import StudentFilter, UserFilter, ProfessorFilter
+from sis.tables.referenceitems import ProfReferenceItemsTable
 
 from schooladmin.forms import (
     CourseCreationForm,
@@ -32,19 +30,17 @@ from schooladmin.forms import (
 )
 
 from sis.forms.major import MajorCreationForm, MajorEditForm
-from sis.forms.referenceitem import ReferenceItemCreationForm
 from sis.forms.section import SectionCreationForm, SectionEditForm
+from sis.forms.referenceitem import ReferenceItemCreationForm
+from sis.filters.referenceitem import ItemFilter
 
 from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
-from sis.tables.messages import MessageSentTable, MessageReceivedTable
-from sis.tables.referenceitems import ProfReferenceItemsTable
 from sis.tables.sectionreferenceitems import ReferenceItemsForSectionTable
 from sis.tables.sections import SectionForClassTable, SectionsTable
 from sis.tables.sectionstudents import (StudentHistoryTable, StudentInSectionTable)
 from sis.tables.semesters import SemestersSummaryTable, SemestersTable
 from sis.tables.users import (UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable,
                               ProfessorsTable)
-from schooladmin.views import users
 
 
 @role_login_required(Profile.ACCESS_ADMIN)
