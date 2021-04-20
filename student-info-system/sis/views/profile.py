@@ -14,7 +14,7 @@ def profile(request):
     the_user = request.user
 
     data = {
-        'user': the_user,
+        'auser': the_user,
     }
 
     if the_user.profile.role == Profile.ACCESS_ADMIN:
@@ -54,7 +54,7 @@ def profile_edit(request):
 
     return render(
         request, 'student/student_edit.html', {
-            'user': the_user,
+            'auser': the_user,
             'user_form': user_form,
             'profile_form': profile_form,
             'demo_form': demo_form,

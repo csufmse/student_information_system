@@ -134,7 +134,7 @@ def registration_view(request):
 def history(request):
     the_user = request.user
     data = {
-        'user': the_user,
+        'auser': the_user,
     }
     data.update(
         filtered_table2(
@@ -204,7 +204,7 @@ def drop(request, id):
         sectionstudent_qs=droppable,
     )
     data = {
-        'user': the_user,
+        'auser': the_user,
         'count': droppable.count(),
         'drop_form': drop_form,
     }
@@ -216,7 +216,7 @@ def secitems(request):
     the_user = request.user
     the_semester = Semester.current_semester()
     data = {
-        'user': the_user,
+        'auser': the_user,
         'semester': the_semester,
     }
     data.update(
@@ -250,7 +250,7 @@ def test_majors(request):
         })
 
     data = {
-        'user': the_user,
+        'auser': the_user,
         'major': the_major,
         'major_form': major_form,
     }
@@ -292,7 +292,7 @@ def request_major_change(request):
 
     the_major = the_user.profile.student.major
     data = {
-        'user': the_user,
+        'auser': the_user,
         'major': the_major,
         'major_form': MajorChangeForm(initial={
             'major': the_major,

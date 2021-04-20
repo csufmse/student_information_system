@@ -5,17 +5,17 @@
 
 {% block content %}
     {%  if table %}
-        <form name="semester" method="post" action="{% url 'professor:sections' %}">
-          {% csrf_token %}
-          <select name="semester">
-          {% for semester in semesters %}
-            <option value="{{semester}}">{{semester}}</option>
-          {% endfor %}
-          </select>
-          <input class="btn btn-primary" type="submit" value="Submit">
-        </form>
+    <form name="semester" method="post" action="{% url 'professor:sections' %}">
+      {% csrf_token %}
+      <select name="semester">
+      {% for semester in semesters %}
+        <option value="{{semester}}">{{semester}}</option>
+      {% endfor %}
+      </select>
+      <input class="btn btn-primary" type="submit" value="Submit">
+    </form>
 
-        <h2>{{semester}}</h2>
+    <h2>{{semester}}</h2>
         <div class="data-table-alt">
           {% render_table table 'django_tables2/bootstrap.html' %}
         </div>

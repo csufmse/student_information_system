@@ -1,4 +1,5 @@
 from django import forms
+from django.core.validators import *
 
 from sis.models import (Course, CoursePrerequisite, Major, Semester)
 
@@ -9,7 +10,7 @@ class CourseCreationForm(forms.ModelForm):
     major = forms.ModelChoiceField(queryset=Major.objects.all())
     major.widget.attrs.update({'class': 'major_sel selectpicker'})
 
-    catalog_number = forms.IntegerField(label='Number')
+    catalog_number = forms.IntegerField(label='Number', validators=(MinValueValidator(1),))
     title = forms.CharField(label='Title', max_length=256)
     description = forms.CharField(max_length=256,
                                   required=False,
@@ -25,7 +26,7 @@ class CourseEditForm(forms.ModelForm):
     major = forms.ModelChoiceField(queryset=Major.objects.all())
     major.widget.attrs.update({'class': 'major_sel selectpicker'})
 
-    catalog_number = forms.IntegerField(label='Number')
+    catalog_number = forms.IntegerField(label='Number', validators=(MinValueValidator(1),))
     title = forms.CharField(label='Title', max_length=256)
     description = forms.CharField(label='Description',
                                   max_length=256,

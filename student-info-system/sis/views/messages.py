@@ -27,7 +27,7 @@ def usermessages(request):
         receivedTable = StudentMessageReceivedTable
 
     data = {
-        'user': the_user,
+        'auser': the_user,
     }
     data.update(
         filtered_table(
@@ -122,7 +122,7 @@ def message(request, id):
         and not handled
     return render(
         request, 'sis/message.html', {
-            'user': the_user,
+            'auser': the_user,
             'message': the_mess,
             'show_approve_drop': show_drop,
             'show_approve_major': show_major,
