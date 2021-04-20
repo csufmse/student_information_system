@@ -618,7 +618,7 @@ def sectionstudent(request, id):
     is_admin = request.user.profile.role == Profile.ACCESS_ADMIN
     is_prof = request.user.profile.role == Profile.ACCESS_PROFESSOR
 
-    if not is_admin and not is_prof and request.user.id != the_sectionstud.student.profile.id:
+    if not is_admin and not is_prof and request.user.id != the_sectionstud.student.profile.user.id:
         messages.error(request, "Something went wrong")
         return HttpResponse("Unauthorized")
 

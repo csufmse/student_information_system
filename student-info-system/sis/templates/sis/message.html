@@ -1,9 +1,9 @@
-{% extends user.home_template %}
+{% extends 'sis/base.html' %}
 {% load static %}
 {% load bootstrap3 %}
 {% block class %}messages{% endblock %}
 
-{% block content %}
+{% block all_content %}
     <div><span class="message_header">From:</span>
         <span class="message_header_value">{{ message.sender.user.get_full_name }}</span></div>
     <div><span class="message_header">To:</span>

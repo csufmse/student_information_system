@@ -37,11 +37,6 @@ class Migration(migrations.Migration):
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('interval_amount', models.IntegerField(validators=[django.core.validators.MinValueValidator(1)], verbose_name='Interval Amount')),
-<<<<<<< HEAD
-                ('interval_type', models.CharField(choices=[('months', 'months'), ('weeks', 'weeks'), ('hours', 'hours'), ('days', 'days'), ('minutes', 'minutes'), ('seconds', 'seconds')], max_length=7, verbose_name='Interval Type')),
-=======
-                ('interval_type', models.CharField(choices=[('months', 'months'), ('minutes', 'minutes'), ('days', 'days'), ('weeks', 'weeks'), ('hours', 'hours'), ('seconds', 'seconds')], max_length=7, verbose_name='Interval Type')),
->>>>>>> develop
             ],
         ),
         migrations.CreateModel(
