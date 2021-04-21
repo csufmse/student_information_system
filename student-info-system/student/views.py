@@ -93,13 +93,15 @@ def registration_view(request):
                     course_val = request.POST.get(str(sect.course.id))
                     if course_val is not None and int(course_val) == sect.id:
                         if not Course.objects.get(id=sect.course.id).prerequisites_met(student):
-                            messages.error(request,
-                                           f'You have not met the prerequisites for {sect.course.name}.')
+                            messages.error(
+                                request,
+                                f'You have not met the prerequisites for {sect.course.name}.')
                         else:
                             status = SectionStudent.REGISTERED
                             if sect.seats_remaining < 1:
                                 status = SectionStudent.WAITLISTED
-                            sectstud = SectionStudent(section=sect, student=student,
+                            sectstud = SectionStudent(section=sect,
+                                                      student=student,
                                                       status=status)
                             sectstud.save()
                             sect.is_selected = True
