@@ -2,6 +2,7 @@
 {% load static %}
 
 {% block content %}
+    <div id="actual_transcript">
 <h2>Transcript</h2>
 
 <p>Student: {{student.name}}</p>
@@ -39,4 +40,5 @@
 {% endfor %}
 </table>
 <p>Cumulative GPA: {{student.gpa|floatformat:2}}</p>
+    </div>
 {% endblock content %}

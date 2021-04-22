@@ -1150,6 +1150,8 @@ class Message(models.Model):
     SECTION_FILLING_TYPE = 'sectionfilling'
     SECTION_FULL_TYPE = 'sectionfull'
     SECTION_ADDED = 'sectionadded'
+    TRANSCRIPT_REQUEST_TYPE = 'reqtranscript'
+    TRANSCRIPT_TYPE = 'transcript'
     TYPES = (
         (GENERIC_TYPE, GENERIC_TYPE),
         (ACADEMIC_PROBATION_TYPE, ACADEMIC_PROBATION_TYPE),
@@ -1158,6 +1160,8 @@ class Message(models.Model):
         (SECTION_FILLING_TYPE, SECTION_FILLING_TYPE),
         (SECTION_FULL_TYPE, SECTION_FULL_TYPE),
         (SECTION_ADDED, SECTION_ADDED),
+        (TRANSCRIPT_REQUEST_TYPE, TRANSCRIPT_REQUEST_TYPE),
+        (TRANSCRIPT_TYPE, TRANSCRIPT_TYPE),
     )
 
     message_type = models.CharField(choices=TYPES, default=GENERIC_TYPE, max_length=15)
@@ -1183,7 +1187,7 @@ class Message(models.Model):
     body = models.TextField(null=True, blank=True)
     high_priority = models.BooleanField(default=False)
 
-    support_data = models.JSONField(max_length=1024, default=dict)
+    support_data = models.JSONField(default=dict)
 
     class Meta:
         ordering = ['time_sent']

@@ -46,6 +46,13 @@
         {%  if can_reply %}
             <input id="reply" name="reply" action="action" type="submit" value="Reply" class="btn btn-info"/>
         {% endif %}
+      {%  if show_transcript_req %}
+        <input id="transcriptreq" name="transcriptreq"
+            action="action" type="submit"
+            value="Generate Transcript" class="btn btn-info"
+        />
+      {%  endif %}
+
       {%  if show_approve_drop %}
         <input id="approvedrop" name="approvedrop"
             action="action" type="submit"

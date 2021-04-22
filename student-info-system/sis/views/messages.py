@@ -1,8 +1,10 @@
 from datetime import date, datetime
 import pytz
+from bs4 import BeautifulSoup
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
+from django.urls import reverse
 
 from sis.models import (Profile, Major, Message, SectionStudent, Student)
 
@@ -55,6 +57,7 @@ def usermessages(request):
 def message(request, id):
     the_user = request.user
     the_profile = the_user.profile
+
     the_mess = Message.objects.get(id=id)
     is_recipient = the_mess.recipient == the_profile
     is_sender = the_mess.sender == the_profile
@@ -105,6 +108,25 @@ def message(request, id):
             the_mess.save()
             messages.success(request, 'Trust me, you rejected the major change.')
 
+        elif is_admin and request.POST.get('transcriptreq', None) is not None:
+            the_mess.time_handled = datetime.now(pytz.utc)
+            the_mess.save()
+            the_student = Student.objects.get(id=the_mess.support_data['student'])
+            trans_page = render(request,'schooladmin/transcript.html', {
+                            'userid':the_student.profile.user.id} ).content
+            soup = BeautifulSoup(trans_page, 'html.parser')
+            trans = soup.find('div', id='actual_transcript')
+            print(f'{trans.encode(formatter="html")}')
+            response = Message.objects.create(sender=the_profile,
+                                              recipient=the_student.profile,
+                                              message_type=Message.TRANSCRIPT_TYPE,
+                                              subject="Your Transcript",
+                                              support_data={'transcript':str(trans.encode(formatter="html")),},
+                                              body=trans.encode(formatter="html"),
+                                              in_response_to=the_mess,)
+            messages.success(request, 'Transcript prepared.')
+
+
         else:
             messages.error(request, 'Something went wrong.')
 
@@ -120,12 +142,15 @@ def message(request, id):
         and not handled
     show_major = is_recipient and the_mess.message_type == Message.MAJOR_CHANGE_TYPE \
         and not handled
+    show_transcript_req = is_recipient and the_mess.message_type == Message.TRANSCRIPT_REQUEST_TYPE \
+        and not handled
     return render(
         request, 'sis/message.html', {
             'auser': the_user,
             'message': the_mess,
             'show_approve_drop': show_drop,
             'show_approve_major': show_major,
+            'show_transcript_req': show_transcript_req,
             'show_archive': is_recipient,
             'message_archived': the_mess.time_archived is not None,
             'message_read': the_mess.time_read is not None,
