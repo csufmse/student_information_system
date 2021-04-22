@@ -1,7 +1,9 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load render_table from django_tables2 %}
 {% load bootstrap3 %}
+
+{% block class %}schedule{% endblock %}
 
 {% block content %}
     <h3>Current Semester: {{ semester }}</h3>

@@ -1,97 +1,104 @@
-{% extends 'sis/base.html'%}
+{% extends 'sis/base.html' %}
 {% load static %}
-{% load bootstrap3 %}
 
-{% block logged-in %}
-<div>
-<span>
-  <dl class="dl-horizontal">
-    <dt>Name</dt>
-    <dd>{{ user.get_full_name }}</dd>
-    <dt>Account Id</dt>
-    <dd>{{ user.username }}</dd>
-    {% if total %}<dt>Unread Messages</dt>
-    <dd><b>{{ normal }} normal message{{ normal|pluralize }}, {{ priority }} priority message{{ priority|pluralize }}</b></dd>{% endif %}
-    {% if current_semester %}
-        <dt>Current Semester</dt><dd><a href="{% url 'schooladmin:semester' semester_id=current_semester.id %}">{{ current_semester }}</a></dd>
-  {% endif %}
-    {% if registration_open %}
-        <dt>Open for Registration</dt><dd>{% for sem in registration_open %}<a href="{% url 'schooladmin:semester' semester_id=sem.id %}">{{ sem }}</a>  {% endfor %}</dd>
-  {% endif %}
-  </dl>
-  <a
-     class="btn btn-primary"
-     href="{% url 'logout' %}">Log Out</a>
-</span>
-</div>
-{% endblock logged-in %}
+<head>
+  {% block css %}
+      {{ super.block }}
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="{% static 'schooladmin/styles.css' %}" />
+  {% endblock css %}
 
-{% block late_scripts %}
-<script>
-  var buffer = 30; // scroll bar buffer
-  var samplecontentblock = document.getElementsByClassName('samplecontentblock')[0];
-  var defaultButton = document.getElementById("defaultOpen")
-  var defaultButtonWidth = defaultButton.offsetWidth;
-  
-  function pageY(elem) {
-      return elem.offsetParent ? (elem.offsetTop + pageY(elem.offsetParent)) : elem.offsetTop;
-  }
-  
-  // resize iframe based on window size/resize
-  function resizeContentBlocks() {
-      var width = window.innerWidth;
-      var height = document.documentElement.clientHeight;
-  
-      width = width - defaultButtonWidth - buffer;
-  
-      height -= pageY(samplecontentblock) + buffer;
-      height = (height < 0) ? 0 : height;
-  
-      for (const tc of document.getElementsByClassName('tabcontent')) {
-          tc.style.height = height + 'px';
-          tc.style.width = width + 'px';
-      }
-  }
-  
-  // handle tab button clicks. Relies on the content (frame) id be the same as the button text
-  // that lights it up.
-  function openChunk(evt) {
-    var chunkName = this.innerText;
-  
-    // Get all elements with class="tabcontent" and hide them
-      for (const tc of document.getElementsByClassName("tabcontent")) {
-          if (tc.id == chunkName) {
-              tc.style.display = "block";
-          } else {
-              tc.style.display = "none";
+</head>
+<body>
+    {% block all_content %}
+    <div class="header">
+      <span class="name">
+      {% block header_content %}
+        <h1>{% block header_name %}Student Info System{% endblock %}</h1>
+
+        {% block logged-in %}
+            <div>
+            <span>
+              <dl class="dl-horizontal">
+                <dt>Name</dt>
+                <dd>{{ user.get_full_name }}</dd>
+                <dt>Account Id</dt>
+                <dd>{{ user.username }}</dd>
+
+                {% if total %}<dt>Unread Messages</dt>
+                <dd><b>{{ normal }} normal message{{ normal|pluralize }}, {{ priority }} priority message{{ priority|pluralize }}</b></dd>{% endif %}
+
+                {% if current_semester %}
+                    <dt>Current Semester</dt><dd><a href="{% url 'schooladmin:semester' semester_id=current_semester.id %}">{{ current_semester }}</a></dd>
+                {% endif %}
+
+                {% if registration_open %}
+                    <dt>Open for Registration</dt><dd>{% for sem in registration_open %}<a href="{% url 'schooladmin:semester' semester_id=sem.id %}">{{ sem }}</a>  {% endfor %}</dd>
+              {% endif %}
+              </dl>
+              <a class="btn btn-primary" href="{% url 'logout' %}">Log Out</a>
+            </span>
+            </div>
+        {% endblock logged-in %}
+
+      {% endblock header_content %}
+      </span>
+    </div>
+
+    {% block nav %}{% endblock nav %}
+
+    <div class="messages">
+        {% if messages %}
+        <ul>
+           {% for message in messages %}
+            <li{% if message.tags %} class="{{ message.tags }}"{% endif %}>{{ message }}</li>
+           {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+
+    <div class="contentblob"><div>
+    {% block content %}{% endblock content %}
+    </div></div>
+
+    {% block resizing %}
+    <script>
+          var buffer = 30; // scroll bar buffer
+          var samplecontentblock = document.getElementsByClassName('contentblob')[0];
+          var defaultButtonWidth = document.getElementById("courses-btn").offsetWidth;
+
+          function pageY(elem) {
+              return elem.offsetParent ? (elem.offsetTop + pageY(elem.offsetParent)) : elem.offsetTop;
           }
-      }
-  
-      // Get all elements with class="tablinks" and remove the class "active"
-      for (const link of document.getElementsByClassName("tablinks")) {
-          link.className = link.className.replace(" active", "");
-      }
-  
-      // Show the current tab, and add an "active" class to the link that opened the tab
-      document.getElementById(chunkName).style.display = "block";
-      this.className += " active";
-  }
-  
-  // Add onclick to each tab button so that it displays the contents
-  for (const link of document.getElementsByClassName('tablinks')) {
-      link.addEventListener("click", openChunk, false);
-  }
-  
-  // .onload doesn't work with IE8 and older.
-  if (samplecontentblock.attachEvent) {
-      samplecontentblock.addEventListener("load", resizeContentBlocks);
-  } else {
-      samplecontentblock.onload=resizeContentBlocks;
-  }
-  
-  window.addEventListener("resize", resizeContentBlocks);
-  
-  // start the page with the default tab
-  defaultButton.click();
-</script>
-{% endblock late_scripts %}
+
+          // resize iframe based on window size/resize
+          function resizeContentBlocks() {
+              var width = window.innerWidth;
+              var height = document.documentElement.clientHeight;
+
+              width = width - defaultButtonWidth - buffer;
+
+              height -= pageY(samplecontentblock) + buffer;
+              height = (height < 0) ? 0 : height;
+
+              for (const tc of document.getElementsByClassName('tabcontent')) {
+                  tc.style.height = height + 'px';
+                  tc.style.width = width + 'px';
+              }
+          }
+
+          window.addEventListener("resize", resizeContentBlocks);
+
+          activebtn = document.getElementById("{% block class %}{% endblock class %}-btn")
+          for (const btn of document.getElementsByClassName("tablinks")) {
+              if (btn == activebtn) {
+                  btn.classList.add("active-section");
+              } else {
+                  btn.classList.remove("active-section");
+              }
+          }
+    </script>
+    {%  endblock %}
+    {% endblock all_content %}
+</body>
+</html>

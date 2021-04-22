@@ -1,8 +1,9 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends 'sis/base.html' %}
 {% load static %}
 {% load bootstrap3 %}
+{% block class %}messages{% endblock %}
 
-{% block content %}
+{% block all_content %}
     <div><span class="message_header">From:</span>
         <span class="message_header_value">{{ message.sender.user.get_full_name }}</span></div>
     <div><span class="message_header">To:</span>
@@ -69,6 +70,9 @@
       {%  endif %}
 
   </form>
+{% endblock %}
+
+{% block late_scripts %}
     <script>
 document.getElementById("archive").addEventListener("click", function () {
         this.form.submit();
