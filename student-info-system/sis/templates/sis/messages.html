@@ -1,9 +1,10 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {% load render_table from django_tables2 %}
 {% load sis-filter %}
-{% load user_demographics %}
+
+{% block class %}messages{% endblock %}
 
 {% block content %}
         <h3>Received Messages:</h3>
@@ -46,17 +47,6 @@
     <iframe id="sent_frame" class="message_detail_iframe" title="Message Detail" ></iframe>
     </div>
 
- <form method="post">
-    {% csrf_token %}
-     <input type="hidden" name="userid" value="{{ user.id }}"/>
-    <input id="go_back"
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
-
-  </form>
 <script>
 addDetailClickHander({template:"{% url 'sis:message' id=1234599 %}",
     table_parent: 'received',

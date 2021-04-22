@@ -1,8 +1,9 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {% load sis-filter %}
 {%  load user_demographics %}
+{% block class %}professors{% endblock %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -59,6 +60,9 @@
         <input id="edit_professor" action="action" class="btn btn-info" value="Edit Professor"/>
     {% endif %}
 </form>
+{% endblock %}
+
+{% block late_scripts %}
 <script>
 {% if can_edit %}
     function confirmit(evt) {

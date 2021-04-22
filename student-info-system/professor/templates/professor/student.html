@@ -1,4 +1,4 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 
 {% block content %}
@@ -26,7 +26,4 @@
     {% endfor %}
   </table>
 </div>
-<form>
-  <input class="btn btn-info" onclick="window.history.go(-1)" type="back" value="Back"/>
-</form>
 {% endblock content %}

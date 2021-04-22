@@ -33,12 +33,13 @@ from sis.forms.user import UserEditForm
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def index(request):
-    data = {
-        'current_semester': Semester.current_semester(),
-        'registration_open': Semester.semesters_open_for_registration(),
-    }
-    data.update(request.user.profile.unread_messages())
-    return render(request, 'student/home_student.html', data)
+    return current_schedule_view(request)
+    # data = {
+    #     'current_semester': Semester.current_semester(),
+    #     'registration_open': Semester.semesters_open_for_registration(),
+    # }
+    # data.update(request.user.profile.unread_messages())
+    # return render(request, 'student/home_student.html', data)
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
@@ -93,8 +94,9 @@ def registration_view(request):
                     course_val = request.POST.get(str(sect.course.id))
                     if course_val is not None and int(course_val) == sect.id:
                         if not Course.objects.get(id=sect.course.id).prerequisites_met(student):
-                            messages.error(request,
-                                           "You have not met the prerequisites for this course.")
+                            messages.error(
+                                request,
+                                f'You have not met the prerequisites for {sect.course.name}.')
                         else:
                             status = SectionStudent.REGISTERED
                             if sect.seats_remaining < 1:
@@ -104,7 +106,7 @@ def registration_view(request):
                                                       status=status)
                             sectstud.save()
                             sect.is_selected = True
-                            messages.success(request, "Registration successful")
+                            messages.success(request, f'Registration for {sect.name} successful.')
     else:
         if len(semester_list) > 0:
             the_sem = semester_list[0]
@@ -162,6 +164,8 @@ def history(request):
     remaining = the_user.profile.student.requirements_met_list()
     stats = remaining.filter(met=False).aggregate(remaining_course_count=Count('id'),
                                                   remaining_credit_count=Sum('credits_earned'))
+    if stats['remaining_credit_count'] is None:
+        stats['remaining_credit_count'] = 0
     data.update(stats)
 
     data.update(
@@ -258,6 +262,8 @@ def test_majors(request):
     candidate_remaining = the_user.profile.student.requirements_met_list(major=the_major)
     stats = candidate_remaining.filter(met=False).aggregate(
         remaining_course_count=Count('id'), remaining_credit_count=Sum('credits_earned'))
+    if stats['remaining_credit_count'] is None:
+        stats['remaining_credit_count'] = 0
     data.update(stats)
 
     data.update(

@@ -2,46 +2,17 @@
 {% load static %}
 {% load bootstrap3 %}
 
-{% block title %}Student Info System Administration{% endblock %}
-{% block header_name %}Student Info System Administration{% endblock header_name %}
-
-{% block content %}
+{% block nav %}
 <div class="tab">
-  <button class="tablinks" id="defaultOpen">Users</button>
-  <button class="tablinks">Students</button>
-  <button class="tablinks">Professors</button>
-  <button class="tablinks">Majors</button>
-  <button class="tablinks">Semesters</button>
-  <button class="tablinks">Courses</button>
-  <button class="tablinks">Sections</button>
-  <button class="tablinks">Demographics</button>
-  <button class="tablinks">My Profile</button>
-  <button class="tablinks">My Messages</button>
-  <button class="tablinks">Tasks</button>
+  <button class="tablinks" name="section" id="users-btn" onclick="location.href='{% url 'schooladmin:users' %}';">Users</button>
+  <button class="tablinks" name="section" id="students-btn" onclick="location.href='{% url 'schooladmin:students' %}';">Students</button>
+  <button class="tablinks" name="section" id="professors-btn" onclick="location.href='{% url 'schooladmin:professors' %}';">Professors</button>
+  <button class="tablinks" name="section" id="majors-btn" onclick="location.href='{% url 'sis:majors' %}';">Majors</button>
+  <button class="tablinks" name="section" id="semesters-btn" onclick="location.href='{% url 'schooladmin:semesters' %}';">Semesters</button>
+  <button class="tablinks" name="section" id="courses-btn" onclick="location.href='{% url 'schooladmin:courses' %}';">Courses</button>
+  <button class="tablinks" name="section" id="sections-btn" onclick="location.href='{% url 'schooladmin:sections' %}';">Sections</button>
+  <button class="tablinks" name="section" id="demographics-btn" onclick="location.href='{% url 'schooladmin:demographics' %}';">Demographics</button>
+  <button class="tablinks" name="section" id="profile-btn" onclick="location.href='{% url 'sis:profile' %}';">My Profile</button>
+  <button class="tablinks" name="section" id="messages-btn" onclick="location.href='{% url 'sis:messages' %}';">My Messages</button>
 </div>
-
-<span height="400" width="300">
-<iframe id="Users" class="tabcontent samplecontentblock" title="Admin Users" src="{% url 'schooladmin:users' %}"
-    ></iframe>
-<iframe id="Students" class="tabcontent" title="Students" loading="lazy" src="{% url 'schooladmin:students' %}"
-    ></iframe>
-<iframe id="Professors" class="tabcontent" title="Professors" loading="lazy" src="{% url 'schooladmin:professors' %}"
-    ></iframe>
-<iframe id="Majors" class="tabcontent" title="Majors" loading="lazy" src="{% url 'sis:majors' %}"
-    ></iframe>
-<iframe id="Semesters" class="tabcontent" title="Semesters" loading="lazy" src="{% url 'schooladmin:semesters' %}"
-    ></iframe>
-<iframe id="Courses" class="tabcontent" title="Courses" loading="lazy" src="{% url 'schooladmin:courses' %}"
-    ></iframe>
-<iframe id="Sections" class="tabcontent" title="Sections" loading="lazy" src="{% url 'schooladmin:sections' %}"
-    ></iframe>
-<iframe id="Demographics" class="tabcontent" title="Demographics" loading="lazy" src="{% url 'schooladmin:demographics' %}"
-    ></iframe>
-<iframe id="My Profile" class="tabcontent" title="My Profile" loading="lazy" src="{% url 'sis:profile' %}"
-    ></iframe>
-<iframe id="My Messages" class="tabcontent" title="My Messages" loading="lazy" src="{% url 'sis:messages' %}"
-    ></iframe>
-<iframe id="Tasks" class="tabcontent" title="Tasks" loading="lazy" src="{% url 'schooladmin:tasks' %}"
-    ></iframe>
-</span>
 {% endblock %}

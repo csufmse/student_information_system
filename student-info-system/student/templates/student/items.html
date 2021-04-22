@@ -1,24 +1,22 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
+{% load render_table from django_tables2 %}
 {% load bootstrap3 %}
-{% load sis-filter %}
+{%  load sis-filter %}
+
+{% block class %}secitems{% endblock %}
 
 {% block content %}
-<dl class="dl-horizontal">
-<h3>Reference Items for:</h3>
-  <dt>Semester</dt>
-    <dd><a href="{% url 'schooladmin:semester' semester_id=semester.id %}">{{ semester }}</a></dd>
-</dl>
+    <dl class="dl-horizontal">
+    <h3>Reference Items for:</h3>
+      <dt>Semester</dt>
+        <dd><a href="{% url 'schooladmin:semester' semester_id=semester.id %}">{{ semester }}</a></dd>
+    </dl>
 
-{% sis_filter 'secitems' %}
-<div>
-    <input
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
+    {% sis_filter 'secitems' %}
+{% endblock %}
 
+{%  block late_scripts %}
 <script>
 stylizeRange({field:'index',min_label:'From #',max_label:'To #',prefix:"secitems"});
 </script>

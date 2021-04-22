@@ -17,16 +17,7 @@
 </head>
 
 <body>
-<div class="header">
-  <span class="name">
-  {% block header_content %}
-    <h1>{% block header_name %}Student Info System{% endblock %}</h1>
-    {% block logged-in %}{% endblock logged-in %}
-  {% endblock header_content %}
-  </span>
-</div>
-    {% block content %}
-  {% endblock content %}
-  {% block late_scripts %}{% endblock late_scripts %}
+    {% block all_content %}{% endblock all_content %}
+    {% block late_scripts %}{% endblock late_scripts %}
 </body>
 </html>

@@ -1,8 +1,9 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {% load sis-filter %}
 {%  load user_demographics %}
+{% block class %}users{% endblock %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -67,6 +68,9 @@
     />
 {% endif %}
   </form>
+{% endblock %}
+
+{% block late_scripts %}
 <script>
      {%  if show_all %}
 function confirmit(evt) {

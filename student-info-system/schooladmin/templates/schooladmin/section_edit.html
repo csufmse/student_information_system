@@ -1,9 +1,10 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
+{% block class %}sections{% endblock %}
 
 {% block content %}
-  <h3>Edit Section {{ section.course_name }}-{{ section.number }}</h3>
+<h3>Edit Section {{ section.course_name }}-{{ section.number }}</h3>
 <dl class="dl-horizontal">
   <dt>Course</dt>
   <dd>{{ section.course_name }}</dd>
@@ -17,12 +18,6 @@
     {% csrf_token %}
       <table>{{ form.as_table }}</table>
     <input
-        action="action"
-        onclick="window.history.go(-1); return false;"
-        type="submit"
-        value="Cancel" class="btn btn-info"
-    />
-    <input
         type="reset" id="reset_button"
         value="Reset" class="btn btn-info"
     />
@@ -31,6 +26,9 @@
         value="Save Changes" class="btn btn-primary submitme"
     />
   </form>
+{% endblock %}
+
+{% block late_scripts %}
 
 <script>
 document.getElementById("submitme").addEventListener("click", function () {

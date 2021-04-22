@@ -1,6 +1,8 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
+
+{% block class %}profile{%  endblock %}
 
 {% block content %}
   <h3>Edit "{{ auser.username }}" / {{ auser.get_full_name }}</h3>
@@ -10,12 +12,6 @@
       <table>{{ user_form.as_table }}</table>
       <table>{{ profile_form.as_table }}</table>
       <table id="demo_table">{{ demo_form.as_table }}</table>
-    <input
-        action="action"
-        onclick="window.history.go(-1); return false;"
-        type="submit"
-        value="Cancel" class="btn btn-info"
-    />
     <input
         type="reset" id="reset_button"
         value="Reset" class="btn btn-info"

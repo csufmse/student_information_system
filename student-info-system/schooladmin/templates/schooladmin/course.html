@@ -1,7 +1,9 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {% load sis-filter %}
+
+{% block class %}courses{% endblock %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -26,11 +28,13 @@
     <h3>Sections:</h3>
     {% sis_filter 'sections' %}
 
-    <input action="action" class="btn btn-info" onclick="window.history.go(-1); return false;" value="Back"/>
     {%  if can_edit %}
         <input id="new_section" action="action" class="btn btn-info" value="New Section"/>
         <input id="course_edit" action="action" class="btn btn-info" value="Edit Course"/>
     {%  endif %}
+{% endblock %}
+
+{% block late_scripts %}
 <script>
 {%  if can_edit %}
     addButtonClickHandler('course_edit', "{% url 'schooladmin:course_edit' courseid=course.id %}");

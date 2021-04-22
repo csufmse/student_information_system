@@ -1,6 +1,7 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
+{% block class %}users{% endblock %}
 
 {% block content %}
   <h3>Edit User "{{ auser.username }}" / {{ auser.get_full_name }}</h3>
@@ -13,12 +14,6 @@
       <table id="student_table">{{ student_form.as_table }}</table>
       <table id="professor_table">{{ professor_form.as_table }}</table>
     <input
-        action="action"
-        onclick="window.history.go(-1); return false;"
-        type="submit"
-        value="Cancel" class="btn btn-info"
-    />
-    <input
         type="reset" id="reset_button"
         value="Reset" class="btn btn-info"
     />
@@ -28,6 +23,9 @@
     />
   </form>
     </div>
+{% endblock %}
+
+{% block late_scripts %}
 
 <script>
 function manageRole() {

@@ -1,15 +1,17 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load sis-filter %}
 {% load bootstrap3 %}
+{% block class %}sections{% endblock %}
 
 {% block content %}
-<div>
 {%  if can_add %}
     <button class="btn btn-primary" id="section_new">Add Section to Class</button>
 {% endif %}
     {% sis_filter 'sections' %}
-</div>
+{% endblock %}
+
+{% block late_scripts %}
 <script>
 const handler = insertScrollableDivs(applyHandlers=true);
 handler();
@@ -17,4 +19,4 @@ handler();
 addButtonClickHandler('section_new', "{% url 'schooladmin:section_new' %}");
 {% endif %}
 </script>
-{% endblock content %}
+{% endblock  %}

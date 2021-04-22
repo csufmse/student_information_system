@@ -1,7 +1,9 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {%  load user_demographics %}
+
+{% block class %}profile{% endblock %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -23,12 +25,6 @@
  <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
-    <input
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
     <input id="change_password"
         action="action"
            class="btn btn-info"
