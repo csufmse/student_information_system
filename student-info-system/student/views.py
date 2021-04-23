@@ -7,7 +7,8 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse
 
 from sis.authentication_helpers import role_login_required
-from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
+from sis.models import (Course, Section, Profile, Semester, SectionStudent, Message,
+                        SemesterStudent)
 
 from sis.utils import filtered_table2, DUMMY_ID
 
@@ -305,3 +306,21 @@ def request_major_change(request):
         }),
     }
     return render(request, 'student/change_major.html', data)
+
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def request_transcript(request):
+    the_user = request.user
+
+    mesg = Message.objects.create(
+        sender=the_user.profile,
+        recipient=the_user.profile.student.major.contact,
+        message_type=Message.TRANSCRIPT_REQUEST_TYPE,
+        subject="Transcript Request",
+        support_data={
+            'student': the_user.profile.student.pk,
+        },
+    )
+    as_str = mesg.time_sent.strftime('%m/%d/%Y, %H:%M:%S')
+    messages.success(request, f'Request submitted at {as_str}.')
+    return redirect(reverse('sis:profile'))

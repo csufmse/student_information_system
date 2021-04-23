@@ -1,9 +1,8 @@
-{% extends user.home_template %}
+{% extends "easy_pdf/base.html" %}
 {% load static %}
 
 {% block content %}
 <h2>Transcript</h2>
-{% block class %}transcript{% endblock %}
 
 <p>Student: {{student.name}}</p>
 <table class="transcript_table">

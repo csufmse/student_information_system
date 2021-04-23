@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, datetime
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import HttpResponse
@@ -41,6 +41,8 @@ from sis.tables.sectionstudents import (StudentHistoryTable, StudentInSectionTab
 from sis.tables.semesters import SemestersSummaryTable, SemestersTable
 from sis.tables.users import (UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable,
                               ProfessorsTable)
+
+from easy_pdf import rendering
 
 
 @role_login_required(Profile.ACCESS_ADMIN)
@@ -639,6 +641,8 @@ def sectionstudent(request, id):
 
 @role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
 def transcript(request, userid):
+
+    # prepare the data
     student = Student.objects.get(profile__user__id=userid)
     data = {'student': student}
     ssects = student.sectionstudent_set.all().order_by('section__semester')
@@ -652,7 +656,17 @@ def transcript(request, userid):
                 i += 1
                 ssects_by_sem.insert(i, [ssect])
         data['ssects_by_sem'] = ssects_by_sem
-    return render(request, 'schooladmin/transcript.html', data)
+
+    filename = f'{student.profile.name}-{datetime.now().strftime("%Y%m%d-%H%M")}'.replace(
+        ' ', '_')
+
+    # generate the PDF
+    return rendering.render_to_pdf_response(request,
+                                            'schooladmin/transcript.html',
+                                            data,
+                                            filename=filename,
+                                            content_type='application/pdf',
+                                            response_class=HttpResponse)
 
 
 @role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
