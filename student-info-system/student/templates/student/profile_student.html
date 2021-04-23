@@ -35,6 +35,11 @@
            class="btn btn-info"
         value="Request Major Change"
     />
+    <input id="request_transcript"
+        action="action"
+           class="btn btn-info"
+        value="Request Transcript"
+    />
      <input id="edit_user"
         action="action"
            class="btn btn-info"
@@ -45,6 +50,7 @@
 <script>
 addButtonClickHandler('change_password', "{% url 'sis:change_password' 0 %}");
 addButtonClickHandler('request_major_change', "{% url 'student:request_major_change' %}");
+addButtonClickHandler('request_transcript', "{% url 'student:request_transcript' %}");
 addButtonClickHandler('edit_user', "{% url 'sis:profile_edit' %}");
 </script>
 {% endblock %}

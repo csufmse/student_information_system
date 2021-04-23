@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "professor",
     "schooladmin",
     "scheduler.apps.SchedulerConfig",
+    "easy_pdf",
 ]
 
 MIDDLEWARE = [
