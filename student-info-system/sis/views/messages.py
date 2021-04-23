@@ -1,6 +1,5 @@
 from datetime import date, datetime
 import pytz
-from bs4 import BeautifulSoup
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
@@ -14,6 +13,7 @@ from sis.filters.message import (FullSentMessageFilter, FullReceivedMessageFilte
                                  SentMessageFilter, ReceivedMessageFilter)
 from sis.tables.messages import (MessageSentTable, MessageReceivedTable,
                                  StudentMessageReceivedTable)
+from schooladmin.views import transcript
 
 
 @login_required
@@ -112,20 +112,18 @@ def message(request, id):
             the_mess.time_handled = datetime.now(pytz.utc)
             the_mess.save()
             the_student = Student.objects.get(id=the_mess.support_data['student'])
-            trans_page = render(request,'schooladmin/transcript.html', {
-                            'userid':the_student.profile.user.id} ).content
-            soup = BeautifulSoup(trans_page, 'html.parser')
-            trans = soup.find('div', id='actual_transcript')
-            print(f'{trans.encode(formatter="html")}')
-            response = Message.objects.create(sender=the_profile,
-                                              recipient=the_student.profile,
-                                              message_type=Message.TRANSCRIPT_TYPE,
-                                              subject="Your Transcript",
-                                              support_data={'transcript':str(trans.encode(formatter="html")),},
-                                              body=trans.encode(formatter="html"),
-                                              in_response_to=the_mess,)
-            messages.success(request, 'Transcript prepared.')
-
+            response = Message.objects.create(
+                sender=the_profile,
+                recipient=the_student.profile,
+                message_type=Message.TRANSCRIPT_TYPE,
+                subject="Your Transcript",
+                body="I'll be emailing it to you.",
+                in_response_to=the_mess,
+            )
+            messages.success(request, 'Transcript promised.')
+            the_student = Student.objects.get(id=the_mess.support_data['student'])
+            # this generates and downloads the file.
+            return transcript(request, userid=the_student.profile.user.id)
 
         else:
             messages.error(request, 'Something went wrong.')
@@ -142,7 +140,8 @@ def message(request, id):
         and not handled
     show_major = is_recipient and the_mess.message_type == Message.MAJOR_CHANGE_TYPE \
         and not handled
-    show_transcript_req = is_recipient and the_mess.message_type == Message.TRANSCRIPT_REQUEST_TYPE \
+    show_transcript_req = is_recipient \
+        and the_mess.message_type == Message.TRANSCRIPT_REQUEST_TYPE \
         and not handled
     return render(
         request, 'sis/message.html', {
