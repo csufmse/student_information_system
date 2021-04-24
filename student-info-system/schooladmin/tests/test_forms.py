@@ -22,7 +22,6 @@ class CourseCreation_formtest(TestCase):
     def test_blank_data(self):
         form = CourseCreationForm({})
         self.assertFalse(form.is_valid())
-        import pprint
         self.assertEqual(
             form.errors, {
                 'major': ['This field is required.'],
