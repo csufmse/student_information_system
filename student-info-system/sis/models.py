@@ -18,6 +18,8 @@ from django.utils import timezone
 from isbn_field import ISBNField
 from abc import ABCMeta, abstractmethod
 
+from .utils import calculate_gpa
+
 
 class UpperField(models.CharField):
     """
@@ -345,15 +347,11 @@ class Student(models.Model):
 
     def gpa(self):
         completed = self.course_history(graded=True)
-        grade_points = 0
-        credits_attempted = 0
-        for ss in completed:
-            credits_attempted = credits_attempted + ss.section.course.credits_earned
-            grade_points = grade_points + ss.grade_points
+        return calculate_gpa(completed)
 
-        if credits_attempted == 0:
-            return 0.0
-        return grade_points / float(credits_attempted)
+    def semester_gpa(self, semester):
+        qs = self.course_history(graded=True).filter(section__semester=semester)
+        return calculate_gpa(qs)
 
     def class_level(self):
         creds = self.credits_earned()

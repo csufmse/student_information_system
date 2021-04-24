@@ -10,7 +10,7 @@ from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Profile, Semester, SectionStudent, Message,
                         SemesterStudent)
 
-from sis.utils import filtered_table2, DUMMY_ID, ssects_by_sem
+from sis.utils import filtered_table2, DUMMY_ID, student_ssects_by_sem, calculate_gpa
 
 from sis.tables.courses import CoursesTable, MajorCoursesMetTable
 from sis.tables.messages import MessageSentTable, MessageReceivedTable
@@ -136,43 +136,18 @@ def registration_view(request):
 @role_login_required(Profile.ACCESS_STUDENT)
 def history(request):
     the_user = request.user
+    student = the_user.profile.student
     data = {
         'auser': the_user,
     }
-    ssects = ssects_by_sem(the_user)
+    ssects = student_ssects_by_sem(student)
     sem_gpas = []
     # lets get the gpa for each semester
     for sem in ssects:
-        credits_attempted = grade_pnts = 0
-        for ssec in sem:
-            credits_attempted = credits_attempted + ssec.section.course.credits_earned
-            grade_pnts = grade_pnts + ssec.grade_points
-        gpa = grade_pnts / float(credits_attempted)
-        sem_gpas.append(gpa)
+        sem_gpas.append(student.semester_gpa(sem[0].section.semester))
 
     ssects_gpas = zip(sem_gpas, ssects)
     data['ssects_gpas'] = ssects_gpas
-    #    data.update(
-    #        filtered_table2(
-    #            name='history',
-    #            qs=the_user.profile.student.course_history(),
-    #            filter=StudentHistoryFilter,
-    #            table=StudentHistoryTable,
-    #            request=request,
-    #            wrap_list=False,
-    #            self_url=reverse('student:history'),
-    #            click_url=reverse('schooladmin:sectionstudent', args=[DUMMY_ID]),
-    #        ))
-    #    data.update(
-    #        filtered_table2(
-    #            name='semesters',
-    #            qs=the_user.profile.student.semesters.all(),
-    #            filter=SemesterFilter,
-    #            table=SemestersSummaryTable,
-    #            request=request,
-    #            self_url=reverse('student:history'),
-    #            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
-    #        ))
 
     remaining = the_user.profile.student.requirements_met_list()
     stats = remaining.filter(met=False).aggregate(remaining_course_count=Count('id'),

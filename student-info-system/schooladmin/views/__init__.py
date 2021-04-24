@@ -12,7 +12,7 @@ from sis.authentication_helpers import role_login_required
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, Semester, Student,
                         SectionStudent, Profile, Message)
 
-from sis.utils import filtered_table, filtered_table2, DUMMY_ID, ssects_by_sem
+from sis.utils import filtered_table, filtered_table2, DUMMY_ID, student_ssects_by_sem
 
 from sis.filters.course import CourseFilter
 from sis.filters.section import SectionFilter
@@ -646,7 +646,7 @@ def transcript(request, userid):
     data = {'student': student}
     ssects = student.sectionstudent_set.all().order_by('section__semester')
     if len(ssects):
-        ssects_by_sem = [[ssects[0]]]
+        student_ssects_by_sem = [[ssects[0]]]
         i = 0
         for ssect in ssects:
             if ssect.section.semester == ssects_by_sem[i][0].section.semester:
