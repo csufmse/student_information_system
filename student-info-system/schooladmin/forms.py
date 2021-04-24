@@ -16,7 +16,8 @@ class CourseCreationForm(forms.ModelForm):
                                   required=False,
                                   widget=forms.Textarea(attrs={'rows': 3}))
     credits_earned = forms.DecimalField(label='Credits', max_digits=2, decimal_places=1)
-    graduate = forms.ChoiceField(label='Graduate',choices=((True, 'Graduate'), (False, 'Undergrad')))
+    graduate = forms.ChoiceField(label='Graduate',
+                                 choices=((True, 'Graduate'), (False, 'Undergrad')))
 
     class Meta:
         model = Course
@@ -34,7 +35,8 @@ class CourseEditForm(forms.ModelForm):
                                   required=False,
                                   widget=forms.Textarea(attrs={'rows': 3}))
     credits_earned = forms.DecimalField(label='Credits', max_digits=2, decimal_places=1)
-    graduate = forms.ChoiceField(label='Graduate',choices=((True, 'Graduate'), (False, 'Undergrad')))
+    graduate = forms.ChoiceField(label='Graduate',
+                                 choices=((True, 'Graduate'), (False, 'Undergrad')))
 
     prereqs = CourseChoiceField(queryset=Course.objects.all(),
                                 widget=forms.CheckboxSelectMultiple,
@@ -42,7 +44,8 @@ class CourseEditForm(forms.ModelForm):
 
     class Meta:
         model = Course
-        fields = ('major', 'catalog_number', 'graduate', 'title', 'description', 'credits_earned', 'prereqs')
+        fields = ('major', 'catalog_number', 'graduate', 'title', 'description', 'credits_earned',
+                  'prereqs')
 
     def __init__(self, *args, **kwargs):
         super(CourseEditForm, self).__init__(*args, **kwargs)

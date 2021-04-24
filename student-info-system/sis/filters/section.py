@@ -22,8 +22,10 @@ class SectionFilter(FilterSet):
 
     status = ChoiceFilter(choices=Section.STATUSES, field_name='status')
 
-    graduate = ChoiceFilter(field_name='course_graduate', label='Course Level?',
+    graduate = ChoiceFilter(field_name='course_graduate',
+                            label='Course Level?',
                             choices=((True, 'Graduate'), (False, 'Undergrad')))
+
     # seats_remaining = RangeFilter()
 
     def filter_semester(self, queryset, name, value):
@@ -54,4 +56,6 @@ class SectionFilter(FilterSet):
 
     class Meta:
         model = Section
-        fields = ['semester', 'course_descr', 'graduate', 'professor', 'hours', 'location', 'status']
+        fields = [
+            'semester', 'course_descr', 'graduate', 'professor', 'hours', 'location', 'status'
+        ]

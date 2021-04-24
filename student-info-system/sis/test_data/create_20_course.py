@@ -258,7 +258,12 @@ def createData():
     for (cn, t, d, cr) in specs[:to_generate]:
         m = randobj(Major)
         grad = int(cn) >= 500
-        c = Course(major=m, catalog_number=cn, title=t, description=d, graduate=grad, credits_earned=cr)
+        c = Course(major=m,
+                   catalog_number=cn,
+                   title=t,
+                   description=d,
+                   graduate=grad,
+                   credits_earned=cr)
         try:
             c.save()
         except Exception:

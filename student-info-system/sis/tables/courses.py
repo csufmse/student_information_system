@@ -18,7 +18,6 @@ class CoursesTable(tables.Table):
             show = "Undergrad"
         return show
 
-
     class Meta:
         model = Course
         template_name = "django_tables2/bootstrap.html"
