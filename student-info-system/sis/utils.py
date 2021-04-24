@@ -69,29 +69,3 @@ def filtered_table2(name=None,
             'div_classes': div_classes,
         }
     }
-
-
-def student_ssects_by_sem(student):
-    qs = student.course_history().order_by('section__semester')
-    ssects_by_sem = None
-    if len(qs):
-        ssects_by_sem = [[qs[0]]]
-        i = 0
-        for ssect in qs:
-            if ssect.section.semester == ssects_by_sem[i][0].section.semester:
-                ssects_by_sem[i].append(ssect)
-            else:
-                i += 1
-                ssects_by_sem.insert(i, [ssect])
-    return ssects_by_sem
-
-
-def calculate_gpa(ssect_list):
-    crs_attempted = grade_pnts = 0
-    gpa = 0.0
-    if len(ssect_list):
-        for ssec in ssect_list:
-            crs_attempted = crs_attempted + ssec.section.course.credits_earned
-            grade_pnts = grade_pnts + ssec.grade_points
-        gpa = grade_pnts / float(crs_attempted)
-    return gpa

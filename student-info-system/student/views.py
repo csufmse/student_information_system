@@ -10,7 +10,7 @@ from sis.authentication_helpers import role_login_required
 from sis.models import (Course, Section, Profile, Semester, SectionStudent, Message,
                         SemesterStudent)
 
-from sis.utils import filtered_table2, DUMMY_ID, student_ssects_by_sem, calculate_gpa
+from sis.utils import filtered_table2, DUMMY_ID
 
 from sis.tables.courses import CoursesTable, MajorCoursesMetTable
 from sis.tables.messages import MessageSentTable, MessageReceivedTable
@@ -140,7 +140,7 @@ def history(request):
     data = {
         'auser': the_user,
     }
-    ssects = student_ssects_by_sem(student)
+    ssects = student.ssects_by_sem()
     sem_gpas = []
     # lets get the gpa for each semester
     for sem in ssects:
@@ -152,6 +152,8 @@ def history(request):
     remaining = the_user.profile.student.requirements_met_list()
     stats = remaining.filter(met=False).aggregate(remaining_course_count=Count('id'),
                                                   remaining_credit_count=Sum('credits_earned'))
+    if stats['remaining_credit_count'] is None:
+        stats['remaining_credit_count'] = 0
     data.update(stats)
 
     data.update(

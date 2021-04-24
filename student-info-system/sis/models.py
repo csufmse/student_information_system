@@ -18,8 +18,6 @@ from django.utils import timezone
 from isbn_field import ISBNField
 from abc import ABCMeta, abstractmethod
 
-from .utils import calculate_gpa
-
 
 class UpperField(models.CharField):
     """
@@ -345,13 +343,37 @@ class Student(models.Model):
             completed = 0
         return completed
 
+    def ssects_by_sem(self):
+        qs = self.course_history().order_by('section__semester')
+        ssects_by_sem = []
+        if len(qs):
+            ssects_by_sem = [[qs[0]]]
+            i = 0
+            for ssect in qs:
+                if ssect.section.semester == ssects_by_sem[i][0].section.semester:
+                    ssects_by_sem[i].append(ssect)
+                else:
+                    i += 1
+                    ssects_by_sem.insert(i, [ssect])
+        return ssects_by_sem
+
+    def calculate_gpa(self, ssect_list):
+        crs_attempted = grade_pnts = 0
+        gpa = 0.0
+        if len(ssect_list):
+            for ssec in ssect_list:
+                crs_attempted = crs_attempted + ssec.section.course.credits_earned
+                grade_pnts = grade_pnts + ssec.grade_points
+            gpa = grade_pnts / float(crs_attempted)
+        return gpa
+
     def gpa(self):
         completed = self.course_history(graded=True)
-        return calculate_gpa(completed)
+        return self.calculate_gpa(completed)
 
     def semester_gpa(self, semester):
         qs = self.course_history(graded=True).filter(section__semester=semester)
-        return calculate_gpa(qs)
+        return self.calculate_gpa(qs)
 
     def class_level(self):
         creds = self.credits_earned()
