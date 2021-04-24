@@ -185,6 +185,15 @@ def major_edit(request, majorid):
 
 
 @role_login_required(Profile.ACCESS_ADMIN)
+def major_new_course(request, majorid):
+    qs = Major.objects.filter(id=majorid)
+    if qs.count() < 1:
+        return HttpResponse("No such major")
+    the_major = qs.get()
+    return course_new(request, major=the_major)
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
 def major_new(request):
     if request.method == 'POST':
         form = MajorCreationForm(request.POST)
@@ -292,7 +301,7 @@ def course_edit(request, courseid):
 
 
 @role_login_required(Profile.ACCESS_ADMIN)
-def course_new(request):
+def course_new(request, major=None):
     if request.method == 'POST':
         form = CourseCreationForm(request.POST)
         if form.is_valid():
@@ -301,6 +310,8 @@ def course_new(request):
             return redirect('schooladmin:courses')
         else:
             messages.error(request, 'Please correct the error(s) below.')
+    elif major is not None:
+        form = CourseCreationForm(initial={'major': major})
     else:
         form = CourseCreationForm()
     return render(request, 'schooladmin/course_new.html', {'form': form})
@@ -702,4 +713,5 @@ def demographics(request):
     return render(request, 'schooladmin/demographics.html', {
         'students': stud_form,
         'professors': prof_form,
+        'date_prepared': datetime.now().date()
     })

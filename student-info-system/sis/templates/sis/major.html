@@ -34,12 +34,16 @@
     {%  if permit_edit %}
         <input id="edit_major" action="action" class="btn btn-info" value="Edit Major"/>
     {% endif %}
+    {%  if permit_new_course %}
+        <input id="new_course" action="action" class="btn btn-info" value="New Course"/>
+    {% endif %}
     </div>
 {% endblock %}
 
 {% block late_scripts %}
 <script>
     {% if permit_edit %}addButtonClickHandler('edit_major', '{% url 'schooladmin:major_edit' major.id %}');{% endif %}
+    {% if permit_new_course %}addButtonClickHandler('new_course', '{% url 'schooladmin:major_new_course' major.id %}');{% endif %}
     stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'required'});
     stylizeRange({field:'credits_earned',name:'Cred',prefix:'required'});
     stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'offered'});

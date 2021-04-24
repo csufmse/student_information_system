@@ -61,6 +61,7 @@ def major(request, majorid):
     data = {
         'major': the_major,
         'permit_edit': is_admin,
+        'permit_new_course': is_admin,
         'include_students': include_students,
     }
     data.update(
