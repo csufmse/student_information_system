@@ -702,4 +702,5 @@ def demographics(request):
     return render(request, 'schooladmin/demographics.html', {
         'students': stud_form,
         'professors': prof_form,
+        'date_prepared': datetime.now().date()
     })
