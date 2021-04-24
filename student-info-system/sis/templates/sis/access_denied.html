@@ -1,7 +1,7 @@
 {% extends "sis/base.html" %}
 {% block title %}{{block.super}}: Access Denied{% endblock %}
 {% block header_name %}{{block.super}}: Access Denied{% endblock %}
-{% block content %}
+{% block all_content %}
   <p>You do not have access to this feature.</p>
 <p><a href="{% url 'logout' %}">Log Out</a></p>
 {% endblock %}
