@@ -80,7 +80,7 @@
 /* note that the classes of the cells and headers are based on the data in them */
 
 /* all column headers are centered */
-.active_col, .capac_col, .catnumber_col, .classlevel_col, .course_col, .coursetitle_col,
+.active_col, .capac_col, .catnumber_col, .classlevel_col, .course_col, .courselevel_col, .coursetitle_col,
 .credits_col, .date_col, .drop_col, .gpa_col, .hours_col, .lettergrade_col, .location_col, .major_col,
 .majordescr_col, .majorname_col, .message_addr_col, .message_date_col, .message_subject_col, .message_body_col, .message_priority_col,
 .message_unread_col, .met_col, .professor_col, .remaining_col, .role_col, .sched_col,
@@ -89,7 +89,7 @@
 }
 
 /* most (data) cells are centered */
-.active_cell, .capac_cell, .catnumber_cell, .classlevel_cell, .course_cell, .credits_cell,
+.active_cell, .capac_cell, .catnumber_cell, .classlevel_cell, .course_cell, .courselevel_cell, .credits_cell,
 .date_cell, .gpa_cell, .hours_cell, .lettergrade_cell, .major_cell, .majorname_cell, .met_cell,
 .message_date_cell, .message_priority_cell,
 .message_unread_cell, .drop_cell,
@@ -106,7 +106,7 @@
 .year_cell {
   width: 80px;
 }
-.classlevel_cell, .date_cell, .drop_cell, .gpa_cell, .major_cell, .message_addr_cell, .session_cell {
+.classlevel_cell, .courselevel_cell, .date_cell, .drop_cell, .gpa_cell, .major_cell, .message_addr_cell, .session_cell {
   width: 110px;
 }
 .course_cell, .section_name_cell, .sched_cell {

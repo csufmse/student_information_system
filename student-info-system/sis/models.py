@@ -543,6 +543,7 @@ class Course(models.Model):
     description = models.CharField('Description', max_length=256, blank=True)
     credits_earned = models.DecimalField('Credits', max_digits=2, decimal_places=1)
     prereqs = models.ManyToManyField('self', symmetrical=False, through='CoursePrerequisite')
+    graduate = models.BooleanField("Graduate Level",default=False)
 
     class Meta:
         unique_together = (('major', 'catalog_number'),)
