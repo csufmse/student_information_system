@@ -1,6 +1,10 @@
-{% extends 'sis/base.html' %}
+{% extends 'sis/home_base.html' %}
 {% load static %}
 {% load bootstrap3 %}
+
+{% block logged-in %}
+    <div class="welcome">Welcome, Guest!</div>
+{%  endblock %}
 
 {% block nav %}
 <div class="tab">
