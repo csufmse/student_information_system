@@ -181,10 +181,9 @@ def createData():
             # now schedule students for it
             number_attended = randrange(3, 6)
 
-            print(
-                f'{semstud.student} ({semstud.student.major.abbreviation}) reg ' +
-                f'for {number_attended} sections: ',
-                end='')
+            print(f'{semstud.student} ({semstud.student.major.abbreviation}) reg ' +
+                  f'for {number_attended} sections: ',
+                  end='')
 
             # start by listing the ones for whom we've met the requirements
             prereqs_met = [

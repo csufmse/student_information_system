@@ -1,28 +1,29 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {% load sis-filter %}
 {%  load user_demographics %}
+{% block class %}professors{% endblock %}
 
 {% block content %}
 <dl class="dl-horizontal">
   <dt>Professor</dt>
-  <dd>{{ user.get_full_name }}</dd>
+  <dd>{{ auser.get_full_name }}</dd>
   <dt>Username</dt>
-  <dd>{{ user.username }}</dd>
+  <dd>{{ auser.username }}</dd>
   <dt>Email</dt>
-  <dd>{{ user.email }}</dd>
+  <dd>{{ auser.email }}</dd>
   <dt>Bio</dt>
-  <dd>{{  user.profile.bio }}</dd>
+  <dd>{{  auser.profile.bio }}</dd>
   <dt>Teaching Department</dt>
-  <dd><a href="{% url 'sis:major' majorid=user.profile.professor.major.id %}">{{ user.profile.professor.major.abbreviation }}: {{  user.profile.professor.major.name }}</a></dd>
+  <dd><a href="{% url 'sis:major' majorid=auser.profile.professor.major.id %}">{{ auser.profile.professor.major.abbreviation }}: {{  auser.profile.professor.major.name }}</a></dd>
     {%  if can_edit %}
       <dt>Enabled?</dt>
-      <dd>{% if user.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
+      <dd>{% if auser.is_active %}Enabled{% else %}Disabled{% endif %}</dd>
     {% endif %}
 </dl>
     <h3>Demographic Data</h3>
-    {%  demographic_details user.profile %}
+    {%  demographic_details auser.profile %}
 
     <h3>Semesters Taught</h3>
     {% sis_filter 'semesters' %}
@@ -45,12 +46,12 @@
 
   <form method="post">
 {% csrf_token %}
-    <input type="hidden" name="userid" value="{{ user.id }}"/>
+    <input type="hidden" name="userid" value="{{ auser.id }}"/>
     <input action="action" class="btn btn-info" onclick="window.history.go(-1); return false;" value="Back"/>
     <input id="showitems" action="action" class="btn btn-info" value="Reference Items"/>
     {% if can_edit %}
         <input id="change_password" action="action" class="btn btn-info" value="Change Password"/>
-        {% if user.is_active %}
+        {% if auser.is_active %}
             <input id="disbutton" name="disbutton" class="btn btn-primary" action="action" value="Disable Professor"/>
         {% else %}
             <input id="enabutton" name="enabutton" action="action" class="btn btn-primary" value="Enable Professor"/>
@@ -59,11 +60,14 @@
         <input id="edit_professor" action="action" class="btn btn-info" value="Edit Professor"/>
     {% endif %}
 </form>
+{% endblock %}
+
+{% block late_scripts %}
 <script>
 {% if can_edit %}
     function confirmit(evt) {
         var btntitle = evt.target.value;
-        var answer = window.confirm("Are you sure you want to "+btntitle+' \n"{{ user.username }}" ({{ user.get_full_name  }})');
+        var answer = window.confirm("Are you sure you want to "+btntitle+' \n"{{ auser.username }}" ({{ auser.get_full_name  }})');
         if (answer) {
             this.form.submit();
             return true;
@@ -74,11 +78,11 @@
     if ( btn ) {btn.addEventListener("click", confirmit);}
     btn = document.getElementById("enabutton");
     if ( btn ) {btn.addEventListener("click", confirmit);}
-    addButtonClickHandler('new_item', "{% url 'schooladmin:professor_item_new' userid=user.id %}");
-    addButtonClickHandler('change_password', "{% url 'sis:change_password' user.id %}");
-    addButtonClickHandler('edit_professor', "{% url 'schooladmin:user_edit' user.id %}");
+    addButtonClickHandler('new_item', "{% url 'schooladmin:professor_item_new' userid=auser.id %}");
+    addButtonClickHandler('change_password', "{% url 'sis:change_password' auser.id %}");
+    addButtonClickHandler('edit_professor', "{% url 'schooladmin:user_edit' auser.id %}");
 {%  endif %}
-addButtonClickHandler('showitems', "{% url 'schooladmin:professor_items' user.id %}");
+addButtonClickHandler('showitems', "{% url 'schooladmin:professor_items' auser.id %}");
 stylizeRange({field:'year',min_label:'From Year',max_label:'To Year',prefix:"semesters"});
 {%  if received %}
     stylizeRange({field:'time_sent',name:'Sent',prefix:'received',width:'100px'}); {% endif %}

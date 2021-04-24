@@ -2,6 +2,8 @@ from datetime import timedelta, datetime
 
 import pytz
 from django.contrib.auth.models import User, AbstractUser
+from django.contrib.contenttypes.models import ContentType
+from django.contrib.contenttypes.fields import GenericForeignKey, GenericRelation
 from django.core.exceptions import *
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
@@ -14,6 +16,7 @@ from django.dispatch import receiver
 from django.utils import timezone
 
 from isbn_field import ISBNField
+from abc import ABCMeta, abstractmethod
 
 
 class UpperField(models.CharField):
@@ -1147,6 +1150,8 @@ class Message(models.Model):
     SECTION_FILLING_TYPE = 'sectionfilling'
     SECTION_FULL_TYPE = 'sectionfull'
     SECTION_ADDED = 'sectionadded'
+    TRANSCRIPT_REQUEST_TYPE = 'reqtranscript'
+    TRANSCRIPT_TYPE = 'transcript'
     TYPES = (
         (GENERIC_TYPE, GENERIC_TYPE),
         (ACADEMIC_PROBATION_TYPE, ACADEMIC_PROBATION_TYPE),
@@ -1155,6 +1160,8 @@ class Message(models.Model):
         (SECTION_FILLING_TYPE, SECTION_FILLING_TYPE),
         (SECTION_FULL_TYPE, SECTION_FULL_TYPE),
         (SECTION_ADDED, SECTION_ADDED),
+        (TRANSCRIPT_REQUEST_TYPE, TRANSCRIPT_REQUEST_TYPE),
+        (TRANSCRIPT_TYPE, TRANSCRIPT_TYPE),
     )
 
     message_type = models.CharField(choices=TYPES, default=GENERIC_TYPE, max_length=15)
@@ -1180,7 +1187,7 @@ class Message(models.Model):
     body = models.TextField(null=True, blank=True)
     high_priority = models.BooleanField(default=False)
 
-    support_data = models.JSONField(max_length=1024, default=dict)
+    support_data = models.JSONField(default=dict)
 
     class Meta:
         ordering = ['time_sent']
@@ -1212,3 +1219,111 @@ class Message(models.Model):
         return self.message_type in (
             Message.DROP_REQUEST_TYPE, Message.MAJOR_CHANGE_TYPE
         ) and self.time_handled is None and self.time_sent < as_of - timedelta(days=7)
+
+
+def home_template(self):
+    if self.profile.role == Profile.ACCESS_ADMIN:
+        return "schooladmin/home_admin.html"
+    elif self.profile.role == Profile.ACCESS_PROFESSOR:
+        return "professor/home_professor.html"
+    elif self.profile.role == Profile.ACCESS_STUDENT:
+        return "student/home_student.html"
+    return "schooladmin/home_guest.html"
+
+
+User.add_to_class('home_template', home_template)
+
+
+class Interval(models.Model):
+
+    SECONDS = 'seconds'
+    MINUTES = 'minutes'
+    HOURS = 'hours'
+    DAYS = 'days'
+    WEEKS = 'weeks'
+    MONTHS = 'months'
+    INTERVAL_TYPES = {(SECONDS, 'seconds'), (MINUTES, 'minutes'), (HOURS, 'hours'),
+                      (DAYS, 'days'), (WEEKS, 'weeks'), (MONTHS, 'months')}
+
+    interval_amount = models.IntegerField('Interval Amount', validators=[MinValueValidator(1)])
+    interval_type = models.CharField('Interval Type', choices=INTERVAL_TYPES, max_length=7)
+
+    def create_kw_dict(self):
+        return {self.interval_type: self.interval_amount}
+
+
+class AbstractModelMeta(ABCMeta, type(models.Model)):
+    pass
+
+
+class Tasks(models.Model):
+    # Class for holding the subclass objects of the abstract class Task
+    task_id = models.IntegerField()
+    task_type = models.ForeignKey(ContentType, on_delete=models.PROTECT)
+    task = GenericForeignKey('task_type', 'task_id')
+
+    @classmethod
+    def add_task(self, task):
+        task_type = ContentType.objects.get_for_model(task)
+        return Tasks.objects.create(task_type=task_type, task_id=task.pk)
+
+
+class Task(models.Model):
+
+    class Meta:
+        abstract = True
+
+    DATE = 'date'
+    INTERVAL = 'interval'
+    IMMEDIATE = 'immediate'
+    FREQUENCY_TYPES = {
+        (DATE, 'date'),
+        (INTERVAL, 'interval'),
+        (IMMEDIATE, 'immediate'),
+    }
+
+    interval = models.OneToOneField(Interval, on_delete=models.CASCADE, blank=True, null=True)
+    date = models.DateField('Date', default=None, blank=True, null=True)
+    frequency_type = models.CharField('Frequency Type', choices=FREQUENCY_TYPES, max_length=9)
+    title = models.CharField('Task Title', max_length=30, blank=True)
+    active = models.BooleanField('Active', default=True)
+    tasks = GenericRelation(Tasks, content_type_field='task_type', object_id_field='task_id')
+    description = models.CharField('Description', max_length=256)
+
+    @property
+    def name(self):
+        return self.title
+
+    @abstractmethod
+    def execute(self, frequency_type, interval=None, date=None):
+        pass
+
+    @property
+    def job_id(self):
+        return self.__class__.__name__ + str(self.pk)
+
+    def create_job_dict(self):
+        job_dict = {'func': self.execute, 'id': self.job_id}
+        if self.date:
+            return {self.DATE: self.DATE, 'run_date': self.date}
+        if self.interval:
+            job_dict.update(self.interval.create_kw_dict())
+            job_dict[self.INTERVAL] = self.INTERVAL
+            return job_dict
+        else:
+            return job_dict
+
+
+class AcademicProbationTask(Task):
+    # For all attributes see Task
+
+    def academic_probation_check(self):
+        students = Student.objects.all()
+        profile = Profile.objects.get(user__username='zeus')
+        for student in students:
+            if student.gpa() < 2.0:
+                ap_message = "Your GPA has fallen below 2.0, putting you on academic probation."
+                student.notify_probation(sender=profile, when=timezone.now(), body=ap_message)
+
+    def execute(self):
+        AcademicProbationTask.academic_probation_check(self)

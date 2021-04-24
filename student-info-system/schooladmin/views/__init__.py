@@ -1,10 +1,11 @@
-from datetime import date
+from datetime import date, datetime
 from django.contrib import messages
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.utils.html import format_html
 from django.urls import reverse
+from django.contrib.auth.decorators import login_required
 
 from sis.authentication_helpers import role_login_required
 
@@ -19,6 +20,7 @@ from sis.filters.sectionreferenceitem import SectionItemFilter
 from sis.filters.sectionstudent import SectionStudentFilter
 from sis.filters.semester import SemesterFilter
 from sis.filters.user import StudentFilter, UserFilter, ProfessorFilter
+from sis.tables.referenceitems import ProfReferenceItemsTable
 
 from schooladmin.forms import (
     CourseCreationForm,
@@ -29,6 +31,8 @@ from schooladmin.forms import (
 
 from sis.forms.major import MajorCreationForm, MajorEditForm
 from sis.forms.section import SectionCreationForm, SectionEditForm
+from sis.forms.referenceitem import ReferenceItemCreationForm
+from sis.filters.referenceitem import ItemFilter
 
 from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
 from sis.tables.sectionreferenceitems import ReferenceItemsForSectionTable
@@ -38,6 +42,8 @@ from sis.tables.semesters import SemestersSummaryTable, SemestersTable
 from sis.tables.users import (UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable,
                               ProfessorsTable)
 
+from easy_pdf import rendering
+
 
 @role_login_required(Profile.ACCESS_ADMIN)
 def index(request):
@@ -45,6 +51,112 @@ def index(request):
 
 
 # USERS
+
+
+@role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
+def students(request):
+    logged_in = request.user.is_authenticated
+    if logged_in:
+        user_role = request.user.profile.role
+    is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
+
+    data = {
+        'can_add': is_admin,
+    }
+    data.update(
+        filtered_table2(
+            name='students',
+            qs=User.objects.all().filter(profile__role=Profile.ACCESS_STUDENT),
+            filter=StudentFilter,
+            table=StudentsTable,
+            request=request,
+            scrollable=True,
+            self_url=reverse('schooladmin:students'),
+            click_url=reverse('schooladmin:student', args=[DUMMY_ID]),
+        ))
+    return render(request, 'schooladmin/students.html', data)
+
+
+def professors(request):
+    return render(
+        request, 'schooladmin/professors.html',
+        filtered_table2(
+            name='professors',
+            qs=User.objects.all().filter(profile__role=Profile.ACCESS_PROFESSOR),
+            filter=ProfessorFilter,
+            table=ProfessorsTable,
+            request=request,
+            scrollable=True,
+            self_url=reverse('schooladmin:professors'),
+            click_url=reverse('schooladmin:professor', args=[DUMMY_ID]),
+        ))
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def professor_items(request, userid):
+    qs = User.objects.filter(id=userid)
+    if qs.count() < 1:
+        return HttpResponse("No such user")
+    the_user = qs.get()
+
+    if the_user.profile.role != Profile.ACCESS_PROFESSOR:
+        return users.user(request, userid)
+
+    data = {
+        'auser': the_user,
+    }
+    data.update(
+        filtered_table2(
+            name='items',
+            qs=the_user.profile.professor.referenceitem_set,
+            filter=ItemFilter,
+            table=ProfReferenceItemsTable,
+            request=request,
+            self_url=reverse('schooladmin:professor_items', args=[userid]),
+            click_url=reverse('schooladmin:professor_item', args=[userid, DUMMY_ID]),
+        ))
+
+    return render(request, 'schooladmin/professor_items.html', data)
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def professor_item(request, userid, item_id):
+    return HttpResponse("not yet")
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def professor_item_new(request, userid):
+    qs = User.objects.filter(id=userid)
+    if qs.count() < 1:
+        return HttpResponse("No such user")
+    the_prof = qs[0]
+
+    if the_prof.profile.role != Profile.ACCESS_PROFESSOR:
+        messages.error(request, "That's not a professor.")
+        return users.user(request, userid)
+
+    if request.method == 'POST':
+        form = ReferenceItemCreationForm(request.POST)
+        if form.is_valid():
+            the_new_item = form.save(commit=False)
+            the_new_item.professor = the_prof.profile.professor
+            the_new_item.save()
+            form.save_m2m()
+            messages.success(
+                request, f'New item created for ' + f'{the_new_item.course} has been created.')
+            return redirect('schooladmin:professor_items', userid=the_prof.id)
+        else:
+            messages.error(request, 'Please correct the error(s) below.')
+    else:
+        dict = {}
+        profs = Professor.objects.filter(profile__user_id=the_prof.id)
+        dict['professor'] = profs[0]
+        form = ReferenceItemCreationForm(initial=dict)
+    return render(request, 'schooladmin/professor_new_item.html', {
+        'form': form,
+        'auser': the_prof
+    })
+
 
 # MAJORS
 
@@ -499,12 +611,19 @@ def section_new_helper(request, semester_id=None, courseid=None):
         })
 
 
-@role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
+@login_required
 def sectionstudent(request, id):
     qs = SectionStudent.objects.filter(id=id)
     if qs.count() < 1:
         return HttpResponse("No such sectionstudent")
     the_sectionstud = qs[0]
+    is_admin = request.user.profile.role == Profile.ACCESS_ADMIN
+    is_prof = request.user.profile.role == Profile.ACCESS_PROFESSOR
+
+    if not is_admin and not is_prof and request.user.id != \
+            the_sectionstud.student.profile.user.id:
+        messages.error(request, "Something went wrong")
+        return HttpResponse("Unauthorized")
 
     if the_sectionstud.status == SectionStudent.GRADED:
         grade = the_sectionstud.letter_grade
@@ -522,12 +641,31 @@ def sectionstudent(request, id):
 
 @role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
 def transcript(request, userid):
-    user = request.user
+    # prepare the data
     student = Student.objects.get(profile__user__id=userid)
     data = {'student': student}
-    ssects = ssects_by_sem(user)
-    data['ssects_by_sem'] = ssects
-    return render(request, 'schooladmin/transcript.html', data)
+    ssects = student.sectionstudent_set.all().order_by('section__semester')
+    if len(ssects):
+        ssects_by_sem = [[ssects[0]]]
+        i = 0
+        for ssect in ssects:
+            if ssect.section.semester == ssects_by_sem[i][0].section.semester:
+                ssects_by_sem[i].append(ssect)
+            else:
+                i += 1
+                ssects_by_sem.insert(i, [ssect])
+        data['ssects_by_sem'] = ssects_by_sem
+
+    filename = f'{student.profile.name}-{datetime.now().strftime("%Y%m%d-%H%M")}'.replace(
+        ' ', '_')
+
+    # generate the PDF
+    return rendering.render_to_pdf_response(request,
+                                            'schooladmin/transcript.html',
+                                            data,
+                                            filename=filename,
+                                            content_type='application/pdf',
+                                            response_class=HttpResponse)
 
 
 @role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)

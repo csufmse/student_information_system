@@ -1,7 +1,9 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {%  load user_demographics %}
+
+{% block class %}profile{% endblock %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -12,7 +14,7 @@
   <dt>Email</dt>
   <dd>{{ user.email }}</dd>
   <dt>Major</dt>
-  <dd><a href="{% url 'student:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
+  <dd><a href="{% url 'sis:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
   <dt>Bio</dt>
   <dd>{{  user.profile.bio }}</dd>
 </dl>
@@ -23,12 +25,6 @@
  <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
-    <input
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
     <input id="change_password"
         action="action"
            class="btn btn-info"
@@ -38,6 +34,11 @@
         action="action"
            class="btn btn-info"
         value="Request Major Change"
+    />
+    <input id="request_transcript"
+        action="action"
+           class="btn btn-info"
+        value="Request Transcript"
     />
      <input id="edit_user"
         action="action"
@@ -49,6 +50,7 @@
 <script>
 addButtonClickHandler('change_password', "{% url 'sis:change_password' 0 %}");
 addButtonClickHandler('request_major_change', "{% url 'student:request_major_change' %}");
+addButtonClickHandler('request_transcript', "{% url 'student:request_transcript' %}");
 addButtonClickHandler('edit_user', "{% url 'sis:profile_edit' %}");
 </script>
 {% endblock %}

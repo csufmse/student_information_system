@@ -1,4 +1,4 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 
@@ -10,17 +10,15 @@
       <table>{{ profile_form.as_table }}</table>
       <table id="student_table">{{ student_form.as_table }}</table>
       <table id="professor_table">{{ professor_form.as_table }}</table>
-    <input
-        action="action"
-        onclick="window.history.go(-1); return false;"
-        type="submit"
-        value="Cancel" class="btn btn-info"
-    />
     <input id="submitme" name="submitme"
         action="action"
         value="Create User" class="btn btn-primary submitme"
     />
   </form>
+{% endblock %}
+{% block class %}users{% endblock %}
+
+{% block late_scripts %}
 
 <script>
 function manageRole() {

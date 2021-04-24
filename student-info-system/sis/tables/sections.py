@@ -9,7 +9,9 @@ class SectionsTable(tables.Table):
                             css_class_base='semester',
                             accessor='semester',
                             order_by=('semester.year', 'semester.session_order'))
-    course = ClassyColumn(css_class_base='course', accessor='course__name')
+    course = ClassyColumn(css_class_base='course',
+                          accessor='course__name',
+                          order_by=('course__major__abbreviation', 'course__catalog_number'))
     number = ClassyColumn(css_class_base='section_number')
     status = ClassyColumn(css_class_base='sectionstatus')
     course_title = ClassyColumn(css_class_base='coursetitle')
@@ -43,7 +45,9 @@ class SectionForClassTable(tables.Table):
                             css_class_base='semester',
                             accessor='semester__name',
                             order_by=('semester.year', 'semester.session_order'))
-    section = ClassyColumn(css_class_base='section_name', accessor='name')
+    section = ClassyColumn(css_class_base='section_name',
+                           accessor='name',
+                           order_by=('course__major__abbreviation', 'course__catalog_number'))
     status = ClassyColumn(css_class_base='sectionstatus')
     hours = ClassyColumn(css_class_base='hours')
     location = ClassyColumn(css_class_base='location')

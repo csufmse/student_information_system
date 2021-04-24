@@ -1,14 +1,15 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {% load sis-filter %}
 
+{% block class %}professors{% endblock %}
 {% block content %}
 <dl class="dl-horizontal">
   <dt>Professor</dt>
-  <dd>{{ user.get_full_name }}</dd>
+  <dd>{{ auser.get_full_name }}</dd>
   <dt>Professor Name</dt>
-  <dd>{{ user.username }}</dd>
+  <dd>{{ auser.username }}</dd>
 </dl>
 
     <h3>Reference Items for Courses</h3>
@@ -16,13 +17,7 @@
 
   <form method="post">
     {% csrf_token %}
-     <input type="hidden" name="userid" value="{{ user.id }}"/>
-    <input
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
+     <input type="hidden" name="userid" value="{{ auser.id }}"/>
      <input id="new_item"
         action="action"
            class="btn btn-info"
@@ -30,7 +25,10 @@
     />
 
   </form>
+{% endblock %}
+
+{% block late_scripts %}
 <script>
-addButtonClickHandler('new_item', "{% url 'schooladmin:professor_item_new' userid=user.id %}");
+addButtonClickHandler('new_item', "{% url 'schooladmin:professor_item_new' userid=auser.id %}");
 </script>
 {% endblock %}

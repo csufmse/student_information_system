@@ -51,14 +51,14 @@ class CourseCreation_formtest(TestCase):
         form = CourseCreationForm({
             'major': CourseCreation_formtest.m.id,
             'title': 'the titlicious',
-            'catalog_number': '999999999999999999999999999999',
+            'catalog_number': '-2',
             'description': 'descr',
             'credits_earned': '3.0',
             'prereqs': [],
         })
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {
-            'catalog_number': ['Ensure this value has at most 20 characters (it has 30).'],
+            'catalog_number': ['Ensure this value is greater than or equal to 1.'],
         })
 
 
@@ -117,7 +117,7 @@ class CourseEdit_formtest(TestCase):
             {
                 'major': KLASS.m1.id,
                 'title': 'the titlicious',
-                'catalog_number': '123451234512345123451234512345',
+                'catalog_number': '-1',
                 'description': 'descr',
                 'credits_earned': '3.0',
                 'prereqs': [],
@@ -125,5 +125,5 @@ class CourseEdit_formtest(TestCase):
             instance=KLASS.c1)
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {
-            'catalog_number': ['Ensure this value has at most 20 characters (it has 30).'],
+            'catalog_number': ['Ensure this value is greater than or equal to 1.'],
         })

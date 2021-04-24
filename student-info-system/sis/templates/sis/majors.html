@@ -1,17 +1,19 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load sis-filter %}
 {% load bootstrap3 %}
+{% block class %}majors{% endblock %}
 
 {% block content %}
-<div>
 {%  if can_add %}
     <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:major_new' %}';">New Major</button>
 {% endif %}
 {% sis_filter 'majors' %}
-</div>
+{% endblock %}
+
+{% block late_scripts %}
 <script>
 const handler = insertScrollableDivs(applyHandlers=true);
 handler();
 </script>
-{% endblock content %}
+{% endblock  %}

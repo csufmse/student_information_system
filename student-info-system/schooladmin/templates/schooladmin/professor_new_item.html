@@ -1,13 +1,14 @@
-{% extends 'sis/base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 
+{% block class %}professors{% endblock %}
 {% block content %}
     <h3>Add Reference Item</h3>
-  <form method="post" action="{% url 'schooladmin:professor_item_new' userid=user.id %}">
+  <form method="post" action="{% url 'schooladmin:professor_item_new' userid=auser.id %}">
     {% csrf_token %}
       <table>{{ form.as_table }}</table>
-    <input
+   <input
         action="action"
         onclick="window.history.go(-1); return false;"
         type="submit"

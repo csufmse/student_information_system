@@ -7,7 +7,8 @@ from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse
 
 from sis.authentication_helpers import role_login_required
-from sis.models import (Course, Section, Profile, Semester, SectionStudent, SemesterStudent)
+from sis.models import (Course, Section, Profile, Semester, SectionStudent, Message,
+                        SemesterStudent)
 
 from sis.utils import filtered_table2, DUMMY_ID, ssects_by_sem
 
@@ -32,12 +33,13 @@ from sis.forms.user import UserEditForm
 
 @role_login_required(Profile.ACCESS_STUDENT)
 def index(request):
-    data = {
-        'current_semester': Semester.current_semester(),
-        'registration_open': Semester.semesters_open_for_registration(),
-    }
-    data.update(request.user.profile.unread_messages())
-    return render(request, 'student/home_student.html', data)
+    return current_schedule_view(request)
+    # data = {
+    #     'current_semester': Semester.current_semester(),
+    #     'registration_open': Semester.semesters_open_for_registration(),
+    # }
+    # data.update(request.user.profile.unread_messages())
+    # return render(request, 'student/home_student.html', data)
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
@@ -92,17 +94,19 @@ def registration_view(request):
                     course_val = request.POST.get(str(sect.course.id))
                     if course_val is not None and int(course_val) == sect.id:
                         if not Course.objects.get(id=sect.course.id).prerequisites_met(student):
-                            messages.error(request,
-                                           "You have not met the prerequisites for this course.")
+                            messages.error(
+                                request,
+                                f'You have not met the prerequisites for {sect.course.name}.')
                         else:
                             status = SectionStudent.REGISTERED
                             if sect.seats_remaining < 1:
                                 status = SectionStudent.WAITLISTED
-                            sectstud = SectionStudent(section=sect, student=student,
+                            sectstud = SectionStudent(section=sect,
+                                                      student=student,
                                                       status=status)
                             sectstud.save()
                             sect.is_selected = True
-                            messages.success(request, "Registration successful")
+                            messages.success(request, f'Registration for {sect.name} successful.')
     else:
         if len(semester_list) > 0:
             the_sem = semester_list[0]
@@ -133,7 +137,7 @@ def registration_view(request):
 def history(request):
     the_user = request.user
     data = {
-        'user': the_user,
+        'auser': the_user,
     }
     ssects = ssects_by_sem(the_user)
     sem_gpas = []
@@ -185,7 +189,6 @@ def history(request):
     #            self_url=reverse('student:history'),
     #            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
     #        ))
-
     return render(request, 'student/history.html', data)
 
 
@@ -216,7 +219,7 @@ def drop(request, id):
         sectionstudent_qs=droppable,
     )
     data = {
-        'user': the_user,
+        'auser': the_user,
         'count': droppable.count(),
         'drop_form': drop_form,
     }
@@ -228,7 +231,7 @@ def secitems(request):
     the_user = request.user
     the_semester = Semester.current_semester()
     data = {
-        'user': the_user,
+        'auser': the_user,
         'semester': the_semester,
     }
     data.update(
@@ -262,13 +265,15 @@ def test_majors(request):
         })
 
     data = {
-        'user': the_user,
+        'auser': the_user,
         'major': the_major,
         'major_form': major_form,
     }
     candidate_remaining = the_user.profile.student.requirements_met_list(major=the_major)
     stats = candidate_remaining.filter(met=False).aggregate(
         remaining_course_count=Count('id'), remaining_credit_count=Sum('credits_earned'))
+    if stats['remaining_credit_count'] is None:
+        stats['remaining_credit_count'] = 0
     data.update(stats)
 
     data.update(
@@ -304,10 +309,28 @@ def request_major_change(request):
 
     the_major = the_user.profile.student.major
     data = {
-        'user': the_user,
+        'auser': the_user,
         'major': the_major,
         'major_form': MajorChangeForm(initial={
             'major': the_major,
         }),
     }
     return render(request, 'student/change_major.html', data)
+
+
+@role_login_required(Profile.ACCESS_STUDENT)
+def request_transcript(request):
+    the_user = request.user
+
+    mesg = Message.objects.create(
+        sender=the_user.profile,
+        recipient=the_user.profile.student.major.contact,
+        message_type=Message.TRANSCRIPT_REQUEST_TYPE,
+        subject="Transcript Request",
+        support_data={
+            'student': the_user.profile.student.pk,
+        },
+    )
+    as_str = mesg.time_sent.strftime('%m/%d/%Y, %H:%M:%S')
+    messages.success(request, f'Request submitted at {as_str}.')
+    return redirect(reverse('sis:profile'))

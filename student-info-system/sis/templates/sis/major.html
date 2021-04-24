@@ -1,27 +1,29 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
 {% load sis-filter %}
 
-{% block content %}
-<dl class="dl-horizontal">
-  <dt>Major</dt>
-  <dd>{{ major.abbreviation }}</dd>
-  <dt>Title</dt>
-  <dd>{{ major.title }}</dd>
-  <dt>Description</dt>
-  <dd>{{ major.description }}</dd>
-  <dt>Contact</dt>
-  <dd><a href="{% url 'schooladmin:user' userid=major.contact.user.id %}">{{ major.contact }}</a></dd>
-</dl>
+{% block class %}majors{% endblock %}
 
-         <h3>Professors:</h3>
+{% block content %}
+    <dl class="dl-horizontal">
+      <dt>Major</dt>
+      <dd>{{ major.abbreviation }}</dd>
+      <dt>Title</dt>
+      <dd>{{ major.title }}</dd>
+      <dt>Description</dt>
+      <dd>{{ major.description }}</dd>
+      <dt>Contact</dt>
+      <dd><a href="{% url 'schooladmin:user' userid=major.contact.user.id %}">{{ major.contact }}</a></dd>
+    </dl>
+
+     <h3>Professors:</h3>
     {% sis_filter 'profs' %}
 
-        <h3>Required Courses:</h3>
+    <h3>Required Courses:</h3>
     {% sis_filter 'required' %}
 
-        <h3>Courses offered by Major:</h3>
+    <h3>Courses offered by Major:</h3>
     {% sis_filter 'offered' %}
 
     {%  if students_table %}
@@ -29,25 +31,18 @@
         {% sis_filter 'students' %}
     {% endif %}
     <div>
-    <input
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
     {%  if permit_edit %}
-     <input id="edit_major"
-        action="action"
-           class="btn btn-info"
-        value="Edit Major"
-    />
+        <input id="edit_major" action="action" class="btn btn-info" value="Edit Major"/>
     {% endif %}
     </div>
+{% endblock %}
+
+{% block late_scripts %}
 <script>
-{% if permit_edit %}addButtonClickHandler('edit_major', '{% url 'schooladmin:major_edit' major.id %}');{% endif %}
-stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'required'});
-stylizeRange({field:'credits_earned',name:'Cred',prefix:'required'});
-stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'offered'});
-stylizeRange({field:'credits_earned',name:'Cred',prefix:'offered'});
+    {% if permit_edit %}addButtonClickHandler('edit_major', '{% url 'schooladmin:major_edit' major.id %}');{% endif %}
+    stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'required'});
+    stylizeRange({field:'credits_earned',name:'Cred',prefix:'required'});
+    stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'offered'});
+    stylizeRange({field:'credits_earned',name:'Cred',prefix:'offered'});
 </script>
 {% endblock %}

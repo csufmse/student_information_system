@@ -1,7 +1,7 @@
 from django.urls import path
 
 from schooladmin import views
-from schooladmin.views import users
+from schooladmin.views import users, tasks
 
 app_name = 'schooladmin'
 urlpatterns = [
@@ -10,14 +10,14 @@ urlpatterns = [
     path('user/<int:userid>/edit', users.user_edit, name='user_edit'),
     path('user/<int:userid>', users.user, name='user'),
     path('user_new', users.user_new, name='user_new'),
-    path('students', users.students, name='students'),
+    path('students', views.students, name='students'),
     path('student/<int:userid>', users.student, name='student'),
     path('student/<int:userid>/transcript', views.transcript, name='transcript'),
-    path('professors', users.professors, name='professors'),
+    path('professors', views.professors, name='professors'),
     path('professor/<int:userid>', users.professor, name='professor'),
-    path('professor/<int:userid>/items', users.professor_items, name='professor_items'),
-    path('professor/<int:userid>/item_new', users.professor_item_new, name='professor_item_new'),
-    path('professor/<int:userid>/item/<int:item_id>', users.professor_item,
+    path('professor/<int:userid>/items', views.professor_items, name='professor_items'),
+    path('professor/<int:userid>/item_new', views.professor_item_new, name='professor_item_new'),
+    path('professor/<int:userid>/item/<int:item_id>', views.professor_item,
          name='professor_item'),
     path('major/<int:majorid>/edit', views.major_edit, name='major_edit'),
     path('major_new', views.major_new, name='major_new'),
@@ -49,4 +49,7 @@ urlpatterns = [
     path('semester/<int:semester_id>/edit', views.semester_edit, name='semester_edit'),
     path('semester/<int:semester_id>', views.semester, name='semester'),
     path('demographics', views.demographics, name='demographics'),
+    path('scheduled-tasks', tasks.tasks, name='tasks'),
+    path('tasks/edit', tasks.task_edit, name='task_edit'),
+    path('tasks/edit/<int:taskid>', tasks.task_edit, name='task_edit'),
 ]

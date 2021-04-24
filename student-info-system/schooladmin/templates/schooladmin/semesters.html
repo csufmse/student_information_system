@@ -1,19 +1,21 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load sis-filter %}
+{% block class %}semesters{% endblock %}
 
 {% block content %}
-<div>
     {%  if can_add %}
         <button class="btn btn-primary" onclick=location.href="{% url 'schooladmin:semester_new' %}">New Semester</button>
     {% endif %}
     <div id="Semesters">
     {% sis_filter 'semesters' %}
-</div>
-`
-</div>
+    </div>
+
+{% endblock %}
+
+{% block late_scripts %}
 <script>
 insertScrollableDivs(applyHandlers=true);
 stylizeRange({field:'year',min_label:'From Year',max_label:'To Year',prefix:"semesters"});
 </script>
-{% endblock content %}
+{% endblock  %}

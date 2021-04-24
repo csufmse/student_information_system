@@ -1,21 +1,19 @@
-{% extends 'sis/base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
+{% block class %}sections{% endblock %}
 
 {% block content %}
-  <h3>Add Section to Class</h3>
+ <h3>Add Section to Class</h3>
   <form method="post" action="{% url 'schooladmin:section_new' %}">
     {% csrf_token %}
       <table>{{ form.as_table }}</table>
-    <input
-        action="action"
-        onclick="window.history.go(-1); return false;"
-        type="submit"
-        value="Cancel" class="btn btn-info"
-    />
     <button type="submit" class="btn btn-primary">Save Section</button>
   </form>
 
+{% endblock %}
+
+{% block late_scripts %}
 <script>
 var courseMajors = {
 {%  for course in courses %}

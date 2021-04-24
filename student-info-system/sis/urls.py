@@ -1,5 +1,5 @@
 from django.urls import path
-from sis.views import messages, profile, users, majors, sectionreferenceitem
+from sis.views import messages, profile, users, majors, sectionreferenceitem, users
 
 from . import views
 

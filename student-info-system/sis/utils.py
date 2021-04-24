@@ -45,11 +45,11 @@ def filtered_table2(name=None,
     if row_class is None:
         # "table" is the class, for which we added...
         row_class = table.row_class()
-    filter = filter(request.GET, queryset=qs, prefix=name)
+    filt = filter(request.GET, queryset=qs, prefix=name)
     # weird "{name}" thing is because the HTML field has the prefix but the Filter does
     # NOT have it in the field names
-    has_filter = any(f'{name}-{field}' in request.GET for field in set(filter.get_fields()))
-    table_source = filter.qs
+    has_filter = any(f'{name}-{field}' in request.GET for field in set(filt.get_fields()))
+    table_source = filt.qs
     if wrap_list:
         table_source = list(table_source)
     tab = table(table_source, prefix=name + "-")
@@ -61,7 +61,7 @@ def filtered_table2(name=None,
         name: {
             'name': name,
             'table': tab,
-            'filter': filter,
+            'filter': filt,
             'has_filter': has_filter,
             'self_url': self_url,
             'click_url': click_url,

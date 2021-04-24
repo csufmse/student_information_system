@@ -1,8 +1,10 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
 {% load static %}
+{% load render_table from django_tables2 %}
 {% load bootstrap3 %}
-{% load sis-filter %}
-{%  load user_demographics %}
+{%  load sis-filter %}
+
+{% block class %}history{% endblock %}
 
 {% block content %}
 <dl class="dl-horizontal">
@@ -54,17 +56,6 @@
     />
 {% endcomment %}
 
- <form method="post">
-    {% csrf_token %}
-     <input type="hidden" name="userid" value="{{ user.id }}"/>
-    <input
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
-
-  </form>
 <script>
 addButtonClickHandler('test_majors', "{% url 'student:test_majors' %}");
 stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'majorcourses'});
