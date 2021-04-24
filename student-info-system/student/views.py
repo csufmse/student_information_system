@@ -173,22 +173,22 @@ def history(request):
     #            self_url=reverse('student:history'),
     #            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
     #        ))
-    #
-    #    remaining = the_user.profile.student.requirements_met_list()
-    #    stats = remaining.filter(met=False).aggregate(remaining_course_count=Count('id'),
-    #                                                  remaining_credit_count=Sum('credits_earned'))
-    #    data.update(stats)
-    #
-    #    data.update(
-    #        filtered_table2(
-    #            name='majorcourses',
-    #            qs=remaining,
-    #            filter=RequirementsCourseFilter,
-    #            table=MajorCoursesMetTable,
-    #            request=request,
-    #            self_url=reverse('student:history'),
-    #            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
-    #        ))
+
+    remaining = the_user.profile.student.requirements_met_list()
+    stats = remaining.filter(met=False).aggregate(remaining_course_count=Count('id'),
+                                                  remaining_credit_count=Sum('credits_earned'))
+    data.update(stats)
+
+    data.update(
+        filtered_table2(
+            name='majorcourses',
+            qs=remaining,
+            filter=RequirementsCourseFilter,
+            table=MajorCoursesMetTable,
+            request=request,
+            self_url=reverse('student:history'),
+            click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
+        ))
     return render(request, 'student/history.html', data)
 
 

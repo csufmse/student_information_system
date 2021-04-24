@@ -39,12 +39,15 @@
     </tr>
   {% endfor %}
 {% endfor %}
+</table>
+
 {% comment %}
     <h3>Semesters Attended:</h3>
     {% sis_filter 'semesters' %}
 
     <h3>Course History:</h3>
     {% sis_filter 'history' %}
+{% endcomment %}
 
     <h3>Required Courses for {{ user.profile.student.major.abbreviation }}:</h3>
     {% sis_filter 'majorcourses' %}
@@ -54,7 +57,6 @@
            class="btn btn-info"
         value="Explore Another Major..."
     />
-{% endcomment %}
 
 <script>
 addButtonClickHandler('test_majors', "{% url 'student:test_majors' %}");
