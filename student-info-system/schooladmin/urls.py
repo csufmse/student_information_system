@@ -20,6 +20,7 @@ urlpatterns = [
     path('professor/<int:userid>/item/<int:item_id>', views.professor_item,
          name='professor_item'),
     path('major/<int:majorid>/edit', views.major_edit, name='major_edit'),
+    path('major/<int:majorid>/new_course', views.major_new_course, name='major_new_course'),
     path('major_new', views.major_new, name='major_new'),
     path('courses', views.courses, name='courses'),
     path('course/<int:courseid>/edit', views.course_edit, name='course_edit'),
