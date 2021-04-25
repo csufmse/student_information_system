@@ -6,6 +6,7 @@ from django.shortcuts import redirect, render
 from django.utils.html import format_html
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q, Subquery
 
 from sis.authentication_helpers import role_login_required
 
@@ -60,13 +61,23 @@ def students(request):
         user_role = request.user.profile.role
     is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
 
+    qs = User.objects.all().filter(profile__role=Profile.ACCESS_STUDENT)
+    if request.method == 'POST':
+        if request.POST.get('attending-current') is not None:
+            qs = qs.filter(profile__student__semesters__date_started__lte=datetime.now().date(),
+                           profile__student__semesters__date_ended__gte=datetime.now().date())
+        if request.POST.get('attending-upcoming') is not None:
+            qs = qs.filter(
+                profile__student__semesters__date_registration_opens__lte=datetime.now().date(),
+                profile__student__semesters__date_registration_closes__gte=datetime.now().date())
+
     data = {
         'can_add': is_admin,
     }
     data.update(
         filtered_table2(
             name='students',
-            qs=User.objects.all().filter(profile__role=Profile.ACCESS_STUDENT),
+            qs=qs,
             filter=StudentFilter,
             table=StudentsTable,
             request=request,
@@ -82,10 +93,38 @@ def professors(request):
     data = {}
     if not logged_in:
         data['user'] = {'home_template': "schooladmin/home_guest.html"}
+
+    now = datetime.now().date()
+    qs = User.objects.all().filter(profile__role=Profile.ACCESS_PROFESSOR)
+    if request.method == 'POST':
+        if request.POST.get('teaching-current') is not None:
+            qs = qs.filter(profile__professor__id__in=Subquery(
+                Section.objects.filter(semester__date_started__lte=now,
+                                       semester__date_ended__gte=now).values('professor__id')))
+            the_sem_qs = Semester.objects.filter(date_started__lte=now, date_ended__gte=now)
+            if the_sem_qs.count() < 1:
+                messages.error(request, f'No current semester.')
+            else:
+                messages.info(request,
+                              f'{qs.count()} professors teaching in ' + f'{the_sem_qs[0].name}')
+
+        if request.POST.get('teaching-upcoming') is not None:
+            qs = qs.filter(profile__professor__id__in=Subquery(
+                Section.objects.filter(semester__date_registration_opens__lte=now,
+                                       semester__date_registration_closes__gte=now).values(
+                                           'professor__id')))
+            the_sem_qs = Semester.objects.filter(date_registration_opens__lte=now,
+                                                 date_registration_closes__gte=now)
+            if the_sem_qs.count() < 1:
+                messages.error(request, f'No semester open for registration.')
+            else:
+                messages.info(request,
+                              f'{qs.count()} professors teaching in ' + f'{the_sem_qs[0].name}')
+
     data.update(
         filtered_table2(
             name='professors',
-            qs=User.objects.all().filter(profile__role=Profile.ACCESS_PROFESSOR),
+            qs=qs,
             filter=ProfessorFilter,
             table=ProfessorsTable,
             request=request,
@@ -214,13 +253,40 @@ def courses(request):
         user_role = request.user.profile.role
     is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
 
+    now = datetime.now().date()
+    qs = Course.objects.all()
+    if request.method == 'POST':
+        if request.POST.get('offered-current') is not None:
+            qs = qs.filter(id__in=Subquery(
+                Section.objects.filter(semester__date_started__lte=now,
+                                       semester__date_ended__gte=now).values('course__id')))
+            the_sem_qs = Semester.objects.filter(date_started__lte=now, date_ended__gte=now)
+            if the_sem_qs.count() < 1:
+                messages.error(request, f'No current semester.')
+            else:
+                messages.info(request,
+                              f'{qs.count()} courses offered in ' + f'{the_sem_qs[0].name}')
+
+        if request.POST.get('offered-upcoming') is not None:
+            qs = qs.filter(id__in=Subquery(
+                Section.objects.filter(semester__date_registration_opens__lte=now,
+                                       semester__date_registration_closes__gte=now).values(
+                                           'course__id')))
+            the_sem_qs = Semester.objects.filter(date_registration_opens__lte=now,
+                                                 date_registration_closes__gte=now)
+            if the_sem_qs.count() < 1:
+                messages.error(request, f'No semester open for registration.')
+            else:
+                messages.info(request,
+                              f'{qs.count()} courses offered in ' + f'{the_sem_qs[0].name}')
+
     data = {
         'can_add': is_admin,
     }
     data.update(
         filtered_table2(
             name='courses',
-            qs=Course.objects.all(),
+            qs=qs,
             filter=CourseFilter,
             table=CoursesTable,
             request=request,
@@ -329,11 +395,20 @@ def semesters(request):
     if logged_in:
         user_role = request.user.profile.role
     is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
+
     data = {'can_add': is_admin}
+
+    qs = Semester.objects.all()
+    if request.method == 'POST':
+        if request.POST.get('active') is not None:
+            qs = Semester.active_semesters()
+        elif request.POST.get('upcoming') is not None:
+            qs = Semester.objects.filter(date_started__gte=datetime.now().date())
+
     data.update(
         filtered_table2(
             name='semesters',
-            qs=Semester.objects.all(),
+            qs=qs,
             filter=SemesterFilter,
             table=SemestersTable,
             request=request,
