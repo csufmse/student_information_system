@@ -9,6 +9,11 @@
 {%  if can_add %}
   <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
 {%  endif %}
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="attending-current" class="btn btn-primary submitme">Attending Current Semester</button>
+        <button type="submit" name="attending-upcoming" class="btn btn-primary submitme">Attending Upcoming Semesters</button>
+    </form>
     {% sis_filter 'students' %}
 {% endblock %}
 

@@ -8,10 +8,12 @@
 {%  if can_add %}
     <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:course_new' %}';">New Course</button>
 {% endif %}
-    <div>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="offered-current" class="btn btn-primary submitme">Offered Current Semester</button>
+        <button type="submit" name="offered-upcoming" class="btn btn-primary submitme">Offered Upcoming Semester</button>
+    </form>
 {% sis_filter 'courses' %}
-
-</div>
 {% endblock content %}
 
 {% block late_scripts %}

@@ -693,6 +693,8 @@ class Semester(models.Model):
     def current_semester(cls, at=None):
         if at is None:
             at = datetime.now()
+        if isinstance(at, datetime):
+            at = at.date()
         sems = Semester.objects.filter(date_started__lte=at, date_ended__gte=at)
         if not sems.count():
             return None
@@ -705,8 +707,21 @@ class Semester(models.Model):
     def semesters_open_for_registration(cls, at=None):
         if at is None:
             at = datetime.now()
+        if isinstance(at, datetime):
+            at = at.date()
         return Semester.objects.filter(date_registration_opens__lte=at,
                                        date_registration_closes__gte=at)
+
+    # active = in session or in registration
+    @classmethod
+    def active_semesters(cls, at=None):
+        if at is None:
+            at = datetime.now()
+        if isinstance(at, datetime):
+            at = at.date()
+        return Semester.objects.filter(
+            Q(date_registration_opens__lte=at, date_registration_closes__gte=at) |
+            Q(date_started__lte=at, date_ended__gte=at))
 
     date_registration_opens = models.DateField('Registration Opens')
     date_registration_closes = models.DateField(

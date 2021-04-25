@@ -219,7 +219,14 @@
     border-radius: 5px;
     font-family: Arial, Helvetica, sans-serif;
     background-color: #eeff54;
-  color: black;
+    color: black;
+    padding: 22px 10px;
+}
+.info {
+    border-radius: 5px;
+    font-family: Arial, Helvetica, sans-serif;
+    background-color: dodgerblue;
+    color: white;
     padding: 22px 10px;
 }
 /* this is the field validation error */
