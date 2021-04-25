@@ -11,6 +11,8 @@
     <dd><a href="{% url 'sis:major' majorid=course.major.id %}">{{ course.major }}: {{  course.major.name }}</a></dd>
   <dt>Catalog Number</dt>
   <dd>{{ course.catalog_number }}</dd>
+  <dt>Course Level</dt>
+  <dd>{% if course.graduate %}Graduate{% else %}Undergraduate{% endif %}</dd>
   <dt>Title</dt>
   <dd>{{ course.title }}</dd>
   <dt>Description</dt>

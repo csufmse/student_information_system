@@ -48,7 +48,7 @@
       {% if s.new_course %}
         <tr class="class_heading_row p_row" id="{{s.course}}">
           <th>{{s.course.name}}</th>
-          <th>{{s.course.title}}</th>
+          <th>{% if s.course.graduate %}(GRAD) {% endif %}{{s.course.title}}</th>
           <th>{{s.course.credits_earned}}</th>
           <th>{{s.course.description}}</th>
           <th>{% if s.course.prereqs.all %}
