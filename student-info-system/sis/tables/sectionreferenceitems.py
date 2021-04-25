@@ -5,9 +5,10 @@ from sis.tables import *
 
 
 class SectionReferenceItemsTable(tables.Table):
-    section = ClassyColumn(css_class_base='section_name',
-                           accessor='name',
+    section = ClassyColumn(css_class_base='sectionumber',
+                           accessor='section__name',
                            order_by=('course__major__abbreviation', 'course__catalog_number'))
+    course = ClassyColumn(css_class_base='coursename', accessor='section__course__title')
     semester = ClassyColumn(accessor='section__semester', css_class_base='semester')
     professor = ClassyColumn(accessor='section__professor', css_class_base='user_name')
     index = ClassyColumn(verbose_name="#", css_class_base='item_index')
@@ -20,9 +21,10 @@ class SectionReferenceItemsTable(tables.Table):
     description = ClassyColumn(css_class_base='item_description', accessor='item__description')
 
     class Meta:
+        model = SectionReferenceItem
         template_name = "django_tables2/bootstrap.html"
-        fields = ('semester', 'section', 'professor', 'index', 'type', 'title', 'edition',
-                  'description', 'link')
+        fields = ('semester', 'section', 'course', 'professor', 'index', 'type', 'title',
+                  'edition', 'description', 'link')
         row_attrs = {'class': 'secitem_row', 'data-id': lambda record: record.pk}
         attrs = {"class": 'secitems_table'}
 

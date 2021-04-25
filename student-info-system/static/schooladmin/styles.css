@@ -83,7 +83,7 @@
 .active_col, .capac_col, .catnumber_col, .classlevel_col, .course_col, .courselevel_col, .coursetitle_col,
 .credits_col, .date_col, .drop_col, .gpa_col, .hours_col, .lettergrade_col, .location_col, .major_col,
 .majordescr_col, .majorname_col, .message_addr_col, .message_date_col, .message_subject_col, .message_body_col, .message_priority_col,
-.message_unread_col, .met_col, .professor_col, .remaining_col, .role_col, .sched_col,
+.message_unread_col, .met_col, .professor_col, .remaining_col, .role_col, .sched_col, .sectionnumber_col,
 .sectionstatus_col, .sectionstudentstatus_col, .sem_col, .semester_col, .session_col, .user_name_col, .username_col {
   text-align: center;
 }
@@ -92,7 +92,7 @@
 .active_cell, .capac_cell, .catnumber_cell, .classlevel_cell, .course_cell, .courselevel_cell, .credits_cell,
 .date_cell, .gpa_cell, .hours_cell, .lettergrade_cell, .major_cell, .majorname_cell, .met_cell,
 .message_date_cell, .message_priority_cell,
-.message_unread_cell, .drop_cell,
+.message_unread_cell, .drop_cell, .sectionnumber_cell,
 .prof_cell, .remaining_cell, .role_cell, .sched_cell, .section_name_cell, .section_number_cell, .sectionstatus_cell,
 .sectionstudentstatus_cell, .sem_cell, .semester_cell, .session_cell, .year_cell {
   text-align: center;
@@ -108,6 +108,9 @@
 }
 .classlevel_cell, .courselevel_cell, .date_cell, .drop_cell, .gpa_cell, .major_cell, .message_addr_cell, .session_cell {
   width: 110px;
+}
+.sectionnumber_cell {
+  width: 130px;
 }
 .course_cell, .section_name_cell, .sched_cell {
   width: 150px;
