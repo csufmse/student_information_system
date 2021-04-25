@@ -1,11 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AdminPasswordChangeForm
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.db.models import Exists, OuterRef
 
 from sis.authentication_helpers import role_login_required
 
@@ -26,14 +26,8 @@ from sis.filters.section import SectionFilter
 from sis.filters.sectionstudent import SectionStudentFilter
 from sis.filters.semester import SemesterFilter
 from sis.filters.user import StudentFilter, UserFilter, ProfessorFilter
-from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
 from sis.tables.messages import MessageSentTable, MessageReceivedTable
 from sis.tables.referenceitems import ProfReferenceItemsTable
-from sis.tables.sections import SectionForClassTable, SectionsTable
-from sis.tables.sectionstudents import (StudentHistoryTable, StudentInSectionTable)
-from sis.tables.semesters import SemestersSummaryTable, SemestersTable
-from sis.tables.users import (UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable,
-                              ProfessorsTable)
 
 from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
 from sis.tables.sections import SectionForClassTable, SectionsTable
@@ -49,7 +43,8 @@ def userslist(request):
         request, 'schooladmin/users.html',
         filtered_table2(
             name='users',
-            qs=User.objects.exclude(profile__role=Profile.ACCESS_NONE),
+            qs=User.objects.exclude(profile__role=Profile.ACCESS_NONE).exclude(
+                ~Exists(Profile.objects.filter(user__username=OuterRef('username')))),
             filter=UserFilter,
             table=FullUsersTable,
             request=request,
