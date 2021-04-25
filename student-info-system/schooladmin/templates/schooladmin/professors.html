@@ -5,7 +5,9 @@
 {% block class %}professors{% endblock %}
 
 {% block content %}
-  <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
+    {%  if can_add %}
+        <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
+    {% endif %}
     {% sis_filter 'professors' %}
 {% endblock %}
 

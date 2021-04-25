@@ -79,7 +79,13 @@ def students(request):
 
 def professors(request):
     logged_in = request.user.is_authenticated
-    data = {}
+    if logged_in:
+        user_role = request.user.profile.role
+    is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
+
+    data = {
+        'can_add': is_admin,
+    }
     if not logged_in:
         data['user'] = {'home_template': "schooladmin/home_guest.html"}
     data.update(
