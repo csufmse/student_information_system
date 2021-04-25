@@ -1229,6 +1229,13 @@ class Message(models.Model):
         ) and self.time_handled is None and self.time_sent < as_of - timedelta(days=7)
 
 
+class UnknownProfileType(Exception):
+
+    def __init__(self, userid, role):
+        self.userid = userid
+        self.role = role
+
+
 def home_template(self):
     if self.profile.role == Profile.ACCESS_ADMIN:
         return "schooladmin/home_admin.html"
@@ -1236,7 +1243,7 @@ def home_template(self):
         return "professor/home_professor.html"
     elif self.profile.role == Profile.ACCESS_STUDENT:
         return "student/home_student.html"
-    return "schooladmin/home_guest.html"
+    raise UnknownProfileType(self.userid, self.profile.role)
 
 
 User.add_to_class('home_template', home_template)
