@@ -1,4 +1,7 @@
-{% extends 'sis/subpage_base.html' %}
+{% extends user.home_template %}
+{% load static %}
+{% load bootstrap3 %}
+{% block class %}tasks{% endblock %}
 
 {% block scripts %}
   {{block.super}}
