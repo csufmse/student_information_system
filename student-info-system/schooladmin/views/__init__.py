@@ -816,14 +816,9 @@ def demographics(request):
     data = {
         'students': stud_form,
         'professors': prof_form,
-<<<<<<< HEAD
-        'date_prepared': datetime.now().date()
-    })
-=======
         'date_prepared': datetime.now().date(),
     }
 
     if not logged_in:
         data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/demographics.html', data)
->>>>>>> develop
