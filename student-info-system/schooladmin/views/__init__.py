@@ -724,6 +724,7 @@ def demographics(request):
     data = {
         'students': stud_form,
         'professors': prof_form,
+        'date_prepared': datetime.now().date(),
     }
 
     if not logged_in:
