@@ -26,6 +26,7 @@ class CourseCreation_formtest(TestCase):
             form.errors, {
                 'major': ['This field is required.'],
                 'title': ['This field is required.'],
+                'graduate': ['This field is required.'],
                 'catalog_number': ['This field is required.'],
                 'credits_earned': ['This field is required.'],
             })
@@ -37,6 +38,7 @@ class CourseCreation_formtest(TestCase):
             'catalog_number': '102',
             'description': 'descr',
             'credits_earned': '3.0',
+            'graduate': False,
             'prereqs': [],
         })
         self.assertTrue(form.is_valid())
@@ -55,6 +57,7 @@ class CourseCreation_formtest(TestCase):
             'description': 'descr',
             'credits_earned': '3.0',
             'prereqs': [],
+            'graduate': False,
         })
         self.assertFalse(form.is_valid())
         self.assertEqual(form.errors, {
@@ -83,6 +86,7 @@ class CourseEdit_formtest(TestCase):
                 'description': 'descr',
                 'credits_earned': '3.0',
                 'prereqs': [],
+                'graduate': False,
             },
             instance=KLASS.c1)
         self.assertEqual(form.errors, {})
@@ -103,6 +107,7 @@ class CourseEdit_formtest(TestCase):
                 'catalog_number': '',
                 'description': 'descr',
                 'credits_earned': '3.0',
+                'graduate': False,
                 'prereqs': [],
             },
             instance=KLASS.c1)
@@ -120,6 +125,7 @@ class CourseEdit_formtest(TestCase):
                 'catalog_number': '-1',
                 'description': 'descr',
                 'credits_earned': '3.0',
+                'graduate': False,
                 'prereqs': [],
             },
             instance=KLASS.c1)

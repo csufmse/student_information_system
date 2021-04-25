@@ -15,6 +15,8 @@
   <dd>{{ user.email }}</dd>
   <dt>Major</dt>
   <dd><a href="{% url 'sis:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
+  <dt>Class Level</dt>
+  <dd>{{  user.profile.student.class_level }}</dd>
   <dt>Bio</dt>
   <dd>{{  user.profile.bio }}</dd>
 </dl>

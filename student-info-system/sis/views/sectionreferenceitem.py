@@ -8,6 +8,7 @@ from sis.models import (SectionReferenceItem)
 
 
 def sectionreferenceitem(request, id):
+    logged_in = request.user.is_authenticated
     qs = SectionReferenceItem.objects.filter(id=id)
     if qs.count() < 1:
         return HttpResponse("No such sectionreferenceitem")
@@ -18,4 +19,6 @@ def sectionreferenceitem(request, id):
         'item': the_sri.item,
         'index': the_sri.index,
     }
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'sis/sectionreferenceitem.html', data)

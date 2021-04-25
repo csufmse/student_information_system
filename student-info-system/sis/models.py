@@ -247,11 +247,13 @@ class ClassLevel:
     SENIOR = 'Senior'
     JUNIOR = 'Junior'
     SOPHOMORE = 'Sophomore'
+    GRADUATE = 'Graduate'
     LEVELS = (
         (FRESHMAN, FRESHMAN),
         (SOPHOMORE, SOPHOMORE),
         (JUNIOR, JUNIOR),
         (SENIOR, SENIOR),
+        (GRADUATE, GRADUATE),
     )
     CREDITS_FOR_LEVEL = {
         FRESHMAN: 0,
@@ -282,6 +284,9 @@ class Student(models.Model):
                                        through='SemesterStudent',
                                        symmetrical=False,
                                        related_name='semester_students')
+
+    STUDENT_TYPES = ((True, 'Graduate Student'), (False, 'Undergraduate'))
+    grad_student = models.BooleanField('Graduate Student', default=False)
 
     class Meta:
         ordering = ['profile__user__username']
@@ -356,8 +361,11 @@ class Student(models.Model):
         return grade_points / float(credits_attempted)
 
     def class_level(self):
-        creds = self.credits_earned()
-        level = ClassLevel.level(creds)
+        if self.grad_student:
+            level = "Graduate"
+        else:
+            creds = self.credits_earned()
+            level = ClassLevel.level(creds)
         return level
 
     def section_reference_items_for(self, semester=None):
@@ -535,6 +543,7 @@ class Course(models.Model):
     description = models.CharField('Description', max_length=256, blank=True)
     credits_earned = models.DecimalField('Credits', max_digits=2, decimal_places=1)
     prereqs = models.ManyToManyField('self', symmetrical=False, through='CoursePrerequisite')
+    graduate = models.BooleanField("Graduate Level", default=False)
 
     class Meta:
         unique_together = (('major', 'catalog_number'),)
@@ -1221,6 +1230,13 @@ class Message(models.Model):
         ) and self.time_handled is None and self.time_sent < as_of - timedelta(days=7)
 
 
+class UnknownProfileType(Exception):
+
+    def __init__(self, userid, role):
+        self.userid = userid
+        self.role = role
+
+
 def home_template(self):
     if self.profile.role == Profile.ACCESS_ADMIN:
         return "schooladmin/home_admin.html"
@@ -1228,7 +1244,7 @@ def home_template(self):
         return "professor/home_professor.html"
     elif self.profile.role == Profile.ACCESS_STUDENT:
         return "student/home_student.html"
-    return "schooladmin/home_guest.html"
+    raise UnknownProfileType(self.userid, self.profile.role)
 
 
 User.add_to_class('home_template', home_template)

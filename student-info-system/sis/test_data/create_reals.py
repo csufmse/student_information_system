@@ -91,7 +91,7 @@ def createData():
     shuffle(courses)
     letter = ('F', 'D', 'C', 'B', 'A')
 
-    max_number_of_courses_to_create = 3 * Professor.objects.count()
+    max_number_of_courses_to_create = 4 * Professor.objects.count()
 
     semesters = Semester.objects.order_by('date_started')
     error_count = 0
@@ -113,7 +113,7 @@ def createData():
 
         # creating less than actually needed
         number_of_courses_to_create = min(max_number_of_courses_to_create,
-                                          int(len(most_needed) * 0.75))
+                                          int(len(most_needed) * 1.0))
 
         print(f'{len(most_needed)} courses needed by {len(semstudents)} students. ', end='')
         if len(semstudents):
@@ -179,10 +179,10 @@ def createData():
         for semstud in semstudents:
 
             # now schedule students for it
-            number_attended = randrange(3, 6)
+            number_to_attend = randrange(3, 6)
 
             print(f'{semstud.student} ({semstud.student.major.abbreviation}) reg ' +
-                  f'for {number_attended} sections: ',
+                  f'for {number_to_attend} sections: ',
                   end='')
 
             # start by listing the ones for whom we've met the requirements
@@ -196,10 +196,10 @@ def createData():
                       f'classes in semester {sem}')
                 continue
 
-            elif len(prereqs_met) < number_attended:
-                print(f'WARNING: Student {semstud.student} wants to attend {number_attended} ' +
+            elif len(prereqs_met) < number_to_attend:
+                print(f'WARNING: Student {semstud.student} wants to attend {number_to_attend} ' +
                       f'courses but only meets the prereqs for {len(prereqs_met)}.')
-                number_attended = len(prereqs_met)
+                number_to_attend = len(prereqs_met)
 
             # don't take classes twice
             courses_passed = [
@@ -228,9 +228,9 @@ def createData():
             print(f'deep_secs={len(reqd_secs)}, ', end='')
 
             # take as many as we can
-            attending = reqd_secs[0:number_attended]
+            attending = reqd_secs[0:number_to_attend]
 
-            if number_attended > len(attending):
+            if number_to_attend > len(attending):
                 # but if there weren't enough, take the others
                 extras = diff(prereqs_met, reqd_secs)
 
@@ -242,13 +242,16 @@ def createData():
                         extras))
 
                 potentials = diff(extras, attending)
-                if len(potentials) < number_attended - len(attending):
+                if len(potentials) + len(attending) <= number_to_attend:
                     attending.extend(potentials)
                 else:
-                    while len(attending) < number_attended:
+                    while len(attending) < number_to_attend and len(extras) > 0:
                         aSec = choices(extras, weights=weights, k=1)[0]
                         if aSec not in attending:
                             attending.append(aSec)
+                        where = extras.index(aSec)
+                        del extras[where]
+                        del weights[where]
 
             print(f'attending={len(attending)}')
 
@@ -275,6 +278,12 @@ def createData():
 
                     print(f'Opened new section {sec} in {sem}')
                     secstud = sec.register(student=semstud.student, check_section_status=False)
+                except Exception:
+                    error_count = error_count + 1
+                    print(f'ERROR: Unable to put {secstud.student} in {sec} [sec={sec.id}, ' +
+                          f'stud={secstud.student.profile.user.id}, ' + f'grade={ltr}]')
+                    print(f'attending = {attending}')
+                    continue
 
                 set_up_sectionstudent(secstud)
 

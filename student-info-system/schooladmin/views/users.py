@@ -438,4 +438,6 @@ def professor(request, userid):
                 self_url=reverse('schooladmin:professor', args=[userid]),
             ))
 
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/professor.html', data)

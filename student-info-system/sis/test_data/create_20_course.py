@@ -9,10 +9,9 @@ django.setup()  # noqa
 
 from django.db import connection
 
-from random import randint
+from random import randint, random
 
 from sis.models import Course, Major, Semester
-from django.db import connection
 
 specs = (
     ('101', 'Underwater Basketweaving', 'The Career, The Myth', '5.0'),
@@ -258,7 +257,13 @@ def createData():
     error_count = 0
     for (cn, t, d, cr) in specs[:to_generate]:
         m = randobj(Major)
-        c = Course(major=m, catalog_number=cn, title=t, description=d, credits_earned=cr)
+        grad = int(cn) >= 500
+        c = Course(major=m,
+                   catalog_number=cn,
+                   title=t,
+                   description=d,
+                   graduate=grad,
+                   credits_earned=cr)
         try:
             c.save()
         except Exception:
@@ -266,7 +271,7 @@ def createData():
             print(f'ERROR: Unable to save {m}-{cn} {t} [m={m},catalog_number={cn}, ' +
                   f'title="{t}", description="{d}", credits_earned={cr}]')
         else:
-            print(f'create course {m}-{cn} {t}')
+            print(f'create course {m}-{cn} {t} {"GRAD" if grad else ""}')
 
     if error_count:
         print(f'ERROR: {error_count} errors occurred')
