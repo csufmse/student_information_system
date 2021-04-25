@@ -1,5 +1,6 @@
 import os
 import sys
+from random import random
 
 import django
 
@@ -441,7 +442,7 @@ def set_choice_attr(instance, attribute_name, options, weights):
 
 
 def createData():
-    to_generate = min(200, len(specs))
+    to_generate = min(300, len(specs))
 
     set_pass = True
 
@@ -479,7 +480,8 @@ def createData():
             continue
         else:
             m = choice(majors)
-            s = Student(profile=profile, major=m)
+            is_grad = random() < 0.2
+            s = Student(profile=profile, major=m, grad_student=is_grad)
 
             try:
                 s.save()
@@ -489,7 +491,8 @@ def createData():
                 usr.delete()
                 continue
 
-            print(f'create stud {line} {u} ({f} {l}) {m}')
+            class_txt = 'GRAD' if is_grad else ''
+            print(f'create stud {line} {u} ({f} {l}) {m} {class_txt}')
         line = line + 1
 
     if error_count:

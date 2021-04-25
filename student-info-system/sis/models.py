@@ -247,11 +247,13 @@ class ClassLevel:
     SENIOR = 'Senior'
     JUNIOR = 'Junior'
     SOPHOMORE = 'Sophomore'
+    GRADUATE = 'Graduate'
     LEVELS = (
         (FRESHMAN, FRESHMAN),
         (SOPHOMORE, SOPHOMORE),
         (JUNIOR, JUNIOR),
         (SENIOR, SENIOR),
+        (GRADUATE, GRADUATE),
     )
     CREDITS_FOR_LEVEL = {
         FRESHMAN: 0,
@@ -282,6 +284,9 @@ class Student(models.Model):
                                        through='SemesterStudent',
                                        symmetrical=False,
                                        related_name='semester_students')
+
+    STUDENT_TYPES = ((True, 'Graduate Student'), (False, 'Undergraduate'))
+    grad_student = models.BooleanField('Graduate Student', default=False)
 
     class Meta:
         ordering = ['profile__user__username']
@@ -356,8 +361,11 @@ class Student(models.Model):
         return grade_points / float(credits_attempted)
 
     def class_level(self):
-        creds = self.credits_earned()
-        level = ClassLevel.level(creds)
+        if self.grad_student:
+            level = "Graduate"
+        else:
+            creds = self.credits_earned()
+            level = ClassLevel.level(creds)
         return level
 
     def section_reference_items_for(self, semester=None):
