@@ -12,7 +12,7 @@ from sis.authentication_helpers import role_login_required
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, Semester, Student,
                         SectionStudent, Profile, Message)
 
-from sis.utils import filtered_table, filtered_table2, DUMMY_ID
+from sis.utils import filtered_table, filtered_table2, DUMMY_ID, next_prev
 
 from sis.filters.course import CourseFilter
 from sis.filters.section import SectionFilter
@@ -246,6 +246,7 @@ def course(request, courseid):
     the_course = qs.get()
 
     data = {'course': the_course, 'can_edit': is_admin}
+    data.update(next_prev(request, 'courses', courseid))
     data.update(
         filtered_table2(
             name='sections',
@@ -358,6 +359,7 @@ def semester(request, semester_id):
     the_semester = qs.get()
 
     data = {'semester': the_semester, 'can_add': is_admin}
+    data.update(next_prev(request, 'semesters', semester_id))
     data.update(
         filtered_table2(
             name='sections',
@@ -490,6 +492,7 @@ def section(request, sectionid):
         'can_refresh_items': is_prof and the_section.professor == the_profile.professor,
         'can_see_students': can_see_students,
     }
+    data.update(next_prev(request, 'sections', sectionid))
     if can_see_students:
         data.update(
             filtered_table2(

@@ -9,7 +9,7 @@ from sis.authentication_helpers import role_login_required
 
 from sis.models import (Major, Professor, Section, Semester, Student, Course, Profile)
 
-from sis.utils import filtered_table2, DUMMY_ID
+from sis.utils import filtered_table2, DUMMY_ID, next_prev
 
 from sis.filters.course import CourseFilter
 from sis.filters.major import MajorFilter
@@ -65,6 +65,7 @@ def major(request, majorid):
         'permit_edit': is_admin,
         'include_students': include_students,
     }
+    data.update(next_prev(request, 'majors', majorid))
     data.update(
         filtered_table2(
             name='profs',

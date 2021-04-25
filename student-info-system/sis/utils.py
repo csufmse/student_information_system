@@ -57,6 +57,12 @@ def filtered_table2(name=None,
     if scrollable:
         div_classes += ' scrollify-me'
     RequestConfig(request, paginate={"per_page": page_size, "page": 1}).configure(tab)
+
+    # do this rather than the table_source because table implements sorting/ordering
+    # do it after RequestConfig because that's where sorting is set up.
+    pk_list = ','.join([str(x.record.pk) for x in tab.rows])
+    request.session[name + '-pks'] = pk_list
+
     return {
         name: {
             'name': name,
@@ -69,3 +75,19 @@ def filtered_table2(name=None,
             'div_classes': div_classes,
         }
     }
+
+
+def next_prev(request, name, key, fallback=None):
+    pk_list = request.session.get(name + '-pks', None)
+    if pk_list is None and fallback:
+        pk_list = request.session.get(fallback + '-pks', None)
+    data = {}
+    if pk_list:
+        as_list = [int(x) for x in pk_list.split(',')]
+        if key in as_list:
+            loc = as_list.index(key)
+            if loc > 0:
+                data['prev'] = as_list[loc - 1]
+            if loc < len(as_list) - 1:
+                data['next'] = as_list[loc + 1]
+    return data

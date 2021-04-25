@@ -5,6 +5,11 @@
 {% block class %}semesters{% endblock %}
 
 {% block content %}
+ <form method="post">
+    {% csrf_token %}
+    {% if prev %} <input id="prev" action="action" class="btn btn-info" value="Previous"/> {% endif %}
+    {% if next %} <input id="next" action="action" class="btn btn-info" value="Next"/> {% endif %}
+ </form>
 <dl class="dl-horizontal">
   <dt>Semester</dt>
     <dd>{{ semester.session }} - {{ semester.session_name }}</dd>
@@ -46,5 +51,7 @@
         addButtonClickHandler('section_new', "{% url 'schooladmin:semester_section_new' semester.id %}");
         addButtonClickHandler('edit_semester', "{% url 'schooladmin:semester_edit' semester.id %}");
     {% endif %}
+{% if prev %} addButtonClickHandler('prev', "{% url 'schooladmin:semester' prev %}"); {% endif %}
+{% if next %} addButtonClickHandler('next', "{% url 'schooladmin:semester' next %}"); {% endif %}
 </script>
 {% endblock %}

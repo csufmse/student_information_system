@@ -6,6 +6,11 @@
 {% block class %}courses{% endblock %}
 
 {% block content %}
+ <form method="post">
+    {% csrf_token %}
+    {% if prev %} <input id="prev" action="action" class="btn btn-info" value="Previous"/> {% endif %}
+    {% if next %} <input id="next" action="action" class="btn btn-info" value="Next"/> {% endif %}
+ </form>
 <dl class="dl-horizontal">
   <dt>Major</dt>
     <dd><a href="{% url 'sis:major' majorid=course.major.id %}">{{ course.major }}: {{  course.major.name }}</a></dd>
@@ -44,5 +49,7 @@ stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'prereqs'});
 stylizeRange({field:'credits_earned',name:'Cred',prefix:'prereqs'});
 stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'neededby'});
 stylizeRange({field:'credits_earned',name:'Cred',prefix:'neededby'});
+{% if prev %} addButtonClickHandler('prev', "{% url 'schooladmin:course' prev %}"); {% endif %}
+{% if next %} addButtonClickHandler('next', "{% url 'schooladmin:course' next %}"); {% endif %}
 </script>
 {% endblock %}

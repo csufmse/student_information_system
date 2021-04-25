@@ -17,7 +17,7 @@ from sis.forms.student import StudentEditForm, StudentCreationForm
 from sis.forms.user import UserCreationForm, UserEditForm
 from sis.forms.professor import ProfessorCreationForm, ProfessorEditForm
 
-from sis.utils import filtered_table2, DUMMY_ID
+from sis.utils import filtered_table2, DUMMY_ID, next_prev
 from sis.filters.course import CourseFilter
 from sis.filters.message import (FullSentMessageFilter, FullReceivedMessageFilter,
                                  SentMessageFilter, ReceivedMessageFilter)
@@ -89,6 +89,9 @@ def user(request, userid):
         'auser': the_user,
         'show_all': is_admin,
     }
+
+    data.update(next_prev(request, 'users', userid))
+
     if is_admin:
         data.update(
             filtered_table2(
@@ -295,6 +298,8 @@ def student(request, userid):
         'auser': the_user,
         'can_edit': is_admin,
     }
+    data.update(next_prev(request, 'students', userid, fallback='users'))
+
     data.update(
         filtered_table2(
             name='semesters',
@@ -366,8 +371,6 @@ def professor(request, userid):
     if logged_in:
         user_role = request.user.profile.role
     is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
-    if logged_in:
-        the_user = request.user
 
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:
@@ -384,6 +387,9 @@ def professor(request, userid):
         return redirect('schooladmin:users')
 
     data = {'auser': the_prof, 'can_edit': is_admin}
+
+    data.update(next_prev(request, 'professors', userid, fallback='users'))
+
     data.update(
         filtered_table2(
             name='semesters',

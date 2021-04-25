@@ -5,6 +5,11 @@
 {% block class %}sections{% endblock %}
 
 {% block content %}
+ <form method="post">
+    {% csrf_token %}
+    {% if prev %} <input id="prev" action="action" class="btn btn-info" value="Previous"/> {% endif %}
+    {% if next %} <input id="next" action="action" class="btn btn-info" value="Next"/> {% endif %}
+ </form>
 <dl class="dl-horizontal">
 <h3>Section: {{ section }}</h3>
   <dt>Major</dt>
@@ -61,5 +66,7 @@
     addButtonClickHandler('manage_students', '{% url 'schooladmin:section_students_manage' sectionid=section.id %}');
 {% endif %}
 stylizeRange({field:'index',min_label:'From #',max_label:'To #',prefix:"secitems"});
+{% if prev %} addButtonClickHandler('prev', "{% url 'schooladmin:section' prev %}"); {% endif %}
+{% if next %} addButtonClickHandler('next', "{% url 'schooladmin:section' next %}"); {% endif %}
 </script>
 {% endblock %}
