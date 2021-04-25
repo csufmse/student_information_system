@@ -40,26 +40,20 @@ class UserFilter(FilterSet):
 
     is_active = ChoiceFilter(label='Enabled?', choices=((True, 'Enabled'), (False, 'Disabled')))
 
-    # TODO - implement (BJM)
-    # class_level = ChoiceFilter(field_name='student__class_level',
-    #                            label='Class Level',
-    #                            choices=Student.CLASSLEVELS,
-    #                                     ),method='filter_class_level')
-    # gpa = RangeFilter(field_name='student__gpa')
-    #
-    # def filter_class_level(self, queryset, name, value):
-    #     return queryset.filter(
-    #         Q(professor__major__abbreviation=value) | Q(student__major__abbreviation=value))
+    graduate = ChoiceFilter(field_name='profile__student__grad_student',
+                            label='Grad Student?',
+                            choices=((True, 'Grad Student'), (False, 'Undergrad')))
 
     class Meta:
         model = User
-        fields = ['username', 'name', 'major', 'access_role', 'is_active']
+        fields = ['username', 'name', 'major', 'access_role', 'graduate', 'is_active']
 
     def __init__(self, *args, **kwargs):
         super(UserFilter, self).__init__(*args, **kwargs)
         self.filters['is_active'].extra.update({'empty_label': 'Enabled/Disabled'})
         self.filters['access_role'].extra.update({'empty_label': 'Any Role'})
         self.filters['major'].extra.update({'empty_label': 'Any Major/Dept'})
+        self.filters['graduate'].extra.update({'empty_label': 'Grad/Undergrad'})
 
 
 class StudentFilter(FilterSet):
@@ -84,20 +78,19 @@ class StudentFilter(FilterSet):
 
     is_active = ChoiceFilter(label='Enabled?', choices=((True, 'Enabled'), (False, 'Disabled')))
 
+    graduate = ChoiceFilter(field_name='profile__student__grad_student',
+                            label='Grad Student?',
+                            choices=((True, 'Grad Student'), (False, 'Undergrad')))
+
     class Meta:
         model = User
-        fields = [
-            'username',
-            'name',
-            'major',
-            # 'gpa', 'class_level',
-            'is_active'
-        ]
+        fields = ['username', 'name', 'major', 'graduate', 'is_active']
 
     def __init__(self, *args, **kwargs):
         super(StudentFilter, self).__init__(*args, **kwargs)
         self.filters['is_active'].extra.update({'empty_label': 'Enabled/Disabled'})
         self.filters['major'].extra.update({'empty_label': 'Any Major/Dept'})
+        self.filters['graduate'].extra.update({'empty_label': 'Grad/Undergrad'})
 
 
 class ProfessorFilter(FilterSet):

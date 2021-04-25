@@ -9,11 +9,19 @@ class CoursesTable(tables.Table):
     catalog_number = ClassyColumn(verbose_name='Catalog Number', css_class_base='catnumber')
     title = ClassyColumn(css_class_base='coursetitle')
     credits_earned = ClassyColumn(css_class_base='credits')
+    graduate = ClassyColumn(verbose_name="Course Level", css_class_base='courselevel')
+
+    def render_graduate(self, value):
+        if value is not None and value:
+            show = "Graduate"
+        else:
+            show = "Undergrad"
+        return show
 
     class Meta:
         model = Course
         template_name = "django_tables2/bootstrap.html"
-        fields = ('major', 'catalog_number', 'title', 'credits_earned')
+        fields = ('major', 'catalog_number', 'graduate', 'title', 'credits_earned')
         row_attrs = {'class': 'course_row', 'data-id': lambda record: record.pk}
         attrs = {"class": 'course_table'}
 
@@ -23,11 +31,19 @@ class CoursesForMajorTable(tables.Table):
     catalog_number = ClassyColumn(verbose_name='Catalog Number', css_class_base='catnumber')
     title = ClassyColumn(css_class_base='coursetitle')
     credits_earned = ClassyColumn(css_class_base='credits')
+    graduate = ClassyColumn(verbose_name="Course Level", css_class_base='courselevel')
+
+    def render_graduate(self, value):
+        if value is not None and value:
+            show = "Graduate"
+        else:
+            show = "Undergrad"
+        return show
 
     class Meta:
         model = Course
         template_name = "django_tables2/bootstrap.html"
-        fields = ('catalog_number', 'title', 'credits_earned')
+        fields = ('catalog_number', 'graduate', 'title', 'credits_earned')
         row_attrs = {'class': 'course_row', 'data-id': lambda record: record.pk}
         attrs = {"class": 'course_table'}
 

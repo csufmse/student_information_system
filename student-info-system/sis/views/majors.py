@@ -40,6 +40,8 @@ def majors(request):
             self_url=reverse('sis:majors'),
             click_url=reverse('sis:major', args=[DUMMY_ID]),
         ))
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'sis/majors.html', data)
 
 
@@ -109,4 +111,6 @@ def major(request, majorid):
                 click_url=reverse('schooladmin:student', args=[DUMMY_ID]),
             ))
 
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'sis/major.html', data)

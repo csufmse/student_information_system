@@ -4,7 +4,7 @@
 {% block class %}demographics{% endblock %}
 {% block content %}
 <h3>Demographic Summary</h3>
-
+<hr>
     <h3>Students</h3>
 <table>
     <tr>
@@ -20,7 +20,7 @@
     </tr>
     {% endfor %}
 </table>
-
+<hr>
 <h3>Professors</h3>
 <table>
     <tr>
@@ -36,4 +36,6 @@
     </tr>
     {% endfor %}
 </table>
+<hr>
+Date Prepared: {{ date_prepared }}
 {% endblock content %}

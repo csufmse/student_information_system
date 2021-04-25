@@ -78,8 +78,11 @@ def students(request):
 
 
 def professors(request):
-    return render(
-        request, 'schooladmin/professors.html',
+    logged_in = request.user.is_authenticated
+    data = {}
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
+    data.update(
         filtered_table2(
             name='professors',
             qs=User.objects.all().filter(profile__role=Profile.ACCESS_PROFESSOR),
@@ -91,9 +94,12 @@ def professors(request):
             click_url=reverse('schooladmin:professor', args=[DUMMY_ID]),
         ))
 
+    return render(request, 'schooladmin/professors.html', data)
+
 
 @role_login_required(Profile.ACCESS_ADMIN)
 def professor_items(request, userid):
+    logged_in = request.user.is_authenticated
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:
         return HttpResponse("No such user")
@@ -116,6 +122,8 @@ def professor_items(request, userid):
             click_url=reverse('schooladmin:professor_item', args=[userid, DUMMY_ID]),
         ))
 
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/professor_items.html', data)
 
 
@@ -229,6 +237,9 @@ def courses(request):
             self_url=reverse('schooladmin:courses'),
             click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
+
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/courses.html', data)
 
 
@@ -277,6 +288,8 @@ def course(request, courseid):
             click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
 
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/course.html', data)
 
 
@@ -339,6 +352,8 @@ def semesters(request):
             self_url=reverse('schooladmin:semesters'),
             click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
         ))
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/semesters.html', data)
 
 
@@ -386,6 +401,8 @@ def semester(request, semester_id):
             click_url=reverse('schooladmin:professor', args=[DUMMY_ID]),
         ))
 
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/semester.html', data)
 
 
@@ -458,6 +475,8 @@ def sections(request):
             self_url=reverse('schooladmin:sections'),
             click_url=reverse('schooladmin:section', args=[DUMMY_ID]),
         ))
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/sections.html', data)
 
 
@@ -504,6 +523,8 @@ def section(request, sectionid):
             click_url=reverse('sis:secitem', args=[DUMMY_ID]),
         ))
 
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/section.html', data)
 
 
@@ -682,6 +703,7 @@ def transcript(request, userid):
 
 @role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
 def demographics(request):
+    logged_in = request.user.is_authenticated
     students = Profile.demographics_for(Profile.objects.filter(role=Profile.ACCESS_STUDENT))
     professors = Profile.demographics_for(Profile.objects.filter(role=Profile.ACCESS_PROFESSOR))
 
@@ -710,8 +732,17 @@ def demographics(request):
         line = line[2:]
         prof_form.append({'key': attr[2], 'data': line, 'total': total})
 
-    return render(request, 'schooladmin/demographics.html', {
+    data = {
         'students': stud_form,
         'professors': prof_form,
+<<<<<<< HEAD
         'date_prepared': datetime.now().date()
     })
+=======
+        'date_prepared': datetime.now().date(),
+    }
+
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
+    return render(request, 'schooladmin/demographics.html', data)
+>>>>>>> develop
