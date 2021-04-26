@@ -28,17 +28,8 @@
   <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
-    <input id="passchg"
-        action="action"
-           class="btn btn-info"
-        value="Change Password"
-    />
-     <input id="edit_profile"
-        action="action"
-           class="btn btn-info"
-        value="Edit Profile"
-    />
-
+    <input id="passchg" action="action" class="btn btn-warning" value="Change Password"/>
+    <input id="edit_profile" action="action" class="btn btn-primary" value="Edit Profile"/>
   </form>
 {% endblock %}
 

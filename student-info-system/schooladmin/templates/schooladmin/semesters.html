@@ -9,8 +9,8 @@
     {% endif %}
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="active" class="btn btn-primary submitme">Active Semesters</button>
-        <button type="submit" name="upcoming" class="btn btn-primary submitme">Upcoming Semesters</button>
+        <button type="submit" name="active" class="btn btn-info submitme">Active Semesters</button>
+        <button type="submit" name="upcoming" class="btn btn-info submitme">Upcoming Semesters</button>
     </form>
     <div id="Semesters">
     {% sis_filter 'semesters' %}

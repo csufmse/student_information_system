@@ -29,7 +29,7 @@
       <input id="interval_amount" name="interval_amount" type="number" max=5000 min=1 
         {% if interval %}value={{interval.interval_amount}} {% endif %} />
     </div>
-    <input action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="btn btn-info"/>
+    <input action="action" onclick="window.history.go(-1); return false;" type="submit" value="Cancel" class="btn btn-warning"/>
     <input id="submitme" name="submitme" action="action" value="Save Task" class="btn btn-primary submitme"/>
   </form>
 {% endblock content %}

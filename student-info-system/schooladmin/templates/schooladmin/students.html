@@ -11,8 +11,8 @@
 {%  endif %}
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="attending-current" class="btn btn-primary submitme">Attending Current Semester</button>
-        <button type="submit" name="attending-upcoming" class="btn btn-primary submitme">Attending Upcoming Semesters</button>
+        <button type="submit" name="attending-current" class="btn btn-info submitme">Attending Current Semester</button>
+        <button type="submit" name="attending-upcoming" class="btn btn-info submitme">Attending Upcoming Semesters</button>
     </form>
     {% sis_filter 'students' %}
 {% endblock %}
