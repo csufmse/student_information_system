@@ -757,21 +757,35 @@ def transcript(request, userid):
 
     # prepare the data
     student = Student.objects.get(profile__user__id=userid)
-    data = {'student': student}
-    ssects = student.sectionstudent_set.all().order_by('section__semester')
-    if len(ssects):
-        ssects_by_sem = [[ssects[0]]]
-        i = 0
-        for ssect in ssects:
-            if ssect.section.semester == ssects_by_sem[i][0].section.semester:
-                ssects_by_sem[i].append(ssect)
-            else:
-                i += 1
-                ssects_by_sem.insert(i, [ssect])
-        data['ssects_by_sem'] = ssects_by_sem
+    semesters = []
+    ssects = student.sectionstudent_set.all().order_by('section__semester',
+                                                       'section__course__name')
+    last_sem = {
+        'semester': None,
+    }
+    for ssect in ssects:
+        if ssect.section.semester != last_sem['semester']:
+            if last_sem['semester'] is not None:
+                semesters.append(last_sem)
+            last_sem = {
+                'semester': ssect.section.semester,
+                'gpa': student.gpa(semester=ssect.section.semester),
+                'sections': [],
+                'credits_earned': student.credits_earned(semester=ssect.section.semester),
+            }
+        last_sem['sections'].append(ssect)
+
+    data = {
+        'student': student,
+        'date_prepared': datetime.now().date(),
+        'semesters': semesters,
+    }
 
     filename = f'{student.profile.name}-{datetime.now().strftime("%Y%m%d-%H%M")}'.replace(
         ' ', '_')
+
+    # FOR TESTING -- render as HTML
+    # return render(request,'schooladmin/transcript.html',data)
 
     # generate the PDF
     return rendering.render_to_pdf_response(request,

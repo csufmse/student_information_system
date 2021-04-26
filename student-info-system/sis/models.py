@@ -301,7 +301,12 @@ class Student(models.Model):
     class Meta:
         ordering = ['profile__user__username']
 
-    def course_history(self, graded=False, passed=False, required=False, prereqs_for=None):
+    def course_history(self,
+                       graded=False,
+                       passed=False,
+                       required=False,
+                       prereqs_for=None,
+                       semester=None):
         hist = self.sectionstudent_set.all()
         if passed:
             graded = True
@@ -309,6 +314,8 @@ class Student(models.Model):
             hist = hist.filter(status__exact='Graded')
         if passed:
             hist = hist.filter(grade__gt=0)
+        if semester:
+            hist = hist.filter(section__semester=semester)
         if required:
             major_required = self.major.courses_required.all()
             hist = hist.filter(section__course__in=Subquery(major_required.all().values('id')))
@@ -340,16 +347,16 @@ class Student(models.Model):
     def course_prerequisites_detail(self, course):
         return course.prerequisites_detail(self)
 
-    def credits_earned(self):
-        completed = self.course_history(passed=True).aggregate(
+    def credits_earned(self, semester=None):
+        completed = self.course_history(passed=True, semester=semester).aggregate(
             Sum('section__course__credits_earned'))['section__course__credits_earned__sum']
 
         if completed is None:
             completed = 0
         return completed
 
-    def gpa(self):
-        completed = self.course_history(graded=True)
+    def gpa(self, semester=None):
+        completed = self.course_history(graded=True, semester=semester)
         grade_points = 0
         credits_attempted = 0
         for ss in completed:

@@ -1,42 +1,74 @@
 {% extends "easy_pdf/base.html" %}
 {% load static %}
 
-{% block content %}
-<h2>Transcript</h2>
+  {% block extra_style %}
+    <style type="text/css">
 
-<p>Student: {{student.name}}</p>
+.course_col, .majorname_col, .coursetitle_col, .credits_col, .grade_col {
+  text-align: center;
+}
+.course_cell {
+  text-align: center;
+  width: 110px;
+}
+.coursetitle_cell, .majorname_cell {
+  text-align: left;
+  width: 275px;
+}
+.credits_cell, .grade_cell {
+  width: 80px;
+  text-align: center;
+}
+.sem_head {
+    height: 40px;
+}
+.sem_tail {
+    text-align: right;
+}
+.final {
+    text-align: right;
+}
+    </style>
+  {% endblock  %}
+        {%block page_header%}
+            <div class="page-header">Transcript for: {{student.name}}</div>
+        {%endblock%}
+{% block content %}
 <table class="transcript_table">
   <col>
-  <colgroup span="5"></colgroup>
-{% for sem in ssects_by_sem %}
+  <colgroup span="7"></colgroup>
+<div class="head">Class Level: {{ student.class_level }}</div>
+{% for sem in semesters %}
     <tr>
       <th colspan="5" scope="colgroup" class="sem_head">
-            {{sem.0.section.semester.session_name}} {{sem.0.section.semester.year}}
+            {{sem.semester.session_name}} {{sem.semester.year}} ({{sem.semester.date_started}} - {{sem.semester.date_ended}})
       </th>
     </tr>
     <tr>
-      <th scope="col">Course</th>
-      <th scope="col">Course Title</th>
-      <th scope="col">Grade</th>
-      <th scope="col">Date Started</th>
-      <th scope="col">Date Ended</th>
+      <th class="course_col" scope="col">Course</th>
+      <th class="majorname_col" scope="col">Major</th>
+      <th class="coursetitle_col" scope="col">Course Title</th>
+      <th class="credits_col" scope="col">Credits</th>
+      <th class="grade_col" scope="col">Grade</th>
     </tr>
-  {% for ssect in sem %}
+  {% for ssect in sem.sections %}
     <tr>
-      <td>{{ssect.section.course_name}}</td>
-      <td>{{ssect.section.course_title}}</td>
-      <td>{{ssect.letter_grade}}</td>
-      <td>{{ssect.section.semester.date_started}}</td>
-      <td>{{ssect.section.semester.date_ended}}</td>
+      <td class="course_cell">{{ssect.section.course_name}}</td>
+      <td class="majorname_cell">{{ssect.section.course.major.title}}</td>
+      <td class="coursetitle_cell">{{ssect.section.course_title}}</td>
+      <td class="credits_cell">{{ssect.section.course.credits_earned}}</td>
+      <td class="grade_cell">{{ssect.letter_grade}}</td>
     </tr>
   {% endfor %}
-{% comment %}
-  Add this in if we get gpa in semesters
-  <tr>
-    <td>GPA: {{semester gpa here}}</td>
-  </tr>
-{% endcomment %}
+    <tr>
+      <th colspan="5" scope="colgroup" class="sem_tail">
+            Credits Earned: {{ sem.credits_earned }};  GPA: {{sem.gpa|floatformat:2}}
+      </th>
+    </tr>
 {% endfor %}
 </table>
-<p>Cumulative GPA: {{student.gpa|floatformat:2}}</p>
+<p class="final">Cumulative Credits Earned: {{ student.credits_earned }}; Cumulative GPA: {{student.gpa|floatformat:2}}</p>
+<hr>
+Date Prepared: {{ date_prepared }}
+
 {% endblock content %}
