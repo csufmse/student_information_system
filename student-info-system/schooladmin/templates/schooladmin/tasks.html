@@ -23,7 +23,7 @@
         <td>{% if task.task.interval %}{{task.task.interval.interval_type}}: {{task.task.interval.interval_amount}}{% else %}None{% endif %}</td>
       </tr>
     {% endfor %}
-  <a href="{% url 'schooladmin:task_edit' %}" class="btn btn-info">Add Task</a>
+  <a href="{% url 'schooladmin:task_edit' %}" class="btn btn-primary">Add Task</a>
 {% endblock content %}
 {% block late_scripts %}
   {{block.super}}

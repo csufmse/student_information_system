@@ -8,11 +8,10 @@
     {%  if can_add %}
         <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
     {% endif %}
-  <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
     <form method="post">
         {% csrf_token %}
-        <button type="submit" name="teaching-current" class="btn btn-primary submitme">Teaching Current Semester</button>
-        <button type="submit" name="teaching-upcoming" class="btn btn-primary submitme">Teaching Upcoming Semester</button>
+        <button type="submit" name="teaching-current" class="btn btn-info submitme">Teaching Current Semester</button>
+        <button type="submit" name="teaching-upcoming" class="btn btn-info submitme">Teaching Upcoming Semester</button>
     </form>
     {% sis_filter 'professors' %}
 {% endblock %}

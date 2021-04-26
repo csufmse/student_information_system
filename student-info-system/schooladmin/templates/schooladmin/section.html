@@ -39,11 +39,11 @@
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ auser.id }}"/>
 <div>
-    {%  if can_refresh_items %}<input id="refresh_items" action="action" class="btn btn-info" value="Refresh Reference Items for Section"/>{% endif %}
+    {%  if can_refresh_items %}<input id="refresh_items" action="action" class="btn btn-primary" value="Refresh Reference Items for Section"/>{% endif %}
     {%  if can_edit %}
-        <input id="new_section" action="action" class="btn btn-info" value="New Section of this Class"/>
-        <input id="edit_section" action="action" class="btn btn-info" value="Edit Section"/>
-        <input id="manage_students" action="action" class="btn btn-info" value="Manage Students in Section"/>
+        <input id="new_section" action="action" class="btn btn-primary" value="New Section of this Class"/>
+        <input id="edit_section" action="action" class="btn btn-primary" value="Edit Section"/>
+        <input id="manage_students" action="action" class="btn btn-primary" value="Manage Students in Section"/>
     {% endif %}
 </div>
 </form>

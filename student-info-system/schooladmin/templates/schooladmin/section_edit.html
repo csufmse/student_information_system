@@ -17,14 +17,8 @@
   <form method="post">
     {% csrf_token %}
       <table>{{ form.as_table }}</table>
-    <input
-        type="reset" id="reset_button"
-        value="Reset" class="btn btn-info"
-    />
-    <input id="submitme" name="submitme"
-        action="action"
-        value="Save Changes" class="btn btn-primary submitme"
-    />
+    <input type="reset" id="reset_button" class="btn btn-warning" value="Reset"/>
+      <input id="submitme" name="submitme" action="action" class="btn btn-primary submitme" value="Save Changes"/>
   </form>
 {% endblock %}
 
