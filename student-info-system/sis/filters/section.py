@@ -22,7 +22,7 @@ class SectionFilter(FilterSet):
 
     status = ChoiceFilter(choices=Section.STATUSES, field_name='status')
 
-    graduate = ChoiceFilter(field_name='course_graduate',
+    graduate = ChoiceFilter(field_name='course__graduate',
                             label='Course Level?',
                             choices=((True, 'Graduate'), (False, 'Undergrad')))
 
