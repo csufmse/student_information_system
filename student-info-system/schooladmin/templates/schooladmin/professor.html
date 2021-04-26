@@ -52,12 +52,12 @@
     {% if can_edit %}
         <input id="new_item" action="action" class="btn btn-primary" value="Add Reference Item"/>
         <input id="change_password" action="action" class="btn btn-warning" value="Change Password"/>
+        <input id="edit_professor" action="action" class="btn btn-primary" value="Edit Professor"/>
         {% if auser.is_active %}
             <input id="disbutton" name="disbutton" action="action" class="btn btn-danger" value="Disable Professor"/>
         {% else %}
             <input id="enabutton" name="enabutton" action="action" class="btn btn-danger" value="Enable Professor"/>
         {% endif %}
-        <input id="edit_professor" action="action" class="btn btn-primary" value="Edit Professor"/>
     {% endif %}
 </form>
 {% endblock %}
