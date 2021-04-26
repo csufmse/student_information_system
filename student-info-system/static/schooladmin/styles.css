@@ -67,11 +67,17 @@
 .data-table td, .data-table th, .data-table-alt td, .data-table-alt th {
   border: 1px solid #ddd;
   padding: 8px;
+  cursor: cell;
 }
 
-.data-table-alt tr:nth-child(even){background-color: #f2f2f2;}
+.data-table-alt tr:nth-child(even)
+{
+    background-color: #f2f2f2;
+}
 
-.data-table tr:hover .data-table-alt tr:hover {background-color: #ddd;}
+.data-table tr:hover .data-table-alt tr:hover {
+    background-color: #ddd;
+}
 /* End data table styling */
 
 
