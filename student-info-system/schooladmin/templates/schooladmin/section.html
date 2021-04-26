@@ -5,6 +5,11 @@
 {% block class %}sections{% endblock %}
 
 {% block content %}
+ <form method="post">
+    {% csrf_token %}
+    {% if prev %} <input id="prev" action="action" class="btn btn-info" value="Previous"/> {% endif %}
+    {% if next %} <input id="next" action="action" class="btn btn-info" value="Next"/> {% endif %}
+ </form>
 <dl class="dl-horizontal">
 <h3>Section: {{ section }}</h3>
   <dt>Major</dt>
@@ -39,11 +44,11 @@
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ auser.id }}"/>
 <div>
-    {%  if can_refresh_items %}<input id="refresh_items" action="action" class="btn btn-info" value="Refresh Reference Items for Section"/>{% endif %}
+    {%  if can_refresh_items %}<input id="refresh_items" action="action" class="btn btn-primary" value="Refresh Reference Items for Section"/>{% endif %}
     {%  if can_edit %}
-        <input id="new_section" action="action" class="btn btn-info" value="New Section of this Class"/>
-        <input id="edit_section" action="action" class="btn btn-info" value="Edit Section"/>
-        <input id="manage_students" action="action" class="btn btn-info" value="Manage Students in Section"/>
+        <input id="new_section" action="action" class="btn btn-primary" value="New Section of this Class"/>
+        <input id="edit_section" action="action" class="btn btn-primary" value="Edit Section"/>
+        <input id="manage_students" action="action" class="btn btn-primary" value="Manage Students in Section"/>
     {% endif %}
 </div>
 </form>
@@ -61,5 +66,7 @@
     addButtonClickHandler('manage_students', '{% url 'schooladmin:section_students_manage' sectionid=section.id %}');
 {% endif %}
 stylizeRange({field:'index',min_label:'From #',max_label:'To #',prefix:"secitems"});
+{% if prev %} addButtonClickHandler('prev', "{% url 'schooladmin:section' prev %}"); {% endif %}
+{% if next %} addButtonClickHandler('next', "{% url 'schooladmin:section' next %}"); {% endif %}
 </script>
 {% endblock %}

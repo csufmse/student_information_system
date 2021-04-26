@@ -15,6 +15,8 @@
   <dd>{{ user.email }}</dd>
   <dt>Major</dt>
   <dd><a href="{% url 'sis:major' majorid=user.profile.student.major.id %}">{{ user.profile.student.major.abbreviation }}: {{  user.profile.student.major.name }}</a></dd>
+  <dt>Class Level</dt>
+  <dd>{{  user.profile.student.class_level }}</dd>
   <dt>Bio</dt>
   <dd>{{  user.profile.bio }}</dd>
 </dl>
@@ -25,27 +27,10 @@
  <form method="post">
     {% csrf_token %}
      <input type="hidden" name="userid" value="{{ user.id }}"/>
-    <input id="change_password"
-        action="action"
-           class="btn btn-info"
-        value="Change Password"
-    />
-    <input id="request_major_change"
-        action="action"
-           class="btn btn-info"
-        value="Request Major Change"
-    />
-    <input id="request_transcript"
-        action="action"
-           class="btn btn-info"
-        value="Request Transcript"
-    />
-     <input id="edit_user"
-        action="action"
-           class="btn btn-info"
-        value="Edit Profile"
-    />
-
+    <input id="change_password" action="action" class="btn btn-warning" value="Change Password"/>
+     <input id="request_major_change" action="action" class="btn btn-secondary" value="Request Major Change"/>
+     <input id="request_transcript" action="action" class="btn btn-secondary" value="Request Transcript"/>
+     <input id="edit_user" action="action" class="btn btn-primary" value="Edit Profile"/>
   </form>
 <script>
 addButtonClickHandler('change_password', "{% url 'sis:change_password' 0 %}");

@@ -81,6 +81,8 @@ STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
 
+SESSION_ENGINE = "django.contrib.sessions.backends.signed_cookies"
+
 DEBUG_TOOLBAR_CONFIG = {
     # COMMENT OUT this line to ENABLE debug toolbar
     # UNCOMMENT this line to DISABLE debug toolbar

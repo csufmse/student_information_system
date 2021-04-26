@@ -249,11 +249,13 @@ class ClassLevel:
     SENIOR = 'Senior'
     JUNIOR = 'Junior'
     SOPHOMORE = 'Sophomore'
+    GRADUATE = 'Graduate'
     LEVELS = (
         (FRESHMAN, FRESHMAN),
         (SOPHOMORE, SOPHOMORE),
         (JUNIOR, JUNIOR),
         (SENIOR, SENIOR),
+        (GRADUATE, GRADUATE),
     )
     CREDITS_FOR_LEVEL = {
         FRESHMAN: 0,
@@ -285,6 +287,9 @@ class Student(models.Model):
                                        symmetrical=False,
                                        related_name='semester_students')
 
+    STUDENT_TYPES = ((True, 'Graduate Student'), (False, 'Undergraduate'))
+    grad_student = models.BooleanField('Graduate Student', default=False)
+
     class Meta:
         ordering = ['profile__user__username']
 
@@ -298,7 +303,12 @@ class Student(models.Model):
     class Meta:
         ordering = ['profile__user__username']
 
-    def course_history(self, graded=False, passed=False, required=False, prereqs_for=None):
+    def course_history(self,
+                       graded=False,
+                       passed=False,
+                       required=False,
+                       prereqs_for=None,
+                       semester=None):
         hist = self.sectionstudent_set.all()
         if passed:
             graded = True
@@ -306,6 +316,8 @@ class Student(models.Model):
             hist = hist.filter(status__exact='Graded')
         if passed:
             hist = hist.filter(grade__gt=0)
+        if semester:
+            hist = hist.filter(section__semester=semester)
         if required:
             major_required = self.major.courses_required.all()
             hist = hist.filter(section__course__in=Subquery(major_required.all().values('id')))
@@ -337,25 +349,32 @@ class Student(models.Model):
     def course_prerequisites_detail(self, course):
         return course.prerequisites_detail(self)
 
-    def credits_earned(self):
-        completed = self.course_history(passed=True).aggregate(
+    def credits_earned(self, semester=None):
+        completed = self.course_history(passed=True, semester=semester).aggregate(
             Sum('section__course__credits_earned'))['section__course__credits_earned__sum']
 
         if completed is None:
             completed = 0
         return completed
 
-    def gpa(self):
-        completed = self.course_history(graded=True)
-        return calculate_gpa(completed)
+    def gpa(self, semester=None):
+        completed = self.course_history(graded=True, semester=semester)
+        grade_points = 0
+        credits_attempted = 0
+        for ss in completed:
+            credits_attempted = credits_attempted + ss.section.course.credits_earned
+            grade_points = grade_points + ss.grade_points
 
     def semester_gpa(self, semester):
         qs = self.course_history(graded=True).filter(section__semester=semester)
         return calculate_gpa(qs)
 
     def class_level(self):
-        creds = self.credits_earned()
-        level = ClassLevel.level(creds)
+        if self.grad_student:
+            level = "Graduate"
+        else:
+            creds = self.credits_earned()
+            level = ClassLevel.level(creds)
         return level
 
     def section_reference_items_for(self, semester=None):
@@ -533,6 +552,7 @@ class Course(models.Model):
     description = models.CharField('Description', max_length=256, blank=True)
     credits_earned = models.DecimalField('Credits', max_digits=2, decimal_places=1)
     prereqs = models.ManyToManyField('self', symmetrical=False, through='CoursePrerequisite')
+    graduate = models.BooleanField("Graduate Level", default=False)
 
     class Meta:
         unique_together = (('major', 'catalog_number'),)
@@ -682,6 +702,8 @@ class Semester(models.Model):
     def current_semester(cls, at=None):
         if at is None:
             at = datetime.now()
+        if isinstance(at, datetime):
+            at = at.date()
         sems = Semester.objects.filter(date_started__lte=at, date_ended__gte=at)
         if not sems.count():
             return None
@@ -694,8 +716,21 @@ class Semester(models.Model):
     def semesters_open_for_registration(cls, at=None):
         if at is None:
             at = datetime.now()
+        if isinstance(at, datetime):
+            at = at.date()
         return Semester.objects.filter(date_registration_opens__lte=at,
                                        date_registration_closes__gte=at)
+
+    # active = in session or in registration
+    @classmethod
+    def active_semesters(cls, at=None):
+        if at is None:
+            at = datetime.now()
+        if isinstance(at, datetime):
+            at = at.date()
+        return Semester.objects.filter(
+            Q(date_registration_opens__lte=at, date_registration_closes__gte=at) |
+            Q(date_started__lte=at, date_ended__gte=at))
 
     date_registration_opens = models.DateField('Registration Opens')
     date_registration_closes = models.DateField(
@@ -1219,6 +1254,13 @@ class Message(models.Model):
         ) and self.time_handled is None and self.time_sent < as_of - timedelta(days=7)
 
 
+class UnknownProfileType(Exception):
+
+    def __init__(self, userid, role):
+        self.userid = userid
+        self.role = role
+
+
 def home_template(self):
     if self.profile.role == Profile.ACCESS_ADMIN:
         return "schooladmin/home_admin.html"
@@ -1226,7 +1268,7 @@ def home_template(self):
         return "professor/home_professor.html"
     elif self.profile.role == Profile.ACCESS_STUDENT:
         return "student/home_student.html"
-    return "schooladmin/home_guest.html"
+    raise UnknownProfileType(self.userid, self.profile.role)
 
 
 User.add_to_class('home_template', home_template)

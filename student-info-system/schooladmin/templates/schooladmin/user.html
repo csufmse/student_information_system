@@ -6,6 +6,11 @@
 {% block class %}users{% endblock %}
 
 {% block content %}
+ <form method="post">
+    {% csrf_token %}
+    {% if prev %} <input id="prev" action="action" class="btn btn-info" value="Previous"/> {% endif %}
+    {% if next %} <input id="next" action="action" class="btn btn-info" value="Next"/> {% endif %}
+ </form>
 <dl class="dl-horizontal">
   <dt>User</dt>
   <dd>{{ auser.get_full_name }}</dd>
@@ -33,41 +38,20 @@
         {% sis_filter 'sent' %}
     {%  endif %}
 
-  <form method="post">
-    {% csrf_token %}
-     <input type="hidden" name="userid" value="{{ auser.id }}"/>
-    <input
-        action="action"
-           class="btn btn-info"
-        onclick="window.history.go(-1); return false;"
-        value="Back"
-    />
-     {%  if show_all %}
-   <input id="passchg"
-        action="action"
-           class="btn btn-info"
-        value="Change Password"
-    />
-      {% if auser.is_active %}
-    <input id="disbutton" name="disbutton"
-           class="btn btn-primary"
-           action="action"
-        value="Disable User"
-    />
-    {% else %}
-    <input id="enabutton" name="enabutton"
-        action="action"
-           class="btn btn-primary"
-        value="Enable User"
-   />
-   {% endif %}
-     <input id="editu"
-        action="action"
-           class="btn btn-info"
-        value="Edit User"
-    />
-{% endif %}
-  </form>
+    <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="userid" value="{{ auser.id }}"/>
+        <input action="action" class="btn btn-secondary" onclick="window.history.go(-1); return false;" value="Back"/>
+        {%  if show_all %}
+            <input id="passchg" action="action" class="btn btn-warning" value="Change Password"/>
+            <input id="editu" action="action" class="btn btn-primary" value="Edit User"/>
+            {% if auser.is_active %}
+                <input id="disbutton" name="disbutton" action="action" class="btn btn-danger" value="Disable User"/>
+            {% else %}
+                <input id="enabutton" name="enabutton" action="action" class="btn btn-danger" value="Enable User"/>
+            {% endif %}
+        {% endif %}
+    </form>
 {% endblock %}
 
 {% block late_scripts %}
@@ -96,5 +80,7 @@ stylizeRange({field:'time_sent',name:'Received',prefix:'sent',width:'100px'});
 addButtonClickHandler('passchg', "{% url 'sis:change_password' auser.id %}");
 addButtonClickHandler('editu', "{% url 'schooladmin:user_edit' auser.id %}");
      {% endif %}
+{% if prev %} addButtonClickHandler('prev', "{% url 'schooladmin:user' prev %}"); {% endif %}
+{% if next %} addButtonClickHandler('next', "{% url 'schooladmin:user' next %}"); {% endif %}
 </script>
 {% endblock %}

@@ -97,6 +97,10 @@ def registration_view(request):
                             messages.error(
                                 request,
                                 f'You have not met the prerequisites for {sect.course.name}.')
+                        elif sect.course.graduate and not student.grad_student:
+                            messages.error(
+                                request,
+                                f'{sect.course.name} is a graduate-level class.')
                         else:
                             status = SectionStudent.REGISTERED
                             if sect.seats_remaining < 1:
@@ -204,11 +208,18 @@ def drop(request, id):
 @role_login_required(Profile.ACCESS_STUDENT)
 def secitems(request):
     the_user = request.user
+
     the_semester = Semester.current_semester()
+    if request.method == 'POST':
+        the_id = request.POST.get('semester', the_semester.id)
+        the_semester = Semester.objects.get(id=the_id)
+
     data = {
         'auser': the_user,
         'semester': the_semester,
+        'semesters': the_user.profile.student.semesters.all(),
     }
+
     data.update(
         filtered_table2(
             name='secitems',

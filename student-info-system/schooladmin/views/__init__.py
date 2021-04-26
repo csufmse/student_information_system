@@ -6,13 +6,14 @@ from django.shortcuts import redirect, render
 from django.utils.html import format_html
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
+from django.db.models import Q, Subquery
 
 from sis.authentication_helpers import role_login_required
 
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, Semester, Student,
                         SectionStudent, Profile, Message)
 
-from sis.utils import filtered_table, filtered_table2, DUMMY_ID, student_ssects_by_sem
+from sis.utils import filtered_table, filtered_table2, DUMMY_ID, next_prev
 
 from sis.filters.course import CourseFilter
 from sis.filters.section import SectionFilter
@@ -60,13 +61,23 @@ def students(request):
         user_role = request.user.profile.role
     is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
 
+    qs = User.objects.all().filter(profile__role=Profile.ACCESS_STUDENT)
+    if request.method == 'POST':
+        if request.POST.get('attending-current') is not None:
+            qs = qs.filter(profile__student__semesters__date_started__lte=datetime.now().date(),
+                           profile__student__semesters__date_ended__gte=datetime.now().date())
+        if request.POST.get('attending-upcoming') is not None:
+            qs = qs.filter(
+                profile__student__semesters__date_registration_opens__lte=datetime.now().date(),
+                profile__student__semesters__date_registration_closes__gte=datetime.now().date())
+
     data = {
         'can_add': is_admin,
     }
     data.update(
         filtered_table2(
             name='students',
-            qs=User.objects.all().filter(profile__role=Profile.ACCESS_STUDENT),
+            qs=qs,
             filter=StudentFilter,
             table=StudentsTable,
             request=request,
@@ -78,11 +89,48 @@ def students(request):
 
 
 def professors(request):
-    return render(
-        request, 'schooladmin/professors.html',
+    logged_in = request.user.is_authenticated
+    if logged_in:
+        user_role = request.user.profile.role
+    is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
+
+    data = {
+        'can_add': is_admin,
+    }
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
+
+    now = datetime.now().date()
+    qs = User.objects.all().filter(profile__role=Profile.ACCESS_PROFESSOR)
+    if request.method == 'POST':
+        if request.POST.get('teaching-current') is not None:
+            qs = qs.filter(profile__professor__id__in=Subquery(
+                Section.objects.filter(semester__date_started__lte=now,
+                                       semester__date_ended__gte=now).values('professor__id')))
+            the_sem_qs = Semester.objects.filter(date_started__lte=now, date_ended__gte=now)
+            if the_sem_qs.count() < 1:
+                messages.error(request, f'No current semester.')
+            else:
+                messages.info(request,
+                              f'{qs.count()} professors teaching in ' + f'{the_sem_qs[0].name}')
+
+        if request.POST.get('teaching-upcoming') is not None:
+            qs = qs.filter(profile__professor__id__in=Subquery(
+                Section.objects.filter(semester__date_registration_opens__lte=now,
+                                       semester__date_registration_closes__gte=now).values(
+                                           'professor__id')))
+            the_sem_qs = Semester.objects.filter(date_registration_opens__lte=now,
+                                                 date_registration_closes__gte=now)
+            if the_sem_qs.count() < 1:
+                messages.error(request, f'No semester open for registration.')
+            else:
+                messages.info(request,
+                              f'{qs.count()} professors teaching in ' + f'{the_sem_qs[0].name}')
+
+    data.update(
         filtered_table2(
             name='professors',
-            qs=User.objects.all().filter(profile__role=Profile.ACCESS_PROFESSOR),
+            qs=qs,
             filter=ProfessorFilter,
             table=ProfessorsTable,
             request=request,
@@ -91,9 +139,12 @@ def professors(request):
             click_url=reverse('schooladmin:professor', args=[DUMMY_ID]),
         ))
 
+    return render(request, 'schooladmin/professors.html', data)
+
 
 @role_login_required(Profile.ACCESS_ADMIN)
 def professor_items(request, userid):
+    logged_in = request.user.is_authenticated
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:
         return HttpResponse("No such user")
@@ -116,6 +167,8 @@ def professor_items(request, userid):
             click_url=reverse('schooladmin:professor_item', args=[userid, DUMMY_ID]),
         ))
 
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/professor_items.html', data)
 
 
@@ -185,6 +238,15 @@ def major_edit(request, majorid):
 
 
 @role_login_required(Profile.ACCESS_ADMIN)
+def major_new_course(request, majorid):
+    qs = Major.objects.filter(id=majorid)
+    if qs.count() < 1:
+        return HttpResponse("No such major")
+    the_major = qs.get()
+    return course_new(request, major=the_major)
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
 def major_new(request):
     if request.method == 'POST':
         form = MajorCreationForm(request.POST)
@@ -206,13 +268,40 @@ def courses(request):
         user_role = request.user.profile.role
     is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
 
+    now = datetime.now().date()
+    qs = Course.objects.all()
+    if request.method == 'POST':
+        if request.POST.get('offered-current') is not None:
+            qs = qs.filter(id__in=Subquery(
+                Section.objects.filter(semester__date_started__lte=now,
+                                       semester__date_ended__gte=now).values('course__id')))
+            the_sem_qs = Semester.objects.filter(date_started__lte=now, date_ended__gte=now)
+            if the_sem_qs.count() < 1:
+                messages.error(request, f'No current semester.')
+            else:
+                messages.info(request,
+                              f'{qs.count()} courses offered in ' + f'{the_sem_qs[0].name}')
+
+        if request.POST.get('offered-upcoming') is not None:
+            qs = qs.filter(id__in=Subquery(
+                Section.objects.filter(semester__date_registration_opens__lte=now,
+                                       semester__date_registration_closes__gte=now).values(
+                                           'course__id')))
+            the_sem_qs = Semester.objects.filter(date_registration_opens__lte=now,
+                                                 date_registration_closes__gte=now)
+            if the_sem_qs.count() < 1:
+                messages.error(request, f'No semester open for registration.')
+            else:
+                messages.info(request,
+                              f'{qs.count()} courses offered in ' + f'{the_sem_qs[0].name}')
+
     data = {
         'can_add': is_admin,
     }
     data.update(
         filtered_table2(
             name='courses',
-            qs=Course.objects.all(),
+            qs=qs,
             filter=CourseFilter,
             table=CoursesTable,
             request=request,
@@ -220,6 +309,9 @@ def courses(request):
             self_url=reverse('schooladmin:courses'),
             click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
+
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/courses.html', data)
 
 
@@ -235,6 +327,7 @@ def course(request, courseid):
     the_course = qs.get()
 
     data = {'course': the_course, 'can_edit': is_admin}
+    data.update(next_prev(request, 'courses', courseid))
     data.update(
         filtered_table2(
             name='sections',
@@ -268,6 +361,8 @@ def course(request, courseid):
             click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
 
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/course.html', data)
 
 
@@ -292,7 +387,7 @@ def course_edit(request, courseid):
 
 
 @role_login_required(Profile.ACCESS_ADMIN)
-def course_new(request):
+def course_new(request, major=None):
     if request.method == 'POST':
         form = CourseCreationForm(request.POST)
         if form.is_valid():
@@ -301,6 +396,8 @@ def course_new(request):
             return redirect('schooladmin:courses')
         else:
             messages.error(request, 'Please correct the error(s) below.')
+    elif major is not None:
+        form = CourseCreationForm(initial={'major': major})
     else:
         form = CourseCreationForm()
     return render(request, 'schooladmin/course_new.html', {'form': form})
@@ -316,11 +413,20 @@ def semesters(request):
     if logged_in:
         user_role = request.user.profile.role
     is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
+
     data = {'can_add': is_admin}
+
+    qs = Semester.objects.all()
+    if request.method == 'POST':
+        if request.POST.get('active') is not None:
+            qs = Semester.active_semesters()
+        elif request.POST.get('upcoming') is not None:
+            qs = Semester.objects.filter(date_started__gte=datetime.now().date())
+
     data.update(
         filtered_table2(
             name='semesters',
-            qs=Semester.objects.all(),
+            qs=qs,
             filter=SemesterFilter,
             table=SemestersTable,
             request=request,
@@ -328,6 +434,8 @@ def semesters(request):
             self_url=reverse('schooladmin:semesters'),
             click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
         ))
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/semesters.html', data)
 
 
@@ -343,6 +451,7 @@ def semester(request, semester_id):
     the_semester = qs.get()
 
     data = {'semester': the_semester, 'can_add': is_admin}
+    data.update(next_prev(request, 'semesters', semester_id))
     data.update(
         filtered_table2(
             name='sections',
@@ -375,6 +484,8 @@ def semester(request, semester_id):
             click_url=reverse('schooladmin:professor', args=[DUMMY_ID]),
         ))
 
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/semester.html', data)
 
 
@@ -447,6 +558,8 @@ def sections(request):
             self_url=reverse('schooladmin:sections'),
             click_url=reverse('schooladmin:section', args=[DUMMY_ID]),
         ))
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/sections.html', data)
 
 
@@ -471,6 +584,7 @@ def section(request, sectionid):
         'can_refresh_items': is_prof and the_section.professor == the_profile.professor,
         'can_see_students': can_see_students,
     }
+    data.update(next_prev(request, 'sections', sectionid))
     if can_see_students:
         data.update(
             filtered_table2(
@@ -493,6 +607,8 @@ def section(request, sectionid):
             click_url=reverse('sis:secitem', args=[DUMMY_ID]),
         ))
 
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/section.html', data)
 
 
@@ -643,21 +759,35 @@ def sectionstudent(request, id):
 def transcript(request, userid):
     # prepare the data
     student = Student.objects.get(profile__user__id=userid)
-    data = {'student': student}
-    ssects = student.sectionstudent_set.all().order_by('section__semester')
-    if len(ssects):
-        student_ssects_by_sem = [[ssects[0]]]
-        i = 0
-        for ssect in ssects:
-            if ssect.section.semester == ssects_by_sem[i][0].section.semester:
-                ssects_by_sem[i].append(ssect)
-            else:
-                i += 1
-                ssects_by_sem.insert(i, [ssect])
-        data['ssects_by_sem'] = ssects_by_sem
+    semesters = []
+    ssects = student.sectionstudent_set.all().order_by('section__semester',
+                                                       'section__course__name')
+    last_sem = {
+        'semester': None,
+    }
+    for ssect in ssects:
+        if ssect.section.semester != last_sem['semester']:
+            if last_sem['semester'] is not None:
+                semesters.append(last_sem)
+            last_sem = {
+                'semester': ssect.section.semester,
+                'gpa': student.gpa(semester=ssect.section.semester),
+                'sections': [],
+                'credits_earned': student.credits_earned(semester=ssect.section.semester),
+            }
+        last_sem['sections'].append(ssect)
+
+    data = {
+        'student': student,
+        'date_prepared': datetime.now().date(),
+        'semesters': semesters,
+    }
 
     filename = f'{student.profile.name}-{datetime.now().strftime("%Y%m%d-%H%M")}'.replace(
         ' ', '_')
+
+    # FOR TESTING -- render as HTML
+    # return render(request,'schooladmin/transcript.html',data)
 
     # generate the PDF
     return rendering.render_to_pdf_response(request,
@@ -670,6 +800,7 @@ def transcript(request, userid):
 
 @role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
 def demographics(request):
+    logged_in = request.user.is_authenticated
     students = Profile.demographics_for(Profile.objects.filter(role=Profile.ACCESS_STUDENT))
     professors = Profile.demographics_for(Profile.objects.filter(role=Profile.ACCESS_PROFESSOR))
 
@@ -698,7 +829,12 @@ def demographics(request):
         line = line[2:]
         prof_form.append({'key': attr[2], 'data': line, 'total': total})
 
-    return render(request, 'schooladmin/demographics.html', {
+    data = {
         'students': stud_form,
         'professors': prof_form,
-    })
+        'date_prepared': datetime.now().date(),
+    }
+
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
+    return render(request, 'schooladmin/demographics.html', data)

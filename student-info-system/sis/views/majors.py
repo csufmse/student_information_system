@@ -9,7 +9,7 @@ from sis.authentication_helpers import role_login_required
 
 from sis.models import (Major, Professor, Section, Semester, Student, Course, Profile)
 
-from sis.utils import filtered_table2, DUMMY_ID
+from sis.utils import filtered_table2, DUMMY_ID, next_prev
 
 from sis.filters.course import CourseFilter
 from sis.filters.major import MajorFilter
@@ -40,6 +40,8 @@ def majors(request):
             self_url=reverse('sis:majors'),
             click_url=reverse('sis:major', args=[DUMMY_ID]),
         ))
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'sis/majors.html', data)
 
 
@@ -61,8 +63,10 @@ def major(request, majorid):
     data = {
         'major': the_major,
         'permit_edit': is_admin,
+        'permit_new_course': is_admin,
         'include_students': include_students,
     }
+    data.update(next_prev(request, 'majors', majorid))
     data.update(
         filtered_table2(
             name='profs',
@@ -108,4 +112,6 @@ def major(request, majorid):
                 click_url=reverse('schooladmin:student', args=[DUMMY_ID]),
             ))
 
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'sis/major.html', data)

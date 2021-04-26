@@ -1,11 +1,11 @@
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import AdminPasswordChangeForm
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.db.models import Exists, OuterRef
 
 from sis.authentication_helpers import role_login_required
 
@@ -17,7 +17,7 @@ from sis.forms.student import StudentEditForm, StudentCreationForm
 from sis.forms.user import UserCreationForm, UserEditForm
 from sis.forms.professor import ProfessorCreationForm, ProfessorEditForm
 
-from sis.utils import filtered_table2, DUMMY_ID
+from sis.utils import filtered_table2, DUMMY_ID, next_prev
 from sis.filters.course import CourseFilter
 from sis.filters.message import (FullSentMessageFilter, FullReceivedMessageFilter,
                                  SentMessageFilter, ReceivedMessageFilter)
@@ -26,14 +26,8 @@ from sis.filters.section import SectionFilter
 from sis.filters.sectionstudent import SectionStudentFilter
 from sis.filters.semester import SemesterFilter
 from sis.filters.user import StudentFilter, UserFilter, ProfessorFilter
-from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
 from sis.tables.messages import MessageSentTable, MessageReceivedTable
 from sis.tables.referenceitems import ProfReferenceItemsTable
-from sis.tables.sections import SectionForClassTable, SectionsTable
-from sis.tables.sectionstudents import (StudentHistoryTable, StudentInSectionTable)
-from sis.tables.semesters import SemestersSummaryTable, SemestersTable
-from sis.tables.users import (UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable,
-                              ProfessorsTable)
 
 from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
 from sis.tables.sections import SectionForClassTable, SectionsTable
@@ -49,7 +43,8 @@ def userslist(request):
         request, 'schooladmin/users.html',
         filtered_table2(
             name='users',
-            qs=User.objects.exclude(profile__role=Profile.ACCESS_NONE),
+            qs=User.objects.exclude(profile__role=Profile.ACCESS_NONE).exclude(
+                ~Exists(Profile.objects.filter(user__username=OuterRef('username')))),
             filter=UserFilter,
             table=FullUsersTable,
             request=request,
@@ -89,6 +84,9 @@ def user(request, userid):
         'auser': the_user,
         'show_all': is_admin,
     }
+
+    data.update(next_prev(request, 'users', userid))
+
     if is_admin:
         data.update(
             filtered_table2(
@@ -295,6 +293,8 @@ def student(request, userid):
         'auser': the_user,
         'can_edit': is_admin,
     }
+    data.update(next_prev(request, 'students', userid, fallback='users'))
+
     data.update(
         filtered_table2(
             name='semesters',
@@ -366,8 +366,6 @@ def professor(request, userid):
     if logged_in:
         user_role = request.user.profile.role
     is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
-    if logged_in:
-        the_user = request.user
 
     qs = User.objects.filter(id=userid)
     if qs.count() < 1:
@@ -384,6 +382,9 @@ def professor(request, userid):
         return redirect('schooladmin:users')
 
     data = {'auser': the_prof, 'can_edit': is_admin}
+
+    data.update(next_prev(request, 'professors', userid, fallback='users'))
+
     data.update(
         filtered_table2(
             name='semesters',
@@ -438,4 +439,6 @@ def professor(request, userid):
                 self_url=reverse('schooladmin:professor', args=[userid]),
             ))
 
+    if not logged_in:
+        data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/professor.html', data)

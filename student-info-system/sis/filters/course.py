@@ -16,6 +16,8 @@ class CourseFilter(FilterSet):
                              lookup_expr='icontains')
 
     credits_earned = RangeFilter(label='Credits')
+    graduate = ChoiceFilter(label='Course Level?',
+                            choices=((True, 'Graduate'), (False, 'Undergrad')))
 
     # need filters for...
     prereqs = CharFilter(
@@ -50,13 +52,14 @@ class CourseFilter(FilterSet):
     class Meta:
         model = Course
         fields = [
-            'major', 'catalog_number', 'title', 'description', 'prereqs', 'is_prereq',
+            'major', 'catalog_number', 'graduate', 'title', 'description', 'prereqs', 'is_prereq',
             'credits_earned'
         ]
 
     def __init__(self, *args, **kwargs):
         super(CourseFilter, self).__init__(*args, **kwargs)
         self.filters['major'].extra.update({'empty_label': 'Major...'})
+        self.filters['graduate'].extra.update({'empty_label': 'Course Level...'})
 
 
 class RequirementsCourseFilter(FilterSet):

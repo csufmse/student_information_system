@@ -5,7 +5,14 @@
 {% block class %}professors{% endblock %}
 
 {% block content %}
-  <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
+    {%  if can_add %}
+        <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:user_new' %}';">New User</button>
+    {% endif %}
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="teaching-current" class="btn btn-info submitme">Teaching Current Semester</button>
+        <button type="submit" name="teaching-upcoming" class="btn btn-info submitme">Teaching Upcoming Semester</button>
+    </form>
     {% sis_filter 'professors' %}
 {% endblock %}
 

@@ -7,10 +7,16 @@
 {% block class %}secitems{% endblock %}
 
 {% block content %}
-    <dl class="dl-horizontal">
-    <h3>Reference Items for:</h3>
-      <dt>Semester</dt>
-        <dd><a href="{% url 'schooladmin:semester' semester_id=semester.id %}">{{ semester }}</a></dd>
+    <dl class="dl-vertical">
+    <dt>Reference Items for:</dt>
+      <form action="{% url 'student:secitems' %}" method="post">
+        {% csrf_token %}
+        <dd><select name="semester">
+        {% for sem in semesters %}<option value="{{sem.id}}" {% if semester.id == sem.id %}SELECTED{% endif %}>{{ sem.name }}</option>
+        {% endfor %}
+        </select>
+            <input type="submit" id="switch" name="switch" value="Show" class="btn btn-primary"></dd>
+    </form>
     </dl>
 
     {% sis_filter 'secitems' %}

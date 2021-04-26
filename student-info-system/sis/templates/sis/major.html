@@ -6,6 +6,11 @@
 {% block class %}majors{% endblock %}
 
 {% block content %}
+ <form method="post">
+    {% csrf_token %}
+    {% if prev %} <input id="prev" action="action" class="btn btn-info" value="Previous"/> {% endif %}
+    {% if next %} <input id="next" action="action" class="btn btn-info" value="Next"/> {% endif %}
+ </form>
     <dl class="dl-horizontal">
       <dt>Major</dt>
       <dd>{{ major.abbreviation }}</dd>
@@ -32,7 +37,10 @@
     {% endif %}
     <div>
     {%  if permit_edit %}
-        <input id="edit_major" action="action" class="btn btn-info" value="Edit Major"/>
+        <input id="edit_major" action="action" class="btn btn-primary" value="Edit Major"/>
+    {% endif %}
+    {%  if permit_new_course %}
+        <input id="new_course" action="action" class="btn btn-primary" value="New Course"/>
     {% endif %}
     </div>
 {% endblock %}
@@ -40,9 +48,12 @@
 {% block late_scripts %}
 <script>
     {% if permit_edit %}addButtonClickHandler('edit_major', '{% url 'schooladmin:major_edit' major.id %}');{% endif %}
+    {% if permit_new_course %}addButtonClickHandler('new_course', '{% url 'schooladmin:major_new_course' major.id %}');{% endif %}
     stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'required'});
     stylizeRange({field:'credits_earned',name:'Cred',prefix:'required'});
     stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'offered'});
     stylizeRange({field:'credits_earned',name:'Cred',prefix:'offered'});
+{% if prev %} addButtonClickHandler('prev', "{% url 'sis:major' prev %}"); {% endif %}
+{% if next %} addButtonClickHandler('next', "{% url 'sis:major' next %}"); {% endif %}
 </script>
 {% endblock %}

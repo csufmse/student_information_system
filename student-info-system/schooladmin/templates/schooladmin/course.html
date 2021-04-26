@@ -6,11 +6,18 @@
 {% block class %}courses{% endblock %}
 
 {% block content %}
+ <form method="post">
+    {% csrf_token %}
+    {% if prev %} <input id="prev" action="action" class="btn btn-info" value="Previous"/> {% endif %}
+    {% if next %} <input id="next" action="action" class="btn btn-info" value="Next"/> {% endif %}
+ </form>
 <dl class="dl-horizontal">
   <dt>Major</dt>
     <dd><a href="{% url 'sis:major' majorid=course.major.id %}">{{ course.major }}: {{  course.major.name }}</a></dd>
   <dt>Catalog Number</dt>
   <dd>{{ course.catalog_number }}</dd>
+  <dt>Course Level</dt>
+  <dd>{% if course.graduate %}Graduate{% else %}Undergraduate{% endif %}</dd>
   <dt>Title</dt>
   <dd>{{ course.title }}</dd>
   <dt>Description</dt>
@@ -29,8 +36,8 @@
     {% sis_filter 'sections' %}
 
     {%  if can_edit %}
-        <input id="new_section" action="action" class="btn btn-info" value="New Section"/>
-        <input id="course_edit" action="action" class="btn btn-info" value="Edit Course"/>
+        <input id="new_section" action="action" class="btn btn-primary" value="New Section"/>
+        <input id="course_edit" action="action" class="btn btn-primary" value="Edit Course"/>
     {%  endif %}
 {% endblock %}
 
@@ -44,5 +51,7 @@ stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'prereqs'});
 stylizeRange({field:'credits_earned',name:'Cred',prefix:'prereqs'});
 stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'neededby'});
 stylizeRange({field:'credits_earned',name:'Cred',prefix:'neededby'});
+{% if prev %} addButtonClickHandler('prev', "{% url 'schooladmin:course' prev %}"); {% endif %}
+{% if next %} addButtonClickHandler('next', "{% url 'schooladmin:course' next %}"); {% endif %}
 </script>
 {% endblock %}

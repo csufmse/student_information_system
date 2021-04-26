@@ -2,6 +2,7 @@
 {% load static %}
 {% load render_table from django_tables2 %}
 {% load bootstrap3 %}
+{% block class %}registration{% endblock %}
 
 {% block scripts %}
   {{block.super}}
@@ -48,7 +49,7 @@
       {% if s.new_course %}
         <tr class="class_heading_row p_row" id="{{s.course}}">
           <th>{{s.course.name}}</th>
-          <th>{{s.course.title}}</th>
+          <th>{% if s.course.graduate %}(GRAD) {% endif %}{{s.course.title}}</th>
           <th>{{s.course.credits_earned}}</th>
           <th>{{s.course.description}}</th>
           <th>{% if s.course.prereqs.all %}
@@ -74,7 +75,7 @@
           <td>{{s.location}}</td>
           <td>
             {% if s.seats_remaining <= 0 %}<span class="waitlist_notif">WAITLIST?</span>{% endif %}
-              <input type="radio" name="{{s.course.id}}" value="{{s.id}}" {% if s.is_selected  %}SELECTED{% endif %}/>
+              <input type="radio" class="section_button" name="{{s.course.id}}" value="{{s.id}}" {% if s.is_selected  %}SELECTED{% endif %}/>
               <label for="{{ s.course.id }}">{{s.name}}</label>
           </td>
         </tr>
@@ -100,5 +101,13 @@
             })
         })
     })
+
+    for (const butt of document.getElementsByClassName("section_button")) {
+        butt.addEventListener('click', function(evt) {
+            if( evt.ctrlKey) {
+                this.checked = false;
+            }
+        })
+    }
   </script>
 {% endblock late_scripts %}    
