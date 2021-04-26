@@ -97,6 +97,10 @@ def registration_view(request):
                             messages.error(
                                 request,
                                 f'You have not met the prerequisites for {sect.course.name}.')
+                        elif sect.course.graduate and not student.grad_student:
+                            messages.error(
+                                request,
+                                f'{sect.course.name} is a graduate-level class.')
                         else:
                             status = SectionStudent.REGISTERED
                             if sect.seats_remaining < 1:
