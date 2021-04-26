@@ -8,6 +8,8 @@
 
 {% block content %}
 <dl class="dl-horizontal">
+  <dt>Major</dt>
+  <dd>{{ user.profile.student.major.title }}</dd>
   <dt>Class Level</dt>
   <dd>{{ user.profile.student.class_level }}</dd>
   <dt>Overall GPA</dt>
@@ -17,37 +19,30 @@
 </dl>
 
 <table class="data-table-alt">
-{% for gpa, sem in ssects_gpas %}
-  <tr>
-    <th></th>
-    <th>Semester: {{sem.0.section.semester}}</th>
-    <th></th>
-    <th>GPA: {{gpa|floatformat:2}}</th>
+{% for sem in semesters %}
+ <tr>
+    <th colspan="3">Semester: {{sem.semester}}</th>
+    <th>GPA: {{sem.gpa|floatformat:2}}</th>
+    <th>Credits Earned: {{ sem.credits_earned }}</th>
   </tr>
-  <tr>
-    <th>Course</th>
-    <th>Course Title</th>
-    <th>Professor</th>
-    <th>Grade</th>
-  </tr>
-  {% for sec in sem %}
     <tr>
-      <td>{{sec.section.course}}</td>
-      <td>{{sec.section.course.title}}</td>
-      <td>{{sec.professor}}</td>
-      <td>{{sec.letter_grade}}</td>
+        <th>Course</th>
+        <th>Course Title</th>
+        <th>Professor</th>
+        <th>Grade</th>
+        <th>Credits Earned</th>
+    </tr>
+  {% for ssect in sem.sections %}
+    <tr>
+      <td>{{ssect.section.course_name}}</td>
+      <td>{{ssect.section.course_title}}</td>
+      <td>{{ssect.section.professor}}</td>
+      <td align="center">{{ssect.letter_grade}}</td>
+      <td align="center">{{ssect.credits_earned}}</td>
     </tr>
   {% endfor %}
 {% endfor %}
 </table>
-
-{% comment %}
-    <h3>Semesters Attended:</h3>
-    {% sis_filter 'semesters' %}
-
-    <h3>Course History:</h3>
-    {% sis_filter 'history' %}
-{% endcomment %}
 
     <h3>Required Courses for {{ user.profile.student.major.abbreviation }}:</h3>
     {% sis_filter 'majorcourses' %}
