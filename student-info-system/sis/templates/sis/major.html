@@ -6,6 +6,11 @@
 {% block class %}majors{% endblock %}
 
 {% block content %}
+ <form method="post">
+    {% csrf_token %}
+    {% if prev %} <input id="prev" action="action" class="btn btn-info" value="Previous"/> {% endif %}
+    {% if next %} <input id="next" action="action" class="btn btn-info" value="Next"/> {% endif %}
+ </form>
     <dl class="dl-horizontal">
       <dt>Major</dt>
       <dd>{{ major.abbreviation }}</dd>
@@ -48,5 +53,7 @@
     stylizeRange({field:'credits_earned',name:'Cred',prefix:'required'});
     stylizeRange({field:'catalog_number',name:'Cat Num',prefix:'offered'});
     stylizeRange({field:'credits_earned',name:'Cred',prefix:'offered'});
+{% if prev %} addButtonClickHandler('prev', "{% url 'sis:major' prev %}"); {% endif %}
+{% if next %} addButtonClickHandler('next', "{% url 'sis:major' next %}"); {% endif %}
 </script>
 {% endblock %}
