@@ -26,24 +26,24 @@ class AdminViewsAccess(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'schooladmin/home_admin.html')
 
-    def test_home_view_redirects_for_prof(self):
+    def test_home_view_works_for_prof(self):
         login = self.client.login(username='u2', password='hello')
         response = self.client.get('/schooladmin/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
-    def test_home_view_redirects_for_stud(self):
+    def test_home_view_works_for_stud(self):
         login = self.client.login(username='u3', password='hello')
         response = self.client.get('/schooladmin/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
-    def test_home_view_redirect_login_for_loser(self):
+    def test_home_view_works_login_for_loser(self):
         response = self.client.get('/schooladmin/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
     def test_home_view_login_for_loser(self):
         response = self.client.get('/schooladmin/', follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'registration/login.html')
+        self.assertTemplateUsed(response, 'schooladmin/home_guest.html')
 
 
 class AdminUserViewsTest(TestCase):
