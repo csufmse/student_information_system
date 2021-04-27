@@ -69,10 +69,11 @@ TEMPLATES = [
     },
 ]
 
-LOGIN_REDIRECT_URL = '/schooladmin/semesters'
-LOGOUT_REDIRECT_URL = '/schooladmin/professors'
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
+LOGIN_URL = '/login/'
 
-# STATIS FILES (CSS, JavaScript, Images)
+# STATIC FILES (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.1/howto/static-files/
 
 STATIC_ROOT = os.path.join(BASE_DIR, 'static_files')

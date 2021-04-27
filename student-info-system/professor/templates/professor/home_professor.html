@@ -4,16 +4,22 @@
 
 {% block title %}Professor Home Page{% endblock %}
 
+{% block identification %}
+    {{ block.super }}
+  <dt>Department</dt>
+    <dd><a href="{% url 'sis:major' majorid=user.profile.professor.major.id %}">{{ user.profile.professor.major.abbreviation }}: {{  user.profile.professor.major.name }}</a></dd>
+{%  endblock %}
+
 {% block nav %}
 <div class="tab">
   <button class="tablinks" name="section" id="schedule-btn" onclick="location.href='{% url 'professor:sections' %}';">My Sections</button>
-  <button class="tablinks" name="section" id="registration-btn" onclick="location.href='{% url 'schooladmin:students' %}';">Students</button>
+  <button class="tablinks" name="section" id="students-btn" onclick="location.href='{% url 'schooladmin:students' %}';">Students</button>
   <button class="tablinks" name="section" id="professors-btn" onclick="location.href='{% url 'schooladmin:professors' %}';">Professors</button>
   <button class="tablinks" name="section" id="majors-btn" onclick="location.href='{% url 'sis:majors' %}';">Majors</button>
   <button class="tablinks" name="section" id="semesters-btn" onclick="location.href='{% url 'schooladmin:semesters' %}';">Semesters</button>
   <button class="tablinks" name="section" id="courses-btn" onclick="location.href='{% url 'schooladmin:courses' %}';">Courses</button>
   <button class="tablinks" name="section" id="sections-btn" onclick="location.href='{% url 'schooladmin:sections' %}';">Sections</button>
-  <button class="tablinks" name="section" id="history-btn" onclick="location.href='{% url 'sis:profile' %}';">My Profile</button>
+  <button class="tablinks" name="section" id="profile-btn" onclick="location.href='{% url 'sis:profile' %}';">My Profile</button>
   <button class="tablinks" name="section" id="messages-btn" onclick="location.href='{% url 'sis:messages' %}';">My Messages</button>
 </div>
 {% endblock %}

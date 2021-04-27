@@ -4,6 +4,7 @@ from django.contrib.auth.forms import AdminPasswordChangeForm
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
+from django.urls import reverse
 
 from sis.models import Profile
 
@@ -30,7 +31,10 @@ def user_change_password(request, userid):
             messages.success(
                 request, f'Password for "{the_user.username}" {the_user.get_full_name()} ' +
                 'was successfully updated.')
-            return redirect('sis:profile')
+            if request.user == the_user:
+                return redirect('sis:profile')
+            else:
+                return redirect(reverse('schooladmin:user', args=[userid]))
         else:
             messages.error(request, 'Please correct the error(s) below.')
     else:

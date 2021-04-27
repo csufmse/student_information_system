@@ -1,10 +1,12 @@
-from django.urls import include, path
+from django.urls import path
+from django.shortcuts import redirect
 
 from student import views
 
 app_name = 'student'
+
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', lambda request: redirect('/', permanent=True)),
     path('current_schedule', views.current_schedule_view, name='current_schedule'),
     path('drop/<int:id>', views.drop, name='drop'),
     path('history', views.history, name='history'),

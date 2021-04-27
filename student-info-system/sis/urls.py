@@ -1,11 +1,13 @@
 from django.urls import path
+from django.shortcuts import redirect
+
 from sis.views import messages, profile, users, majors, sectionreferenceitem, users
 
 from . import views
 
 app_name = 'sis'
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', lambda request: redirect('/', permanent=True)),
     path('profile', profile.profile, name='profile'),
     path('profile/edit', profile.profile_edit, name='profile_edit'),
     path('access_denied', views.access_denied, name='access_denied'),

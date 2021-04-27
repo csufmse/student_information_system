@@ -2,6 +2,7 @@
 {% extends user.home_template %}
 {% load static %}
 {% load django_tables2 %}
+{% block class %}schedule{% endblock %}
 
 {% block content %}
     {%  if table %}

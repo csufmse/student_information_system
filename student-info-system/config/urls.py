@@ -4,6 +4,7 @@ from django.contrib.auth import views as auth_views
 from django.urls import include, path
 
 from sis import views as sis_views
+from schooladmin import views as schooladmin_views
 
 urlpatterns = [
     path('__debug__/', include(debug_toolbar.urls)),
@@ -15,5 +16,5 @@ urlpatterns = [
     # path('accounts/', include('django.contrib.auth.urls')),
     path('schooladmin/', include('schooladmin.urls')),
     path('professor/', include('professor.urls')),
-    path('', sis_views.index),
+    path('', schooladmin_views.index),
 ]
