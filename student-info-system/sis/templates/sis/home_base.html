@@ -19,6 +19,7 @@
         {% block logged-in %}
             <div>
             <span>
+            {%  block left_block %}
               <dl class="dl-horizontal">
                 {% block identification %}
                     <dt>Name</dt>
@@ -37,7 +38,10 @@
                     <dt>Open for Registration</dt><dd>{% for sem in registration_open %}<a href="{% url 'schooladmin:semester' semester_id=sem.id %}">{{ sem }}</a>  {% endfor %}</dd>
               {% endif %}
               </dl>
+                {% endblock %}
+            {%  block right_block %}
               <a class="btn btn-primary" href="{% url 'logout' %}">Log Out</a>
+                {% endblock %}
             </span>
             </div>
         {% endblock logged-in %}

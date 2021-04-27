@@ -2,9 +2,12 @@
 {% load static %}
 {% load bootstrap3 %}
 
-{% block logged-in %}
+{% block identification %}
     <div class="welcome">Welcome, Guest!</div>
 {%  endblock %}
+{%  block right_block %}
+<a class="btn btn-primary" href="{% url 'login' %}">Sign In</a>
+{% endblock %}
 
 {% block nav %}
 <div class="tab">
