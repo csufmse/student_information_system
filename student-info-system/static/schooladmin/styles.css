@@ -258,3 +258,15 @@ input {
     border-spacing: 5px 1rem;
     border-collapse: separate;
 }
+
+.alignleft {
+	float: left;
+}
+.alignright {
+	float: right;
+}
+
+.withmargin {
+    padding: 10px 10px;
+    margin-right: 25px;
+}
