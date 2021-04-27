@@ -88,7 +88,6 @@
     addButtonClickHandler('edit_professor', "{% url 'schooladmin:user_edit' auser.id %}");
 {%  endif %}
 addButtonClickHandler('showitems', "{% url 'schooladmin:professor_items' auser.id %}");
-stylizeRange({field:'year',min_label:'From Year',max_label:'To Year',prefix:"semesters"});
 {%  if received %}
     stylizeRange({field:'time_sent',name:'Sent',prefix:'received',width:'100px'}); {% endif %}
 {%  if sent %}
