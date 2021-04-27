@@ -362,10 +362,10 @@ class Student(models.Model):
         for ss in completed:
             credits_attempted = credits_attempted + ss.section.course.credits_earned
             grade_points = grade_points + ss.grade_points
-
         if credits_attempted == 0:
             return 0.0
-        return grade_points / float(credits_attempted)
+        else:
+            return grade_points / float(credits_attempted)
 
     def class_level(self):
         if self.grad_student:
@@ -893,6 +893,15 @@ class SectionStudent(models.Model):
         default=REGISTERED,
         max_length=20,
     )
+
+    def credits_earned(self):
+        if self.status == self.GRADED:
+            if self.grade == self.GRADE_F:
+                return 0
+            else:
+                return self.section.course.credits_earned
+        else:
+            return None
 
     class Meta:
         unique_together = (('section', 'student'),)

@@ -757,7 +757,6 @@ def sectionstudent(request, id):
 
 @role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)
 def transcript(request, userid):
-
     # prepare the data
     student = Student.objects.get(profile__user__id=userid)
     semesters = []
