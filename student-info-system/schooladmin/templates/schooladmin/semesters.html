@@ -21,7 +21,6 @@
 {% block late_scripts %}
 <script>
 insertScrollableDivs(applyHandlers=true);
-stylizeRange({field:'year',min_label:'From Year',max_label:'To Year',prefix:"semesters"});
 for (const butt of document.getElementsByClassName("submitme")) {
     butt.addEventListener("click", function () {
         this.form.submit();
