@@ -14,32 +14,32 @@ class ViewsAccess(TestCase):
         ad = createAdmin('foobar').profile
         m1 = Major.objects.create(abbreviation="CPSC", title="Computer Science", contact=ad)
         createAdmin(username='u1', password='hello')
-        createProfessor(username='u2', major=m1, password='hello')
+        createProfessor(username='u2', password='hello', major=m1)
         createStudent(username='u3', major=m1, password='hello')
 
-    def test_home_view_redirects_for_admin(self):
+    def test_home_view_works_for_admin(self):
         self.client.login(username='u1', password='hello')
         response = self.client.get('/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
-    def test_home_view_redirects_for_prof(self):
+    def test_home_view_works_for_prof(self):
         self.client.login(username='u2', password='hello')
         response = self.client.get('/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
-    def test_home_view_redirects_for_stud(self):
+    def test_home_view_works_for_stud(self):
         self.client.login(username='u3', password='hello')
         response = self.client.get('/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
-    def test_home_view_redirect_login_for_loser(self):
+    def test_home_view_guest_login_for_loser(self):
         response = self.client.get('/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
     def test_home_view_login_for_loser(self):
         response = self.client.get('/', follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'registration/login.html')
+        self.assertTemplateUsed(response, 'schooladmin/home_guest.html')
 
 
 class ViewsUseTemplate(TestCase):

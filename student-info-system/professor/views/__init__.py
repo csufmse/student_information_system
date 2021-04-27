@@ -49,11 +49,13 @@ def sections(request):
         table = sections[sem][1]
         data['table'] = table
     else:
-        sem = Semester.current_semester().name
-        values = sections.get(sem)
-        if values is not None:
-            table = values[1]
-            data['table'] = table
+        sem = Semester.current_semester()
+        if sem is not None:
+            sem = sem.name
+            values = sections.get(sem)
+            if values is not None:
+                table = values[1]
+                data['table'] = table
     return render(request, 'professor/sections.html', data)
 
 

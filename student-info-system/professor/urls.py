@@ -1,12 +1,12 @@
 from django.urls import path
+from django.shortcuts import redirect
 
 from . import views
-from sis.views import profile
 
 app_name = 'professor'
 
 urlpatterns = [
-    path('', views.index, name='index'),
+    path('', lambda request: redirect('/', permanent=True)),
     path('sections', views.sections, name='sections'),
     path('sections/<int:sectionid>/section', views.section, name='section'),
     path('section/<int:studentid>/student', views.student, name='student'),

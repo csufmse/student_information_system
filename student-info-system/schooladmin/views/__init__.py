@@ -32,13 +32,24 @@ from sis.elements.user import (UsersTable, FullUsersTable, StudentsTable, Studen
 
 from easy_pdf import rendering
 
+import schooladmin.views.users
+from professor.views import sections as profsections
+from student.views import current_schedule_view
 
-@role_login_required(Profile.ACCESS_ADMIN)
+
 def index(request):
-    return render(request, 'schooladmin/home_admin.html', request.user.profile.unread_messages())
+    logged_in = request.user.is_authenticated
+    if logged_in:
+        user_role = request.user.profile.role
 
-
-# USERS
+    if not logged_in:
+        return professors(request)
+    if user_role == Profile.ACCESS_ADMIN:
+        return schooladmin.views.users.userslist(request)
+    elif user_role == Profile.ACCESS_PROFESSOR:
+        return profsections(request)
+    else:
+        return current_schedule_view(request)
 
 
 @role_login_required(Profile.ACCESS_ADMIN, Profile.ACCESS_PROFESSOR)

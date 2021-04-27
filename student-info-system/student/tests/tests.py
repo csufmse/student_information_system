@@ -19,15 +19,15 @@ class ViewsAccess(TestCase):
         ViewsAccess.u2 = createProfessor(username='u2', password='hello', major=m1)
         ViewsAccess.u3 = createStudent(username='u3', password='hello', major=m1)
 
-    def test_home_view_redirects_for_admin(self):
+    def test_home_view_works_for_admin(self):
         login = self.client.login(username='u1', password='hello')
         response = self.client.get('/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
-    def test_home_view_redirects_for_prof(self):
+    def test_home_view_works_for_prof(self):
         login = self.client.login(username='u2', password='hello')
         response = self.client.get('/')
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 200)
 
     def test_home_view_exists_for_stud(self):
         login = self.client.login(username='u3', password='hello')
@@ -35,14 +35,10 @@ class ViewsAccess(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(str(response.context['user']), 'u3')
 
-    def test_home_view_redirect_login_for_loser(self):
-        response = self.client.get('/')
-        self.assertEqual(response.status_code, 302)
-
     def test_home_view_login_for_loser(self):
         response = self.client.get('/', follow=True)
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'registration/login.html')
+        self.assertTemplateUsed(response, 'schooladmin/home_guest.html')
 
 
 class ViewsExist(TestCase):
