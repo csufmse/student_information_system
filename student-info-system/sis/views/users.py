@@ -2,10 +2,8 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.forms import AdminPasswordChangeForm
 from django.contrib.auth.models import User
-from django.db import transaction
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
-from django.urls import reverse
 
 from sis.models import Profile
 

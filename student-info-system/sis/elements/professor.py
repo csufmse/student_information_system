@@ -2,7 +2,7 @@ from django import forms
 
 from sis.models import (Major, Professor)
 
-from sis.forms.utils import *
+from sis.elements.utils import *
 
 
 class ProfessorCreationForm(forms.ModelForm):

@@ -1,7 +1,7 @@
 from django import forms
 
-from sis.models import (Profile)
-from sis.forms.utils import *
+from sis.models import Profile
+from sis.elements.utils import *
 
 
 class ProfileCreationForm(forms.ModelForm):

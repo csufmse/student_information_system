@@ -1,13 +1,24 @@
+from django import forms
 import django_tables2 as tables
 
 
-# mix in a method to get specified CSS row class. Used by filtered_table2
-def row_class(cls):
-    ra = getattr(cls, 'Meta').row_attrs
-    return ra['class']
+class UpperFormField(forms.CharField):
+
+    def clean(self, value):
+        supa_clean = super().clean(value)
+        return str(supa_clean).upper()
 
 
-tables.Table.row_class = classmethod(row_class)
+class CourseChoiceField(forms.ModelMultipleChoiceField):
+
+    def label_from_instance(self, obj):
+        return f'{obj.name}: {obj.title}'
+
+
+class SectionStudentChoiceField(forms.ModelChoiceField):
+
+    def label_from_instance(self, obj):
+        return obj.section.name
 
 
 # Each column and cell has its own CSS class based on the type of

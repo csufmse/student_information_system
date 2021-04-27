@@ -1,9 +1,7 @@
-from datetime import date, datetime
+from datetime import date
 
 from django.contrib import messages
-from django.db import transaction
 from django.db.models import Sum, Count
-from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse
 
 from sis.authentication_helpers import role_login_required
@@ -12,23 +10,13 @@ from sis.models import (Course, Section, Profile, Semester, SectionStudent, Mess
 
 from sis.utils import filtered_table2, DUMMY_ID
 
-from sis.tables.courses import CoursesTable, MajorCoursesMetTable
-from sis.tables.messages import MessageSentTable, MessageReceivedTable
-from sis.tables.sectionreferenceitems import SectionReferenceItemsTable
-from sis.tables.sectionstudents import StudentHistoryTable
-from sis.tables.semesters import SemestersSummaryTable
-
-from sis.filters.course import RequirementsCourseFilter
-from sis.filters.message import SentMessageFilter, ReceivedMessageFilter
-from sis.filters.section import SectionFilter
-from sis.filters.sectionreferenceitem import SectionItemFilter
-from sis.filters.sectionstudent import StudentHistoryFilter
-from sis.filters.semester import SemesterFilter
-
-from sis.forms.major import MajorSelectForm, MajorChangeForm
-from sis.forms.profile import DemographicForm, UnprivProfileEditForm
-from sis.forms.sectionstudent import DropRequestForm
-from sis.forms.user import UserEditForm
+from sis.elements.course import CoursesTable, MajorCoursesMetTable, RequirementsCourseFilter
+from sis.elements.major import MajorSelectForm, MajorChangeForm
+from sis.elements.section import SectionFilter
+from sis.elements.sectionreferenceitem import SectionReferenceItemsTable, SectionItemFilter
+from sis.elements.sectionstudent import (StudentHistoryTable, StudentHistoryFilter,
+                                         DropRequestForm)
+from sis.elements.semester import SemestersSummaryTable, SemesterFilter
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
@@ -98,9 +86,8 @@ def registration_view(request):
                                 request,
                                 f'You have not met the prerequisites for {sect.course.name}.')
                         elif sect.course.graduate and not student.grad_student:
-                            messages.error(
-                                request,
-                                f'{sect.course.name} is a graduate-level class.')
+                            messages.error(request,
+                                           f'{sect.course.name} is a graduate-level class.')
                         else:
                             status = SectionStudent.REGISTERED
                             if sect.seats_remaining < 1:
