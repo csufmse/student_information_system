@@ -3,16 +3,15 @@ import pytz
 from django.contrib import messages
 from django.shortcuts import redirect, render
 from django.contrib.auth.decorators import login_required
-from django.urls import reverse
 
 from sis.models import (Profile, Major, Message, SectionStudent, Student)
 
 from sis.utils import filtered_table, filtered_table2, DUMMY_ID
 
-from sis.filters.message import (FullSentMessageFilter, FullReceivedMessageFilter,
-                                 SentMessageFilter, ReceivedMessageFilter)
-from sis.tables.messages import (MessageSentTable, MessageReceivedTable,
-                                 StudentMessageReceivedTable)
+from sis.elements.message import (FullSentMessageFilter, FullReceivedMessageFilter,
+                                  SentMessageFilter, ReceivedMessageFilter, MessageSentTable,
+                                  MessageReceivedTable, StudentMessageReceivedTable)
+
 from schooladmin.views import transcript
 
 

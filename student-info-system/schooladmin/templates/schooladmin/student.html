@@ -99,7 +99,6 @@
     addButtonClickHandler('change_password', "{% url 'sis:change_password' auser.id %}");
     addButtonClickHandler('edit_user', "{% url 'schooladmin:user_edit' auser.id %}");
 {% endif %}
-stylizeRange({field:'year',min_label:'From Year',max_label:'To Year',prefix:"semesters"});
 {%  if received %}
     stylizeRange({field:'time_sent',name:'Sent',prefix:'received',width:'100px'});
 {% endif %}

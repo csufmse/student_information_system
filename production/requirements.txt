@@ -17,5 +17,5 @@ english-words==1.0.3
 beautifulsoup4==4.9.3
 django-easy-pdf==0.1.1
 reportlab==3.5.67
-xhtml2pdf==0.2b1
+xhtml2pdf==0.2.5
 django-utils-six==2.0

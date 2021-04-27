@@ -60,7 +60,7 @@
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: center;
-  background-color: #4CAF50;
+  background-color: #74b06f;
   color: white;
 }
 
@@ -257,4 +257,16 @@ input {
 .editform form table {
     border-spacing: 5px 1rem;
     border-collapse: separate;
+}
+
+.alignleft {
+	float: left;
+}
+.alignright {
+	float: right;
+}
+
+.withmargin {
+    padding: 10px 10px;
+    margin-right: 25px;
 }

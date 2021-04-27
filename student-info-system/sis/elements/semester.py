@@ -1,65 +1,25 @@
-from django import forms
-from django.core.validators import *
+from django_filters import CharFilter, FilterSet
+from django.db.models import CharField, Value
+from django.db.models.functions import Concat
 
-from sis.models import (Course, CoursePrerequisite, Major, Semester)
+import django_tables2 as tables
 
-from sis.forms.utils import *
+from sis.models import Semester
+
+from sis.elements.utils import *
 
 
-class CourseCreationForm(forms.ModelForm):
-    major = forms.ModelChoiceField(queryset=Major.objects.all())
-    major.widget.attrs.update({'class': 'major_sel selectpicker'})
+class SemesterFilter(FilterSet):
+    semester = CharFilter(Semester.objects, label='Semester', method='filter_semester')
 
-    catalog_number = forms.IntegerField(label='Number', validators=(MinValueValidator(1),))
-    title = forms.CharField(label='Title', max_length=256)
-    description = forms.CharField(max_length=256,
-                                  required=False,
-                                  widget=forms.Textarea(attrs={'rows': 3}))
-    credits_earned = forms.DecimalField(label='Credits', max_digits=2, decimal_places=1)
-    graduate = forms.ChoiceField(label='Graduate',
-                                 choices=((True, 'Graduate'), (False, 'Undergrad')))
+    def filter_semester(self, queryset, name, value):
+        return queryset.annotate(
+            slug=Concat('session', Value('-'), 'year', output_field=CharField())).filter(
+                slug__icontains=value)
 
     class Meta:
-        model = Course
-        fields = ('major', 'catalog_number', 'graduate', 'title', 'description', 'credits_earned')
-
-
-class CourseEditForm(forms.ModelForm):
-    major = forms.ModelChoiceField(queryset=Major.objects.all())
-    major.widget.attrs.update({'class': 'major_sel selectpicker'})
-
-    catalog_number = forms.IntegerField(label='Number', validators=(MinValueValidator(1),))
-    title = forms.CharField(label='Title', max_length=256)
-    description = forms.CharField(label='Description',
-                                  max_length=256,
-                                  required=False,
-                                  widget=forms.Textarea(attrs={'rows': 3}))
-    credits_earned = forms.DecimalField(label='Credits', max_digits=2, decimal_places=1)
-    graduate = forms.ChoiceField(label='Graduate',
-                                 choices=((True, 'Graduate'), (False, 'Undergrad')))
-
-    prereqs = CourseChoiceField(queryset=Course.objects.all(),
-                                widget=forms.CheckboxSelectMultiple,
-                                required=False)
-
-    class Meta:
-        model = Course
-        fields = ('major', 'catalog_number', 'graduate', 'title', 'description', 'credits_earned',
-                  'prereqs')
-
-    def __init__(self, *args, **kwargs):
-        super(CourseEditForm, self).__init__(*args, **kwargs)
-        # we defer loading of professors until we know what major is chosen
-        if kwargs['instance']:
-            the_course = kwargs['instance']
-            if the_course:
-                self.fields['prereqs'].queryset = Course.objects.exclude(id=the_course.id)
-
-    def clean(self):
-        cleaned_data = super().clean()
-        are_valid = self.instance.are_candidate_prerequisites_valid(cleaned_data['prereqs'])
-        if not are_valid:
-            self.add_error('prereqs', "Prerequisites lead back to this course.")
+        model = Semester
+        fields = ['semester']
 
 
 class SemesterCreationForm(forms.ModelForm):
@@ -142,3 +102,43 @@ class SemesterEditForm(forms.ModelForm):
         model = Semester
         fields = ('date_registration_opens', 'date_registration_closes', 'date_started',
                   'date_last_drop', 'date_ended', 'date_finalized')
+
+
+class SemestersTable(tables.Table):
+    semester = ClassyColumn(verbose_name='Semester',
+                            css_class_base='semester',
+                            accessor='name',
+                            order_by=('year', 'session_order'))
+    session = ClassyColumn(verbose_name='Session',
+                           css_class_base='session',
+                           accessor='session',
+                           order_by=('session_order',))
+    year = ClassyColumn(css_class_base='year')
+    date_registration_opens = ClassyColumn(verbose_name='Registration Opens',
+                                           css_class_base='date')
+    date_registration_closes = ClassyColumn(verbose_name='Registration Closes',
+                                            css_class_base='date')
+    date_last_drop = ClassyColumn(verbose_name='Date of Last Drop', css_class_base='date')
+    date_started = ClassyColumn(verbose_name='Start of Classes', css_class_base='date')
+    date_ended = ClassyColumn(verbose_name='End of Classes', css_class_base='date')
+    date_finalized = ClassyColumn(verbose_name='Grades Finalized', css_class_base='date')
+
+    class Meta:
+        model = Semester
+        template_name = "django_tables2/bootstrap.html"
+        fields = ('semester', 'session', 'year', 'date_registration_opens',
+                  'date_registration_closes', 'date_started', 'date_last_drop', 'date_ended',
+                  'date_finalized')
+        attrs = {"class": 'semester_table'}
+        row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}
+
+
+class SemestersSummaryTable(SemestersTable):
+
+    class Meta:
+        model = Semester
+        template_name = "django_tables2/bootstrap.html"
+        exclude = ('date_registration_opens', 'id', 'date_registration_closes', 'date_started',
+                   'date_last_drop', 'date_ended', 'date_finalized')
+        attrs = {"class": 'semester_table'}
+        row_attrs = {'class': 'semester_row', 'data-id': lambda record: record.pk}

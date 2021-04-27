@@ -3,7 +3,7 @@ from django.test import TestCase
 from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, SectionStudent,
                         Semester, Student, ClassLevel)
 
-from schooladmin.forms import (CourseEditForm, CourseCreationForm)
+from sis.elements.course import (CourseEditForm, CourseCreationForm)
 
 from sis.tests.utils import *
 

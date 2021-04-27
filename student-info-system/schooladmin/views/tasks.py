@@ -1,11 +1,11 @@
 from django.contrib import messages
-from django.shortcuts import redirect, render
+from django.shortcuts import render
 
 from sis.authentication_helpers import role_login_required
 
 from sis.models import Interval, Profile, Task, Tasks, AcademicProbationTask
 
-from sis.forms.tasks import AcademicProbationTaskForm, IntervalForm
+from sis.elements.task import AcademicProbationTaskForm, IntervalForm
 
 
 @role_login_required(Profile.ACCESS_ADMIN)

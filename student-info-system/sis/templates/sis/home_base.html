@@ -14,11 +14,11 @@
     <div class="header">
       <span class="name">
       {% block header_content %}
-        <h1>{% block header_name %}Student Info System{% endblock %}</h1>
+        <h1 align="center">{% block header_name %}Student Info System{% endblock %}</h1>
 
         {% block logged-in %}
-            <div>
-            <span>
+            <div id="headerstuff">
+            <span class="alignleft">
             {%  block left_block %}
               <dl class="dl-horizontal">
                 {% block identification %}
@@ -43,7 +43,9 @@
               <a class="btn btn-primary" href="{% url 'logout' %}">Log Out</a>
                 {% endblock %}
             </span>
+              <a class="btn btn-primary alignright withmargin" href="{% url 'logout' %}">Log Out</a>
             </div>
+            <div style="clear: both;"></div>
         {% endblock logged-in %}
 
       {% endblock header_content %}

@@ -1,9 +1,7 @@
-from datetime import date, datetime
+from datetime import date
 
 from django.contrib import messages
-from django.db import transaction
 from django.db.models import Sum, Count
-from django.http import HttpResponse
 from django.shortcuts import redirect, render, reverse
 
 from sis.authentication_helpers import role_login_required
@@ -12,23 +10,13 @@ from sis.models import (Course, Section, Profile, Semester, SectionStudent, Mess
 
 from sis.utils import filtered_table2, DUMMY_ID
 
-from sis.tables.courses import CoursesTable, MajorCoursesMetTable
-from sis.tables.messages import MessageSentTable, MessageReceivedTable
-from sis.tables.sectionreferenceitems import SectionReferenceItemsTable
-from sis.tables.sectionstudents import StudentHistoryTable
-from sis.tables.semesters import SemestersSummaryTable
-
-from sis.filters.course import RequirementsCourseFilter
-from sis.filters.message import SentMessageFilter, ReceivedMessageFilter
-from sis.filters.section import SectionFilter
-from sis.filters.sectionreferenceitem import SectionItemFilter
-from sis.filters.sectionstudent import StudentHistoryFilter
-from sis.filters.semester import SemesterFilter
-
-from sis.forms.major import MajorSelectForm, MajorChangeForm
-from sis.forms.profile import DemographicForm, UnprivProfileEditForm
-from sis.forms.sectionstudent import DropRequestForm
-from sis.forms.user import UserEditForm
+from sis.elements.course import CoursesTable, MajorCoursesMetTable, RequirementsCourseFilter
+from sis.elements.major import MajorSelectForm, MajorChangeForm
+from sis.elements.section import SectionFilter
+from sis.elements.sectionreferenceitem import SectionReferenceItemsTable, SectionItemFilter
+from sis.elements.sectionstudent import (StudentHistoryTable, StudentHistoryFilter,
+                                         DropRequestForm)
+from sis.elements.semester import SemestersSummaryTable, SemesterFilter
 
 
 @role_login_required(Profile.ACCESS_STUDENT)
@@ -98,9 +86,8 @@ def registration_view(request):
                                 request,
                                 f'You have not met the prerequisites for {sect.course.name}.')
                         elif sect.course.graduate and not student.grad_student:
-                            messages.error(
-                                request,
-                                f'{sect.course.name} is a graduate-level class.')
+                            messages.error(request,
+                                           f'{sect.course.name} is a graduate-level class.')
                         else:
                             status = SectionStudent.REGISTERED
                             if sect.seats_remaining < 1:
@@ -140,36 +127,36 @@ def registration_view(request):
 @role_login_required(Profile.ACCESS_STUDENT)
 def history(request):
     the_user = request.user
+    student = the_user.profile.student
+    ssects = student.sectionstudent_set.all().order_by('section__semester',
+                                                       'section__course__name')
+    semesters = []
+    accumulating_sem = {
+        'semester': None,
+    }
+    for ssect in ssects:
+        if ssect.section.semester != accumulating_sem['semester']:
+            if accumulating_sem['semester'] is not None:
+                semesters.append(accumulating_sem)
+            accumulating_sem = {
+                'semester': ssect.section.semester,
+                'gpa': student.gpa(semester=ssect.section.semester),
+                'sections': [],
+                'credits_earned': student.credits_earned(semester=ssect.section.semester),
+            }
+        accumulating_sem['sections'].append(ssect)
+
     data = {
         'auser': the_user,
+        'semesters': semesters,
     }
-    data.update(
-        filtered_table2(
-            name='history',
-            qs=the_user.profile.student.course_history(),
-            filter=StudentHistoryFilter,
-            table=StudentHistoryTable,
-            request=request,
-            wrap_list=False,
-            self_url=reverse('student:history'),
-            click_url=reverse('schooladmin:sectionstudent', args=[DUMMY_ID]),
-        ))
-    data.update(
-        filtered_table2(
-            name='semesters',
-            qs=the_user.profile.student.semesters.all(),
-            filter=SemesterFilter,
-            table=SemestersSummaryTable,
-            request=request,
-            self_url=reverse('student:history'),
-            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
-        ))
 
     remaining = the_user.profile.student.requirements_met_list()
     stats = remaining.filter(met=False).aggregate(remaining_course_count=Count('id'),
                                                   remaining_credit_count=Sum('credits_earned'))
     if stats['remaining_credit_count'] is None:
         stats['remaining_credit_count'] = 0
+
     data.update(stats)
 
     data.update(
@@ -182,7 +169,6 @@ def history(request):
             self_url=reverse('student:history'),
             click_url=reverse('schooladmin:course', args=[DUMMY_ID]),
         ))
-
     return render(request, 'student/history.html', data)
 
 
