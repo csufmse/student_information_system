@@ -1,7 +1,7 @@
 from django import forms
 
 from sis.models import (Student, Major)
-from sis.forms.utils import *
+from sis.elements.utils import *
 
 
 class StudentCreationForm(forms.ModelForm):

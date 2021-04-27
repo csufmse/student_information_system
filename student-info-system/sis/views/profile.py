@@ -3,10 +3,9 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 
-from sis.models import (
-    Profile,)
-from sis.forms.user import UserEditForm
-from sis.forms.profile import DemographicForm, UnprivProfileEditForm
+from sis.models import Profile
+from sis.elements.user import UserEditForm
+from sis.elements.profile import DemographicForm, UnprivProfileEditForm
 
 
 @login_required

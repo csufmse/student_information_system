@@ -1,23 +1,18 @@
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.http import HttpResponse
 from django.shortcuts import redirect, render
 from django.urls import reverse
 
-from sis.authentication_helpers import role_login_required
-
 from sis.models import (Major, Professor, Section, Semester, Student, Course, Profile)
 
 from sis.utils import filtered_table2, DUMMY_ID, next_prev
 
-from sis.filters.course import CourseFilter
-from sis.filters.major import MajorFilter
-from sis.filters.user import StudentFilter, UserFilter, ProfessorFilter
-
-from sis.tables.courses import CoursesTable, CoursesForMajorTable, MajorCoursesMetTable
-from sis.tables.majors import MajorsTable
-from sis.tables.users import UsersTable, FullUsersTable, StudentsTable, StudentInMajorTable
+from sis.elements.course import (CourseFilter, CoursesTable, CoursesForMajorTable,
+                                 MajorCoursesMetTable)
+from sis.elements.major import MajorFilter, MajorsTable
+from sis.elements.user import (StudentFilter, UserFilter, ProfessorFilter, UsersTable,
+                               FullUsersTable, StudentsTable, StudentInMajorTable)
 
 
 def majors(request):
