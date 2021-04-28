@@ -232,14 +232,15 @@ class MessageDetailForm(forms.ModelForm):
         fields = ('role', 'bio')
 
 
-def classes_for(record):
-    cl = 'message_row'
-    if record.unread:
-        cl += ' unread'
-    if record.time_archived is not None:
-        cl += ' archived'
-    if record.aged_request():
-        cl += ' aged-request'
+def classes_for(record=None, row_class="message_row"):
+    cl = row_class
+    if record is not None:
+        if record.unread:
+            cl += ' unread'
+        if record.time_archived is not None:
+            cl += ' archived'
+        if record.aged_request():
+            cl += ' aged-request'
 
     return cl
 
@@ -295,7 +296,7 @@ class MessageTable(tables.Table):
         fields = ('unread', 'high_priority', 'time_sent', 'recipient', 'sender', 'subject',
                   'handled')
         row_attrs = {
-            'class': (lambda record: 'message_row unread' if record.unread else 'message_row'),
+            'class': (lambda record: classes_for(record)),
             'data-id': lambda record: record.pk
         }
         attrs = {"class": 'message_table'}
@@ -306,7 +307,7 @@ class MessageReceivedTable(MessageTable):
     class Meta:
         exclude = ('recipient', 'time_read')
         row_attrs = {
-            'class': (lambda record: classes_for(record)),
+            'class': (lambda record: classes_for(record, 'received-row')),
             'data-id': lambda record: record.pk
         }
         attrs = {"class": 'message_table'}
@@ -317,7 +318,7 @@ class StudentMessageReceivedTable(MessageReceivedTable):
     class Meta:
         exclude = ('handled',)
         row_attrs = {
-            'class': (lambda record: classes_for(record)),
+            'class': (lambda record: classes_for(record, 'received-row')),
             'data-id': lambda record: record.pk
         }
         attrs = {"class": 'message_table'}
@@ -332,7 +333,7 @@ class MessageSentTable(MessageTable):
             'handled',
         )
         row_attrs = {
-            'class': (lambda record: classes_for(record)),
+            'class': (lambda record: classes_for(record, 'sent-row')),
             'data-id': lambda record: record.pk
         }
         attrs = {"class": 'message_table'}

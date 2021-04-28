@@ -14,6 +14,7 @@ urlpatterns = [
     path('majors', majors.majors, name='majors'),
     path('major/<int:majorid>', majors.major, name='major'),
     path('messages', messages.usermessages, name='messages'),
+    path('viewmessage/<int:id>', messages.viewmessage, name='viewmessage'),
     path('message/<int:id>', messages.message, name='message'),
     path('user/<int:userid>/change_password', users.user_change_password, name='change_password'),
     path('secitem/<int:id>', sectionreferenceitem.sectionreferenceitem, name='secitem'),
