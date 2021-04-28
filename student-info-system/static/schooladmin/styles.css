@@ -73,7 +73,7 @@
 .data-table-alt th {
   border: 1px solid #ddd;
   padding: 8px;
-  cursor: cell;
+  cursor: pointer;
 }
 
 .data-table-alt tr:nth-child(even) {
@@ -372,4 +372,9 @@ input {
 
 table {
   width: 100%;
+}
+
+.contentblob > div > .table-container {
+  display: flex;
+  justify-content: center;
 }
