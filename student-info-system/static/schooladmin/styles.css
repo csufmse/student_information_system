@@ -1,4 +1,6 @@
-* {box-sizing: border-box}
+* {
+  box-sizing: border-box;
+}
 
 .tabcontent {
   padding: 0px 12px;
@@ -30,7 +32,6 @@
   transition: 0.3s;
 }
 
-
 /* Create an active/current "tab button" class */
 .tab button.active {
   background-color: #ccc;
@@ -41,22 +42,24 @@
 }
 
 .contentblob {
-   padding: 0px 10px;
-         display: flex;
+  padding: 0 3% 0 1%;
+  display: flex;
+  flex-direction: column;
 }
 /* end of styles relevant to tabs and tab content */
-
 
 /* style for all of our data tables. Two types: with alternating
 ** row colors, and all one color
  */
-.data-table, .data-table-alt {
+.data-table,
+.data-table-alt {
   font-family: Arial, Helvetica, sans-serif;
   border-collapse: collapse;
   width: 100%;
 }
 
-.data-table th, .data-table-alt th {
+.data-table th,
+.data-table-alt th {
   padding-top: 12px;
   padding-bottom: 12px;
   text-align: center;
@@ -64,122 +67,215 @@
   color: white;
 }
 
-.data-table td, .data-table th, .data-table-alt td, .data-table-alt th {
+.data-table td,
+.data-table th,
+.data-table-alt td,
+.data-table-alt th {
   border: 1px solid #ddd;
   padding: 8px;
   cursor: cell;
 }
 
-.data-table-alt tr:nth-child(even)
-{
-    background-color: #f2f2f2;
+.data-table-alt tr:nth-child(even) {
+  background-color: #f2f2f2;
 }
 
 .data-table tr:hover .data-table-alt tr:hover {
-    background-color: #ddd;
+  background-color: #ddd;
 }
 /* End data table styling */
-
 
 /* TABLE COLUMN HEADERS AND DATA CELLS */
 
 /* note that the classes of the cells and headers are based on the data in them */
 
 /* all column headers are centered */
-.active_col, .capac_col, .catnumber_col, .classlevel_col, .course_col, .courselevel_col, .coursetitle_col,
-.credits_col, .date_col, .drop_col, .gpa_col, .hours_col, .lettergrade_col, .location_col, .major_col,
-.majordescr_col, .majorname_col, .message_addr_col, .message_date_col, .message_subject_col, .message_body_col, .message_priority_col,
-.message_unread_col, .met_col, .professor_col, .remaining_col, .role_col, .sched_col, .sectionnumber_col,
-.sectionstatus_col, .sectionstudentstatus_col, .sem_col, .semester_col, .session_col, .user_name_col, .username_col {
+.active_col,
+.capac_col,
+.catnumber_col,
+.classlevel_col,
+.course_col,
+.courselevel_col,
+.coursetitle_col,
+.credits_col,
+.date_col,
+.drop_col,
+.gpa_col,
+.hours_col,
+.lettergrade_col,
+.location_col,
+.major_col,
+.majordescr_col,
+.majorname_col,
+.message_addr_col,
+.message_date_col,
+.message_subject_col,
+.message_body_col,
+.message_priority_col,
+.message_unread_col,
+.met_col,
+.professor_col,
+.remaining_col,
+.role_col,
+.sched_col,
+.sectionnumber_col,
+.sectionstatus_col,
+.sectionstudentstatus_col,
+.sem_col,
+.semester_col,
+.session_col,
+.user_name_col,
+.username_col {
   text-align: center;
 }
 
 /* most (data) cells are centered */
-.active_cell, .capac_cell, .catnumber_cell, .classlevel_cell, .course_cell, .courselevel_cell, .credits_cell,
-.date_cell, .gpa_cell, .hours_cell, .lettergrade_cell, .major_cell, .majorname_cell, .met_cell,
-.message_date_cell, .message_priority_cell,
-.message_unread_cell, .drop_cell, .sectionnumber_cell,
-.prof_cell, .remaining_cell, .role_cell, .sched_cell, .section_name_cell, .section_number_cell, .sectionstatus_cell,
-.sectionstudentstatus_cell, .sem_cell, .semester_cell, .session_cell, .year_cell {
+.active_cell,
+.capac_cell,
+.catnumber_cell,
+.classlevel_cell,
+.course_cell,
+.courselevel_cell,
+.credits_cell,
+.date_cell,
+.gpa_cell,
+.hours_cell,
+.lettergrade_cell,
+.major_cell,
+.majorname_cell,
+.met_cell,
+.message_date_cell,
+.message_priority_cell,
+.message_unread_cell,
+.drop_cell,
+.sectionnumber_cell,
+.prof_cell,
+.remaining_cell,
+.role_cell,
+.sched_cell,
+.section_name_cell,
+.section_number_cell,
+.sectionstatus_cell,
+.sectionstudentstatus_cell,
+.sem_cell,
+.semester_cell,
+.session_cell,
+.year_cell {
   text-align: center;
 }
-.coursetitle_cell, .location_cell, .majordescr_cell, .majorname_cell, .prof_cell, .username_cell,
-.user_name_cell, .message_addr_cell, .message_subject_cell, .message_body_cell  {
+.coursetitle_cell,
+.location_cell,
+.majordescr_cell,
+.majorname_cell,
+.prof_cell,
+.username_cell,
+.user_name_cell,
+.message_addr_cell,
+.message_subject_cell,
+.message_body_cell {
   text-align: left;
 }
-.active_cell, .catnumber_cell. .credits_cell, .message_unread_cell, .message_priority_cell, .message_date_cell,
-.role_cell, .section_number_cell, .semester_cell, .session_col,
+.active_cell,
+.catnumber_cell. .credits_cell,
+.message_unread_cell,
+.message_priority_cell,
+.message_date_cell,
+.role_cell,
+.section_number_cell,
+.semester_cell,
+.session_col,
 .year_cell {
   width: 80px;
 }
-.classlevel_cell, .courselevel_cell, .date_cell, .drop_cell, .gpa_cell, .major_cell, .message_addr_cell, .session_cell {
+.classlevel_cell,
+.courselevel_cell,
+.date_cell,
+.drop_cell,
+.gpa_cell,
+.major_cell,
+.message_addr_cell,
+.session_cell {
   width: 110px;
 }
 .sectionnumber_cell {
   width: 130px;
 }
-.course_cell, .section_name_cell, .sched_cell {
+.course_cell,
+.section_name_cell,
+.sched_cell {
   width: 150px;
 }
-.user_name_cell, .message_subject_cell, .message_body_cell {
+.user_name_cell,
+.message_subject_cell,
+.message_body_cell {
   width: 200px;
 }
 .coursetitle_cell {
   width: 300px;
 }
 
-
 /* Transcript table */
 .transcript_table {
-    font-family: Arial, Helvetica, sans-serif;
-    border-collapse: collapse;
-    width: 100%;
+  font-family: Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  width: 100%;
 }
 
-.transcript_table td, .transcript_table th {
-    padding: 6px;
+.transcript_table td,
+.transcript_table th {
+  padding: 6px;
 }
 
 .sem_head {
-    background: #f2f2f2;
-    padding: 10px;
+  background: #f2f2f2;
+  padding: 10px;
 }
-
-
 
 /* SELECT/PULLDOWNS */
-.role_sel, .course_sel, .major_sel, .role_sel, .session_sel, .semester_sel, .user_sel {
-    font-family: Arial, Helvetica, sans-serif;
-    data-style: btn_primary;
-    width: 180px;
-    height: 30px;
+.role_sel,
+.course_sel,
+.major_sel,
+.role_sel,
+.session_sel,
+.semester_sel,
+.user_sel {
+  font-family: Arial, Helvetica, sans-serif;
+  data-style: btn_primary;
+  width: 180px;
+  height: 30px;
 }
 
-.major_table, .user_table, .course_table, .fulluser_table, .semester_table,
-.section_table, .sectionstudent_table {
-    position: relative;
-    overflow: auto;
+.major_table,
+.user_table,
+.course_table,
+.fulluser_table,
+.semester_table,
+.section_table,
+.sectionstudent_table {
+  position: relative;
+  overflow: auto;
 }
 
 .scrollable-div {
-    /* border: 1px solid red; */
-    display: inline-block;
-    position:relative;
-    overflow:auto;
+  /* border: 1px solid red; */
+  display: inline-block;
+  position: relative;
+  overflow: auto;
+  width: 100%;
 }
 
 /* message display stuff */
 .unread {
-    font-weight: bold;
+  font-weight: bold;
 }
 
 .archived {
-    font-style: italic;
+  font-style: italic;
 }
 
 .aged-request {
-    font-style: italic;
-    color: red;
+  font-style: italic;
+  color: red;
 }
 
 .message_detail_div {
@@ -198,75 +294,82 @@
 }
 
 .message_header {
-     font-style: italic;
+  font-style: italic;
 }
 
 .message_header_value {
-     font-weight: bold;
-    padding: 10px 4px;
-
+  font-weight: bold;
+  padding: 10px 4px;
 }
 /* This is the message at the top */
 .success {
-    border-radius: 5px;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #04d709;
+  border-radius: 5px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #04d709;
   color: black;
-    padding: 22px 10px;
+  padding: 22px 10px;
 }
 .error {
-    border-radius: 5px;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #ff5454;
+  border-radius: 5px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #ff5454;
   color: white;
-    padding: 22px 10px;
+  padding: 22px 10px;
 }
 .warning {
-    border-radius: 5px;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #eeff54;
-    color: black;
-    padding: 22px 10px;
+  border-radius: 5px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #eeff54;
+  color: black;
+  padding: 22px 10px;
 }
 .info {
-    border-radius: 5px;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: dodgerblue;
-    color: white;
-    padding: 22px 10px;
+  border-radius: 5px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: dodgerblue;
+  color: white;
+  padding: 22px 10px;
 }
 /* this is the field validation error */
 .errorlist {
-    border-radius: 5px;
-    font-family: Arial, Helvetica, sans-serif;
-    background-color: #ff5454;
+  border-radius: 5px;
+  font-family: Arial, Helvetica, sans-serif;
+  background-color: #ff5454;
   color: white;
-    padding: 22px 8px;
+  padding: 22px 8px;
 }
 /* this is the input help text */
 .helptext {
-    padding: 22px 5px;
-    font-size: large;
-    font-style: italic;
-    font-weight: bold;
+  padding: 22px 5px;
+  font-size: large;
+  font-style: italic;
+  font-weight: bold;
 }
 input {
-    font-size: large;
+  font-size: large;
 }
 
 .editform form table {
-    border-spacing: 5px 1rem;
-    border-collapse: separate;
+  border-spacing: 5px 1rem;
+  border-collapse: separate;
 }
 
 .alignleft {
-	float: left;
+  float: left;
 }
 .alignright {
-	float: right;
+  float: right;
 }
 
 .withmargin {
-    padding: 10px 10px;
-    margin-right: 25px;
+  padding: 10px 10px;
+  margin-right: 25px;
+}
+
+.home-container {
+  padding: 0% 5%;
+}
+
+table {
+  width: 100%;
 }
