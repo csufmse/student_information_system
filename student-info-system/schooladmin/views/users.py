@@ -92,6 +92,7 @@ def user(request, userid):
                 request=request,
                 wrap_list=False,
                 self_url=reverse('schooladmin:user', args=[userid]),
+                click_url=reverse('sis:viewmessage', args=[DUMMY_ID]),
             ))
         data.update(
             filtered_table2(
@@ -102,6 +103,7 @@ def user(request, userid):
                 request=request,
                 wrap_list=False,
                 self_url=reverse('schooladmin:user', args=[userid]),
+                click_url=reverse('sis:viewmessage', args=[DUMMY_ID]),
             ))
 
     return render(request, 'schooladmin/user.html', data)
@@ -341,6 +343,7 @@ def student(request, userid):
                 request=request,
                 wrap_list=False,
                 self_url=reverse('schooladmin:student', args=[userid]),
+                click_url=reverse('sis:viewmessage', args=[DUMMY_ID]),
             ))
         data.update(
             filtered_table2(
@@ -351,6 +354,7 @@ def student(request, userid):
                 request=request,
                 wrap_list=False,
                 self_url=reverse('schooladmin:student', args=[userid]),
+                click_url=reverse('sis:viewmessage', args=[DUMMY_ID]),
             ))
 
     return render(request, 'schooladmin/student.html', data)
@@ -422,6 +426,7 @@ def professor(request, userid):
                 request=request,
                 wrap_list=False,
                 self_url=reverse('schooladmin:professor', args=[userid]),
+                click_url=reverse('sis:viewmessage', args=[DUMMY_ID]),
             ))
         data.update(
             filtered_table2(
@@ -432,6 +437,7 @@ def professor(request, userid):
                 request=request,
                 wrap_list=False,
                 self_url=reverse('schooladmin:professor', args=[userid]),
+                click_url=reverse('sis:viewmessage', args=[DUMMY_ID]),
             ))
 
     if not logged_in:

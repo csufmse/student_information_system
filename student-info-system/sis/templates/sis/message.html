@@ -1,10 +1,17 @@
-{% extends 'sis/base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
-{% block class %}messages{% endblock %}
+{% load render_table from django_tables2 %}
+{% load sis-filter %}
 
-{% block all_content %}
-    <div><span class="message_header">From:</span>
+{% block class %}{{ block_class }}{% endblock %}
+
+{% block content %}
+<span>
+    {% if prev %} <input id="prev" action="action" class="btn btn-info" value="Previous"/> {% endif %}
+    {% if next %} <input id="next" action="action" class="btn btn-info" value="Next"/> {% endif %}
+</span>
+   <div><span class="message_header">From:</span>
         <span class="message_header_value">{{ message.sender.user.get_full_name }}</span></div>
     <div><span class="message_header">To:</span>
         <span class="message_header_value">{{ message.recipient.user.get_full_name }}</span></div>
@@ -80,15 +87,9 @@
 {% endblock %}
 
 {% block late_scripts %}
-    <script>
-document.getElementById("archive").addEventListener("click", function () {
-        this.form.submit();
-        return true;
-    });
-document.getElementById("unarchive").addEventListener("click", function () {
-        this.form.submit();
-        return true;
-    });
-
-    </script>
+<script>
+{% if prev %} addButtonClickHandler('prev', "{% url detail_class prev %}"); {% endif %}
+{% if next %} addButtonClickHandler('next', "{% url detail_class next %}"); {% endif %}
+</script>
 {% endblock %}
+
