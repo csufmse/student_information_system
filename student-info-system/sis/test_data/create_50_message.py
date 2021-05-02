@@ -82,7 +82,7 @@ def createData():
                       f'(semester {aSemester}, sent to {mesg.recipient})')
 
             # yo be on AP
-            if 0.01 < student.gpa() < 2.0:
+            if 0.01 < student.gpa < 2.0:
                 anAdmin = student.major.contact
                 when = rand_between(aSemester.date_started, aSemester.date_ended)
                 reason = get_sentence()

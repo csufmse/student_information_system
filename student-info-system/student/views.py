@@ -139,10 +139,14 @@ def history(request):
             if accumulating_sem['semester'] is not None:
                 semesters.append(accumulating_sem)
             accumulating_sem = {
-                'semester': ssect.section.semester,
-                'gpa': student.gpa(semester=ssect.section.semester),
+                'semester':
+                    ssect.section.semester,
+                'gpa':
+                    student.semesterstudent_set.get(semester=ssect.section.semester).gpa,
                 'sections': [],
-                'credits_earned': student.credits_earned(semester=ssect.section.semester),
+                'credits_earned':
+                    student.semesterstudent_set.get(semester=ssect.section.semester
+                                                    ).credits_earned,
             }
         accumulating_sem['sections'].append(ssect)
 
