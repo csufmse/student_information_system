@@ -26,10 +26,10 @@ class FullSentMessageFilter(FilterSet):
     unread = ChoiceFilter(field_name='unread',
                           label='Read?',
                           choices=((True, 'Unread Only'), (False, 'Read Only')))
-    archived = ChoiceFilter(field_name='archived',
-                            label='Archived?',
-                            choices=BOOLE_CHOICES,
-                            initial=False)
+    sender_archived = ChoiceFilter(field_name='sender_archived',
+                                   label='Archived?',
+                                   choices=BOOLE_CHOICES,
+                                   initial=False)
     handled = ChoiceFilter(field_name='handled', label='Handled?', choices=HANDLED_CHOICES)
     subject = CharFilter(field_name='subject', lookup_expr='icontains')
     high_priority = ChoiceFilter(label='High Pri?',
@@ -57,11 +57,11 @@ class FullSentMessageFilter(FilterSet):
     def __init__(self, data=None, *args, **kwargs):
         newdict = data.dict()
         if len(newdict) == 0:
-            newdict[f'{self.prefix}-archived'] = False
+            newdict[f'{self.prefix}-sender_archived'] = False
         super(FullSentMessageFilter, self).__init__(newdict, *args, **kwargs)
         self.filters['high_priority'].extra.update({'empty_label': 'Any Pri'})
         self.filters['unread'].extra.update({'empty_label': 'Read/Unread'})
-        self.filters['archived'].extra.update({'empty_label': 'Archived?'})
+        self.filters['sender_archived'].extra.update({'empty_label': 'Archived?'})
         self.filters['handled'].extra.update({'empty_label': 'Handled?'})
 
     class Meta:
@@ -72,7 +72,7 @@ class FullSentMessageFilter(FilterSet):
             'subject',
             'unread',
             'high_priority',
-            'archived',
+            'sender_archived',
             'handled',
         ]
 
@@ -164,8 +164,6 @@ class SentMessageFilter(FilterSet):
 
     def __init__(self, data=None, *args, **kwargs):
         newdict = data.dict()
-        if len(newdict) == 0:
-            newdict[f'{self.prefix}-archived'] = False
         super(SentMessageFilter, self).__init__(newdict, *args, **kwargs)
         self.filters['high_priority'].extra.update({'empty_label': 'Any Pri'})
         self.filters['unread'].extra.update({'empty_label': 'Read/Unread'})
@@ -232,12 +230,14 @@ class MessageDetailForm(forms.ModelForm):
         fields = ('role', 'bio')
 
 
-def classes_for(record=None, row_class="message_row"):
+def classes_for(record=None, row_class=None):
     cl = row_class
     if record is not None:
         if record.unread:
             cl += ' unread'
-        if record.time_archived is not None:
+        if row_class == 'received-row' and record.archived:
+            cl += ' archived'
+        if row_class == 'sent-row' and record.sender_archived:
             cl += ' archived'
         if record.aged_request():
             cl += ' aged-request'
@@ -295,10 +295,6 @@ class MessageTable(tables.Table):
         template_name = "django_tables2/bootstrap.html"
         fields = ('unread', 'high_priority', 'time_sent', 'recipient', 'sender', 'subject',
                   'handled')
-        row_attrs = {
-            'class': (lambda record: classes_for(record)),
-            'data-id': lambda record: record.pk
-        }
         attrs = {"class": 'message_table'}
 
 

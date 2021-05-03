@@ -25,7 +25,7 @@
         </span></div>{% endif %}
     {% if show_archive %}<div><span class="message_header">Archived At:</span>
         <span class="message_header_value">
-            {% if message_archived %}{{ message.time_archived }}{% else %}(Not archived){% endif %}
+            {% if message_archived %}{{ time_archived }}{% else %}(Not archived){% endif %}
         </span></div>{% endif %}
     {% if show_type %}<div><span class="message_header">Type:</span>
         <span class="message_header_value">{{ message.message_type }}</span></div>{% endif %}
@@ -52,7 +52,7 @@
           {%  endif %}
         {%  endif %}
         {%  if can_reply %}
-            <input id="reply" name="reply" action="action" type="submit" value="Reply" class="btn btn-info"/>
+            <input id="reply" name="notreply" action="action" value="Reply" onclick="openForm('reply');" class="btn btn-info"/>
         {% endif %}
       {%  if show_transcript_req %}
         <input id="transcriptreq" name="transcriptreq"
@@ -67,7 +67,7 @@
             value="Approve Drop" class="btn btn-info"
         />
         <input id="rejectdrop" name="rejectdrop"
-            action="action" type="submit"
+            action="action" onclick="openForm('rejectdrop');"
             value="Reject Drop" class="btn btn-info"
         />
       {%  endif %}
@@ -78,18 +78,51 @@
             value="Approve Major Change" class="btn btn-info"
         />
         <input id="rejectmajor" name="rejectmajor"
-            action="action" type="submit"
+            action="action" onclick="openForm('rejectmajor');"
             value="Reject Major Change" class="btn btn-info"
         />
       {%  endif %}
 
   </form>
+{%  if can_reply or show_approve_drop or show_approve_major %}
+    <div class="form-popup" id="message_form">
+    <div class="form-content">
+      <form method="post" class="form-container">
+        {% csrf_token %}
+        <div><label for="message_body">Message:</label></div>
+        <textarea id="body" name="message_body" class="reply_body" rows="4" cols="50"></textarea>
+        <div>
+            <button id="form_cancel" class="btn cancel btn-warning" >Cancel</button>
+            <button id="form_submit" type="submit" class="btn btn-primary">Send</button>
+        </div>
+      </form>
+    </div>
+    </div>
+{% endif %}
+
 {% endblock %}
 
 {% block late_scripts %}
 <script>
 {% if prev %} addButtonClickHandler('prev', "{% url detail_class prev %}"); {% endif %}
 {% if next %} addButtonClickHandler('next', "{% url detail_class next %}"); {% endif %}
+{%  if can_reply or show_approve_drop or show_approve_major %}
+function openForm(typ) {
+    document.getElementById("message_form").style.display = "block";
+    document.getElementById("form_submit").name = typ;
+    return true;
+}
+
+function close_form(evt) {
+  document.getElementById("message_form").style.display = "none";
+  if (evt) {
+      evt.preventDefault();
+  }
+  return false;
+}
+close_form();
+document.getElementById("form_cancel").addEventListener("click", close_form);
+{% endif %}
 </script>
 {% endblock %}
 
