@@ -36,11 +36,11 @@ class StudentTestCase_Basic(TestCase):
 
     def test_gpa(self):
         student = StudentTestCase_Basic.stud
-        self.assertEqual(student.gpa(), 0.0)
+        self.assertEqual(student.gpa, None)
 
     def test_credits_earned(self):
         student = StudentTestCase_Basic.stud
-        self.assertEqual(student.credits_earned(), 0)
+        self.assertEqual(student.credits_earned, None)
 
     def test_major(self):
         student = StudentTestCase_Basic.stud
@@ -155,7 +155,7 @@ class StudentTestCase_History(TestCase):
 
     def test_gpa(self):
         student = (User.objects.get(username="testUser")).profile.student
-        self.assertEqual(student.gpa(), (3 * 3.0 + 0 * 2.0 + 2 * 3.0) / (3.0 + 2.0 + 3.0))
+        self.assertEqual(student.gpa, (3 * 3.0 + 0 * 2.0 + 2 * 3.0) / (3.0 + 2.0 + 3.0))
 
     def test_semesters(self):
         student = StudentTestCase_History.stud
@@ -239,7 +239,7 @@ class StudentTestCase_History(TestCase):
 
     def test_credits_earned(self):
         student = StudentTestCase_History.stud
-        self.assertEqual(student.credits_earned(), 3.0 + 3.0)
+        self.assertEqual(student.credits_earned, 3.0 + 3.0)
 
     def test_remaining_required(self):
         student = StudentTestCase_History.stud

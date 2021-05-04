@@ -11,6 +11,7 @@
 </head>
 <body>
     {% block all_content %}
+    <div class='home-container'>
     <div class="header">
       <span class="name">
       {% block header_content %}
@@ -65,10 +66,10 @@
         {% endif %}
     </div>
 
-    <div class="contentblob"><div>
+    <div class="contentblob">
     {% block content %}{% endblock content %}
-    </div></div>
-
+    </div>
+  </div>
     {% block resizing %}
     <script>
           var buffer = 30; // scroll bar buffer

@@ -169,7 +169,6 @@ specs = (
     ('OCEA', 'Oceanography', 'Physical Sciences'),
     ('PHYSY', 'Physics', 'Physical Sciences'),
     ('MOGS', 'Multi-disciplinary Or General Science', 'Physical Sciences'),
-    ('W', '"nuclear', ' Industrial Radiology'),
     ('PSYC', 'Psychology', 'Psychology & Social Work'),
     ('EP', 'Educational Psychology', 'Psychology & Social Work'),
     ('CP', 'Clinical Psychology', 'Psychology & Social Work'),
