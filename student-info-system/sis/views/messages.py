@@ -73,6 +73,7 @@ def message(request, id, read_only=False):
     is_student = the_profile.role == Profile.ACCESS_STUDENT
     is_admin = the_profile.role == Profile.ACCESS_ADMIN
     can_reply = the_mess.recipient == the_profile and not is_sender
+    can_archive = not read_only and (is_recipient or is_sender)
 
     if the_mess is None:
         messages.error(request, 'Invalid message')
@@ -80,6 +81,8 @@ def message(request, id, read_only=False):
 
     if not (is_sender or is_recipient) and not is_admin:
         messages.error(request, 'Invalid message')
+
+    print(f'reply is {request.POST.get("reply", None)}')
 
     if not read_only:
         # mark our received messages read. Don't touch sent messages.
@@ -90,18 +93,34 @@ def message(request, id, read_only=False):
         if request.method == 'POST':
             if request.POST.get('unarchive', None) is not None:
                 messages.success(request, 'Message unarchived.')
-                the_mess.time_archived = None
+                # why like this? Some messages are sent from you to you.
+                if is_recipient:
+                    the_mess.time_archived = None
+                if is_sender:
+                    the_mess.time_sender_archived = None
                 the_mess.save()
                 return redirect('sis:messages')
 
             elif request.POST.get('archive', None) is not None:
                 messages.success(request, 'Message archived.')
-                the_mess.time_archived = datetime.now(pytz.utc)
+                # why like this? Some messages are sent from you to you.
+                if is_recipient:
+                    the_mess.time_archived = datetime.now(pytz.utc)
+                if is_sender:
+                    the_mess.time_sender_archived = datetime.now(pytz.utc)
                 the_mess.save()
                 return redirect('sis:messages')
 
             elif request.POST.get('reply', None) is not None:
-                messages.success(request, 'Trust me, you replied.')
+                response = Message.objects.create(
+                    sender=the_profile,
+                    recipient=the_mess.sender,
+                    message_type=Message.REPLY_TYPE,
+                    subject=f'Re: {the_mess.subject}',
+                    body=request.POST.get("message_body", ""),
+                    in_response_to=the_mess,
+                )
+                messages.success(request, f'Reply sent to {the_mess.sender.name}.')
                 return redirect('sis:messages')
 
             elif is_admin and request.POST.get('approvedrop', None) is not None:
@@ -114,7 +133,16 @@ def message(request, id, read_only=False):
             elif is_admin and request.POST.get('rejectdrop', None) is not None:
                 the_mess.time_handled = datetime.now(pytz.utc)
                 the_mess.save()
-                messages.success(request, 'Trust me, you rejected the drop.')
+                response = Message.objects.create(
+                    sender=the_profile,
+                    recipient=the_mess.sender,
+                    message_type=Message.DROP_REJECTED_TYPE,
+                    subject=f'Re: {the_mess.subject}',
+                    body=request.POST.get("message_body", ""),
+                    in_response_to=the_mess,
+                )
+                messages.success(request,
+                                 f'Drop request rejection sent to {the_mess.sender.name}.')
                 return redirect('sis:messages')
 
             elif is_admin and request.POST.get('approvemajor', None) is not None:
@@ -127,7 +155,16 @@ def message(request, id, read_only=False):
             elif is_admin and request.POST.get('rejectmajor', None) is not None:
                 the_mess.time_handled = datetime.now(pytz.utc)
                 the_mess.save()
-                messages.success(request, 'Trust me, you rejected the major change.')
+                response = Message.objects.create(
+                    sender=the_profile,
+                    recipient=the_mess.sender,
+                    message_type=Message.MAJOR_CHANGE_REJECTED_TYPE,
+                    subject=f'Re: {the_mess.subject}',
+                    body=request.POST.get("message_body", ""),
+                    in_response_to=the_mess,
+                )
+                messages.success(request,
+                                 f'Major change rejection sent to {the_mess.sender.name}.')
                 return redirect('sis:messages')
 
             elif is_admin and request.POST.get('transcriptreq', None) is not None:
@@ -161,6 +198,10 @@ def message(request, id, read_only=False):
         and the_mess.message_type == Message.TRANSCRIPT_REQUEST_TYPE \
         and not handled
 
+    message_archived = (is_recipient and the_mess.time_archived
+                        is not None) or (is_sender and the_mess.time_sender_archived is not None)
+    time_archived = the_mess.time_archived if is_recipient else the_mess.time_sender_archived
+
     detail_class = 'sis:viewmessage' if read_only else 'sis:message'
     block_class = 'users' if read_only else 'messages'
 
@@ -170,8 +211,9 @@ def message(request, id, read_only=False):
         'show_approve_drop': not read_only and show_drop,
         'show_approve_major': not read_only and show_major,
         'show_transcript_req': not read_only and show_transcript_req,
-        'show_archive': not read_only and is_recipient,
-        'message_archived': the_mess.time_archived is not None,
+        'show_archive': can_archive,
+        'message_archived': message_archived,
+        'time_archived': time_archived,
         'message_read': the_mess.time_read is not None,
         'message_handled': handled,
         'show_type': not is_student,

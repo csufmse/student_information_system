@@ -1238,6 +1238,8 @@ class MessageManager(models.Manager):
                                      output_field=models.BooleanField()),
             archived=ExpressionWrapper(Q(time_archived__isnull=False),
                                        output_field=models.BooleanField()),
+            sender_archived=ExpressionWrapper(Q(time_sender_archived__isnull=False),
+                                              output_field=models.BooleanField()),
             handled=ExpressionWrapper(Q(time_handled__isnull=False),
                                       output_field=models.BooleanField()),
         )
@@ -1260,6 +1262,7 @@ class Message(models.Model):
     SECTION_ADDED = 'sectionadded'
     TRANSCRIPT_REQUEST_TYPE = 'reqtranscript'
     TRANSCRIPT_TYPE = 'transcript'
+    REPLY_TYPE = 'reply'
     TYPES = (
         (GENERIC_TYPE, GENERIC_TYPE),
         (ACADEMIC_PROBATION_TYPE, ACADEMIC_PROBATION_TYPE),
@@ -1270,6 +1273,7 @@ class Message(models.Model):
         (SECTION_ADDED, SECTION_ADDED),
         (TRANSCRIPT_REQUEST_TYPE, TRANSCRIPT_REQUEST_TYPE),
         (TRANSCRIPT_TYPE, TRANSCRIPT_TYPE),
+        (REPLY_TYPE, REPLY_TYPE),
     )
 
     message_type = models.CharField(choices=TYPES, default=GENERIC_TYPE, max_length=15)
@@ -1286,6 +1290,9 @@ class Message(models.Model):
     time_sent = models.DateTimeField(verbose_name="Sent at", editable=False)
     time_read = models.DateTimeField(verbose_name="Read at", null=True, blank=True)
     time_archived = models.DateTimeField(verbose_name='Archived at', null=True, blank=True)
+    time_sender_archived = models.DateTimeField(verbose_name='Sender Archived at',
+                                                null=True,
+                                                blank=True)
     time_handled = models.DateTimeField(verbose_name="Handled at", null=True, blank=True)
 
     # if a response message,...
