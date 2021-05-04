@@ -144,8 +144,10 @@ def main(argv):
                 if mod[0] == 30 and doit_real:
                     next = mod[0] + 11
                     print(f'********************** about to {doit} REAL:')
-                    create_reals.createData()
+                    error_count = create_reals.createData()
                     print(f'********************** done REAL:')
+                    if error_count:
+                        break
                 else:
                     next = mod[0] + 1
                     print(f'********************** about to {doit} {mod[0]}:')

@@ -25,7 +25,8 @@ from sis.elements.referenceitem import ItemFilter, ProfReferenceItemsTable
 from sis.elements.section import SectionFilter, SectionForClassTable, SectionsTable
 from sis.elements.sectionstudent import (StudentHistoryTable, StudentInSectionTable,
                                          SectionStudentFilter)
-from sis.elements.semester import SemesterFilter, SemestersSummaryTable, SemestersTable
+from sis.elements.semester import SemestersTable, SemesterFilter, SemestersSummaryTable
+from sis.elements.semesterstudent import SemesterStudentFilter, SemesterStudentSummaryTable
 from sis.elements.student import StudentEditForm, StudentCreationForm
 from sis.elements.user import (StudentFilter, UserFilter, ProfessorFilter, UserCreationForm,
                                UserEditForm, UsersTable, FullUsersTable, StudentsTable,
@@ -55,7 +56,10 @@ def user(request, userid):
         return HttpResponse("No such user")
     the_user = qs.get()
 
-    is_admin = request.user.profile.role == Profile.ACCESS_ADMIN
+    logged_in = request.user.is_authenticated
+    if logged_in:
+        user_role = request.user.profile.role
+    is_admin = logged_in and user_role == Profile.ACCESS_ADMIN
 
     if is_admin and request.method == 'POST':
         if request.POST.get('disbutton'):
@@ -71,7 +75,10 @@ def user(request, userid):
         return redirect('schooladmin:users')
 
     if the_user.profile.role == Profile.ACCESS_STUDENT:
-        return student(request, userid)
+        if logged_in and (is_admin or user_role == Profile.ACCESS_PROFESSOR):
+            return student(request, userid)
+        else:
+            return HttpResponse("Unauthorized")
     elif the_user.profile.role == Profile.ACCESS_PROFESSOR:
         return professor(request, userid)
 
@@ -295,12 +302,11 @@ def student(request, userid):
     data.update(
         filtered_table2(
             name='semesters',
-            qs=the_user.profile.student.semesters.all(),
-            filter=SemesterFilter,
-            table=SemestersSummaryTable,
+            qs=the_user.profile.student.semesterstudent_set.all(),
+            filter=SemesterStudentFilter,
+            table=SemesterStudentSummaryTable,
             request=request,
             self_url=reverse('schooladmin:student', args=[userid]),
-            click_url=reverse('schooladmin:semester', args=[DUMMY_ID]),
         ))
 
     data.update(

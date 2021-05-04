@@ -1,7 +1,7 @@
 from django import forms
 from django.db.models import Q, Value
 from django.db.models.functions import Concat
-from django_filters import (CharFilter, ChoiceFilter, FilterSet, ModelChoiceFilter)
+from django_filters import (CharFilter, ChoiceFilter, FilterSet, ModelChoiceFilter, RangeFilter)
 import django_tables2 as tables
 from django.contrib.auth.forms import UserCreationForm as DjangoUserCreationForm
 
@@ -49,9 +49,13 @@ class UserFilter(FilterSet):
                             label='Grad Student?',
                             choices=((True, 'Grad Student'), (False, 'Undergrad')))
 
+    student_gpa = RangeFilter(field_name='profile__student__gpa', label='GPA')
+
     class Meta:
         model = User
-        fields = ['username', 'name', 'major', 'access_role', 'graduate', 'is_active']
+        fields = [
+            'username', 'name', 'major', 'access_role', 'graduate', 'student_gpa', 'is_active'
+        ]
 
     def __init__(self, *args, **kwargs):
         super(UserFilter, self).__init__(*args, **kwargs)
@@ -87,9 +91,11 @@ class StudentFilter(FilterSet):
                             label='Grad Student?',
                             choices=((True, 'Grad Student'), (False, 'Undergrad')))
 
+    student_gpa = RangeFilter(field_name='profile__student__gpa', label='GPA')
+
     class Meta:
         model = User
-        fields = ['username', 'name', 'major', 'graduate', 'is_active']
+        fields = ['username', 'name', 'major', 'graduate', 'student_gpa', 'is_active']
 
     def __init__(self, *args, **kwargs):
         super(StudentFilter, self).__init__(*args, **kwargs)

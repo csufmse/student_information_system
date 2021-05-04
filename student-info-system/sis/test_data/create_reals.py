@@ -11,6 +11,7 @@ django.setup()  # noqa
 
 from sis.models import *
 from django.db import connection
+from django.db import IntegrityError
 
 capacities = (10,) * 3 + (30,) * 11 + (100,) * 3
 
@@ -263,6 +264,10 @@ def createData():
                 secstud = None
                 try:
                     secstud = sec.register(student=semstud.student, check_section_status=False)
+                except IntegrityError:
+                    print(f'ERROR: Constraint Violation inserting {sec} into {semstud}')
+                    error_count = error_count + 1
+                    continue
                 except NoSeatsRemaining:
                     newsec = sec.open_new_section_from()
                     if newsec.status != Section.REG_CLOSED:
@@ -310,6 +315,8 @@ def createData():
             if sec.students.count() == 0 and random() < 0.7:
                 print(f'Deleting {sec}')
                 sec.delete()
+
+    return error_count
 
 
 def cleanData():
