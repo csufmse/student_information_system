@@ -78,16 +78,21 @@ def filtered_table2(name=None,
 
 
 def next_prev(request, name, key, fallback=None):
-    pk_list = request.session.get(name + '-pks', None)
-    if pk_list is None and fallback:
-        pk_list = request.session.get(fallback + '-pks', None)
+
+    def try_to_find(aName):
+        pk_list = request.session.get(aName + '-pks', None)
+        if pk_list:
+            as_list = [int(x) for x in pk_list.split(',')]
+            if key in as_list:
+                loc = as_list.index(key)
+                if loc > 0:
+                    data['prev'] = as_list[loc - 1]
+                if loc < len(as_list) - 1:
+                    data['next'] = as_list[loc + 1]
+
     data = {}
-    if pk_list:
-        as_list = [int(x) for x in pk_list.split(',')]
-        if key in as_list:
-            loc = as_list.index(key)
-            if loc > 0:
-                data['prev'] = as_list[loc - 1]
-            if loc < len(as_list) - 1:
-                data['next'] = as_list[loc + 1]
+    try_to_find(name)
+    # check second list if there is one, and if we couldn't find id in first list
+    if len(data) == 0 and fallback:
+        try_to_find(fallback)
     return data

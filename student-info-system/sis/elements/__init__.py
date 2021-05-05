@@ -1,4 +1,5 @@
 import django_tables2 as tables
+import types
 
 
 # Each column and cell has its own CSS class based on the type of
@@ -10,16 +11,11 @@ def field_css_classes(field_name):
 # mix in a method to get specified CSS row class. Used by filtered_table2
 def row_class(cls):
     ra = getattr(cls, 'Meta').row_attrs
-    return ra['class']
-
-
-tables.Table.row_class = classmethod(row_class)
-
-
-# mix in a method to get specified CSS row class. Used by filtered_table2
-def row_class(cls):
-    ra = getattr(cls, 'Meta').row_attrs
-    return ra['class']
+    rowc = ra['class']
+    # for message tables, there are record-dependent classes
+    if isinstance(rowc, types.LambdaType):
+        rowc = rowc(None)
+    return rowc
 
 
 tables.Table.row_class = classmethod(row_class)

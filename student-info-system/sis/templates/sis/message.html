@@ -1,10 +1,17 @@
-{% extends 'sis/base.html' %}
+{% extends user.home_template %}
 {% load static %}
 {% load bootstrap3 %}
-{% block class %}messages{% endblock %}
+{% load render_table from django_tables2 %}
+{% load sis-filter %}
 
-{% block all_content %}
-    <div><span class="message_header">From:</span>
+{% block class %}{{ block_class }}{% endblock %}
+
+{% block content %}
+<span>
+    {% if prev %} <input id="prev" action="action" class="btn btn-info" value="Previous"/> {% endif %}
+    {% if next %} <input id="next" action="action" class="btn btn-info" value="Next"/> {% endif %}
+</span>
+   <div><span class="message_header">From:</span>
         <span class="message_header_value">{{ message.sender.user.get_full_name }}</span></div>
     <div><span class="message_header">To:</span>
         <span class="message_header_value">{{ message.recipient.user.get_full_name }}</span></div>
@@ -18,7 +25,7 @@
         </span></div>{% endif %}
     {% if show_archive %}<div><span class="message_header">Archived At:</span>
         <span class="message_header_value">
-            {% if message_archived %}{{ message.time_archived }}{% else %}(Not archived){% endif %}
+            {% if message_archived %}{{ time_archived }}{% else %}(Not archived){% endif %}
         </span></div>{% endif %}
     {% if show_type %}<div><span class="message_header">Type:</span>
         <span class="message_header_value">{{ message.message_type }}</span></div>{% endif %}
@@ -45,7 +52,7 @@
           {%  endif %}
         {%  endif %}
         {%  if can_reply %}
-            <input id="reply" name="reply" action="action" type="submit" value="Reply" class="btn btn-info"/>
+            <input id="reply" name="notreply" action="action" value="Reply" onclick="openForm('reply');" class="btn btn-info"/>
         {% endif %}
       {%  if show_transcript_req %}
         <input id="transcriptreq" name="transcriptreq"
@@ -60,7 +67,7 @@
             value="Approve Drop" class="btn btn-info"
         />
         <input id="rejectdrop" name="rejectdrop"
-            action="action" type="submit"
+            action="action" onclick="openForm('rejectdrop');"
             value="Reject Drop" class="btn btn-info"
         />
       {%  endif %}
@@ -71,24 +78,51 @@
             value="Approve Major Change" class="btn btn-info"
         />
         <input id="rejectmajor" name="rejectmajor"
-            action="action" type="submit"
+            action="action" onclick="openForm('rejectmajor');"
             value="Reject Major Change" class="btn btn-info"
         />
       {%  endif %}
 
   </form>
+{%  if can_reply or show_approve_drop or show_approve_major %}
+    <div class="form-popup" id="message_form">
+    <div class="form-content">
+      <form method="post" class="form-container">
+        {% csrf_token %}
+        <div><label for="message_body">Message:</label></div>
+        <textarea id="body" name="message_body" class="reply_body" rows="4" cols="50"></textarea>
+        <div>
+            <button id="form_cancel" class="btn cancel btn-warning" >Cancel</button>
+            <button id="form_submit" type="submit" class="btn btn-primary">Send</button>
+        </div>
+      </form>
+    </div>
+    </div>
+{% endif %}
+
 {% endblock %}
 
 {% block late_scripts %}
-    <script>
-document.getElementById("archive").addEventListener("click", function () {
-        this.form.submit();
-        return true;
-    });
-document.getElementById("unarchive").addEventListener("click", function () {
-        this.form.submit();
-        return true;
-    });
+<script>
+{% if prev %} addButtonClickHandler('prev', "{% url detail_class prev %}"); {% endif %}
+{% if next %} addButtonClickHandler('next', "{% url detail_class next %}"); {% endif %}
+{%  if can_reply or show_approve_drop or show_approve_major %}
+function openForm(typ) {
+    document.getElementById("message_form").style.display = "block";
+    document.getElementById("form_submit").name = typ;
+    return true;
+}
 
-    </script>
+function close_form(evt) {
+  document.getElementById("message_form").style.display = "none";
+  if (evt) {
+      evt.preventDefault();
+  }
+  return false;
+}
+close_form();
+document.getElementById("form_cancel").addEventListener("click", close_form);
+{% endif %}
+</script>
 {% endblock %}
+

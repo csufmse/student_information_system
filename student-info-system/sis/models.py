@@ -1,4 +1,5 @@
 from datetime import timedelta, datetime
+from decimal import Decimal
 
 import pytz
 from django.contrib.auth.models import User, AbstractUser
@@ -11,7 +12,7 @@ from django.db.models import Case, ExpressionWrapper, F, Q, Sum, Max, Subquery, 
 from django.db.models.fields import (CharField, DateField, DecimalField, FloatField, IntegerField)
 from django.db.models import Exists, OuterRef
 from django.db.models.functions import Concat
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, post_delete
 from django.dispatch import receiver
 from django.utils import timezone
 
@@ -292,6 +293,10 @@ class Student(models.Model):
     STUDENT_TYPES = ((True, 'Graduate Student'), (False, 'Undergraduate'))
     grad_student = models.BooleanField('Graduate Student', default=False)
 
+    # these fields are managed by signals. do not update directly.
+    gpa = models.FloatField('GPA', null=True)
+    credits_earned = models.DecimalField('Earned', max_digits=4, decimal_places=1, null=True)
+
     class Meta:
         ordering = ['profile__user__username']
 
@@ -351,7 +356,7 @@ class Student(models.Model):
     def course_prerequisites_detail(self, course):
         return course.prerequisites_detail(self)
 
-    def credits_earned(self, semester=None):
+    def _credits_earned(self, semester=None):
         completed = self.course_history(passed=True, semester=semester).aggregate(
             Sum('section__course__credits_earned'))['section__course__credits_earned__sum']
 
@@ -359,7 +364,7 @@ class Student(models.Model):
             completed = 0
         return completed
 
-    def gpa(self, semester=None):
+    def _gpa(self, semester=None):
         completed = self.course_history(graded=True, semester=semester)
         grade_points = 0
         credits_attempted = 0
@@ -375,7 +380,7 @@ class Student(models.Model):
         if self.grad_student:
             level = "Graduate"
         else:
-            creds = self.credits_earned()
+            creds = self.credits_earned
             level = ClassLevel.level(creds)
         return level
 
@@ -488,6 +493,22 @@ class Student(models.Model):
     def droppable_classes(self, semester=None):
         return self.sectionstudent_set.filter(section__semester=semester).exclude(
             status=SectionStudent.DROP_REQUESTED).exclude(status=SectionStudent.DROPPED)
+
+    def _update_grades(self):
+        grade_points = 0.0
+        credits_attempted = 0.0
+        self.credits_earned = Decimal('0.0')
+        for ssem in self.semesterstudent_set.all():
+            if ssem.grade_points is not None:
+                grade_points += ssem.grade_points
+            credits_attempted += float(ssem.credits_attempted)
+        if ssem.credits_earned is not None:
+            self.credits_earned += ssem.credits_earned
+        if credits_attempted != 0.0:
+            self.gpa = grade_points / float(credits_attempted)
+        else:
+            self.gpa = 0.0
+        self.save()
 
 
 class Professor(models.Model):
@@ -821,6 +842,30 @@ class SemesterStudent(models.Model):
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
 
+    # these fields are managed and updated by signals. do not set/update directly.
+    grade_points = models.FloatField('Grade Points', null=True)
+    credits_attempted = models.DecimalField('Attempted',
+                                            max_digits=3,
+                                            decimal_places=1,
+                                            default=Decimal('0.0'))
+    credits_earned = models.DecimalField('Earned', max_digits=3, decimal_places=1, null=True)
+
+    def _update_grades(self):
+        sums = self.student.sectionstudent_set.filter(status__exact='Graded',
+                                                      section__semester=self.semester).values(
+                                                          'grade',
+                                                          'section__course__credits_earned')
+        self.grade_points = 0.0
+        self.credits_attempted = 0
+        self.credits_earned = 0
+        for section_result in sums:
+            self.grade_points += section_result['grade'] * float(
+                section_result['section__course__credits_earned'])
+            self.credits_attempted += section_result['section__course__credits_earned']
+            if section_result['grade'] != SectionStudent.GRADE_F:
+                self.credits_earned += section_result['section__course__credits_earned']
+        self.save()
+
     class Meta:
         unique_together = (('semester', 'student'),)
         ordering = ['semester', 'student']
@@ -829,8 +874,20 @@ class SemesterStudent(models.Model):
     def name(self):
         return str(self.student) + "@" + str(self.semester)
 
+    @property
+    def gpa(self):
+        if self.credits_attempted == 0:
+            return 0.0
+        else:
+            return self.grade_points / float(self.credits_attempted)
+
     def __str__(self):
         return self.name
+
+
+@receiver([post_save, post_delete], sender=SemesterStudent)
+def semester_student_updated(sender, instance, **kwargs):
+    instance.student._update_grades()
 
 
 class SectionStudentManager(models.Manager):
@@ -941,6 +998,17 @@ class SectionStudent(models.Model):
 
     def droppable(self):
         return self.status not in (SectionStudent.DROPPED, SectionStudent.DROP_REQUESTED)
+
+
+@receiver([post_save, post_delete], sender=SectionStudent)
+def section_student_updated(sender, instance, **kwargs):
+    try:
+        semesterstud = instance.student.semesterstudent_set.all().get(
+            semester=instance.section.semester)
+    except SemesterStudent.DoesNotExist:
+        semesterstud = SemesterStudent.objects.create(student=instance.student,
+                                                      semester=instance.section.semester)
+    semesterstud._update_grades()
 
 
 class NoSeatsRemaining(Exception):
@@ -1182,6 +1250,8 @@ class MessageManager(models.Manager):
                                      output_field=models.BooleanField()),
             archived=ExpressionWrapper(Q(time_archived__isnull=False),
                                        output_field=models.BooleanField()),
+            sender_archived=ExpressionWrapper(Q(time_sender_archived__isnull=False),
+                                              output_field=models.BooleanField()),
             handled=ExpressionWrapper(Q(time_handled__isnull=False),
                                       output_field=models.BooleanField()),
         )
@@ -1204,6 +1274,7 @@ class Message(models.Model):
     SECTION_ADDED = 'sectionadded'
     TRANSCRIPT_REQUEST_TYPE = 'reqtranscript'
     TRANSCRIPT_TYPE = 'transcript'
+    REPLY_TYPE = 'reply'
     TYPES = (
         (GENERIC_TYPE, GENERIC_TYPE),
         (ACADEMIC_PROBATION_TYPE, ACADEMIC_PROBATION_TYPE),
@@ -1214,6 +1285,7 @@ class Message(models.Model):
         (SECTION_ADDED, SECTION_ADDED),
         (TRANSCRIPT_REQUEST_TYPE, TRANSCRIPT_REQUEST_TYPE),
         (TRANSCRIPT_TYPE, TRANSCRIPT_TYPE),
+        (REPLY_TYPE, REPLY_TYPE),
     )
 
     message_type = models.CharField(choices=TYPES, default=GENERIC_TYPE, max_length=15)
@@ -1230,6 +1302,9 @@ class Message(models.Model):
     time_sent = models.DateTimeField(verbose_name="Sent at", editable=False)
     time_read = models.DateTimeField(verbose_name="Read at", null=True, blank=True)
     time_archived = models.DateTimeField(verbose_name='Archived at', null=True, blank=True)
+    time_sender_archived = models.DateTimeField(verbose_name='Sender Archived at',
+                                                null=True,
+                                                blank=True)
     time_handled = models.DateTimeField(verbose_name="Handled at", null=True, blank=True)
 
     # if a response message,...
@@ -1380,7 +1455,7 @@ class AcademicProbationTask(Task):
         students = Student.objects.all()
         profile = Profile.objects.get(user__username='zeus')
         for student in students:
-            if student.gpa() < 2.0:
+            if student.gpa < 2.0:
                 ap_message = "Your GPA has fallen below 2.0, putting you on academic probation."
                 student.notify_probation(sender=profile, when=timezone.now(), body=ap_message)
 
