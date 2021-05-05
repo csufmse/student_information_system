@@ -1,0 +1,43 @@
+{% extends user.home_template %}
+{% load static %}
+{% load bootstrap3 %}
+{% block class %}auditlog{% endblock class %}
+
+{% block content %}
+    <form action="{% url 'schooladmin:auditlog' %}" method="post">
+    {% csrf_token %}
+        <select name="model_option">
+            {% for key in model_options %}
+                <option value="{{key}}" {% if model_chosen == key %}SELECTED{% endif %}>{{key}}</option>
+            {% endfor %}
+        </select>
+        <input type="submit" name="model_select" value="Select" class="btn btn-primary">
+    </form>
+
+{% for object in objects %}
+{% if object.history.latest.changes_dict %}
+  <table class="data-table-alt">
+    <thead>
+    <tr>
+      <th>Object</th>
+      <th>Field</th>
+      <th>From</th>
+      <th>to</th>
+    </tr>
+    </thead>
+    <tbody>
+      {% for key, value in object.history.latest.changes_dict.items %}
+      <tr>
+        <td>{{object}}</td>
+        <td>{{key}}</td>
+        <td>{{value.0|default:"None"}}</td>
+        <td>{{value.1|default:"None"}}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+{% else %}
+  <p>No changes recorded for {{model_chosen}}</p>
+{% endif %}
+{% endfor%}
+{% endblock content %}

@@ -17,6 +17,8 @@ from django.utils import timezone
 
 from isbn_field import ISBNField
 from abc import ABCMeta, abstractmethod
+from auditlog.models import AuditlogHistoryField
+from auditlog.registry import auditlog
 
 
 class UpperField(models.CharField):
@@ -33,6 +35,7 @@ class UpperField(models.CharField):
 
 
 class Profile(models.Model):
+    history = AuditlogHistoryField()
     ACCESS_ADMIN = 'A'
     ACCESS_PROFESSOR = 'P'
     ACCESS_STUDENT = 'S'
@@ -278,6 +281,7 @@ class ClassLevel:
 
 
 class Student(models.Model):
+    history = AuditlogHistoryField()
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
     major = models.ForeignKey('Major', on_delete=models.CASCADE, blank=True, null=True)
     semesters = models.ManyToManyField('Semester',
@@ -487,6 +491,7 @@ class Student(models.Model):
 
 
 class Professor(models.Model):
+    history = AuditlogHistoryField()
     profile = models.OneToOneField(Profile, on_delete=models.CASCADE)
 
     # Professor's department
@@ -508,6 +513,7 @@ class Professor(models.Model):
 
 
 class Major(models.Model):
+    history = AuditlogHistoryField()
     abbreviation = UpperField('Abbreviation', max_length=6, unique=True)
     title = models.CharField('Title', max_length=256)
     description = models.CharField('Description', max_length=256, blank=True)
@@ -544,6 +550,7 @@ class Major(models.Model):
 
 
 class Course(models.Model):
+    history = AuditlogHistoryField()
     major = models.ForeignKey(Major, on_delete=models.CASCADE)
     catalog_number = models.CharField('Number', max_length=20)
     title = models.CharField('Title', max_length=256)
@@ -676,7 +683,7 @@ class MultipleCurrentSemesters(Exception):
 
 
 class Semester(models.Model):
-
+    history = AuditlogHistoryField()
     FALL = 'FA'
     WINTER = 'WI'
     SPRING = 'SP'
@@ -810,6 +817,7 @@ class Semester(models.Model):
 
 
 class SemesterStudent(models.Model):
+    history = AuditlogHistoryField()
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
     student = models.ForeignKey(Student, on_delete=models.CASCADE)
 
@@ -843,6 +851,7 @@ class SectionStudentManager(models.Manager):
 
 class SectionStudent(models.Model):
     # Extra fields here!
+    history = AuditlogHistoryField()
     objects = SectionStudentManager()
 
     section = models.ForeignKey('Section', on_delete=models.CASCADE, null=True)
@@ -947,6 +956,7 @@ class NotOpenForRegistration(Exception):
 
 
 class Section(models.Model):
+    history = AuditlogHistoryField()
     course = models.ForeignKey(Course, on_delete=models.CASCADE)
     professor = models.ForeignKey(Professor, on_delete=models.CASCADE)
     semester = models.ForeignKey(Semester, on_delete=models.CASCADE)
@@ -1107,6 +1117,8 @@ class Section(models.Model):
 
 
 class ReferenceItem(models.Model):
+    history = AuditlogHistoryField()
+
     REQUIRED = 'req'
     OPTIONAL = 'opt'
     RECOMMENDED = 'rec'
@@ -1374,3 +1386,11 @@ class AcademicProbationTask(Task):
 
     def execute(self):
         AcademicProbationTask.academic_probation_check(self)
+
+
+audit_these_models = [
+    Student, Major, Section, Course, Profile, Professor, Semester, SemesterStudent,
+    SectionStudent, ReferenceItem
+]
+for model in audit_these_models:
+    auditlog.register(model)

@@ -53,4 +53,5 @@ urlpatterns = [
     path('scheduled-tasks', tasks.tasks, name='tasks'),
     path('tasks/edit', tasks.task_edit, name='task_edit'),
     path('tasks/edit/<int:taskid>', tasks.task_edit, name='task_edit'),
+    path('auditlog/model-history', views.auditlog, name='auditlog'),
 ]

@@ -10,8 +10,8 @@ from django.utils.html import format_html
 
 from sis.authentication_helpers import role_login_required
 
-from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, Semester, Student,
-                        SectionStudent, Profile, Message)
+from sis.models import (Course, CoursePrerequisite, Major, Professor, Section, Semester,
+                        SemesterStudent, Student, SectionStudent, Profile, Message, ReferenceItem)
 
 from sis.utils import filtered_table, filtered_table2, DUMMY_ID, next_prev
 
@@ -836,3 +836,32 @@ def demographics(request):
     if not logged_in:
         data['user'] = {'home_template': "schooladmin/home_guest.html"}
     return render(request, 'schooladmin/demographics.html', data)
+
+
+@role_login_required(Profile.ACCESS_ADMIN)
+def auditlog(request):
+    logged_in = request.user.is_authenticated
+    data = {}
+    model_options = {
+        "Student": Student,
+        "Major": Major,
+        "Section": Section,
+        "SectionStudent": SectionStudent,
+        "Course": Course,
+        "Professor": Professor,
+        "Semester": Semester,
+        "SemesterStudent": SemesterStudent,
+        "ReferenceItem": ReferenceItem
+    }
+    if request.method == "POST":
+        model_string = request.POST.get("model_option")
+        model_chosen = model_options.get(model_string)
+        qs = model_chosen.objects.all().only("history")
+        objects = [x for x in qs if x.history.all()]
+        data['objects'] = objects
+        data['model_chosen'] = model_string
+
+    data['model_options'] = model_options
+    if not logged_in:
+        data['user'] = {'home_template': 'schooladmin/home_guest.html'}
+    return render(request, 'schooladmin/auditlog.html', data)
