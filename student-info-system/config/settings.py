@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "schooladmin",
     "scheduler.apps.SchedulerConfig",
     "easy_pdf",
+    "auditlog",
 ]
 
 MIDDLEWARE = [
@@ -48,6 +49,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "auditlog.middleware.AuditlogMiddleware",
 ]
 X_FRAME_OPTIONS = 'SAMEORIGIN'
 
