@@ -1,26 +1,26 @@
 {% extends user.home_template %}
 {% load static %}
 {% load sis-filter %}
+{% load bootstrap3 %}
+ 
 {% block class %}semesters{% endblock %}
 
 {% block content %}
     {%  if can_add %}
-        <button class="btn btn-primary" onclick=location.href="{% url 'schooladmin:semester_new' %}">New Semester</button>
+        <button class="btn btn-primary" onclick="location.href='{% url 'schooladmin:semester_new' %}';">New Semester</button>
     {% endif %}
     <form method="post">
         {% csrf_token %}
         <button type="submit" name="active" class="btn btn-info submitme">Active Semesters</button>
         <button type="submit" name="upcoming" class="btn btn-info submitme">Upcoming Semesters</button>
     </form>
-    <div id="Semesters">
     {% sis_filter 'semesters' %}
-    </div>
-
 {% endblock %}
 
 {% block late_scripts %}
 <script>
-insertScrollableDivs(applyHandlers=true);
+const handler = insertScrollableDivs(applyHandlers=true);
+handler();
 for (const butt of document.getElementsByClassName("submitme")) {
     butt.addEventListener("click", function () {
         this.form.submit();
